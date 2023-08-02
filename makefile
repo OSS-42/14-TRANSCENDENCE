@@ -38,7 +38,7 @@ all:	transcendence
 	@echo "$(LGREEN)Logs available. You can follow the containers readiness with command "make logs"$(NC)"
 	@echo "$(LMAGENTA)All containers are not ready when you see this message. Check readiness status with command "make logs"$(NC)"
 
-transcendance:	$(SRCS)
+transcendence:	$(SRCS)
 	@$(call creating, $(DC) up --build --remove-orphans -d) &> $(BLOG)
 	@echo "$(LGREEN)Docker Containers, Volumes and Network Created.$(NC)"
 
