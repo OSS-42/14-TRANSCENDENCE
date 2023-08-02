@@ -1,0 +1,40 @@
+services:
+  db:
+    image: postgres:latest
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    env_file:
+      .env
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: dockerfile
+    volumes:
+      - ./backend:/app/backend:delegated
+      - /app/backend/node_modules
+      
+
+    ports:
+      - "3001:3001"
+    depends_on:
+      - db
+    env_file:
+      - .env
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: dockerfile
+    volumes:
+      - ./frontend:/app/frontend:delegated
+      - /app/frontend/node_modules
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    env_file:
+      - .env
+
+volumes:
+  postgres_data:
