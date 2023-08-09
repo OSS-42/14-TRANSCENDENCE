@@ -8,11 +8,12 @@ export class AuthControler {
     constructor(private authService: AuthService){}
     @Post('signup')
     signup(){
-        return 'I am signed up';
+        return this.authService.signup()
+        
 
     }
     @Post('singin')
     singin(){
-        return 'I am singin in';
+        return this.authService.signin();
     }
 }
