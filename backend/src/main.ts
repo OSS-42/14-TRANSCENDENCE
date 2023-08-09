@@ -9,6 +9,7 @@ async function bootstrap() {
   .setTitle('Transcendence APi')
   .setDescription('the description of the API')
   .setVersion('1.0')
+  .addTag('auth')
   .build()
 
   const document = SwaggerModule.createDocument(app, config);
