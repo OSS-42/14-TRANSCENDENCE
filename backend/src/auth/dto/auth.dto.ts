@@ -1,7 +1,8 @@
 import { ApiProperty } from "@nestjs/swagger";
 
-export interface AuthDto {
-    //@ApiProperty()
+export class AuthDto {
+    @ApiProperty()
     email: string;
+    @ApiProperty()
     password: string;
 }
