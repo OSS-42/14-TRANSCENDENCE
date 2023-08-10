@@ -14,7 +14,8 @@ export class AuthControler {
 
     }
     @Post('signup')
-    signup(@Body() test: any): any {
+    signup(@Body()  test: AuthDto){
+        test.email = "dindon"
         console.log({
             test,
         });
