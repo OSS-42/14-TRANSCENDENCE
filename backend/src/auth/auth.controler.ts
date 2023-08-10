@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from "@nestjs/common";
+import { Body, Controller, Get, ParseIntPipe, Post } from "@nestjs/common";
 import { ApiProperty, ApiTags } from "@nestjs/swagger";
 import { AuthService } from "./auth.service";
 import { AuthDto } from "./dto/auth.dto";
@@ -13,14 +13,18 @@ export class AuthControler {
         return this.authService.signin();
 
     }
+
     @Post('signup')
-    signup(@Body()  test: AuthDto){
-        test.email = "dindon"
+    signup(
+        @Body() dto: AuthDto
+        ) {
         console.log({
-            test,
+            dto,
         });
-        return this.authService.signup(test)
+        return this.authService.signup()
     }
+
+
     @Post('singin')
     singin(){
         return this.authService.signin();

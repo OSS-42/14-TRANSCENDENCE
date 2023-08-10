@@ -8,7 +8,7 @@ export class AuthService{
     signin (){
         return {msg: "I am signed up"};
     }
-    signup(test){
-        return test;
+    signup(){
+        return {msg: "I am signed in"};
     }
 }
