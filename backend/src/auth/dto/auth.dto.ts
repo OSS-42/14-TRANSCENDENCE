@@ -9,6 +9,5 @@ export class AuthDto {
 
     @ApiProperty()
     @IsNotEmpty()
-    @IsInt()
     password: string;
 }
