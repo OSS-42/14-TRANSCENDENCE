@@ -6,4 +6,4 @@ COPY . /app/backend/
 RUN npm install
 
 
-CMD ["npm", "run", "start"]
+CMD ["npm", "run", "start:dev"]
