@@ -13,7 +13,7 @@ let showDebugInfo = false;
 document.addEventListener("keydown", showDebug);
 
 function showDebug(evt) {
-	if(evt.keyCode == 68) {
+	if(evt.keyCode == 73) {
 		showDebugInfo = !showDebugInfo;
 		rendering();
 	}
