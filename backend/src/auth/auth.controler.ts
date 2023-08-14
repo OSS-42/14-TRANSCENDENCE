@@ -29,7 +29,10 @@ export class AuthControler {
 
 
     @Post('singin')
-    singin(){
-        return this.authService.signin();
+    singin(@Body() dto: AuthDto){
+        console.log({
+            dto,
+        });
+        return this.authService.signin(dto);
     }
 }
