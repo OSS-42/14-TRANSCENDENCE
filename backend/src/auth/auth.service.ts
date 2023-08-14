@@ -4,13 +4,15 @@ import { AuthDto } from "./dto";
 import * as argon from 'argon2' 
 import axios from "axios";
 import { PrismaClientKnownRequestError, PrismaClientUnknownRequestError } from "@prisma/client/runtime/library";
+import { JwtService } from "@nestjs/jwt";
 
 
 const clientID = "u-s4t2ud-c14a5526d27b133c2732f5848ea8a11d76ae8e503f6e495cd3016623aa0c382e";
 const clientSecret = "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";
 @Injectable({})
 export class AuthService{
-    constructor(private prisma: PrismaService){}
+    constructor(private prisma: PrismaService, 
+        private jwt: JwtService){}
 
     //fonction test pour le tuto
    async signin (dto: AuthDto){
@@ -35,6 +37,11 @@ export class AuthService{
 
         return {msg: user};
     }
+
+    async signToken(){
+        
+    }
+
    async signup(dto: AuthDto){
         const hash =  await argon.hash(dto.password);
         try{
