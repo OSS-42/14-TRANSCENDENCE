@@ -250,12 +250,14 @@ function update() {
 	if (ball.velocityX > 0) {
 		if (ball.x < computer.x && nextBallX > computer.x) {
 			if (nextBallY + ball.radius > computer.y && nextBallY - ball.radius < computer.y + computer.height) {
+				ball.velocityX = -ball.velocityX;
 				ball.x = computer.x - ball.radius;
 			}
 		}
 	} else if (ball.velocityX < 0) {
 		if (ball.x > user.x && nextBallX < user.x) {
 			if (nextBallY + ball.radius > user.y && nextBallY - ball.radius < user.y + user.height) {
+				ball.velocityX = -ball.velocityX;
 				ball.x = user.x + user.width + ball.radius;
 			}
 		}
@@ -340,7 +342,7 @@ function game() {
 }
 
 // loop pour le rafraichissement de l'ecran de jeu
-const framePerSecond = 60;
+const framePerSecond = 50;
 // setInterval(game, 1000/framePerSecond);
 
 // modifie pour debug et ajout de pauseGame() (pong-debug.js)
