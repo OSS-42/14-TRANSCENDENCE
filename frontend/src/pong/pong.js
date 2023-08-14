@@ -2,6 +2,10 @@
 const canvas = document.getElementById("pong");
 const context = canvas.getContext("2d");
 
+//ajout d'une image en background, a la place de fillRect.
+const backgroundImage = new Image();
+backgroundImage.src = '../src/assets/pong_bg.png';
+
 // Creation des objets "paddles" utilisateur et ordinateur, ainsi que de la balle.
 const user = {
 	x : 10,
@@ -92,7 +96,8 @@ let startTime = null;
 // fonction pour generer le jeu a l'ecran
 function rendering() {
 	// on efface et remet les objets sur l'ecran en prenant en compte les FPS
-	drawRectangle(0, 0, canvas.width, canvas.height, "BLACK");
+	// drawRectangle(0, 0, canvas.width, canvas.height, "BLACK"); // <-- pour fond noir du canvas
+	context.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
 
 	// on dessine aussi un filet...
 	drawNet();
@@ -169,7 +174,6 @@ function movePaddle(event) {
 
 //fonction pour detecter et gerer les collisions
 function collision(balle, paddle) {
-	// selon chatGPT c'est plus safe d'utiliser des variables locales que de changer celle des objets pour eviter les unexpected behavior
 	let balleTop = balle.y - balle.radius;
 	let balleBottom = balle.y + ball.radius;
 	let balleLeft = balle.x - balle.radius;
@@ -221,7 +225,7 @@ function resetBall() {
 	ball.x = canvas.width / 2;
 	ball.y = canvas.height / 2;
 	ball.velocityX = 0; // velocite a 0 pour garder la balle au centre apres un point. (fix)
-    ball.velocityY = 0;
+	ball.velocityY = 0;
 	
 	waitScore = true;
 	setTimeout(() => {
@@ -250,6 +254,24 @@ function update() {
 		resetBall();
 	}
 
+	// verification s'il y a un impact ball/paddle a la prochaine POSITION de la balle (tunneling effect a contrer)
+	let nextBallX = ball.x + ball.velocityX;
+	let nextBallY = ball.y + ball.velocityY;
+
+	if (ball.velocityX > 0) {
+		if (ball.x < computer.x && nextBallX > computer.x) {
+			if (nextBallY + ball.radius > computer.y && nextBallY - ball.radius < computer.y + computer.height) {
+				ball.x = computer.x - ball.radius;
+			}
+		}
+	} else if (ball.velocityX < 0) {
+		if (ball.x > user.x && nextBallX < user.x) {
+			if (nextBallY + ball.radius < user.y && nextBallY - ball.radius > user.y + user.height) {
+				ball.x = user.x + user.width + ball.radius;
+			}
+		}
+	}
+
 	// velocite de la balle
 	ball.x += ball.velocityX;
 	ball.y += ball.velocityY;
@@ -264,10 +286,8 @@ function update() {
 	if (computer.y + computer.height > canvas.height) {
 		computer.y = canvas.height - computer.height;
 	}
-
+	
 	// check for the next frame instead for the current.
-	let nextBallY = ball.y + ball.velocityY;
-
 	if (nextBallY - ball.radius < 0) {
 		ball.velocityY = -ball.velocityY;
 		ball.y = ball.radius;
