@@ -243,17 +243,6 @@ function update() {
 		return; //countdown 3 seconds
 	}
 
-	//mise a jour du score
-	if (ball.x - ball.radius < 9) { //the computer wins
-		computer.score++;
-		keepInfo(); // pour debug
-		resetBall();
-	} else if (ball.x + ball.radius > canvas.width - 9) {
-		user.score++;
-		keepInfo(); // pour debug
-		resetBall();
-	}
-
 	// verification s'il y a un impact ball/paddle a la prochaine POSITION de la balle (tunneling effect a contrer)
 	let nextBallX = ball.x + ball.velocityX;
 	let nextBallY = ball.y + ball.velocityY;
@@ -266,10 +255,21 @@ function update() {
 		}
 	} else if (ball.velocityX < 0) {
 		if (ball.x > user.x && nextBallX < user.x) {
-			if (nextBallY + ball.radius < user.y && nextBallY - ball.radius > user.y + user.height) {
+			if (nextBallY + ball.radius > user.y && nextBallY - ball.radius < user.y + user.height) {
 				ball.x = user.x + user.width + ball.radius;
 			}
 		}
+	}
+
+	//mise a jour du score
+	if (ball.x - ball.radius < 9) { //the computer wins
+		computer.score++;
+		keepInfo(); // pour debug
+		resetBall();
+	} else if (ball.x + ball.radius > canvas.width - 9) {
+		user.score++;
+		keepInfo(); // pour debug
+		resetBall();
 	}
 
 	// velocite de la balle
