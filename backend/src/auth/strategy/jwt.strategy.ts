@@ -21,12 +21,11 @@ export class JwtStrategy extends PassportStrategy(
         //Cette focntion intercepte la requete avant qu'elle arrive au controller. 
         //Elle 'append' a la request un payload qui est extrait du Token Jwt. Ainsi, le user est deja identifie
     async validate(payload:{sub: number, email:string}){
-        const user = await this.prisma.user.findUnique({
+        const user = await this.prisma.utilisateur.findUnique({
             where:{
               id: payload.sub,
             } 
         });
-        delete user.hash;
 
         return payload
     }
