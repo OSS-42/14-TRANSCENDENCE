@@ -49,9 +49,6 @@ function drawRectangle(x, y, w, h, color) {
 	context.fillRect(x, y, w, h);
 }
 
-// test :
-//drawRectangle(0, 0, canvas.width, canvas.height, "BLACK");
-
 function drawCircle(x, y, radius, color) {
 	context.fillStyle = color;
 	//pour dessiner un cercle, il faut d'abord tracer un chemin, le perimetre du cercle. Puis on rempli de colour pour en faire une balle !
@@ -67,9 +64,6 @@ function drawNet() {
 	}
 }
 
-// test :
-//drawCircle(100, 100, 50, "WHITE");
-
 function drawScore(text, x, y, color) {
 	context.fillStyle = color;
 	context.font = "55px impact";
@@ -82,8 +76,6 @@ function drawPlayerName(text, x, y, color) {
 	context.fillText(text, x, y);
 }
 
-// test :
-//drawText("something", 500, 500, "GREEN");
 
 // variables globales pour le message de victoire
 let isGameOver = false;
