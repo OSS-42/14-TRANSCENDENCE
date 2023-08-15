@@ -12,7 +12,7 @@ export class AuthControler {
     @Get()
     async getCode42(@Query('code') code: string) {
         console.log('Code:', code); 
-
+        //ici je vais rediriger la reponse vers le frontend
         return this.authService.getCode42(code);
     }
 

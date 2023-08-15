@@ -92,6 +92,7 @@ export class AuthService{
     //Fonction qui contacte lapi--42 afin de recuperer lacces token, elle cree  un nouvelle utilisateur egalement  
     async getCode42(code: string){
         let  token :string;
+        let UserToken;
         try {
             const response = await axios.post(
                 `https://api.intra.42.fr/oauth/token`,
@@ -118,21 +119,24 @@ export class AuthService{
             if (response.ok) {
                 const data = await response.json();
 
-                //Extraction des donnees vers la base de donnees--> login  Si l'utilisateur n'existe pas.
+                //Extraction des donnees vers la base de donnees--> login  Si l'utilisateur n'existe pas.  On va utiliser le email a place
                 const username = data.login
-                const existingUser = await this.prisma.utilisateur.findUnique({
-                    where: { username },
+                const email = data.email
+                let user = await this.prisma.utilisateur.findUnique({
+                    where: { email },
                 });
-                if (!existingUser){
-                    const user = await this.prisma.utilisateur.create({
+                if (!user){
+                    user = await this.prisma.utilisateur.create({
                         data: {
                           username: username,
+                          email: email
                         },
                     });
                 }
                 else{
                     console.log("Utilisateur existe deja");
                 }
+                UserToken = this.signToken(user.id, user.email)
             } 
             else {
                 console.error('Erreur lors de la requête:', response.status, response.statusText);
@@ -141,8 +145,7 @@ export class AuthService{
         catch (error) {
             console.error('Erreur lors de la récupération des données:', error);
         }
-        
-        return token;
+        return UserToken;
     }
     
 }
