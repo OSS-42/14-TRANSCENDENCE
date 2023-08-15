@@ -267,27 +267,6 @@ function update() {
 		}
 	}
 
-	// // check pour le tunneling ameliorer, on valide sur 2-3 frames d'avance car le tunneling effect est toujours la. Prochaine solution : capper la vitesse de la balle.
-	// let framesToCheck = 3;
-	// for (let i = 1; i <= framesToCheck; i++) {
-	// 	let futureBallX = ball.x + i * ball.velocityX;
-	// 	let futureBallY = ball.y + i * ball.velocityY;
-
-	// 	if (futureBallX + ball.radius > computer.x && futureBallX - ball.radius < computer.x + computer.width &&
-	// 		futureBallY + ball.radius > computer.y && futureBallY - ball.radius < computer.y + computer.height) {
-	// 			ball.velocityX = -ball.velocityX;
-	// 			ball.x = computer.x - ball.radius;
-	// 			break;
-	// 	}
-
-	// 	if (futureBallX - ball.radius < user.x + user. width && futureBallX + ball.radius > user.x &&
-	// 		futureBallY + ball.radius > user.y && futureBallY - ball.radius < user.y + user.height) {
-	// 			ball.velocityX = -ball.velocityX;
-	// 			ball.x = user.x + user.width + ball.radius;
-	// 			break;
-	// 	}
-	// }
-
 	//mise a jour du score
 	if (ball.x - ball.radius < 9) { //the computer wins
 		computer.score++;
