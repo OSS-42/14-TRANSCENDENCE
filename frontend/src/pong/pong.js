@@ -237,6 +237,16 @@ function resetBall() {
 	}, countdownTime * 1000);
 }
 
+function handleBallPaddleCollision(player) {
+    let collisionPoint = ball.y - (player.y + player.height / 2 );
+    collisionPoint = collisionPoint / (player.height / 2);
+    let angleRad = collisionPoint * Math.PI / 4;
+    let direction = (ball.x < canvas.width / 2 ? 1 : -1);
+    ball.velocityX = direction * ball.speed * Math.cos(angleRad);
+    ball.velocityY = ball.speed * Math.sin(angleRad);
+    ball.speed += 0.5;
+}
+
 // fonction pour mettre a jour les donnees
 function update() {
 	if (waitScore) {
@@ -252,6 +262,7 @@ function update() {
 			if (nextBallY + ball.radius > computer.y && nextBallY - ball.radius < computer.y + computer.height) {
 				ball.velocityX = -ball.velocityX;
 				ball.x = computer.x - ball.radius;
+				handleBallPaddleCollision(computer);
 			}
 		}
 	} else if (ball.velocityX < 0) {
@@ -259,6 +270,7 @@ function update() {
 			if (nextBallY + ball.radius > user.y && nextBallY - ball.radius < user.y + user.height) {
 				ball.velocityX = -ball.velocityX;
 				ball.x = user.x + user.width + ball.radius;
+				handleBallPaddleCollision(user);
 			}
 		}
 	}
@@ -310,7 +322,7 @@ function update() {
 		computer.y = canvas.height - computer.height;
 	}
 	
-	// check for the next frame instead for the current.
+	// verification des limites top et bottom (axe Y) et de la frame suivante
 	if (nextBallY - ball.radius < 0) {
 		ball.velocityY = -ball.velocityY;
 		ball.y = ball.radius;
@@ -318,18 +330,6 @@ function update() {
 		ball.velocityY = -ball.velocityY;
 		ball.y = canvas.height - ball.radius;
 	}
-
-	// if (ball.y + ball.radius > canvas.height || ball.y - ball.radius < 0) {
-	// 	ball.velocityY = - ball.velocityY;
-	// }
-	// // boundary correction
-	// if (ball.y - ball.radius < 0) {
-	// 	ball.y = ball.radius;
-	// 	ball.velocityY = -ball.velocityY;
-	// } else if (ball.y + ball.radius > canvas.height) {
-	// 	ball.y = canvas.height - ball.radius;
-	// 	ball.velocityY = -ball.velocityY;
-	// }
 
 	let player = (ball.x < canvas.width / 2) ? user : computer;
 
@@ -363,7 +363,7 @@ function game() {
 }
 
 // loop pour le rafraichissement de l'ecran de jeu
-const framePerSecond = 50;
+const framePerSecond = 60;
 // setInterval(game, 1000/framePerSecond);
 
 // modifie pour debug et ajout de pauseGame() (pong-debug.js)
