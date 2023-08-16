@@ -16,7 +16,7 @@ function App() {
 }
 
 //the state of a logged user is hard coded right now, by setting [user] to true or false.
-//this will have to changed to integrate state hooks and the logic behind login validation.
+//this will be changed to integrate state hooks and the logic behind login validation.
 //the idea of creating protected routes is to be implemented. check it here:
 // https://www.makeuseof.com/create-protected-route-in-react/
 // feel free to change the routes, Momo!
