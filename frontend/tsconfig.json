@@ -7,8 +7,8 @@
     "skipLibCheck": true,
 
     /* Bundler mode */
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
@@ -16,10 +16,17 @@
 
     /* Linting */
     "strict": true,
-    "noUnusedLocals": true,
+		"strictNullChecks": true,
+		"strictPropertyInitialization": true,
+		"noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+		"noImplicitAny": true,
+		"noImplicitOverride": true,
+		"noImplicitReturns": true,
+		"allowUnreachableCode": false,
+		"removeComments": true
   },
-  "include": ["src"],
+  "include": ["src", "src/components/.tsx"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

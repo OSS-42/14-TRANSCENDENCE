@@ -1,35 +1,24 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React from "react";
+import { Routes, Route, Link } from "react-router-dom";
+import { Chat, Home, Pong, Profile, Welcome } from "./pages";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const user = true;
 
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <Routes>
+      <Route path="/" element={!user ? <Welcome /> : <Home />} />
+      <Route path="/chat" element={!user ? <Welcome /> : <Chat />} />
+      <Route path="/game" element={!user ? <Welcome /> : <Pong />} />
+      <Route path="/profile" element={!user ? <Welcome /> : <Profile />} />
+    </Routes>
+  );
 }
 
-export default App
+//the state of a logged user is hard coded right now, by setting [user] to true or false.
+//this will have to changed to integrate state hooks and the logic behind login validation.
+//the idea of creating protected routes is to be implemented. check it here:
+// https://www.makeuseof.com/create-protected-route-in-react/
+// feel free to change the routes, Momo!
+
+export default App;
