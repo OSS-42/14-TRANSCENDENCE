@@ -30,7 +30,7 @@ export function NavBar() {
   return (
     <Box sx={{ width: "100%" }}>
       <Tabs value={value} onChange={handleChange} aria-label="nav tabs example">
-        <LinkTab label="Home" href="/home" />
+        <LinkTab label="Home" href="/" />
         <LinkTab label="Chat" href="/chat" />
         <LinkTab label="Game" href="/game" />
         <LinkTab label="Game" href="/game" />
