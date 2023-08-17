@@ -1,10 +1,10 @@
-import { Header } from '../components'
+import { NavBar } from "../components";
 
 export function Home() {
   return (
     <div>
-      <Header />
+      <NavBar />
       HomePage
     </div>
-  )
+  );
 }

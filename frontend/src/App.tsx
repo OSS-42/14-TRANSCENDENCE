@@ -1,9 +1,8 @@
-import { Routes, Route } from 'react-router-dom'
-import { Chat, Home, Pong, Profile, Welcome } from './pages'
-
+import { Routes, Route } from "react-router-dom";
+import { Chat, Home, Pong, Profile, Welcome } from "./pages";
 
 function App() {
-  const user = false
+  const user = false;
 
   return (
     <>
@@ -14,7 +13,7 @@ function App() {
         <Route path="/profile" element={!user ? <Welcome /> : <Profile />} />
       </Routes>
     </>
-  )
+  );
 }
 
 //the state of a logged user is hard coded right now, by setting [user] to true or false.
@@ -23,4 +22,4 @@ function App() {
 // https://www.makeuseof.com/create-protected-route-in-react/
 // feel free to change the routes!
 
-export default App
+export default App;

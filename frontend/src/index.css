@@ -1,4 +1,19 @@
 * {
-	-webkit-font-smoothing: antialiased;
+  -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+:root {
+  /* Coolors Exported Palette - https://coolors.co/f4f4f4-fefefe-ffe600-ff5552-adadad */
+
+  /* CSS HEX */
+  --white-smoke: #F3F3F3ff;
+  --white: #fefefeff;
+  --canary: #ffe600ff;
+  --bittersweet: #ff5552ff;
+  --silver: #adadadff;
+}
+
+body {
+  background-color: var(--white-smoke);
 }

@@ -24,7 +24,6 @@
 		"noImplicitAny": true,
 		"noImplicitOverride": true,
 		"noImplicitReturns": true,
-		"allowUnreachableCode": false,
 		"removeComments": true
   },
   "include": ["src", "src/components/.tsx"],
