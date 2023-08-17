@@ -54,7 +54,6 @@ export class AuthService{
             );     
             console.log('Réponse POST:', response.data);
             token =response.data.access_token
-            console.log("token;", token);
         } catch (error) {
             console.error('Erreur POST:', error);
         }

@@ -45,7 +45,7 @@ model Utilisateur {
   updatedAt DateTime @updatedAt
 
   username String
-  gamesWon Int
+  // gamesWon Int
   email    String @unique
 }
 model chatRoom {
