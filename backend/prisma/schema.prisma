@@ -34,7 +34,7 @@ model Bookmark {
   link String
 
   userId Int
-  user User @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   //on delete cascade
 
   @@map("bookmarks")
@@ -45,5 +45,14 @@ model Utilisateur {
   updatedAt DateTime @updatedAt
 
   username String
+  gamesWon Int
   email    String @unique
+}
+model chatRoom {
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name String @unique
+  
 }

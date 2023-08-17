@@ -18,29 +18,7 @@ export class AuthService{
         private jwt: JwtService,
         private config: ConfigService,
     ){}
-    //fonction test pour le tuto
-   async signin (dto: AuthDto){
-        //find the user
-        //if user dosent exist throw
-        //...
-        const user = await this.prisma.user.findUnique({
-            where: {
-                email: dto.email,
-            },
-        });
-        if(!user){
-            throw new ForbiddenException('credentieals incorrect',)
-        };
-        const pwMatches = await argon.verify(
-            user.hash,
-            dto.password
-        );
-        if(!pwMatches)
-            throw new ForbiddenException('credentieals incorrect',);
-
-        return  this.signToken(user.id, user.email);
-    }
-
+    
     async signToken(userId: number, email:string ): Promise<{access_token:string}> {
         const payload ={
             sub: userId,
@@ -58,37 +36,8 @@ export class AuthService{
             };
 
     }
-
-   async signup(dto: AuthDto){
-        const hash =  await argon.hash(dto.password);
-        try{
-        const user = await this.prisma.user.create({
-            data: {
-                email: dto.email,
-                hash: hash,
-            }
-        });
-
-        
-        //enleve le password
-        delete user.hash;
-    
-        return user;
-    }
-    catch(error){
-        if(error instanceof PrismaClientKnownRequestError){
-            if(error.code === 'P2002'){
-                throw new ForbiddenException('Credentials taken')
-            }
-        }
-        else {
-            throw error
-        }
-    }
-   }
-
-
-
+    async getUserCode(){
+     }
     //Fonction qui contacte lapi--42 afin de recuperer lacces token, elle cree  un nouvelle utilisateur egalement  
     async getCode42(code: string){
         let  token :string;
@@ -147,5 +96,64 @@ export class AuthService{
         }
         return UserToken;
     }
+
     
 }
+
+
+
+
+
+
+
+
+
+
+// async signin (dto: AuthDto){
+//         //find the user
+//         //if user dosent exist throw
+//         //...
+//         const user = await this.prisma.user.findUnique({
+//             where: {
+//                 email: dto.email,
+//             },
+//         });
+//         if(!user){
+//             throw new ForbiddenException('credentieals incorrect',)
+//         };
+//         const pwMatches = await argon.verify(
+//             user.hash,
+//             dto.password
+//         );
+//         if(!pwMatches)
+//             throw new ForbiddenException('credentieals incorrect',);
+
+//         return  this.signToken(user.id, user.email);
+//     }
+//    async signup(dto: AuthDto){
+//         const hash =  await argon.hash(dto.password);
+//         try{
+//         const user = await this.prisma.user.create({
+//             data: {
+//                 email: dto.email,
+//                 hash: hash,
+//             }
+//         });
+
+        
+//         //enleve le password
+//         delete user.hash;
+    
+//         return user;
+//     }
+//     catch(error){
+//         if(error instanceof PrismaClientKnownRequestError){
+//             if(error.code === 'P2002'){
+//                 throw new ForbiddenException('Credentials taken')
+//             }
+//         }
+//         else {
+//             throw error
+//         }
+//     }
+//    }
