@@ -20,18 +20,22 @@ const App: React.FC = () => {
   
   // ratio pour garder les meme proportions lors d'un resizing de la page
   // attention, a cause du positionnement de la camera, height devient depth et depth devient height.
-  const paddleWidth = 0.000625 * dimension.width;
-  const paddleHeight = 1;
-  const paddleDepth = 0.008333333333 * dimension.height;
-  const ballRadius = 0.000625 * dimension.width;
-  const netWidth = 0.000625 * dimension.width;
-  const netDepth = 0.008333333333 * dimension.height;
+  const paddleWidth: number = 0.000625 * dimension.width;
+  const paddleHeight: number = 1;
+  const paddleDepth: number = 0.008333333333 * dimension.height;
+  const ballRadius: number = 0.000625 * dimension.width;
+  const netWidth: number = 0.000625 * dimension.width;
+  const netDepth: number = 0.008333333333 * dimension.height;
+
+  const [positionZ, setPositionZ] = React.useState(0);
+  const [ballPosition, setBallPosition] = React.useState({ x: 0, y: 0, z: 0.00001 });
+  const [ballVelocity, setBallVelocity] = React.useState({ x: 0.5, z:0.5 });
 
   // methode pour conserver les ratio sur l'evenement resize
   React.useEffect(() => {
     function handleResize() {
-      let newWidth = window.innerWidth;
-      let newHeight = window.innerWidth * 3 / 4;
+      let newWidth: number = window.innerWidth;
+      let newHeight: number = window.innerWidth * 3 / 4;
 
       if (newWidth > 800) {
         newWidth = 800;
@@ -46,20 +50,20 @@ const App: React.FC = () => {
   }, []);
 
 // offsite pour maintenir les paddles a 0.5 unit de leur bordure respective lorsqu'il y resize
-  const distanceFromCenter = 0.024 * dimension.width;
+  const distanceFromCenter: number = 0.024 * dimension.width;
 
   // fixation des positions gauche et droite des paddles
-  const leftPaddleXPosition = -distanceFromCenter;
-  const rightPaddleXPosition = distanceFromCenter;
+  const leftPaddleXPosition: number = -distanceFromCenter;
+  const rightPaddleXPosition: number = distanceFromCenter;
 
   //creation de la ligne (le net) du milieu
-  const numberOfSegments = 15;
-  const segmentHeight = netDepth / 5;
-  const spaceBetweenSegments = 1;
-  const totalHeight = (segmentHeight + spaceBetweenSegments) * numberOfSegments - spaceBetweenSegments; // Subtract space for the last segment
+  const numberOfSegments: number = 15;
+  const segmentHeight: number = netDepth / 5;
+  const spaceBetweenSegments: number = 1;
+  const totalHeight: number = (segmentHeight + spaceBetweenSegments) * numberOfSegments - spaceBetweenSegments; // Subtract space for the last segment
 
   const segments = Array.from({ length: numberOfSegments }).map((_, index) => {
-    const yPosition = (totalHeight / 2) - (index * (segmentHeight + spaceBetweenSegments));
+    const yPosition: number = (totalHeight / 2) - (index * (segmentHeight + spaceBetweenSegments));
 
     return (
       <Box key={index} position={[0, 0, yPosition]} args={[netWidth, 0, segmentHeight]}>
@@ -71,21 +75,21 @@ const App: React.FC = () => {
   // Scoreboard
   const [leftScore, setLeftScore] = React.useState(0);
   const [rightScore, setRightScore] = React.useState(0);
-  const baseCanvasWidth = 800;
-  const baseFontSize = 60;
-  const fontSize = (dimension.width / baseCanvasWidth) * baseFontSize;
+  const baseCanvasWidth: number = 800;
+  const baseFontSize: number = 60;
+  const fontSize: number = (dimension.width / baseCanvasWidth) * baseFontSize;
 
   // Dimensions de l'espace de jeu.
-  const WORLD_WIDTH = dimension.width / 20 //the camera zoom;
-  const WORLD_HEIGHT = dimension.height / 20;
+  const WORLD_WIDTH: number = dimension.width / 20 //the camera zoom;
+  const WORLD_HEIGHT: number = dimension.height / 20;
 
   // facteurs de mise a l'echelle au cas ou (pixels vs canvas units)
   // const xScale = dimension.width / WORLD_WIDTH;
   // const yScale = dimension.height / WORLD_HEIGHT;
 
   const checkCollision = (ballPos, paddlePos, paddleDims) => {
-    const distX = Math.abs(ballPos.x - paddlePos.x);
-    const distZ = Math.abs(ballPos.z - paddlePos.z);
+    const distX: number = Math.abs(ballPos.x - paddlePos.x);
+    const distZ: number = Math.abs(ballPos.z - paddlePos.z);
 
     if (distX <= (paddleDims.width / 2 + ballRadius) && (distZ <= paddleDims.depth / 2 + ballRadius)) {
       return true;
@@ -94,58 +98,67 @@ const App: React.FC = () => {
   };
 
   // Ball mechanics
-  const ACCELERATION_FACTOR = 1.2
-  const SPEED_CAP_FACTOR = 0.15 //quand le canvs devient plus petit, au bout d'un 
+  const ACCELERATION_FACTOR: number = 1.2
+  const SPEED_CAP_FACTOR: number = 0.15 //quand le canvs devient plus petit, au bout d'un 
   //moment la velocite sera plus grande que la distance entre la balle et le mur, et on va "skipper" les collisions
 
-  const speedCap = SPEED_CAP_FACTOR * WORLD_WIDTH;
+  const speedCap: number = SPEED_CAP_FACTOR * WORLD_WIDTH;
 
-  const Ball = () => {
-    const [ballPosition, setBallPosition] = React.useState({ x: 0, y: 0, z: 0.00001 });
-    const [ballVelocity, setBallVelocity] = React.useState({ x: 0.5, z:0.5 });
+  const Ball = ({ ballPosition, setBallPosition, ballVelocity, setBallVelocity }) => {
     
     useFrame(() => {
-      const subSteps = 5;
+      const subSteps: number = 5;
       for (let i = 0; i < subSteps; i++) {
         // utilisation de plus petits bouts de trajectoire pour contrer le tunneling effect.
-        let newX = ballPosition.x + ballVelocity.x / subSteps;
+        let newX: number = ballPosition.x + ballVelocity.x / subSteps;
         // ne pas oublier la position de la camera pour la vue top-down
-        let newZ = ballPosition.z + ballVelocity.z / subSteps;
+        let newZ: number = ballPosition.z + ballVelocity.z / subSteps;
         
         // Validation de hit avec les paddles  
-        const leftPaddlePosition = { x: leftPaddleXPosition, z: 0 };
+        const leftPaddlePosition = { x: leftPaddleXPosition, z: positionZ };
         const rightPaddlePosition = { x: rightPaddleXPosition, z: 0 };
         const paddleDimensions = { width: paddleWidth, depth: paddleDepth };
         
         if (checkCollision({ x: newX, z: newZ }, leftPaddlePosition, paddleDimensions) ||
             checkCollision({ x: newX, z: newZ }, rightPaddlePosition, paddleDimensions)) {
-          const newVelocityX = -ballVelocity.x * ACCELERATION_FACTOR;
-          const cappedVelocityX = Math.sign(newVelocityX) * Math.min(Math.abs(newVelocityX), speedCap);
-      
-        setBallVelocity(prev => ({ 
-          x: cappedVelocityX, 
-          z: prev.z }));
-          console.log('ball speed: ', ballVelocity.x);
-          break;
-        }
+          
+          const hitPaddlePosition = checkCollision({ x: newX, z: newZ }, leftPaddlePosition, paddleDimensions) ? leftPaddlePosition : rightPaddlePosition;
+          const relativeCollisionPoint: number = (newZ - hitPaddlePosition.z) / (paddleDepth / 2);
+          const angleFactor: number = 4;
+          const newVelocityZ: number = ballVelocity.z + angleFactor * relativeCollisionPoint;
 
-      if (Math.abs(ballVelocity.x) > speedCap) {
-        ballVelocity.x = Math.sign(ballVelocity.x) * speedCap;
-       }
+          const newVelocityX:  number = -ballVelocity.x * ACCELERATION_FACTOR;
+          const cappedVelocityX:  number = Math.sign(newVelocityX) * Math.min(Math.abs(newVelocityX), speedCap);
       
-      // Validation de hit avec les murs
-      if (newZ + ballRadius > WORLD_HEIGHT / 2 || newZ - ballRadius < -WORLD_HEIGHT / 2) {
-        setBallVelocity(prev => ({ x: prev.x, z: -prev.z}));
-        break;
+          // Directly assign new velocities for immediate effect
+          // ballVelocity.x = cappedVelocityX;
+          // ballVelocity.z = newVelocityZ;
+
+          setBallVelocity({ 
+            x: cappedVelocityX, 
+            z: newVelocityZ });
+
+            newX = ballPosition.x + cappedVelocityX / subSteps;
+            newZ = ballPosition.z + newVelocityZ / subSteps;
+        }
+        
+        if (Math.abs(ballVelocity.x) > speedCap) {
+          ballVelocity.x = Math.sign(ballVelocity.x) * speedCap;
+        }
+        
+        // Validation de hit avec les murs
+        if (newZ + ballRadius > WORLD_HEIGHT / 2 || newZ - ballRadius < -WORLD_HEIGHT / 2) {
+          ballVelocity.z = -ballVelocity.z;
+        }
+        
+        setBallPosition({
+          x: newX,
+          y: newZ,
+          z : 0.00001
+        });
       }
-      
-      setBallPosition({
-        x: newX,
-        y: newZ,
-        z : 0.00001
-      });
-    }
-   });
+      console.log('ball speed: ', ballVelocity.x);
+  });
     
     return (
       <Sphere position={[ballPosition.x, ballPosition.z, ballPosition.y]} args={[ballRadius, 32, 32]}>
@@ -155,16 +168,15 @@ const App: React.FC = () => {
   }
 
   // mouvement du paddle a la souris.
-  const LeftPaddle = () => {
+  const LeftPaddle = ({ positionZ, setPositionZ }) => {
     const { mouse } = useThree();
-    const [PositionZ, setPositionZ] = React.useState(0);
     
     useFrame(() => {
-      const z = -mouse.y * (WORLD_HEIGHT / 2);
-      const paddleTopEdge = z + paddleDepth / 2;
-      const paddleBottomEdge = z - paddleDepth / 2;
+      const z: number = -mouse.y * (WORLD_HEIGHT / 2);
+      const paddleTopEdge: number = z + paddleDepth / 2;
+      const paddleBottomEdge: number = z - paddleDepth / 2;
       
-      let newPositionZ = z;
+      let newPositionZ: number = z;
       
       if (paddleTopEdge > WORLD_HEIGHT / 2) {
         newPositionZ = WORLD_HEIGHT / 2 - paddleDepth / 2;
@@ -176,7 +188,7 @@ const App: React.FC = () => {
     });
 
     return (
-      <Box position={[leftPaddleXPosition, 0, PositionZ]} args={[paddleWidth, paddleHeight, paddleDepth]}>
+      <Box position={[leftPaddleXPosition, 0, positionZ]} args={[paddleWidth, paddleHeight, paddleDepth]}>
         <meshBasicMaterial attach="material" color="white" />
       </Box>
     )
@@ -196,10 +208,15 @@ const App: React.FC = () => {
           {/* <Sphere position={[0, 0, 0.00001]} args={[ballRadius, 32, 32]}>
             <meshBasicMaterial color="white" />
           </Sphere> */}
-          <Ball />
+          <Ball 
+            ballPosition={ballPosition}
+            setBallPosition={setBallPosition}
+            ballVelocity={ballVelocity}
+            setBallVelocity={setBallVelocity}
+          />
 
           {/* Left Paddle */}
-          <LeftPaddle />
+          <LeftPaddle positionZ={positionZ} setPositionZ={setPositionZ} />
 
           {/* Right Paddle */}
           <Box position={[rightPaddleXPosition, 0, 0]} args={[paddleWidth, paddleHeight, paddleDepth]}>
