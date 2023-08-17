@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Sphere, Box } from "@react-three/drei";
 import "./App.css"
 
@@ -154,7 +154,33 @@ const App: React.FC = () => {
     )
   }
 
+  // mouvement du paddle a la souris.
+  const LeftPaddle = () => {
+    const { mouse } = useThree();
+    const [PositionZ, setPositionZ] = React.useState(0);
+    
+    useFrame(() => {
+      const z = -mouse.y * (WORLD_HEIGHT / 2);
+      const paddleTopEdge = z + paddleDepth / 2;
+      const paddleBottomEdge = z - paddleDepth / 2;
+      
+      let newPositionZ = z;
+      
+      if (paddleTopEdge > WORLD_HEIGHT / 2) {
+        newPositionZ = WORLD_HEIGHT / 2 - paddleDepth / 2;
+      } else if (paddleBottomEdge < -WORLD_HEIGHT / 2) {
+        newPositionZ = -WORLD_HEIGHT / 2 + paddleDepth / 2;
+      }
+      
+      setPositionZ(newPositionZ);
+    });
 
+    return (
+      <Box position={[leftPaddleXPosition, 0, PositionZ]} args={[paddleWidth, paddleHeight, paddleDepth]}>
+        <meshBasicMaterial attach="material" color="white" />
+      </Box>
+    )
+  }
 
   // dessin du canvas
   return (
@@ -173,9 +199,7 @@ const App: React.FC = () => {
           <Ball />
 
           {/* Left Paddle */}
-          <Box position={[leftPaddleXPosition, 0, 0]} args={[paddleWidth, paddleHeight, paddleDepth]}>
-            <meshBasicMaterial attach="material" color="white" />
-          </Box>
+          <LeftPaddle />
 
           {/* Right Paddle */}
           <Box position={[rightPaddleXPosition, 0, 0]} args={[paddleWidth, paddleHeight, paddleDepth]}>
