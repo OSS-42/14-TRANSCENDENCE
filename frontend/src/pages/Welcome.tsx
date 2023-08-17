@@ -1,4 +1,5 @@
 import { Button, Typography, Grid } from "@mui/material";
+import { Link } from "react-router-dom";
 
 export function Welcome() {
   return (
@@ -18,9 +19,11 @@ export function Welcome() {
         <img src="pong.gif" alt="" />
       </Grid>
       <Grid xs display="flex" justifyContent="center" alignItems="center">
-        <Button variant="contained" color="secondary">
-          LOG IN
-        </Button>
+        <Link to="/login">
+          <Button variant="contained" color="secondary">
+            LOG IN
+          </Button>
+        </Link>
       </Grid>
     </Grid>
   );

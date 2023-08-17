@@ -5,7 +5,7 @@ const theme = createTheme({
   palette: {
 		text: {
 			primary: colors.eerieblack,
-			secondary: colors.accent,
+			// secondary: colors.accent,
 			disabled: colors.silver,
 		},
     error: {

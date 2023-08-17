@@ -2,7 +2,7 @@ import { Routes, Route } from "react-router-dom";
 import { Chat, Home, Pong, Profile, Welcome } from "./pages";
 
 function App() {
-  const user = false;
+  const user = true;
 
   return (
     <>
