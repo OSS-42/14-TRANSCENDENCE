@@ -33,7 +33,7 @@ export function NavBar() {
         <LinkTab label="Home" href="/" />
         <LinkTab label="Chat" href="/chat" />
         <LinkTab label="Game" href="/game" />
-        <LinkTab label="Game" href="/game" />
+        <LinkTab label="Profile" href="/profile" />
       </Tabs>
     </Box>
   );
