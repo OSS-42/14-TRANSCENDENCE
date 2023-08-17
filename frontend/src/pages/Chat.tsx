@@ -1,17 +1,6 @@
-import { styled } from "@mui/material/styles";
-import Paper from "@mui/material/Paper";
-import Grid from "@mui/material/Grid";
 import { NavBar } from "../components";
-import { Box, Container } from "@mui/system";
+import { Box } from "@mui/system";
 import { TextField } from "@mui/material";
-
-const Item = styled(Paper)(({ theme }) => ({
-  backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
-  ...theme.typography.body2,
-  padding: theme.spacing(1),
-  textAlign: "center",
-  color: theme.palette.text.secondary,
-}));
 
 export function Chat() {
   return (
@@ -21,18 +10,14 @@ export function Chat() {
         display: "flex flex-direction-row",
         width: "100vw",
         height: "100vh",
-
-        // background: "red",
       }}
     >
       <Box component={NavBar} />
-      {/* body box from here */}
       <Box
         sx={{
           display: "flex",
           padding: "10px",
           height: "96vh",
-          // background: "red",
         }}
       >
         <Box
@@ -62,6 +47,7 @@ export function Chat() {
             variant="outlined"
           />
         </Box>
+        {/* Lists Box */}
         <Box
           sx={{
             display: "grid",
