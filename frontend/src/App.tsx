@@ -1,7 +1,5 @@
-import { Routes, Route, Link } from 'react-router-dom'
+import { Routes, Route } from 'react-router-dom'
 import { Chat, Home, Pong, Profile, Welcome } from './pages'
-import { useState } from 'react'
-import { Header } from './components'
 
 
 function App() {
