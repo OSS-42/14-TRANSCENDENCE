@@ -3,7 +3,7 @@ import { Welcome } from '../pages'
 
 // I'd like to change the header for a Material UI component,
 // but I'm still not sure how it would work.
-// For now we have a simple NavBar.
+// For now we have a simple NavBar. :)
 
 export default function RootLayout() {
   const user = true
