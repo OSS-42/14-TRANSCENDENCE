@@ -7,6 +7,7 @@ import { PrismaClientKnownRequestError, PrismaClientUnknownRequestError } from "
 import { JwtService } from "@nestjs/jwt";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { access } from "fs";
+import { version } from "os";
 
 
 const clientID = "u-s4t2ud-c14a5526d27b133c2732f5848ea8a11d76ae8e503f6e495cd3016623aa0c382e";
@@ -70,6 +71,7 @@ export class AuthService{
                 //Extraction des donnees vers la base de donnees--> login  Si l'utilisateur n'existe pas.  On va utiliser le email a place
                 const username = data.login
                 const email = data.email
+                const avatar = data.image.versions.small
                 let user = await this.prisma.utilisateur.findUnique({
                     where: { email },
                 });
@@ -77,7 +79,8 @@ export class AuthService{
                     user = await this.prisma.utilisateur.create({
                         data: {
                           username: username,
-                          email: email
+                          email: email,
+                          avatar: avatar,
                         },
                     });
                 }

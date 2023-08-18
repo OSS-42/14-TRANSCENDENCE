@@ -34,6 +34,13 @@ export class AuthControler {
 
 
 
+
+
+
+
+
+
+
 //    //@ApiBearerAuth() 
 //    @Post('signup')
 //     signup(

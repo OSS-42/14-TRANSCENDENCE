@@ -2,6 +2,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import { ConfigService } from '@nestjs/config';
 
 
 async function bootstrap() {
@@ -12,7 +13,7 @@ async function bootstrap() {
   );
 
   const config = new DocumentBuilder()
-  .setTitle('Transcendence APi')
+  .setTitle('Transcendence API')
   .setDescription('the description of the API')
   .setVersion('1.0')
   .addTag('auth')
@@ -26,8 +27,12 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
 
   SwaggerModule.setup('/', app, document);
-  // app.enableCors({origin: ['http://localhost:3000',"https://api.intra.42.fr/"],
-  // credentials: true,});
+  const configService = app.get(ConfigService);
+
+  app.enableCors({
+    origin: [configService.get('HOST_FORNTEND'), "https://api.intra.42.fr/"],
+    credentials: true,
+  });
   await app.listen(3001);
 }
 bootstrap();
