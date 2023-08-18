@@ -12,14 +12,23 @@ import { UserService } from "./user.service";
 @UseGuards(JwtGuard)
 export class UserController {
     constructor(private userService: UserService) {}
+    
+
+    //retourne le data de l'utilisateur
     @Get('me')
     getMe(@GetUser() user: Utilisateur){
        return (user)
     }
-     @Get('AllUsers')
+
+
+    //retourne un array d'objets utilisateurs
+    @Get('AllUsers')
     getAllUsers(){
         return this.userService.getAllUsers();
     }
+
+    
+    //retourne le data d'un utilisateur particulier
     @ApiParam({ name: 'id', type: Number })
     @Get(':id')
     getUserInfo(@Param('id') id:number){
