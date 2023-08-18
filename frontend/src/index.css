@@ -1,13 +1,15 @@
 * {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-family: 'Montserrat', sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 :root {
-  /* Coolors Exported Palette - https://coolors.co/f4f4f4-fefefe-ffe600-ff5552-adadad */
-
   /* CSS HEX */
-  --white-smoke: #F3F3F3ff;
+  --white-smoke: #f3f3f3ff;
   --white: #fefefeff;
   --canary: #ffe600ff;
   --bittersweet: #ff5552ff;
@@ -15,5 +17,33 @@
 }
 
 body {
-  background-color: var(--white-smoke);
+  background-color: #fffff6;
+}
+
+header nav {
+  display: flex;
+  justify-content: space-evenly;
+  max-width: 100vw;
+  background-color: #66cccc;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+header nav a {
+  padding: 5px;
+  color: #026c96;
+  text-decoration: none;
+  cursor: pointer;
+  border-radius: 5px 5px 0 0;
+  transition: 0.5s;
+}
+
+a:hover,
+a:focus {
+  color: #00364b;
+}
+
+header nav a.active {
+  background-color: #fffff6;
+  color: #00364b;
 }

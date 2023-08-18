@@ -1,25 +1,29 @@
-import { Routes, Route } from "react-router-dom";
-import { Chat, Home, Pong, Profile, Welcome } from "./pages";
+import {
+  Route,
+  createBrowserRouter,
+  createRoutesFromElements,
+  RouterProvider,
+} from 'react-router-dom'
+
+import RootLayout from './layouts/RootLayout'
+import { Chat, Home, Login, Pong, Profile, Welcome, Error } from './pages'
+
+const router = createBrowserRouter(
+  createRoutesFromElements(
+    <Route path="/" element={<RootLayout />}>
+      <Route path="/" element={<Home />} />
+      <Route path="login" element={<Login />} />
+      <Route path="chat" element={<Chat />} />
+      <Route path="game" element={<Pong />} />
+      <Route path="profile" element={<Profile />} />
+      <Route path="welcome" element={<Welcome />} />
+      <Route path="*" element={<Error />} />
+    </Route>
+  )
+)
 
 function App() {
-  const user = true;
-
-  return (
-    <>
-      <Routes>
-        <Route path="/" element={!user ? <Welcome /> : <Home />} />
-        <Route path="/chat" element={!user ? <Welcome /> : <Chat />} />
-        <Route path="/game" element={!user ? <Welcome /> : <Pong />} />
-        <Route path="/profile" element={!user ? <Welcome /> : <Profile />} />
-      </Routes>
-    </>
-  );
+  return <RouterProvider router={router} />
 }
 
-//the state of a logged user is hard coded right now, by setting [user] to true or false.
-//this will be changed to integrate hooks and the logic behind login validation. (connection to API)
-//the idea of creating protected routes is to be implemented. check it here:
-// https://www.makeuseof.com/create-protected-route-in-react/
-// feel free to change the routes!
-
-export default App;
+export default App
