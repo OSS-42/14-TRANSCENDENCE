@@ -28,18 +28,67 @@ const App: React.FC = () => {
   const paddleHeight: number = 1;
   const paddleDepth: number = 0.008333333333 * dimension.height;
   const ballRadius: number = 0.000625 * dimension.width;
-  const INITIAL_BALL_SPEED: number = 0.01;
+  const initialSpeedFactor = getSpeedFactor(dimension.width);
+  const INITIAL_BALL_SPEED: number = 0.2 * initialSpeedFactor;
   const netWidth: number = 0.000625 * dimension.width;
   const netDepth: number = 0.008333333333 * dimension.height;
 
   const [leftPaddlePositionZ, setLeftPaddlePositionZ] = React.useState(0);
   const [rightPaddlePositionZ, setRightPaddlePositionZ] = React.useState(0);
-  const [ballSpeed, setBallSpeed] = React.useState(INITIAL_BALL_SPEED * (dimension.width / WORLD_WIDTH));
+  const [ballSpeed, setBallSpeed] = React.useState(INITIAL_BALL_SPEED);
   const [ballPosition, setBallPosition] = React.useState({ x: 0, y: 0, z: 0.00001 });
-  const [ballVelocity, setBallVelocity] = React.useState({ x: ballSpeed * 1, z: ballSpeed * 1 });
+  const [ballVelocity, setBallVelocity] = React.useState({ x: INITIAL_BALL_SPEED, z: INITIAL_BALL_SPEED });
+  const [isPaused, setIsPaused] = React.useState(true);
+  const [gameStart, setGameStart] = React.useState(true);
+  const [isOrthographic, setIsOrthographic] = React.useState(true);
+  
+  function getSpeedFactor(width: number) {
+    if (width < 300) {
+      return 0.2;
+    } else if (width < 450) {
+      return 0.5;
+    } else if (width < 700) {
+      return 0.8;
+    }
+    return 1;
+  }
 
+  const handleCountdown = () => {
+    setCountdown(3);
+    // setCountdown(3);
+  const timer = setInterval(() => {
+    setCountdown(prevCount => (prevCount !== null && prevCount > 0 ? prevCount - 1 : null));
+  }, 1000);
+  
+    setTimeout(() => {
+      clearInterval(timer);
+      if (gameStart) {
+        setGameStart(false);
+      }
+      setIsPaused(false);
+    }, 3000);
+
+    return () => clearInterval(timer);
+  };
+
+  React.useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      if(event.key === 'c' || event.key === 'C') {
+        setIsOrthographic(!isOrthographic);
+      }
+    };
+    window.addEventListener('keydown', handleKeyPress);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyPress);
+    };
+  }, [isOrthographic])
+  
   // methode pour conserver les ratio sur l'evenement resize
   React.useEffect(() => {
+    // const initialSpeedFactor = getSpeedFactor(dimension.width);
+    // const [ballSpeed, setBallSpeed] = React.useState(INITIAL_BALL_SPEED * initialSpeedFactor);
+    
     function handleResize() {
       let newWidth: number = window.innerWidth;
       let newHeight: number = window.innerWidth * 3 / 4;
@@ -51,18 +100,8 @@ const App: React.FC = () => {
 
       setDimensions({ width : newWidth, height: newHeight });
 
-      let speedFactor: number = 1;
-      if (newWidth < 300) {
-        speedFactor = 0.2;
-      } else if (newWidth < 450) {
-        speedFactor = 0.5;
-      } else if (newWidth < 700) {
-        speedFactor = 0.8;
-      }
-
-      console.log('speedfactor: ', speedFactor);
-      // const adjustedBallSpeed: number = INITIAL_BALL_SPEED * speedFactor;
-      // console.log('adjusted speed: ', adjustedBallSpeed);
+      const speedFactor = getSpeedFactor(newWidth);
+      const newBallSpeed = INITIAL_BALL_SPEED * speedFactor;
 
       const currentVelocityMagnitude = Math.sqrt(Math.pow(ballVelocity.x, 2) + Math.pow(ballVelocity.z, 2));
       
@@ -71,8 +110,8 @@ const App: React.FC = () => {
       const normalizedVelocityZ = ballVelocity.z / currentVelocityMagnitude;
   
       // Scale the normalized velocity by the new speed
-      const newVelocityX = normalizedVelocityX * speedFactor;
-      const newVelocityZ = normalizedVelocityZ * speedFactor;
+      const newVelocityX = normalizedVelocityX * newBallSpeed;
+      const newVelocityZ = normalizedVelocityZ * newBallSpeed;
   
       setBallVelocity({ x: newVelocityX, z: newVelocityZ });
       // setBallSpeed(INITIAL_BALL_SPEED * (newWidth / WORLD_WIDTH))
@@ -81,6 +120,10 @@ const App: React.FC = () => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, [ballSpeed, ballVelocity]);
+
+  React.useEffect(() => {
+    handleCountdown();
+  }, [gameStart]);
 
 // offsite pour maintenir les paddles a 0.5 unit de leur bordure respective lorsqu'il y resize
   const distanceFromCenter: number = 0.024 * dimension.width;
@@ -112,9 +155,8 @@ const App: React.FC = () => {
   const baseFontSize: number = 60;
   const fontSize: number = (dimension.width / baseCanvasWidth) * baseFontSize;
 
-  // facteurs de mise a l'echelle au cas ou (pixels vs canvas units)
-  // const xScale = dimension.width / WORLD_WIDTH;
-  // const yScale = dimension.height / WORLD_HEIGHT;
+// Timer to restart
+  const [countdown, setCountdown] = React.useState<number | null>(null);
 
   const checkCollision = (ballPos, paddlePos, paddleDims) => {
     const distX: number = Math.abs(ballPos.x - paddlePos.x);
@@ -134,13 +176,24 @@ const App: React.FC = () => {
   };
 
   // Ball mechanics
-  const Ball = ({ ballPosition, setBallPosition, ballVelocity, setBallVelocity, speedFactor }) => {
-
+  const Ball = ({ ballPosition, setBallPosition, ballVelocity, setBallVelocity }) => {
+    
     useFrame(() => {
+        if(isPaused || gameStart) return;
+
         let newX: number = ballPosition.x + ballVelocity.x;
         // ne pas oublier la position de la camera pour la vue top-down
         let newZ: number = ballPosition.z + ballVelocity.z;
         
+        const directionZ = Math.sign(ballVelocity.z);
+
+        // Validation de hit avec les murs
+        if ((directionZ > 0 && newZ + ballRadius > WORLD_HEIGHT / 2) || 
+        (directionZ < 0 && newZ - ballRadius < -WORLD_HEIGHT / 2)) {
+          ballVelocity.z = -ballVelocity.z;
+          newZ = ballPosition.z + ballVelocity.z;
+        }
+
         // Validation de hit avec les paddles  
         const leftPaddlePosition = { x: leftPaddleXPosition, z: leftPaddlePositionZ };
         const rightPaddlePosition = { x: rightPaddleXPosition, z: rightPaddlePositionZ };
@@ -152,23 +205,18 @@ const App: React.FC = () => {
         // const oldZVelocity: number = ballVelocity.z;
 
         if (hitSectionLeft || hitSectionRight) {
-          const hitSection: string | boolean = hitSectionLeft ? hitSectionLeft : hitSectionRight;
-          switch (hitSection) {
-            case "top":
-              ballVelocity.x = -ballVelocity.x;
-              break;
-            case "bottom":
-              ballVelocity.x = -ballVelocity.x;
-              break;
-            case "middle":
-              ballVelocity.x = -ballVelocity.x;
-              break;
-          }
+          const hitPaddlePosition = hitSectionLeft ? leftPaddlePosition : rightPaddlePosition;
+
+          ballVelocity.x = -ballVelocity.x;
+
+          newX = hitPaddlePosition.x + Math.sign(ballVelocity.x) * (paddleWidth / 2 + ballRadius);
         }
 
-        // Validation de hit avec les murs
-        if (newZ + ballRadius > WORLD_HEIGHT / 2 || newZ - ballRadius < -WORLD_HEIGHT / 2) {
-          ballVelocity.z = -ballVelocity.z;
+        // Goal Validation
+        if (newX - ballRadius <= - WORLD_WIDTH / 2) {
+          setRightScore(rightScore + 1);
+        } else if (newX + ballRadius >= WORLD_WIDTH / 2) {
+          setLeftScore(leftScore + 1);
         }
         
         setBallPosition({
@@ -251,9 +299,12 @@ const App: React.FC = () => {
       <div id = "canvas-container" style = {{ width: dimension.width, height: dimension.height }}>
         <Canvas 
           style={{ background: 'black' }}
-          orthographic
-          camera={{ position: [0, 10, 0], zoom: 20 }}
-          // camera={{ position: [0, 0, 10], zoom: 20 }}
+          orthographic={isOrthographic}
+          camera={
+            isOrthographic
+            ? { position: [0, 10, 0], zoom: 20 }
+            : { position: [leftPaddleXPosition - 5, 3, leftPaddleXPosition - 5], fov: 75 }
+            }
         >
           {/* Ball */}
           <Ball 
@@ -261,6 +312,7 @@ const App: React.FC = () => {
             setBallPosition={setBallPosition}
             ballVelocity={ballVelocity}
             setBallVelocity={setBallVelocity}
+            speedFactor={ballSpeed}
           />
 
           {/* Left Paddle */}
@@ -277,6 +329,11 @@ const App: React.FC = () => {
         <div className="scoreboard">
           <span className="left-score" style={{fontSize: `${fontSize}px` }}>{leftScore}</span>
           <span className="right-score"  style={{fontSize: `${fontSize}px` }}>{rightScore}</span>
+        </div>
+
+        {/* timer */}
+        <div className="countdown">
+          {countdown !== null && <span style={{ fontSize: `${fontSize}px` }}>{countdown}</span>}
         </div>
 
       </div>
