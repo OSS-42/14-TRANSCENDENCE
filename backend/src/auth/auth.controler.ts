@@ -22,11 +22,11 @@ export class AuthControler {
         //ici je vais rediriger la reponse vers le frontend
         const token_object=  await this.authService.getCode42(code);
         const access_token:string = token_object.access_token;
-        res.cookie('jwt_token', access_token, { httpOnly: true, secure: true });
+        res.cookie('jwt_token', access_token, { httpOnly: false, secure: false });
         console.log(token_object)
 
         // Redirect to the desired URL
-        return res.redirect('http://localhost:3000/index.test.html');
+        return res.redirect('http://localhost:3000/');
     }
 }
 
