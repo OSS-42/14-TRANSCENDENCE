@@ -54,22 +54,22 @@ const App: React.FC = () => {
   }
 
   const handleCountdown = () => {
-    setCountdown(3);
-    // setCountdown(3);
-  const timer = setInterval(() => {
-    setCountdown(prevCount => (prevCount !== null && prevCount > 0 ? prevCount - 1 : null));
-  }, 1000);
-  
-    setTimeout(() => {
-      clearInterval(timer);
-      if (gameStart) {
-        setGameStart(false);
+    let currentCountdown = 3;
+    setCountdown(currentCountdown);
+    const timer = setInterval(() => {
+      currentCountdown -= 1;
+      setCountdown(currentCountdown);
+      if (currentCountdown === 0) {
+        clearInterval(timer);
+        if (gameStart) {
+          setGameStart(false);
+        }
+        setIsPaused(false);
+        setCountdown(null);
       }
-      setIsPaused(false);
-    }, 3000);
-
-    return () => clearInterval(timer);
+    }, 1000);
   };
+
 
   React.useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
@@ -123,7 +123,7 @@ const App: React.FC = () => {
 
   React.useEffect(() => {
     handleCountdown();
-  }, [gameStart]);
+  }, []);
 
 // offsite pour maintenir les paddles a 0.5 unit de leur bordure respective lorsqu'il y resize
   const distanceFromCenter: number = 0.024 * dimension.width;
@@ -212,13 +212,24 @@ const App: React.FC = () => {
           newX = hitPaddlePosition.x + Math.sign(ballVelocity.x) * (paddleWidth / 2 + ballRadius);
         }
 
-        // Goal Validation
-        if (newX - ballRadius <= - WORLD_WIDTH / 2) {
-          setRightScore(rightScore + 1);
-        } else if (newX + ballRadius >= WORLD_WIDTH / 2) {
-          setLeftScore(leftScore + 1);
+        if (newX - ballRadius <= -WORLD_WIDTH / 2 || newX + ballRadius >= WORLD_WIDTH / 2) {
+          // Reset the ball to the center
+          
+          // Update scores
+          if (newX - ballRadius <= -WORLD_WIDTH / 2) {
+            setRightScore(rightScore + 1);
+          } else if (newX + ballRadius >= WORLD_WIDTH / 2) {
+            setLeftScore(leftScore + 1);
+          }
+
+          newX = 0;
+          newZ = 0;
+          
+          // Optional: Pause the game if needed
+          setIsPaused(true);
+          handleCountdown();
         }
-        
+  
         setBallPosition({
           x: newX,
           y: 0.0001,
@@ -292,20 +303,14 @@ const App: React.FC = () => {
     );
   }
 
-
   // dessin du canvas
   return (
     <div className="pong-container" style={{ width: dimension.width, height: dimension.height }}>
       <div id = "canvas-container" style = {{ width: dimension.width, height: dimension.height }}>
-        <Canvas 
-          style={{ background: 'black' }}
-          orthographic={isOrthographic}
-          camera={
-            isOrthographic
-            ? { position: [0, 10, 0], zoom: 20 }
-            : { position: [leftPaddleXPosition - 5, 3, leftPaddleXPosition - 5], fov: 75 }
-            }
-        >
+        <Canvas>
+          {/* Camera */}
+          <Camera isOrthographic={isOrthographic} />
+
           {/* Ball */}
           <Ball 
             ballPosition={ballPosition}
