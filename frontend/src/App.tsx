@@ -40,8 +40,7 @@ const App: React.FC = () => {
   const [ballVelocity, setBallVelocity] = React.useState({ x: INITIAL_BALL_SPEED, z: INITIAL_BALL_SPEED });
   const [isPaused, setIsPaused] = React.useState(true);
   const [gameStart, setGameStart] = React.useState(true);
-  const [isOrthographic, setIsOrthographic] = React.useState(true);
-  
+
   function getSpeedFactor(width: number) {
     if (width < 300) {
       return 0.2;
@@ -70,19 +69,22 @@ const App: React.FC = () => {
     }, 1000);
   };
 
+  const handleKeyPress = (event: KeyboardEvent) => {
+    if (event.key === "c" || event.key === "C") {
+      // Toggle the camera mode when the "C" key is pressed
+      console.log('c has been pressed');
+      setCameraMode(prevMode => (prevMode === "orthographic" ? "perspective" : "orthographic"));
+    }
+  };
 
-  React.useEffect(() => {
-    const handleKeyPress = (event: KeyboardEvent) => {
-      if(event.key === 'c' || event.key === 'C') {
-        setIsOrthographic(!isOrthographic);
-      }
-    };
-    window.addEventListener('keydown', handleKeyPress);
+   React.useEffect(() => {
+    window.addEventListener("keydown", handleKeyPress);
 
+    // Clean up the event listener when the component unmounts
     return () => {
-      window.removeEventListener('keydown', handleKeyPress);
+      window.removeEventListener("keydown", handleKeyPress);
     };
-  }, [isOrthographic])
+  }, []);
   
   // methode pour conserver les ratio sur l'evenement resize
   React.useEffect(() => {
@@ -303,13 +305,22 @@ const App: React.FC = () => {
     );
   }
 
+  // perspective camera
+
+  
+
   // dessin du canvas
   return (
     <div className="pong-container" style={{ width: dimension.width, height: dimension.height }}>
       <div id = "canvas-container" style = {{ width: dimension.width, height: dimension.height }}>
-        <Canvas>
-          {/* Camera */}
-          <Camera isOrthographic={isOrthographic} />
+      <Canvas 
+          style={{ background: 'black' }}
+          orthographic
+          camera={{ position: [0, 10, 0], zoom: 20 }}
+          // camera={{ position: [0, 0, 10], zoom: 20 }}
+        >
+          {/* Camera Controller */}
+          
 
           {/* Ball */}
           <Ball 
