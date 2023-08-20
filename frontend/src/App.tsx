@@ -2,6 +2,8 @@ import * as React from 'react';
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Sphere, Box } from "@react-three/drei";
 import "./App.css"
+import { ControlledCameras } from "./controlledCamera.tsx"; // Assuming it's exported from a file named ControlledCameras.tsx
+import * as THREE from 'three';
 
 const App: React.FC = () => {
 
@@ -40,6 +42,8 @@ const App: React.FC = () => {
   const [ballVelocity, setBallVelocity] = React.useState({ x: INITIAL_BALL_SPEED, z: INITIAL_BALL_SPEED });
   const [isPaused, setIsPaused] = React.useState(true);
   const [gameStart, setGameStart] = React.useState(true);
+  const [cameraMode, setCameraMode] = React.useState<"perspective" | "orthographic">("orthographic");
+
 
   function getSpeedFactor(width: number) {
     if (width < 300) {
@@ -314,11 +318,19 @@ const App: React.FC = () => {
     <div className="pong-container" style={{ width: dimension.width, height: dimension.height }}>
       <div id = "canvas-container" style = {{ width: dimension.width, height: dimension.height }}>
       <Canvas 
-          style={{ background: 'black' }}
-          orthographic
-          camera={{ position: [0, 10, 0], zoom: 20 }}
-          // camera={{ position: [0, 0, 10], zoom: 20 }}
-        >
+          style={{ background: 'black' }}>
+          <ControlledCameras
+            mode={cameraMode}
+            perspectivePosition={[-20, 30, 0]}
+            perspectiveTarget={[0, 0, 0]}
+            orthographicPosition={[0, 10, 0]}
+            orthographicTarget={[0, 0, 0]}
+            perspectiveCameraProps={{ fov: 50, near: 0.1, far: 1000 }}
+            orthographicCameraProps={{ zoom: 20, near: 0, far: 1000 }}
+            mouseButtons={{ LEFT: THREE.MOUSE.ROTATE }}
+            touches={{ ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_PAN }}
+          />
+
           {/* Camera Controller */}
           
 
