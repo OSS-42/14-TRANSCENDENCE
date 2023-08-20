@@ -1,17 +1,10 @@
-import { ForbiddenException, Injectable } from "@nestjs/common";
+import {  Injectable } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
-import { AuthDto } from "./dto";
-import * as argon from 'argon2' 
 import axios from "axios";
-import { PrismaClientKnownRequestError, PrismaClientUnknownRequestError } from "@prisma/client/runtime/library";
 import { JwtService } from "@nestjs/jwt";
-import { ConfigModule, ConfigService } from "@nestjs/config";
-import { access } from "fs";
-import { version } from "os";
+import { ConfigService } from "@nestjs/config";
 
 
-const clientID = "u-s4t2ud-c14a5526d27b133c2732f5848ea8a11d76ae8e503f6e495cd3016623aa0c382e";
-const clientSecret = "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";
 @Injectable({})
 export class AuthService{
     constructor(
@@ -19,7 +12,7 @@ export class AuthService{
         private jwt: JwtService,
         private config: ConfigService,
     ){}
-    
+   
     async signToken(userId: number, email:string ): Promise<{access_token:string}> {
         const payload ={
             sub: userId,
@@ -37,12 +30,15 @@ export class AuthService{
             };
 
     }
-    async getUserCode(){
-     }
+    
+
     //Fonction qui contacte lapi--42 afin de recuperer lacces token, elle cree  un nouvelle utilisateur egalement  
     async getCode42(code: string){
         let  token :string;
-        let UserToken;
+        let UserToken :Promise<{access_token:string}>
+        const clientID = this.config.get('CLIENT_ID');
+        const clientSecret = this.config.get('CLIENT_SECRET');
+    
         try {
             const response = await axios.post(
                 `https://api.intra.42.fr/oauth/token`,
@@ -58,7 +54,6 @@ export class AuthService{
         } catch (error) {
             console.error('Erreur POST:', error);
         }
-       
         try {
             const response = await fetch("https://api.intra.42.fr/v2/me", {
                 headers: {
