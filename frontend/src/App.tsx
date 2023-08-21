@@ -43,7 +43,11 @@ const App: React.FC = () => {
   const [isPaused, setIsPaused] = React.useState(true);
   const [gameStart, setGameStart] = React.useState(true);
   const [cameraMode, setCameraMode] = React.useState<"perspective" | "orthographic">("orthographic");
-
+  const [winner, setWinner] = React.useState<string | null>(null);
+  const [isClassicMode, setIsClassicMode] = React.useState(false);
+  const [showButtons, setShowButtons] = React.useState(true);
+  const [powerupPosition, setPowerupPosition] = React.useState({ x: 0, y: 0, z: 0 });
+  const [powerupVisible, setPowerupVisible] = React.useState(false);
 
   function getSpeedFactor(width: number) {
     if (width < 300) {
@@ -73,7 +77,23 @@ const App: React.FC = () => {
     }, 1000);
   };
 
+  const handleClassicMode = () => {
+    setCameraMode("orthographic");
+    setIsClassicMode(true);
+    setShowButtons(false);
+    handleCountdown();
+  };
+
+  const handlePowerupMode = () => {
+    setCameraMode("orthographic");
+    setPowerupVisible(true);
+    setIsClassicMode(false);
+    setShowButtons(false);
+    handleCountdown();
+  };
+
   const handleKeyPress = (event: KeyboardEvent) => {
+    if (isClassicMode) return; 
     if (event.key === "c" || event.key === "C") {
       // Toggle the camera mode when the "C" key is pressed
       console.log('c has been pressed');
@@ -88,7 +108,7 @@ const App: React.FC = () => {
     return () => {
       window.removeEventListener("keydown", handleKeyPress);
     };
-  }, []);
+  }, [isClassicMode]);
   
   // methode pour conserver les ratio sur l'evenement resize
   React.useEffect(() => {
@@ -127,9 +147,49 @@ const App: React.FC = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, [ballSpeed, ballVelocity]);
 
+  // powerup
   React.useEffect(() => {
-    handleCountdown();
+    const randomX = (Math.random() * (WORLD_WIDTH - 2)) - (WORLD_WIDTH / 2 - 1);
+    const randomZ = (Math.random() * (WORLD_HEIGHT - 2)) - (WORLD_HEIGHT / 2 - 1);
+    setPowerupPosition({ x: randomX, y: 0, z: randomZ });
   }, []);
+
+  const Powerup = () => {
+    if (!powerupVisible || isClassicMode) return null;
+
+    const textTexture = React.useMemo(createTextTexture, []);
+
+    return (
+      <Box position={[powerupPosition.x, powerupPosition.y, powerupPosition.z]} args={[1, 1, 1]}>
+      <meshBasicMaterial attachArray="material" map={textTexture} />
+    </Box>
+    );
+  };
+
+  const respawnPowerup = () => {
+    const randomX = (Math.random() * (WORLD_WIDTH - 2)) - (WORLD_WIDTH / 2 - 1);
+    const randomZ = (Math.random() * (WORLD_HEIGHT - 2)) - (WORLD_HEIGHT / 2 - 1);
+  
+    setPowerupPosition({ x: randomX, y: 0, z: randomZ });
+    setPowerupVisible(true);
+  };
+
+  const createTextTexture = () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 256;
+    canvas.height = 256;
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      ctx.fillStyle = 'yellow'; // Background color
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.font = 'Bold 200px Impact';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = 'black'; // Text color
+      ctx.fillText('3D', canvas.width / 2, canvas.height / 2);
+    }
+    return new THREE.CanvasTexture(canvas);
+  };
 
 // offsite pour maintenir les paddles a 0.5 unit de leur bordure respective lorsqu'il y resize
   const distanceFromCenter: number = 0.024 * dimension.width;
@@ -183,7 +243,13 @@ const App: React.FC = () => {
 
   // Ball mechanics
   const Ball = ({ ballPosition, setBallPosition, ballVelocity, setBallVelocity }) => {
-    
+    const goalSound = new Audio('src/assets/neo-tokyo-goal.mp3');
+    const ballWallSound = new Audio('src/assets/pong-ball.ogg');
+    const powerupHitSound = new Audio('src/assets/mario-star.mp3');
+    goalSound.preload = 'auto';
+    ballWallSound.preload = 'auto';
+    powerupHitSound.preload = 'auto';
+
     useFrame(() => {
         if(isPaused || gameStart) return;
 
@@ -193,11 +259,27 @@ const App: React.FC = () => {
         
         const directionZ = Math.sign(ballVelocity.z);
 
+        if (
+          powerupVisible &&
+          Math.abs(ballPosition.x - powerupPosition.x) < ballRadius + 1 &&
+          Math.abs(ballPosition.z - powerupPosition.z) < ballRadius + 1
+        ) {
+          setPowerupVisible(false);
+          setCameraMode("perspective");
+          powerupHitSound.play();
+      
+          setTimeout(() => {
+            setCameraMode("orthographic");
+            respawnPowerup();
+          }, 15000);
+        }
+
         // Validation de hit avec les murs
         if ((directionZ > 0 && newZ + ballRadius > WORLD_HEIGHT / 2) || 
         (directionZ < 0 && newZ - ballRadius < -WORLD_HEIGHT / 2)) {
           ballVelocity.z = -ballVelocity.z;
           newZ = ballPosition.z + ballVelocity.z;
+          ballWallSound.play();
         }
 
         // Validation de hit avec les paddles  
@@ -219,14 +301,30 @@ const App: React.FC = () => {
         }
 
         if (newX - ballRadius <= -WORLD_WIDTH / 2 || newX + ballRadius >= WORLD_WIDTH / 2) {
-          // Reset the ball to the center
-          
+          if (!isClassicMode) {
+            powerupHitSound.pause();
+            powerupHitSound.currentTime = 0;
+            goalSound.play();
+          }
+
           // Update scores
           if (newX - ballRadius <= -WORLD_WIDTH / 2) {
             setRightScore(rightScore + 1);
           } else if (newX + ballRadius >= WORLD_WIDTH / 2) {
             setLeftScore(leftScore + 1);
           }
+
+          if (rightScore + 1 === 11 || leftScore + 1 === 11) {
+            if (rightScore + 1 === 11) {
+              setWinner("Right Player Wins!");
+            } else if(leftScore + 1 === 11) {
+              setWinner("Left Player Wins!");
+            }
+            setIsPaused(true);
+            return;
+          }
+
+          setCameraMode("orthographic");
 
           newX = 0;
           newZ = 0;
@@ -255,19 +353,23 @@ const App: React.FC = () => {
     const { mouse } = useThree();
     
     useFrame(() => {
-      const z: number = -mouse.y * (WORLD_HEIGHT / 2);
-      const paddleTopEdge: number = z + paddleDepth / 2;
-      const paddleBottomEdge: number = z - paddleDepth / 2;
-      
-      let newPositionZ: number = z;
-      
-      if (paddleTopEdge > WORLD_HEIGHT / 2) {
-        newPositionZ = WORLD_HEIGHT / 2 - paddleDepth / 2;
-      } else if (paddleBottomEdge < -WORLD_HEIGHT / 2) {
-        newPositionZ = -WORLD_HEIGHT / 2 + paddleDepth / 2;
+      let newPosition;
+      if (cameraMode === "perspective") {
+        newPosition = mouse.x * (WORLD_WIDTH / 2);
+      } else {
+        newPosition = -mouse.y * (WORLD_HEIGHT / 2);
       }
-      
-      setLeftPaddlePositionZ(newPositionZ);
+
+      const paddleTopEdge = newPosition + paddleDepth / 2;
+      const paddleBottomEdge = newPosition - paddleDepth / 2;
+
+      if (paddleTopEdge > WORLD_HEIGHT / 2) {
+        newPosition = WORLD_HEIGHT / 2 - paddleDepth / 2;
+      } else if (paddleBottomEdge < -WORLD_HEIGHT / 2) {
+        newPosition = -WORLD_HEIGHT / 2 + paddleDepth / 2;
+      }
+
+      setLeftPaddlePositionZ(newPosition);
     });
 
     return (
@@ -309,23 +411,50 @@ const App: React.FC = () => {
     );
   }
 
-  // perspective camera
+// border lines
+const Borders = () => {
+  const borderThickness = 0.05; // You can adjust this value
+  return (
+    <>
+      {/* Top Border */}
+      <Box position={[0, 0, WORLD_HEIGHT / 2]} args={[WORLD_WIDTH, 1, borderThickness]}>
+        <meshBasicMaterial color="white" />
+      </Box>
+      {/* Bottom Border */}
+      <Box position={[0, 0, -WORLD_HEIGHT / 2]} args={[WORLD_WIDTH, 1, borderThickness]}>
+        <meshBasicMaterial color="white" />
+      </Box>
+      
+    </>
+  );
+};
 
   
 
   // dessin du canvas
   return (
     <div className="pong-container" style={{ width: dimension.width, height: dimension.height }}>
+      {showButtons && (
+        <div className="game-buttons" style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)'
+        }}>
+          <button onClick={handleClassicMode}>Classic 1 vs 1</button>
+          <button onClick={handlePowerupMode}>Powerup 1 vs 1</button>
+        </div>
+      )}
       <div id = "canvas-container" style = {{ width: dimension.width, height: dimension.height }}>
       <Canvas 
-          style={{ background: 'black' }}>
+          style={{ background: cameraMode === "perspective" ? 'url(src/assets/pong_3d_bg2b.png) no-repeat center center / cover' : 'black' }}>
           <ControlledCameras
             mode={cameraMode}
-            perspectivePosition={[-20, 30, 0]}
+            perspectivePosition={[-50, 10, 0]}
             perspectiveTarget={[0, 0, 0]}
             orthographicPosition={[0, 10, 0]}
             orthographicTarget={[0, 0, 0]}
-            perspectiveCameraProps={{ fov: 50, near: 0.1, far: 1000 }}
+            perspectiveCameraProps={{ fov: 40, near: 0.1, far: 1000 }}
             orthographicCameraProps={{ zoom: 20, near: 0, far: 1000 }}
             mouseButtons={{ LEFT: THREE.MOUSE.ROTATE }}
             touches={{ ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_PAN }}
@@ -351,6 +480,13 @@ const App: React.FC = () => {
 
           {/* le net */}
           {segments}
+
+          {/* borders */}
+          <Borders />
+
+          {/* PowerUp Cube */}
+          <Powerup />
+
         </Canvas>
 
         {/* Scoreboard */}
@@ -358,12 +494,14 @@ const App: React.FC = () => {
           <span className="left-score" style={{fontSize: `${fontSize}px` }}>{leftScore}</span>
           <span className="right-score"  style={{fontSize: `${fontSize}px` }}>{rightScore}</span>
         </div>
+        <div className="winner-message">
+          {winner && <span>{winner}</span>}
+        </div>
 
         {/* timer */}
         <div className="countdown">
           {countdown !== null && <span style={{ fontSize: `${fontSize}px` }}>{countdown}</span>}
         </div>
-
       </div>
     </div>
   );

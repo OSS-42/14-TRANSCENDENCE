@@ -101,16 +101,6 @@ export type ControlledCamerasProps = ReactThreeFiber.Overwrite<
       near?: number;
       far?: number;
     };
-    onControlStart?: (e) => void;
-    onControl?: (e) => void;
-    onControlEnd?: (e) => void;
-    onTransitionStart?: (e) => void;
-    onUpdate?: (e) => void;
-    onWake?: (e) => void;
-    onRest?: (e) => void;
-    onSleep?: (e) => void;
-    mouseButtons: Partial<CameraControlsImpl["mouseButtons"]>;
-    touches: Partial<CameraControlsImpl["touches"]>;
   }
 >;
 
@@ -135,14 +125,6 @@ export const ControlledCameras = forwardRef<
         near: 0,
         far: 1000
       },
-      onControlStart,
-      onControl,
-      onControlEnd,
-      onTransitionStart,
-      onUpdate,
-      onWake,
-      onRest,
-      onSleep,
       ...restProps
     },
     ref
@@ -368,44 +350,6 @@ export const ControlledCameras = forwardRef<
         controls.enabled = true;
       })();
     }, [invalidate, mode, controls, orthoCam, persCam, set]);
-
-    /* Set up event listeners */
-    useEffect(() => {
-      if (onControlStart)
-        controls.addEventListener("controlstart", onControlStart);
-      if (onControl) controls.addEventListener("control", onControl);
-      if (onControlEnd) controls.addEventListener("controlend", onControlEnd);
-      if (onTransitionStart)
-        controls.addEventListener("transitionstart", onTransitionStart);
-      if (onUpdate) controls.addEventListener("update", onUpdate);
-      if (onWake) controls.addEventListener("wake", onWake);
-      if (onRest) controls.addEventListener("rest", onRest);
-      if (onSleep) controls.addEventListener("sleep", onSleep);
-
-      return () => {
-        if (onControlStart)
-          controls.removeEventListener("controlstart", onControlStart);
-        if (onControl) controls.removeEventListener("control", onControl);
-        if (onControlEnd)
-          controls.removeEventListener("controlend", onControlEnd);
-        if (onTransitionStart)
-          controls.removeEventListener("transitionstart", onTransitionStart);
-        if (onUpdate) controls.removeEventListener("update", onUpdate);
-        if (onWake) controls.removeEventListener("wake", onWake);
-        if (onRest) controls.removeEventListener("rest", onRest);
-        if (onSleep) controls.removeEventListener("sleep", onSleep);
-      };
-    }, [
-      controls,
-      onControlStart,
-      onControl,
-      onControlEnd,
-      onTransitionStart,
-      onUpdate,
-      onWake,
-      onRest,
-      onSleep
-    ]);
 
     return (
       <>
