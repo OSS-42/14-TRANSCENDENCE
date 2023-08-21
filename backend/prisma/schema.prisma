@@ -9,30 +9,56 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-
-model User {
-  id Int @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  email String
-  hash String
-
-  firstName String?
-  lastName String?
-}
-model Bookmark {
-  id Int @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  title String
-  description String?
-  link String
-}
 model Utilisateur {
   id Int @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  username String @unique
+  username String
+  // gamesWon Int
+  avatar String?
+  email    String @unique
 }
+model chatRoom {
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name String @unique
+  
+}
+
+
+
+
+
+
+// model User {
+//   id Int @id @default(autoincrement())
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+//   email String @unique
+//   hash String
+
+//   firstName String?
+//   lastName String?
+  
+//   bookmarks Bookmark[]
+
+//   @@map("users")
+// }
+// model Bookmark {
+//   id Int @id @default(autoincrement())
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   title String
+//   description String?
+//   link String
+
+//   userId Int
+//   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+//   //on delete cascade
+
+//   @@map("bookmarks")
+// }

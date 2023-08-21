@@ -20,6 +20,7 @@ services:
 
     ports:
       - "3001:3001"
+      - "5555:5555"
     depends_on:
       - db
     env_file:

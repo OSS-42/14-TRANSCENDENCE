@@ -8,7 +8,8 @@
 
     /* Bundler mode */
     "moduleResolution": "node",
-    "allowImportingTsExtensions": true,
+    "allowImportingTsExtensions": true, //from eric
+    "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
@@ -16,10 +17,16 @@
 
     /* Linting */
     "strict": true,
-    "noUnusedLocals": true,
+		"strictNullChecks": true,
+		"strictPropertyInitialization": true,
+		"noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+		"noImplicitAny": true,
+		"noImplicitOverride": true,
+		"noImplicitReturns": true,
+		"removeComments": true
   },
-  "include": ["src"],
+  "include": ["src", "src/components/.tsx"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
