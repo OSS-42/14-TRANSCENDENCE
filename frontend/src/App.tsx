@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { useRef } from 'react';
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Sphere, Box } from "@react-three/drei";
 import "./App.css"
@@ -31,7 +31,7 @@ const App: React.FC = () => {
   const paddleDepth: number = 0.008333333333 * dimension.height;
   const ballRadius: number = 0.000625 * dimension.width;
   const initialSpeedFactor = getSpeedFactor(dimension.width);
-  const INITIAL_BALL_SPEED: number = 0.2 * initialSpeedFactor;
+  const INITIAL_BALL_SPEED: number = 0.3 * initialSpeedFactor;
   const netWidth: number = 0.000625 * dimension.width;
   const netDepth: number = 0.008333333333 * dimension.height;
 
@@ -241,14 +241,37 @@ const App: React.FC = () => {
     return false;
   };
 
+  // sound effects
+    // const goalSound = new Audio('src/assets/neo-tokyo-goal.mp3');
+    // const ballWallSound = new Audio('src/assets/pong-ball.ogg');
+    // const powerupHitSound = new Audio('src/assets/mario-star.mp3');
+    // goalSound.preload = 'auto';
+    // ballWallSound.preload = 'auto';
+    // powerupHitSound.preload = 'auto';
+    const goalSoundRef = React.useRef<HTMLAudioElement>(null);
+    const ballWallSoundRef = React.useRef<HTMLAudioElement>(null);
+    const powerupHitSoundRef = React.useRef<HTMLAudioElement>(null);
+    // goalSound.preload = 'auto';
+    // ballWallSound.preload = 'auto';
+    // powerupHitSound.preload = 'auto';
+    const playGoalSound = () => {
+      goalSoundRef.current?.play();
+    };
+
+    const playPowerupSound = () => {
+      powerupHitSoundRef.current?.play();
+    };
+
+    const pausePowerupSound = () => {
+      powerupHitSoundRef.current?.pause();
+    };
+
+    const playBallWallSound = () => {
+      ballWallSoundRef.current?.play();
+    };
+
   // Ball mechanics
   const Ball = ({ ballPosition, setBallPosition, ballVelocity, setBallVelocity }) => {
-    const goalSound = new Audio('src/assets/neo-tokyo-goal.mp3');
-    const ballWallSound = new Audio('src/assets/pong-ball.ogg');
-    const powerupHitSound = new Audio('src/assets/mario-star.mp3');
-    goalSound.preload = 'auto';
-    ballWallSound.preload = 'auto';
-    powerupHitSound.preload = 'auto';
 
     useFrame(() => {
         if(isPaused || gameStart) return;
@@ -266,7 +289,7 @@ const App: React.FC = () => {
         ) {
           setPowerupVisible(false);
           setCameraMode("perspective");
-          powerupHitSound.play();
+          playPowerupSound();
       
           setTimeout(() => {
             setCameraMode("orthographic");
@@ -279,7 +302,8 @@ const App: React.FC = () => {
         (directionZ < 0 && newZ - ballRadius < -WORLD_HEIGHT / 2)) {
           ballVelocity.z = -ballVelocity.z;
           newZ = ballPosition.z + ballVelocity.z;
-          ballWallSound.play();
+          if(!isClassicMode)
+            playBallWallSound();
         }
 
         // Validation de hit avec les paddles  
@@ -289,22 +313,27 @@ const App: React.FC = () => {
 
         const hitSectionLeft = checkCollision({ x: newX, z: newZ }, leftPaddlePosition, paddleDimensions);
         const hitSectionRight = checkCollision({ x: newX, z: newZ }, rightPaddlePosition, paddleDimensions);
-        
-        // const oldZVelocity: number = ballVelocity.z;
 
         if (hitSectionLeft || hitSectionRight) {
           const hitPaddlePosition = hitSectionLeft ? leftPaddlePosition : rightPaddlePosition;
 
           ballVelocity.x = -ballVelocity.x;
 
+          const relativeCollisionPoint = (newZ - hitPaddlePosition.z) / (paddleDepth / 2);
+          const newZVelocity = ballVelocity.z + relativeCollisionPoint * INITIAL_BALL_SPEED;
+
+          // Normalize the velocity to maintain the initial speed
+          const magnitude = Math.sqrt(ballVelocity.x ** 2 + newZVelocity ** 2);
+          ballVelocity.x = (ballVelocity.x / magnitude) * INITIAL_BALL_SPEED;
+          ballVelocity.z = (newZVelocity / magnitude) * INITIAL_BALL_SPEED;
+
           newX = hitPaddlePosition.x + Math.sign(ballVelocity.x) * (paddleWidth / 2 + ballRadius);
         }
 
         if (newX - ballRadius <= -WORLD_WIDTH / 2 || newX + ballRadius >= WORLD_WIDTH / 2) {
           if (!isClassicMode) {
-            powerupHitSound.pause();
-            powerupHitSound.currentTime = 0;
-            goalSound.play();
+            pausePowerupSound();
+            playGoalSound();
           }
 
           // Update scores
@@ -328,6 +357,7 @@ const App: React.FC = () => {
 
           newX = 0;
           newZ = 0;
+          setBallVelocity({ x: INITIAL_BALL_SPEED, z: INITIAL_BALL_SPEED });
           
           // Optional: Pause the game if needed
           setIsPaused(true);
@@ -380,7 +410,7 @@ const App: React.FC = () => {
   }
 
   // Right paddle (Computer)
-  const RIGHT_PADDLE_SPEED: number = 1;
+  const RIGHT_PADDLE_SPEED: number = 0.8;
 
   const lerp = (a, b, t) => a + t * (b - a);
 
@@ -441,8 +471,8 @@ const Borders = () => {
           left: '50%',
           transform: 'translate(-50%, -50%)'
         }}>
-          <button onClick={handleClassicMode}>Classic 1 vs 1</button>
-          <button onClick={handlePowerupMode}>Powerup 1 vs 1</button>
+          <button onClick={handleClassicMode}>Classic 1 vs IA</button>
+          <button onClick={handlePowerupMode}>Powerup 1 vs IA</button>
         </div>
       )}
       <div id = "canvas-container" style = {{ width: dimension.width, height: dimension.height }}>
@@ -491,8 +521,14 @@ const Borders = () => {
 
         {/* Scoreboard */}
         <div className="scoreboard">
-          <span className="left-score" style={{fontSize: `${fontSize}px` }}>{leftScore}</span>
-          <span className="right-score"  style={{fontSize: `${fontSize}px` }}>{rightScore}</span>
+          <div className="player-info">
+            <span className="player-name">Player 1</span>
+            <span className="left-score" style={{fontSize: `${fontSize}px` }}>{leftScore}</span>
+          </div>
+          <div className="player-info">
+            <span className="player-name">Computer</span>
+            <span className="right-score"  style={{fontSize: `${fontSize}px` }}>{rightScore}</span>
+          </div>
         </div>
         <div className="winner-message">
           {winner && <span>{winner}</span>}
@@ -502,6 +538,11 @@ const Borders = () => {
         <div className="countdown">
           {countdown !== null && <span style={{ fontSize: `${fontSize}px` }}>{countdown}</span>}
         </div>
+
+        {/* Sound elements */}
+        <audio ref={goalSoundRef} src="src/assets/neo-tokyo-goal.mp3" />
+        <audio ref={powerupHitSoundRef} src="src/assets/mario-star.mp3" />
+        <audio ref={ballWallSoundRef} src="src/assets/pong-ball.ogg" />
       </div>
     </div>
   );
