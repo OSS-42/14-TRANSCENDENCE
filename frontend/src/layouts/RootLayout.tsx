@@ -1,15 +1,16 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import { Welcome } from '../pages'
+import  Cookies  from 'js-cookie';
 
 // I'd like to change the header for a Material UI component,
 // but I'm still not sure how it would work.
 // For now we have a simple NavBar. :)
 
 export default function RootLayout() {
-  const user = true
-
-  if (!user) {
+  const secureCookieValue = Cookies.get('jwt_token');
+  if (!secureCookieValue) {
     return <Welcome />
+
   }
 
   return (

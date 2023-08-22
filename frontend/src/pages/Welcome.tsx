@@ -37,7 +37,7 @@ export function Welcome() {
         <img src="welcome.gif" alt="" />
       </Grid>
       <Grid xs display="flex" justifyContent="center" alignItems="center">
-        <Link to="/login">
+        <Link to="http://localhost:3001/auth/42">
           <Button variant="contained">LOG IN</Button>
         </Link>
       </Grid>
