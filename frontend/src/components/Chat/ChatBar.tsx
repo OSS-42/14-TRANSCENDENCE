@@ -1,6 +1,37 @@
-// import React from 'react';
+import axios from "axios";
+import Cookies from "js-cookie";
+import { useEffect, useState } from "react";
+import { Socket } from "socket.io-client";
+import { User } from "../../models/User";
 
-const ChatBar = () => {
+ type someProp = {
+  socket: Socket;
+};
+
+function ChatBar (socket:someProp) {
+  const [usersList, setUsersList] = useState<User[]>([]);
+
+  useEffect(() => {
+    async function fetchUsersData() {
+      const jwt_token = Cookies.get('jwt_token');
+      try {
+        const response = await axios.get('http://localhost:3001/users/allUsers', {
+          headers: {
+            Authorization: `Bearer ${jwt_token}`,
+          },
+        });
+        setUsersList(response.data)
+        console.log(usersList[0].username)
+        
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    }
+
+    fetchUsersData();
+  }, []);
+
+ 
   return (
     <div className="chat__sidebar">
       <h2>Open Chat</h2>
@@ -8,10 +39,10 @@ const ChatBar = () => {
       <div>
         <h4 className="chat__header">ACTIVE USERS</h4>
         <div className="chat__users">
-          <p>User 1</p>
-          <p>User 2</p>
-          <p>User 3</p>
-          <p>User 4</p>
+          <p></p>
+          {usersList.map((user, index) => (
+            <p key={index}>{user.username}</p>
+          ))}
         </div>
       </div>
     </div>

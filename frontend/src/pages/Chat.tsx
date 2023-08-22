@@ -74,7 +74,7 @@ export function Chat({ socket } : ChatProps ) {
             padding: '1rem',
           }}
         >
-          <ChatBar/>
+          <ChatBar someProp={socket}/>
           {/* I'm a box for the friends list. Replace this line with a component. */}
         </Box>
         <Box
