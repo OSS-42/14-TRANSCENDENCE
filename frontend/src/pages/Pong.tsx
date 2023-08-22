@@ -1,6 +1,11 @@
 import { Box } from '@mui/material'
+import { Socket } from 'socket.io-client';
 
-export function Pong() {
+type PongProps = {
+  socket: Socket; // Assurez-vous que ce type correspond au type de socket que vous utilisez
+};
+
+export function Pong({ socket } : PongProps) {
   return (
     <Box
       sx={{

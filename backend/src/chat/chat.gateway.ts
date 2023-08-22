@@ -4,7 +4,7 @@ import { Server, Socket } from 'socket.io';
 import { ChatService } from './chat.service';
 import { createMessageDto } from './dto/create.message.dto';
 
-@WebSocketGateway()
+@WebSocketGateway({ cors: true})
 export class ChatGateway {
 
   @WebSocketServer()
@@ -13,7 +13,14 @@ export class ChatGateway {
 
   constructor(private chatService: ChatService){}
 
-
+  //test morgan
+  @SubscribeMessage('allo')
+  handleAllo (client: Socket) {
+    // this.server.to(client.id).emit('allo')
+    console.log('allo')
+  }
+  //test morgan
+  
   @SubscribeMessage('createMessage')
   async createMessage(@MessageBody() createMessageDto: createMessageDto) {
 

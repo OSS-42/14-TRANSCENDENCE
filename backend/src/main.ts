@@ -3,6 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
+import * as cors from "cors";
 
 
 async function bootstrap() {
@@ -11,6 +12,12 @@ async function bootstrap() {
     whitelist:true,
   }),
   );
+
+  app.use(cors())
+  app.enableCors({
+    origin: '*',
+    methods: '*',
+  });
 
   const config = new DocumentBuilder()
   .setTitle('Transcendence API')

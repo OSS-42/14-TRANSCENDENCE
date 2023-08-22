@@ -1,11 +1,23 @@
 import { Box, TextField } from '@mui/material'
+import { Socket } from 'socket.io-client';
+import ChatBar from '../components/Chat/ChatBar';
+import ChatBody from '../components/Chat/ChatBox';
+import ChatFooter from '../components/Chat/ChatFooter';
 
 // I'll refactor this, but the componenets placement would still be
 // where the simple texts are. As it is, I'm not yet confident the
 // layout is gonna be responsive to the components' size, etc.
 // I'm still not sure how everything interacts, but I'll find out soon enough.
 
-export function Chat() {
+type ChatProps = {
+  socket: Socket; // Assurez-vous que ce type correspond au type de socket que vous utilisez
+};
+
+export function Chat({ socket } : ChatProps ) {
+  socket.emit('allo'); //Pourquoi j'ai deux message dans le console du serveur ?
+  // socket.on('allo', () => {
+  //   alert('allo');
+  // })
   return (
     // main box
     <Box
@@ -33,14 +45,16 @@ export function Chat() {
             padding: '1rem',
           }}
         >
-          I'm a chat room box for the messages received. Replace this line with
-          a component.
+          <ChatBody/>
+          {/* I'm a chat room box for the messages received. Replace this line with
+          a component. */}
         </Box>
-        <TextField
+          <ChatFooter/>
+        {/* <TextField
           id="outlined-basic"
           label="Type your message..."
           variant="outlined"
-        />
+        /> */}
       </Box>
       {/* Lists Box */}
       <Box
@@ -60,7 +74,8 @@ export function Chat() {
             padding: '1rem',
           }}
         >
-          I'm a box for the friends list. Replace this line with a component.
+          <ChatBar/>
+          {/* I'm a box for the friends list. Replace this line with a component. */}
         </Box>
         <Box
           sx={{
