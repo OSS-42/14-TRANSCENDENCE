@@ -4,8 +4,6 @@ import { AuthService } from "./auth.service";
 import { Response } from 'express'
 import { AuthDto } from "./dto/auth.dto";
 
-
-
 //Définition des diffrentes routes du module Auth
 @Controller('auth')
 @ApiTags('auth')

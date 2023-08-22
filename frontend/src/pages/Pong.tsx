@@ -1,14 +1,12 @@
-import { Box } from '@mui/material'
+import { Box as MaterialBox } from '@mui/material'
+import React, { useRef } from 'react';
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { Sphere, Box } from "@react-three/drei";
+import "./Pong.css"
+import { ControlledCameras } from "./controlledCamera.tsx"; // Assuming it's exported from a file named ControlledCameras.tsx
+import * as THREE from 'three';
 
 export function Pong() {
-  import React, { useRef } from 'react';
-  import { Canvas, useFrame, useThree } from "@react-three/fiber";
-  import { Sphere, Box } from "@react-three/drei";
-  import "./App.css"
-  import { ControlledCameras } from "./controlledCamera.tsx"; // Assuming it's exported from a file named ControlledCameras.tsx
-  import * as THREE from 'three';
-
-  const App: React.FC = () => {
 
     // s'assure que le canvas aura comme maximum toujours 800x600
     const [dimension, setDimensions] = React.useState<{ width: number, height: number }>(() => {
@@ -96,7 +94,10 @@ export function Pong() {
     };
 
     const handleKeyPress = (event: KeyboardEvent) => {
-      if (isClassicMode) return; 
+      // if (event.key === "p" || event.key === "P") {
+      //   setIsPaused(prevIsPaused => !prevIsPaused); // Toggle the pause state
+      // }
+      if (isClassicMode) return;
       if (event.key === "c" || event.key === "C") {
         // Toggle the camera mode when the "C" key is pressed
         console.log('c has been pressed');
@@ -152,7 +153,7 @@ export function Pong() {
 
     // powerup
     React.useEffect(() => {
-      const randomX = (Math.random() * (WORLD_WIDTH - 2)) - (WORLD_WIDTH / 2 - 1);
+      const randomX = (Math.random() * (WORLD_WIDTH - 10)) - (WORLD_WIDTH / 2 - 9);
       const randomZ = (Math.random() * (WORLD_HEIGHT - 2)) - (WORLD_HEIGHT / 2 - 1);
       setPowerupPosition({ x: randomX, y: 0, z: randomZ });
     }, []);
@@ -245,18 +246,12 @@ export function Pong() {
     };
 
     // sound effects
-      // const goalSound = new Audio('src/assets/neo-tokyo-goal.mp3');
-      // const ballWallSound = new Audio('src/assets/pong-ball.ogg');
-      // const powerupHitSound = new Audio('src/assets/mario-star.mp3');
-      // goalSound.preload = 'auto';
-      // ballWallSound.preload = 'auto';
-      // powerupHitSound.preload = 'auto';
       const goalSoundRef = React.useRef<HTMLAudioElement>(null);
       const ballWallSoundRef = React.useRef<HTMLAudioElement>(null);
       const powerupHitSoundRef = React.useRef<HTMLAudioElement>(null);
-      // goalSound.preload = 'auto';
-      // ballWallSound.preload = 'auto';
-      // powerupHitSound.preload = 'auto';
+      const userHitSoundRef = React.useRef<HTMLAudioElement>(null);
+      const compHitSoundRef = React.useRef<HTMLAudioElement>(null);
+
       const playGoalSound = () => {
         goalSoundRef.current?.play();
       };
@@ -272,6 +267,14 @@ export function Pong() {
       const playBallWallSound = () => {
         ballWallSoundRef.current?.play();
       };
+
+      const playUserHitSound = () => {
+        userHitSoundRef.current?.play();
+      }
+
+      const playCompHitSound = () => {
+        compHitSoundRef.current?.play();
+      }
 
     // Ball mechanics
     const Ball = ({ ballPosition, setBallPosition, ballVelocity, setBallVelocity }) => {
@@ -319,6 +322,11 @@ export function Pong() {
 
           if (hitSectionLeft || hitSectionRight) {
             const hitPaddlePosition = hitSectionLeft ? leftPaddlePosition : rightPaddlePosition;
+            if (hitSectionLeft && !isClassicMode) {
+              playUserHitSound();
+            } else if (hitSectionRight && !isClassicMode) {
+              playCompHitSound();
+            }
 
             ballVelocity.x = -ballVelocity.x;
 
@@ -463,25 +471,33 @@ export function Pong() {
   };
 
   return (
-    <Box
+    <MaterialBox
       sx={{
-        background: '#e4f7fb',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        // background: `url('../src/assets/arcade.png') no-repeat center center / cover`,
+        background: '#000000',
         borderRadius: '5px',
         margin: '10px',
         padding: '15px',
         height: '92.5vh',
+        align: 'center',
       }}
     >
         <div className="pong-container" style={{ width: dimension.width, height: dimension.height }}>
         {showButtons && (
-          <div className="game-buttons" style={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)'
-          }}>
-            <button onClick={handleClassicMode}>Classic 1 vs IA</button>
-            <button onClick={handlePowerupMode}>Powerup 1 vs IA</button>
+          <div className="starting-screen">
+            <img src="../src/assets/arcade_2k.png" alt="Starting Screen" />
+            <div className="game-buttons" style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)'
+            }}>
+              <button onClick={handleClassicMode}>Classic 1 vs IA</button>
+              <button onClick={handlePowerupMode}>Powerup 1 vs IA</button>
+            </div>
           </div>
         )}
         <div id = "canvas-container" style = {{ width: dimension.width, height: dimension.height }}>
@@ -542,6 +558,9 @@ export function Pong() {
           <div className="winner-message">
             {winner && <span>{winner}</span>}
           </div>
+          {/* <div className="pause-message">
+          {isPaused && !gameStart && <span>Game Paused</span>}
+          </div> */}
 
           {/* timer */}
           <div className="countdown">
@@ -552,8 +571,10 @@ export function Pong() {
           <audio ref={goalSoundRef} src="src/assets/neo-tokyo-goal.mp3" />
           <audio ref={powerupHitSoundRef} src="src/assets/mario-star.mp3" />
           <audio ref={ballWallSoundRef} src="src/assets/pong-ball.ogg" />
+          <audio ref={userHitSoundRef} src="src/assets/paddle-hit.mp3" />
+          <audio ref={compHitSoundRef} src="src/assets/paddle-hit2.mp3" />
         </div>
       </div>
-    </Box>
+    </MaterialBox>
   )
 }
