@@ -1,7 +1,7 @@
 export interface User {
   id : Number
-  username : String
+  username : string
   // gamesWon Int
-  avatar :String
-  mail  :  String
+  avatar :string
+  mail  :  string
 }

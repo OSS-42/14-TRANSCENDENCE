@@ -1,3 +1,4 @@
+import { Box } from "@mui/system";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { useEffect, useState } from "react";
@@ -21,8 +22,6 @@ function ChatBar (socket:someProp) {
           },
         });
         setUsersList(response.data)
-        console.log(usersList[0].username)
-        
       } catch (error) {
         console.error('Error fetching user data:', error);
       }
@@ -41,7 +40,27 @@ function ChatBar (socket:someProp) {
         <div className="chat__users">
           <p></p>
           {usersList.map((user, index) => (
-            <p key={index}>{user.username}</p>
+            <Box
+              key={index}
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                padding: '5px',
+                border: '1px solid #ccc',
+                borderRadius: '5px',
+                marginBottom: '5px',
+              }}
+            >
+              <img
+                src={user.avatar}
+                alt={user.username}
+                width="50"
+                height="50"
+                style={{ borderRadius: '50%' }}
+              />
+              <p>{user.username}</p>
+            </Box>
           ))}
         </div>
       </div>
