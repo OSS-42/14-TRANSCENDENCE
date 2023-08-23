@@ -12,23 +12,23 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   //une reference au socket.io 
   server: Server
   constructor(private chatService: ChatService){}
-  async handleConnection(client: Socket) {
-    const token = client.handshake.query.token as string
+  // async handleConnection(client: Socket) {
+  //   const token = client.handshake.query.token as string
     
-    if (token) {
-      try {
-        const decoded = verify(token, 'La danse des dindons');
-      console.log("voici lidentite du socket")
-        console.log(decoded)
+  //   if (token) {
+  //     try {
+  //       const decoded = verify(token, 'La danse des dindons');
+  //     console.log("voici lidentite du socket")
+  //       console.log(decoded)
         
         
-      } catch (error) {
-        client.disconnect();
-      }
-    } else {
-      client.disconnect();
-    }
-  }
+  //     } catch (error) {
+  //       client.disconnect();
+  //     }
+  //   } else {
+  //     client.disconnect();
+  //   }
+  // }
 
 
   //-----------------test morgan-----------------
