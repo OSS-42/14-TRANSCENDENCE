@@ -1,8 +1,9 @@
 import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer, OnGatewayConnection, OnGatewayDisconnect} from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-
 import { ChatService } from './chat.service';
 import { createMessageDto } from './dto/create.message.dto';
+import { verify } from 'jsonwebtoken';
+
 
 @WebSocketGateway({ cors: true})
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -10,8 +11,25 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   //une reference au socket.io 
   server: Server
-
   constructor(private chatService: ChatService){}
+  async handleConnection(client: Socket) {
+    const token = client.handshake.query.token as string
+    
+    if (token) {
+      try {
+        const decoded = verify(token, 'La danse des dindons');
+      console.log("voici lidentite du socket")
+        console.log(decoded)
+        
+        
+      } catch (error) {
+        client.disconnect();
+      }
+    } else {
+      client.disconnect();
+    }
+  }
+
 
   //-----------------test morgan-----------------
   @SubscribeMessage('allo')

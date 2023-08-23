@@ -7,9 +7,16 @@ import {
 
 import RootLayout from './layouts/RootLayout'
 import socketIO from 'socket.io-client'
+import Cookies from 'js-cookie'
 import { Chat, Home, Login, Pong, Profile, Welcome, Error } from './pages'
 
-const socket = socketIO('http://localhost:3001');
+
+const socket = socketIO('http://localhost:3001', {
+  query: {
+    token: Cookies.get('jwt_token')
+  },
+});
+
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<RootLayout />}>
