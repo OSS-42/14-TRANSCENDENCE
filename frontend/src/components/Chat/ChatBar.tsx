@@ -9,8 +9,10 @@ import { User } from "../../models/User";
   socket: Socket;
 };
 
+
 function ChatBar (socket:someProp) {
   const [usersList, setUsersList] = useState<User[]>([]);
+  
 
   useEffect(() => {
     async function fetchUsersData() {
@@ -18,9 +20,10 @@ function ChatBar (socket:someProp) {
       try {
         const response = await axios.get('http://localhost:3001/users/allUsers', {
           headers: {
-            Authorization: `Bearer ${jwt_token}`,
+            Authorization: "Bearer " + jwt_token,
           },
         });
+        // setUsersList(response.data)
         setUsersList(response.data)
       } catch (error) {
         console.error('Error fetching user data:', error);
@@ -30,7 +33,6 @@ function ChatBar (socket:someProp) {
     fetchUsersData();
   }, []);
 
- 
   return (
     <div className="chat__sidebar">
       <h2>Open Chat</h2>

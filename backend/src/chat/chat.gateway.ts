@@ -3,6 +3,7 @@ import { Server, Socket } from 'socket.io';
 import { ChatService } from './chat.service';
 import { createMessageDto } from './dto/create.message.dto';
 import { verify } from 'jsonwebtoken';
+import { ConfigService } from '@nestjs/config';
 
 
 @WebSocketGateway({ cors: true})
@@ -11,13 +12,13 @@ export class ChatGateway {
   @WebSocketServer()
   //une reference au socket.io 
   server: Server
-  constructor(private chatService: ChatService){}
+  constructor(private chatService: ChatService,
+      private config: ConfigService){}
   async handleConnection(client: Socket) {
     const token = client.handshake.query.token as string
-    
     if (token) {
       try {
-        const decoded = verify(token, 'La danse des dindons');
+        const decoded = verify(token, this.config.get("JWT_TOKEN"));
       console.log("voici lidentite du socket")
         console.log(decoded)
         
