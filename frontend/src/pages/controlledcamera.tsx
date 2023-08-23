@@ -1,3 +1,17 @@
+// The controlledcamera.tsx file defines and exports a ControlledCameras component that wraps both a PerspectiveCamera and an OrthographicCamera, along with camera controls.
+// It allows smooth transitioning between the two cameras.
+//
+// Here's a summary:
+//
+// The component is designed to replace the default React-Three-Fiber (R3F) camera system and should not be used alongside other cameras.
+// It forwards an instance of CameraControls, providing access to all methods and props described in the Camera Controls documentation.
+// The transition between views is handled by lerping (linear interpolation) between the orthographic and perspective projection matrices.
+// Popmotion is used for this lerping.
+// State is saved for each view type, so switching back to a perspective/orthographic view will return the camera to the same position it was previously in for that view.
+// This component provides the ability to control and switch between different camera views in the Pong game, enhancing the user experience.
+
+//
+
 /* This component wraps a PerspectiveCamera, OrthographicCamera, and CameraControls and allows smoothly transitioning
  * back and forth between the two cameras.
  * Note: it is designed to completely replace the default R3F camera system and should not be used alongside other cameras

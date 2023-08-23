@@ -1,13 +1,21 @@
+// Complete Pong code. To be sliced accross multiples files for clarity.
+// TO DO : create a 1 vs 1 mode (the right paddle becomes user controlled)
+// TO DO : websocket connections for data transfer (for the second client (user) to be able to play)
+// TO DO : matchmaking system.
+
 import { Box as MaterialBox } from '@mui/material'
+
 import React, { useRef } from 'react';
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Sphere, Box } from "@react-three/drei";
 import "./Pong.css"
-import { ControlledCameras } from "./controlledCamera.tsx"; // Assuming it's exported from a file named ControlledCameras.tsx
 import * as THREE from 'three';
+
+import { ControlledCameras } from "./controlledCamera.tsx"; // Assuming it's exported from a file named ControlledCameras.tsx
 
 export function Pong() {
 
+//------------------ SCENE SETTINGS ------------------------
     // s'assure que le canvas aura comme maximum toujours 800x600
     const [dimension, setDimensions] = React.useState<{ width: number, height: number }>(() => {
       let initialWidth = window.innerWidth;
@@ -22,9 +30,11 @@ export function Pong() {
     });
 
       // Dimensions de l'espace de jeu.
-      const WORLD_WIDTH: number = dimension.width / 20 //the camera zoom;
-      const WORLD_HEIGHT: number = dimension.height / 20;
-    
+    const CAMERA_ZOOM = 20;
+    const WORLD_WIDTH: number = dimension.width / CAMERA_ZOOM;
+    const WORLD_HEIGHT: number = dimension.height / CAMERA_ZOOM;
+
+//------------------ GAME VARIABLES ------------------------
     // ratio pour garder les meme proportions lors d'un resizing de la page
     // attention, a cause du positionnement de la camera, height devient depth et depth devient height.
     const paddleWidth: number = 0.000625 * dimension.width;
@@ -50,6 +60,7 @@ export function Pong() {
     const [powerupPosition, setPowerupPosition] = React.useState({ x: 0, y: 0, z: 0 });
     const [powerupVisible, setPowerupVisible] = React.useState(false);
 
+//------------------ GAME UTILS ------------------------
     function getSpeedFactor(width: number) {
       if (width < 300) {
         return 0.2;
@@ -61,6 +72,7 @@ export function Pong() {
       return 1;
     }
 
+//------------------ GAME GENERAL BEHAVIOR ------------------------
     const handleCountdown = () => {
       let currentCountdown = 3;
       setCountdown(currentCountdown);
@@ -78,20 +90,8 @@ export function Pong() {
       }, 1000);
     };
 
-    const handleClassicMode = () => {
-      setCameraMode("orthographic");
-      setIsClassicMode(true);
-      setShowButtons(false);
-      handleCountdown();
-    };
-
-    const handlePowerupMode = () => {
-      setCameraMode("orthographic");
-      setPowerupVisible(true);
-      setIsClassicMode(false);
-      setShowButtons(false);
-      handleCountdown();
-    };
+    // Timer to restart
+    const [countdown, setCountdown] = React.useState<number | null>(null);
 
     const handleKeyPress = (event: KeyboardEvent) => {
       // if (event.key === "p" || event.key === "P") {
@@ -113,7 +113,24 @@ export function Pong() {
         window.removeEventListener("keydown", handleKeyPress);
       };
     }, [isClassicMode]);
-    
+
+//------------------ GAME MODES ------------------------
+    const handleClassicMode = () => {
+      setCameraMode("orthographic");
+      setIsClassicMode(true);
+      setShowButtons(false);
+      handleCountdown();
+    };
+
+    const handlePowerupMode = () => {
+      setCameraMode("orthographic");
+      setPowerupVisible(true);
+      setIsClassicMode(false);
+      setShowButtons(false);
+      handleCountdown();
+    };
+
+//------------------ GAME RESIZING MANAGEMENT ------------------------
     // methode pour conserver les ratio sur l'evenement resize
     React.useEffect(() => {
       // const initialSpeedFactor = getSpeedFactor(dimension.width);
@@ -151,6 +168,10 @@ export function Pong() {
       return () => window.removeEventListener('resize', handleResize);
     }, [ballSpeed, ballVelocity]);
 
+    // offsite pour maintenir les paddles a 0.5 unit de leur bordure respective lorsqu'il y a resize
+    const distanceFromCenter: number = 0.024 * dimension.width;
+
+//------------------ GAME OBJECTS ------------------------
     // powerup
     React.useEffect(() => {
       const randomX = (Math.random() * (WORLD_WIDTH - 10)) - (WORLD_WIDTH / 2 - 9);
@@ -195,13 +216,6 @@ export function Pong() {
       return new THREE.CanvasTexture(canvas);
     };
 
-  // offsite pour maintenir les paddles a 0.5 unit de leur bordure respective lorsqu'il y resize
-    const distanceFromCenter: number = 0.024 * dimension.width;
-
-    // fixation des positions gauche et droite des paddles
-    const leftPaddleXPosition: number = -distanceFromCenter;
-    const rightPaddleXPosition: number = distanceFromCenter;
-
     //creation de la ligne (le net) du milieu
     const numberOfSegments: number = 15;
     const segmentHeight: number = netDepth / 5;
@@ -225,57 +239,56 @@ export function Pong() {
     const baseFontSize: number = 60;
     const fontSize: number = (dimension.width / baseCanvasWidth) * baseFontSize;
 
-  // Timer to restart
-    const [countdown, setCountdown] = React.useState<number | null>(null);
+    // sound effects
+    const goalSoundRef = React.useRef<HTMLAudioElement>(null);
+    const ballWallSoundRef = React.useRef<HTMLAudioElement>(null);
+    const powerupHitSoundRef = React.useRef<HTMLAudioElement>(null);
+    const userHitSoundRef = React.useRef<HTMLAudioElement>(null);
+    const compHitSoundRef = React.useRef<HTMLAudioElement>(null);
 
-    const checkCollision = (ballPos, paddlePos, paddleDims) => {
-      const distX: number = Math.abs(ballPos.x - paddlePos.x);
-      const distZ: number = Math.abs(ballPos.z - paddlePos.z);
-
-      if (distX <= (paddleDims.width / 2 + ballRadius) && (distZ <= paddleDims.depth / 2 + ballRadius)) {
-        const relativeCollisionPoint: number = (ballPos.z - paddlePos.z) / (paddleDepth / 2);
-        if (relativeCollisionPoint > 0.5) {
-          return "top";
-        } else if (relativeCollisionPoint < -0.5) {
-          return "bottom";
-        } else {
-          return "middle";
-        }
-      }
-      return false;
+    const playGoalSound = () => {
+      goalSoundRef.current?.play();
     };
 
-    // sound effects
-      const goalSoundRef = React.useRef<HTMLAudioElement>(null);
-      const ballWallSoundRef = React.useRef<HTMLAudioElement>(null);
-      const powerupHitSoundRef = React.useRef<HTMLAudioElement>(null);
-      const userHitSoundRef = React.useRef<HTMLAudioElement>(null);
-      const compHitSoundRef = React.useRef<HTMLAudioElement>(null);
+    const playPowerupSound = () => {
+      powerupHitSoundRef.current?.play();
+    };
 
-      const playGoalSound = () => {
-        goalSoundRef.current?.play();
+    const pausePowerupSound = () => {
+      powerupHitSoundRef.current?.pause();
+    };
+
+    const playBallWallSound = () => {
+      ballWallSoundRef.current?.play();
+    };
+
+    const playUserHitSound = () => {
+      userHitSoundRef.current?.play();
+    }
+
+    const playCompHitSound = () => {
+      compHitSoundRef.current?.play();
+    }
+
+    // border lines
+      const Borders = () => {
+        const borderThickness = 0.05; // You can adjust this value
+        return (
+          <>
+            {/* Top Border */}
+            <Box position={[0, 0, WORLD_HEIGHT / 2]} args={[WORLD_WIDTH, 1, borderThickness]}>
+              <meshBasicMaterial color="white" />
+            </Box>
+            {/* Bottom Border */}
+            <Box position={[0, 0, -WORLD_HEIGHT / 2]} args={[WORLD_WIDTH, 1, borderThickness]}>
+              <meshBasicMaterial color="white" />
+            </Box>
+            
+          </>
+        );
       };
 
-      const playPowerupSound = () => {
-        powerupHitSoundRef.current?.play();
-      };
-
-      const pausePowerupSound = () => {
-        powerupHitSoundRef.current?.pause();
-      };
-
-      const playBallWallSound = () => {
-        ballWallSoundRef.current?.play();
-      };
-
-      const playUserHitSound = () => {
-        userHitSoundRef.current?.play();
-      }
-
-      const playCompHitSound = () => {
-        compHitSoundRef.current?.play();
-      }
-
+//------------------ GAME BALL LOGIC ------------------------
     // Ball mechanics
     const Ball = ({ ballPosition, setBallPosition, ballVelocity, setBallVelocity }) => {
 
@@ -389,7 +402,30 @@ export function Pong() {
       )
     }
 
-    // mouvement du paddle a la souris.
+//------------------ GAME PADDLES LOGIC ------------------------
+    // fixation des positions gauche et droite des paddles
+    const leftPaddleXPosition: number = -distanceFromCenter;
+    const rightPaddleXPosition: number = distanceFromCenter;
+
+    // Collision Logic with Paddles
+    const checkCollision = (ballPos, paddlePos, paddleDims) => {
+      const distX: number = Math.abs(ballPos.x - paddlePos.x);
+      const distZ: number = Math.abs(ballPos.z - paddlePos.z);
+
+      if (distX <= (paddleDims.width / 2 + ballRadius) && (distZ <= paddleDims.depth / 2 + ballRadius)) {
+        const relativeCollisionPoint: number = (ballPos.z - paddlePos.z) / (paddleDepth / 2);
+        if (relativeCollisionPoint > 0.5) {
+          return "top";
+        } else if (relativeCollisionPoint < -0.5) {
+          return "bottom";
+        } else {
+          return "middle";
+        }
+      }
+      return false;
+    };
+
+    // mouvement du left (user1) paddle a la souris.
     const LeftPaddle = ({ leftPaddlePositionZ, setLeftPaddlePositionZ }) => {
       const { mouse } = useThree();
       
@@ -420,7 +456,7 @@ export function Pong() {
       )
     }
 
-    // Right paddle (Computer)
+    // Right paddle (Computer - User2)
     const RIGHT_PADDLE_SPEED: number = 0.8;
 
     const lerp = (a, b, t) => a + t * (b - a);
@@ -452,24 +488,7 @@ export function Pong() {
       );
     }
 
-  // border lines
-  const Borders = () => {
-    const borderThickness = 0.05; // You can adjust this value
-    return (
-      <>
-        {/* Top Border */}
-        <Box position={[0, 0, WORLD_HEIGHT / 2]} args={[WORLD_WIDTH, 1, borderThickness]}>
-          <meshBasicMaterial color="white" />
-        </Box>
-        {/* Bottom Border */}
-        <Box position={[0, 0, -WORLD_HEIGHT / 2]} args={[WORLD_WIDTH, 1, borderThickness]}>
-          <meshBasicMaterial color="white" />
-        </Box>
-        
-      </>
-    );
-  };
-
+//------------------ GAME SCENE RENDERER ------------------------
   return (
     <MaterialBox
       sx={{
@@ -503,6 +522,7 @@ export function Pong() {
         <div id = "canvas-container" style = {{ width: dimension.width, height: dimension.height }}>
         <Canvas 
             style={{ background: cameraMode === "perspective" ? 'url(src/assets/pong_3d_bg2b.png) no-repeat center center / cover' : 'black' }}>
+            {/* Camera Controller */}
             <ControlledCameras
               mode={cameraMode}
               perspectivePosition={[-50, 10, 0]}
@@ -515,8 +535,14 @@ export function Pong() {
               touches={{ ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_PAN }}
             />
 
-            {/* Camera Controller */}
-            
+            {/* le net */}
+            {segments}
+
+            {/* borders */}
+            <Borders />
+
+            {/* PowerUp Cube */}
+            <Powerup />
 
             {/* Ball */}
             <Ball 
@@ -533,15 +559,6 @@ export function Pong() {
             {/* Right Paddle */}
             <RightPaddle rightPaddlePositionZ={rightPaddlePositionZ} setRightPaddlePositionZ={setRightPaddlePositionZ} />
 
-            {/* le net */}
-            {segments}
-
-            {/* borders */}
-            <Borders />
-
-            {/* PowerUp Cube */}
-            <Powerup />
-
           </Canvas>
 
           {/* Scoreboard */}
@@ -554,17 +571,17 @@ export function Pong() {
               <span className="player-name">Computer</span>
               <span className="right-score"  style={{fontSize: `${fontSize}px` }}>{rightScore}</span>
             </div>
-          </div>
-          <div className="winner-message">
-            {winner && <span>{winner}</span>}
-          </div>
-          {/* <div className="pause-message">
-          {isPaused && !gameStart && <span>Game Paused</span>}
-          </div> */}
+            <div className="winner-message">
+              {winner && <span>{winner}</span>}
+            </div>
+            {/* <div className="pause-message">
+            {isPaused && !gameStart && <span>Game Paused</span>}
+            </div> */}
 
-          {/* timer */}
-          <div className="countdown">
-            {countdown !== null && <span style={{ fontSize: `${fontSize}px` }}>{countdown}</span>}
+            {/* timer */}
+            <div className="countdown">
+              {countdown !== null && <span style={{ fontSize: `${fontSize}px` }}>{countdown}</span>}
+            </div>
           </div>
 
           {/* Sound elements */}
