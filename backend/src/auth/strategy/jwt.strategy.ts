@@ -27,6 +27,6 @@ export class JwtStrategy extends PassportStrategy(
             } 
         });
 
-        return payload
+        return user
     }
 }

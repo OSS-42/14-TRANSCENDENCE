@@ -1,19 +1,59 @@
-import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer, OnGatewayConnection, OnGatewayDisconnect} from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-
 import { ChatService } from './chat.service';
 import { createMessageDto } from './dto/create.message.dto';
+import { verify } from 'jsonwebtoken';
+import { ConfigService } from '@nestjs/config';
 
-@WebSocketGateway()
-export class ChatGateway {
+
+@WebSocketGateway({ cors: true})
+export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @WebSocketServer()
   //une reference au socket.io 
   server: Server
-
   constructor(private chatService: ChatService){}
+  // async handleConnection(client: Socket) {
+  //   const token = client.handshake.query.token as string
+    
+  //   if (token) {
+  //     try {
+  //       const decoded = verify(token, 'La danse des dindons');
+  //     console.log("voici lidentite du socket")
+  //       console.log(decoded)
+        
+        
+  //     } catch (error) {
+  //       client.disconnect();
+  //     }
+  //   } else {
+  //     client.disconnect();
+  //   }
+  // }
 
 
+  //-----------------test morgan-----------------
+  @SubscribeMessage('allo')
+  handleAllo (client: Socket) {
+    // this.server.to(client.id).emit('allo')
+    console.log('allo')
+  }
+  
+  @SubscribeMessage('message')
+  handleMessage(client: Socket, payload: any): void { //voir pour changer any
+    console.log(payload.name)
+    this.server.emit('messageResponse', payload); // Diffuser le message à tous les clients connectés
+  }
+  
+  handleConnection(client: Socket): void {
+    console.log(`⚡: ${client.id} user just connected!`);
+  }
+  
+  handleDisconnect(client: Socket): void {
+    console.log(`🔥: ${client.id} user disconnected`);
+  }
+  //-----------------test morgan-----------------
+  
   @SubscribeMessage('createMessage')
   async createMessage(@MessageBody() createMessageDto: createMessageDto) {
 
