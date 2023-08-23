@@ -3,6 +3,7 @@ import { Server, Socket } from 'socket.io';
 import { ChatService } from './chat.service';
 import { createMessageDto } from './dto/create.message.dto';
 import { verify } from 'jsonwebtoken';
+import { ConfigService } from '@nestjs/config';
 
 
 @WebSocketGateway({ cors: true})
