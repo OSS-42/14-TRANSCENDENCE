@@ -13,10 +13,11 @@ async function bootstrap() {
   }),
   );
 
-  app.use(cors())
+    // app.use(cors())
   app.enableCors({
     origin: '*',
     methods: '*',
+    credentials: true,
   });
 
   const config = new DocumentBuilder()

@@ -8,32 +8,29 @@ type ChatFooterProps = {
 };
 
 interface User {
-  id : Number
-  username : string
+  id: Number;
+  username: string;
   // gamesWon Int
-  avatar :string
-  mail  :  string
+  avatar: string;
+  mail: string;
 }
 
 const ChatFooter = ({ socket }: ChatFooterProps) => {
   const [message, setMessage] = useState("");
-  const [user, setUser] = useState<User>()
+  const [user, setUser] = useState<User>();
 
   useEffect(() => {
     async function fetchUsersData() {
       const jwt_token = Cookies.get("jwt_token");
       try {
-        const response = await axios.get(
-          "http://localhost:3001/users/me",
-          {
-            headers: {
-              Authorization: "Bearer " + jwt_token,
-            },
-          }
-        );
+        const response = await axios.get("http://localhost:3001/users/me", {
+          headers: {
+            Authorization: "Bearer " + jwt_token,
+          },
+        });
         // setUsersList(response.data)
         setUser(response.data);
-        console.log(user)
+        console.log(user);
       } catch (error) {
         console.error("Error fetching user data:", error);
       }
@@ -44,16 +41,30 @@ const ChatFooter = ({ socket }: ChatFooterProps) => {
 
   const handleSendMessage = (e) => {
     e.preventDefault();
-    console.log(message);
-    console.log(user?.username);
+    // console.log(message);
+    // console.log(user?.username);
     if (message.trim()) {
-      //userName n'est pas set
-      socket.emit("message", {
-        text: message,
-        name: user?.username,
-        id: `${socket.id}${Math.random()}`,
-        socketID: socket.id,
-      }); // J'emit plusieurs informations, pas seulement le message
+      if (message.startsWith("#JOIN")) {
+        const [, channelName] = message.split(" ");
+        if (channelName) {
+          // Format du message pour le serveur
+          console.log(channelName);
+          socket.emit("joinRoom", {
+            username: user?.username,
+            id: `${socket.id}${Math.random()}`,
+            socketID: socket.id,
+            name: channelName
+          });
+          console.log(channelName);
+        }
+      } else {
+          socket.emit("message", {
+          text: message,
+          name: user?.username,
+          id: `${socket.id}${Math.random()}`,
+          socketID: socket.id,
+        }); // J'emit plusieurs informations, pas seulement le message
+      }
     }
     setMessage("");
   };

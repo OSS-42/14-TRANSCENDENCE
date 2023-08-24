@@ -4,6 +4,7 @@ import { ChatService } from './chat.service';
 import { createMessageDto } from './dto/create.message.dto';
 import { verify } from 'jsonwebtoken';
 import { ConfigService } from '@nestjs/config';
+import { stringify } from 'querystring';
 
 
 @WebSocketGateway({ cors: true})
@@ -52,6 +53,22 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   handleDisconnect(client: Socket): void {
     console.log(`🔥: ${client.id} user disconnected`);
   }
+
+  @SubscribeMessage('joinRoom')
+  async joinRoom(client: Socket, payload: any) {
+    if (this.chatService.isRoomExist(payload.name)){
+      client.join(payload.name); 
+      client.emit('messageResponse', `Welcome to room ${payload.name}!`);
+      console.log(payload.name)
+    } else {
+    client.emit('messageResponse', {            
+      id: payload.id, // un identifiant unique pour chaque message
+      name: payload.username,
+      text: `Room already exist!`,
+    })
+  }
+}
+
   //-----------------test morgan-----------------
   
   @SubscribeMessage('createMessage')
@@ -79,14 +96,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   //peut etre faire une focntion qui joint les rooms a debut de l<application.
 
-  @SubscribeMessage('joinRoom')
-  async joinRoom(@MessageBody('room') room: string, @ConnectedSocket() client: Socket) {
-    if (this.chatService.isRoomExist(room)){
-      client.join(room); 
-      client.emit('message', `Welcome to room ${room}!`);
-    }
-    client.emit('message', `Room already exist!`);
-  }
 
   @SubscribeMessage('createRoom')
   async createRoom(@MessageBody('room') room: string, @ConnectedSocket() client: Socket) {
