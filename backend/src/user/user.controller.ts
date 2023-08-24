@@ -1,6 +1,6 @@
-import { Controller, Get, Param, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiBearerAuth, ApiHeader, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiHeader, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { Utilisateur } from '@prisma/client';
 import { GetUser } from 'src/auth/decorator';
 import { JwtGuard } from 'src/auth/guard';
@@ -46,6 +46,12 @@ export class UserController {
     addFriend(@Param('username') username:string, @GetUser() user: Utilisateur){
 
         return this.userService.addFriend(user, username);
+    }
+
+    @Post('updateAvatar')
+    updateAvatar(@GetUser() user: Utilisateur, @Body() requestBody: any){
+        console.log()
+    return this.userService.updateAvatar(user, requestBody)
     }
 
 }

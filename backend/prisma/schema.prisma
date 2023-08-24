@@ -31,7 +31,6 @@ model chatRoom {
   
 }
 
-
 model Friendship {
   id          Int         @id @default(autoincrement())
   createdAt   DateTime    @default(now())

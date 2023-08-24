@@ -22,9 +22,6 @@ export class UserService {
         return user;
     }
 
-   
-
-
     async getAllUsers(): Promise<Utilisateur[]> {
         return this.prisma.utilisateur.findMany();
     }
@@ -71,7 +68,26 @@ export class UserService {
                 friend: { connect: { id: friend.id } }
             }
         });
-    
+    }
+    async updateAvatar(user : Utilisateur, image: any) {
+        // const userToChange = await this.prisma.utilisateur.findUnique({
+        //     where: {
+        //     id: user.id, 
+        //     },
+        // });
+        // if (!userToChange) {
+        //     throw new Error("Utilisateur non trouvé"); 
+        // }
+        const updatedUser= await this.prisma.utilisateur.update({
+            where: {
+                id: user.id
+            },
+            data:{
+                avatar:image,
+            }
+        });
+        return updatedUser
+    }
         // //Je pense que je nai pas besoin de update les users, cela se fait automatiquement???
         // await this.prisma.utilisateur.update({
         //     where: { id: user.id },
@@ -82,5 +98,5 @@ export class UserService {
         //     where: { id: friend.id },
         //     data: { friendOf: { connect: { id: friendship.id } } }
         // });
-    }
 }
+
