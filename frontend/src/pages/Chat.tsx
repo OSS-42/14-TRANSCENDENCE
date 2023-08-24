@@ -4,6 +4,7 @@ import { Socket } from "socket.io-client";
 import ChatBar from "../components/Chat/ChatBar";
 import ChatBody from "../components/Chat/ChatBody";
 import ChatFooter from "../components/Chat/ChatFooter";
+import ChatFriends from "../components/Chat/ChatFriends";
 
 // I'll refactor this, but the componenets placement would still be
 // where the simple texts are. As it is, I'm not yet confident the
@@ -93,7 +94,7 @@ export function Chat({ socket }: ChatProps) {
             padding: "1rem",
           }}
         >
-          <ChatBar someProp={socket}/>
+          <ChatBar socket={socket}/>
           {/* I'm a box for the friends list. Replace this line with a component. */}
         </Box>
         <Box
@@ -103,7 +104,7 @@ export function Chat({ socket }: ChatProps) {
             padding: "1rem",
           }}
         >
-          I'm a box for the friends list. Replace this line with a component.
+          <ChatFriends socket={socket}/>
         </Box>
       </Box>
     </Box>

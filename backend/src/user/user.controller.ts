@@ -26,13 +26,26 @@ export class UserController {
     getAllUsers(){
         return this.userService.getAllUsers();
     }
+    @Get('friendsList')
+    getFriendsList(@GetUser() user: Utilisateur){
+        return this.userService.getFriendsList(user);
+    }
 
     
     //retourne le data d'un utilisateur particulier
-    @ApiParam({ name: 'id', type: Number })
-    @Get(':id')
-    getUserInfo(@Param('id') id:number){
+    @ApiParam({ name: 'username', type: String })
+    @Get(':username')
+    getUserInfo(@Param('username') username:string){
 
-        return this.userService.getUserInfo(id);
+        return this.userService.getUserInfo(username);
     }
+
+    //ajout d<une relation d'amitié
+    @ApiParam({ name: 'username', type: String })
+    @Get('addFriend/:username')
+    addFriend(@Param('username') username:string, @GetUser() user: Utilisateur){
+
+        return this.userService.addFriend(user, username);
+    }
+
 }

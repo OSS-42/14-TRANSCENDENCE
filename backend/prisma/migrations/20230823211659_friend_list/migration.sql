@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "Utilisateur" ADD COLUMN     "friendList" JSONB,
+ADD COLUMN     "gameLost" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "gamesWon" INTEGER NOT NULL DEFAULT 0;
