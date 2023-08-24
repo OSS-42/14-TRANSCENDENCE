@@ -15,9 +15,12 @@ model Utilisateur {
   updatedAt DateTime @updatedAt
 
   username String
-  // gamesWon Int
+  gamesWon Int @default(0)
+  gameLost Int @default(0)
   avatar String?
   email    String @unique
+  friends  Friendship[] @relation("UserToFriendship")
+  friendOf  Friendship[]  @relation("FriendToFriendship")
 }
 model chatRoom {
   id Int @id @default(autoincrement())
@@ -27,6 +30,21 @@ model chatRoom {
   name String @unique
   
 }
+
+
+model Friendship {
+  id          Int         @id @default(autoincrement())
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  user       Utilisateur @relation("UserToFriendship", fields: [userId], references: [id]) // Relation to Utilisateur model
+  userId     Int
+  friend     Utilisateur @relation("FriendToFriendship", fields: [friendId], references: [id]) // Different relation name
+  friendId   Int
+}
+
+
+
+
 
 
 

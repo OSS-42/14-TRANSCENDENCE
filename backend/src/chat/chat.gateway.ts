@@ -14,23 +14,22 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   server: Server
   constructor(private chatService: ChatService,
       private config: ConfigService){}
-  async handleConnection(client: Socket) {
-    const token = client.handshake.query.token as string
-    if (token) {
-      try {
-        const decoded = verify(token, this.config.get("JWT_TOKEN"));
-      console.log("voici lidentite du socket")
-        console.log(decoded)
+  // async handleConnection(client: Socket) {
+  //   const token = client.handshake.query.token as string
+  //   if (token) {
+  //     try {
+  //       const decoded = verify(token, this.config.get("JWT_TOKEN"));
+  //     console.log("voici lidentite du socket")
+  //       console.log(decoded)
         
         
-      } catch (error) {
-        client.disconnect();
-      }
-    } else {
-      client.disconnect();
-    }
-  }
-
+  //     } catch (error) {
+  //       client.disconnect();
+  //     }
+  //   } else {
+  //     client.disconnect();
+  //   }
+  // }
 
   //-----------------test morgan-----------------
   @SubscribeMessage('allo')
@@ -45,9 +44,24 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server.emit('messageResponse', payload); // Diffuser le message à tous les clients connectés
   }
   
-  handleConnection(client: Socket): void {
+   handleConnection(client: Socket): void {
     console.log(`⚡: ${client.id} user just connected!`);
-  }
+    const token = client.handshake.query.token as string
+      if (token) {
+        try {
+          const decoded = verify(token, this.config.get("JWT_SECRET"));
+        console.log("voici lidentite du socket")
+          console.log(decoded)
+          
+          
+        } catch (error) {
+          client.disconnect();
+        }
+      } else {
+        client.disconnect();
+      }
+    
+   }
   
   handleDisconnect(client: Socket): void {
     console.log(`🔥: ${client.id} user disconnected`);
