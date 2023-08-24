@@ -8,20 +8,21 @@ interface User {
 }
 
 interface PrivmsgCommandProps {
-    message: string;
+    data: string;
     socket: Socket;
     user : User;
   }
 
-const privmsgCommand = ({message, socket, user}: PrivmsgCommandProps) => {
-    const [, channelName] = message.split(" ");
-    if (channelName) {
+const privmsgCommand = ({data, socket, user}: PrivmsgCommandProps) => {
+    const [command, target, message] = data.split(" ");
+    if (command === "PRIVMSG" && target && message) {
       // Format du message pour le serveur
       socket.emit("privmsg", {
         username: user?.username,
         id: `${socket.id}${Math.random()}`,
         socketID: socket.id,
-        name: channelName
+        target: target,
+        message: message,
       });
     }
 }
