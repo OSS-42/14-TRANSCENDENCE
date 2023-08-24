@@ -2,6 +2,9 @@ import { useState, useEffect } from "react";
 import { Socket } from "socket.io-client";
 import axios from "axios";
 import Cookies from "js-cookie";
+import joinCommand from "./commands/joinCommand";
+import defaultCommand from "./commands/defaultCommand";
+import privmsgCommand from "./commands/privmsgCommand";
 
 type ChatFooterProps = {
   socket: Socket; // Assurez-vous que ce type correspond au type de socket que vous utilisez
@@ -10,14 +13,18 @@ type ChatFooterProps = {
 interface User {
   id: Number;
   username: string;
-  // gamesWon Int
   avatar: string;
   mail: string;
 }
 
 const ChatFooter = ({ socket }: ChatFooterProps) => {
   const [message, setMessage] = useState("");
-  const [user, setUser] = useState<User>();
+  const [user, setUser] = useState<User>({
+    id: 0,
+    username: "",
+    avatar: "",
+    mail: "",
+  });
 
   useEffect(() => {
     async function fetchUsersData() {
@@ -39,32 +46,23 @@ const ChatFooter = ({ socket }: ChatFooterProps) => {
     fetchUsersData();
   }, []);
 
-  const handleSendMessage = (e) => {
+  const handleSendMessage = (e: React.FormEvent) => { //e pour evenement, c'est une convention
     e.preventDefault();
-    // console.log(message);
-    // console.log(user?.username);
     if (message.trim()) {
-      if (message.startsWith("#JOIN")) {
-        const [, channelName] = message.split(" ");
-        if (channelName) {
-          // Format du message pour le serveur
-          console.log(channelName);
-          socket.emit("joinRoom", {
-            username: user?.username,
-            id: `${socket.id}${Math.random()}`,
-            socketID: socket.id,
-            name: channelName
-          });
-          console.log(channelName);
-        }
-      } else {
-          socket.emit("message", {
-          text: message,
-          name: user?.username,
-          id: `${socket.id}${Math.random()}`,
-          socketID: socket.id,
-        }); // J'emit plusieurs informations, pas seulement le message
-      }
+      if (message.startsWith("#JOIN"))
+        joinCommand({ message, socket, user });
+      else if (message.startsWith("#PRIVMSG"))
+        privmsgCommand({ message, socket, user });
+      // else if (message.startsWith("#KICK"))
+      //   kickCommand({ message, socket, user });
+      // else if (message.startsWith("#BAN"))
+      //   banCommand({ message, socket, user });
+      // else if (message.startsWith("#ADMIN"))
+      //   adminCommand({ message, socket, user });
+      // else if (message.startsWith("#LEAVE")) Moins sur de la commande leave
+      //   joinCommand({ message, socket, user });
+      else
+        defaultCommand({ message, socket, user });
     }
     setMessage("");
   };

@@ -70,30 +70,25 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage('joinRoom')
   async joinRoom(client: Socket, payload: any) {
-    if (this.chatService.isRoomExist(payload.name)){
+    if (await this.chatService.isRoomExist(payload.name) != null){ // la room n'existe pas
+      // ici il faut rajouter du code pour ajouter le nouveau canal a la base de donnée
+      // et faire les manipulations pour ajouter le chat dans la db du user, ajouter le user au db du canal etc ...            
       client.join(payload.name); 
-      client.emit('messageResponse', `Welcome to room ${payload.name}!`);
-      console.log(payload.name)
-    } else {
-    client.emit('messageResponse', {            
+      client.emit('messageResponse', `You create a new room ${payload.name}!`);
+    } else { //la room existe
+    client.emit('messageResponse', {
+      // ici il va falloir verifier si l'utilisateur est deja dans le canal et envoyer un message adapté.
+      // if deja dedans
       id: payload.id, // un identifiant unique pour chaque message
       name: payload.username,
-      text: `Room already exist!`,
+      text: `You already are a member of the room ${payload.name} !`,
+      // else vous avez rejoins la room ...
     })
+    }
   }
-}
 
   //-----------------test morgan-----------------
   
-  @SubscribeMessage('createMessage')
-  async createMessage(@MessageBody() createMessageDto: createMessageDto) {
-
-    const message = await this.chatService.createMessage(createMessageDto)
-    this.server.emit('message', message)
-    
-    return message;
-  }
-
   @SubscribeMessage('findAllMessages')
   findAllMessages(client: any, payload: any): string {
     return 'array des messages';
@@ -109,20 +104,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   //peut etre faire une focntion qui joint les rooms a debut de l<application.
-
-
-  @SubscribeMessage('createRoom')
-  async createRoom(@MessageBody('room') room: string, @ConnectedSocket() client: Socket) {
-    if (!this.chatService.isRoomExist(room)){
-      this.chatService.createRoom(room)
-      client.join(room); 
-      client.emit('message', `Welcome to room ${room}!`);
-    }
-    client.join(room); 
-    client.emit('message', `Welcome to room ${room}!`);
-    //implementer une logique sil ya une creation de room (la premiere fois qu<on joint une room) Et identifier le proprietaire de la room
-  }
-
 
   @SubscribeMessage('leaveRoom')
   async leaveRoom(@MessageBody('room') room: string, @ConnectedSocket() client: Socket) {

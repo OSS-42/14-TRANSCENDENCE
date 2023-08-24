@@ -33,11 +33,6 @@ export function Chat({ socket }: ChatProps) {
     );
   }, [socket, messages]); // Le contenu du tableau signifie qu'il y a des dépendances, donc cet effet se déclenche a chaque fois que le statut d'une des variables change.
   
-  // socket.emit('allo'); //Pourquoi j'ai deux message dans le console du serveur ?
-  // socket.on('allo', () => {
-  //   alert('allo');
-  // })
-  
   return (
     // main box
     <Box
@@ -63,6 +58,7 @@ export function Chat({ socket }: ChatProps) {
             border: "1px solid black",
             borderRadius: "4px",
             padding: "1rem",
+            overflow: "auto"
           }}
         >
           <ChatBody messages={messages} />
@@ -110,3 +106,23 @@ export function Chat({ socket }: ChatProps) {
     </Box>
   );
 }
+
+
+/*
+  Pour le channel on a besoin :
+  - Son nom
+  - Son proprietaire
+  - Ses admins
+  - Ses membres
+  - Qui est ban
+  - Flag de mdp
+  - mdp
+  - Flag invitation ? 
+  - 
+
+  Pour les utilisateurs : 
+  - Son nom
+  - Ses channels
+  - Ses amis
+  - Les personnes qu'il a bloqué
+*/
