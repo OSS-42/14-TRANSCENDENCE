@@ -23,7 +23,7 @@ const ChatBody = ({ messages } : ChatBodyProps) => {
     window.location.reload();
     // gestion de la db. Deconnexion du channel, nombre de membre present etc ...
   };
-
+  console.log(messages)
   return (
     <>
       <header className="chat__mainHeader">

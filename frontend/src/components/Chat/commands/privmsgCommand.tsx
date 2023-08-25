@@ -14,7 +14,7 @@ interface PrivmsgCommandProps {
   }
 
 const privmsgCommand = ({data, socket, user}: PrivmsgCommandProps) => {
-    const [command, target, message] = data.split(" ");
+    const [command, target, message] = data.split(" "); // revoir cette partie pour le split du message 
     if (command === "#PRIVMSG" && target && message) {
       // Format du message pour le serveur
       socket.emit("privmsg", {
