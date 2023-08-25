@@ -119,8 +119,6 @@ export class ChatService {
         return room;
     }
 
-
-
     async removeModerator(roomId: number, memberId: number):Promise<ChatRoom> {
         const room = await this.prisma.chatRoom.update({
         where: { id: roomId }, 
@@ -164,7 +162,6 @@ export class ChatService {
 
 
     async validatePassword(password:string, roomName:string) {
-      const hash =  await argon2.hash(password);
       const room = await this.prisma.chatRoom.findFirst({
         where: {
           name: roomName,
@@ -176,6 +173,8 @@ export class ChatService {
               );
       return pwMatches
       }
+
+
     async createPassword(password:string, roomName:string) {
       const hash =  await argon2.hash(password);
       const room = await this.prisma.chatRoom.update({
@@ -186,7 +185,7 @@ export class ChatService {
                 hash :hash
               }
       });
-      
+      return room
     }
   
   }

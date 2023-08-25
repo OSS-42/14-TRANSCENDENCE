@@ -28,6 +28,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
           console.log("voici lidentite du socket")
           console.log(decoded)
           this.connectedUsers.set( Number(decoded.sub), client.id);
+          //FONCTION QUI VERIFIE LES CHANNELS DONT LUTILASATEUR EST MEMBRE ET LES JOIN TOUS
         } catch (error) {
           client.disconnect();
         }
