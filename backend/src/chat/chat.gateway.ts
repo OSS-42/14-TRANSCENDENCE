@@ -63,7 +63,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   
   @SubscribeMessage('message')
   handleMessage(client: Socket, payload: any): void { //voir pour changer any
-    this.server.emit('messageResponse', payload); // Diffuser le message à tous les clients connectés
+    this.server.emit('messageResponse', {
+      id: payload.id,
+      name: payload.username,
+      channel: 'General',
+      text: payload.message
+    }); // Diffuser le message à tous les clients connectés
   }
   
 
@@ -113,7 +118,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       this.server.to(socketId).emit('messageResponse', {
         id: payload.id,
         name: payload.username,
-        text: `${payload.username}: ${payload.message}`,
+        channel: undefined,
+        text: payload.message
       })
       // je penses que j'envois pas la bonne chose. Par exemple dans le cas de 'message' j'envois directement le payload
     }

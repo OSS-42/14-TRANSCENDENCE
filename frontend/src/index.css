@@ -20,6 +20,14 @@ body {
   background-color: #fffff6;
 }
 
+.nameSender {
+  color: green
+}
+
+.channelSender {
+  color: blue
+}
+
 header nav {
   display: flex;
   justify-content: space-evenly;

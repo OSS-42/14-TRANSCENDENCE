@@ -14,6 +14,7 @@ import ChatFriends from "../components/Chat/ChatFriends";
 type ChatMessage = {
   id: number; // un identifiant unique pour chaque message
   name: string;
+  channel: string;
   text: string;
 };
 

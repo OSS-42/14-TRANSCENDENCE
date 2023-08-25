@@ -15,7 +15,7 @@ interface DefaultCommandProps {
 
 const defaultCommand = ({data, socket, user}: DefaultCommandProps) => {
     socket.emit("message", {
-        text: data,
+        message: data,
         name: user?.username,
         id: `${socket.id}${Math.random()}`,
         socketID: socket.id,
