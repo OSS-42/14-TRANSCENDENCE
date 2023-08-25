@@ -27,3 +27,11 @@ const privmsgCommand = ({data, socket, user}: PrivmsgCommandProps) => {
     }
 }
 export default privmsgCommand
+
+/* Verifier les parametres : 
+
+- Si le deuxieme parametre ne commence pas par ":" alors c'est un message privé
+  vers un utilisateur (#PRIVMSG mbertin bla bla bla)
+- Si le deuxieme parametre commence par ":" alors c'est un message vers un canal
+
+*/

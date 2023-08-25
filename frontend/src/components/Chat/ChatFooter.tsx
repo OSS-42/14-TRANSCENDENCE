@@ -18,7 +18,7 @@ interface User {
 }
 
 const ChatFooter = ({ socket }: ChatFooterProps) => {
-  const [message, setMessage] = useState("");
+  const [data, setData] = useState("");
   const [user, setUser] = useState<User>({
     id: 0,
     username: "",
@@ -48,23 +48,25 @@ const ChatFooter = ({ socket }: ChatFooterProps) => {
 
   const handleSendMessage = (e: React.FormEvent) => { //e pour evenement, c'est une convention
     e.preventDefault();
-    if (message.trim()) {
-      if (message.startsWith("#JOIN"))
-        joinCommand({ message, socket, user });
-      else if (message.startsWith("#PRIVMSG"))
-        privmsgCommand({ message, socket, user });
+    if (data.trim()) {
+      if (data.startsWith("#JOIN"))
+        joinCommand({ data, socket, user });
+      else if (data.startsWith("#PRIVMSG"))
+        privmsgCommand({ data, socket, user });
       // else if (message.startsWith("#KICK"))
       //   kickCommand({ message, socket, user });
       // else if (message.startsWith("#BAN"))
       //   banCommand({ message, socket, user });
       // else if (message.startsWith("#ADMIN"))
       //   adminCommand({ message, socket, user });
+      // else if (message.startsWith("#MUTE"))
+      //   adminCommand({ message, socket, user });
       // else if (message.startsWith("#LEAVE")) Moins sur de la commande leave
       //   joinCommand({ message, socket, user });
       else
-        defaultCommand({ message, socket, user });
+        defaultCommand({ data, socket, user });
     }
-    setMessage("");
+    setData("");
   };
 
   return (
@@ -74,8 +76,8 @@ const ChatFooter = ({ socket }: ChatFooterProps) => {
           type="text"
           placeholder="Write message"
           className="message"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
+          value={data}
+          onChange={(e) => setData(e.target.value)}
         />
         <button className="sendBtn">SEND</button>
       </form>

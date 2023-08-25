@@ -8,13 +8,13 @@ interface User {
 }
 
 interface JoinCommandProps {
-    message: string;
+    data: string;
     socket: Socket;
     user : User;
   }
 
-  const joinCommand = ({message, socket, user}: JoinCommandProps) => {
-    const [command, channelName] = message.split(" ");
+  const joinCommand = ({data, socket, user}: JoinCommandProps) => {
+    const [command, channelName] = data.split(" ");
     if (command === "#JOIN" && channelName) {
       // Format du message pour le serveur
       socket.emit("joinRoom", {
@@ -26,3 +26,5 @@ interface JoinCommandProps {
     }
 }
 export default joinCommand
+
+// 

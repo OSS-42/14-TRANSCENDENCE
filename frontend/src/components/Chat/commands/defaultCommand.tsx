@@ -8,14 +8,14 @@ interface User {
 }
 
 interface DefaultCommandProps {
-    message: string;
+    data: string;
     socket: Socket;
     user : User;
   }
 
-const defaultCommand = ({message, socket, user}: DefaultCommandProps) => {
+const defaultCommand = ({data, socket, user}: DefaultCommandProps) => {
     socket.emit("message", {
-        text: message,
+        text: data,
         name: user?.username,
         id: `${socket.id}${Math.random()}`,
         socketID: socket.id,
