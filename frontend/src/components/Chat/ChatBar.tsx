@@ -14,6 +14,7 @@ import { User } from "../../models/User";
 function ChatBar({ socket }: someProp) {
   const [usersList, setUsersList] = useState<User[]>([]);
   const [userFriends, setUserFriends] = useState<string[]>([]);
+  const [connectedUsers, setConnectedUsers] = useState<number[]>([]);
 
   async function fetchUserFriends() {
     const jwt_token = Cookies.get("jwt_token");
@@ -29,6 +30,11 @@ function ChatBar({ socket }: someProp) {
     }
   }
   useEffect(() => {
+    
+    socket.on('updateConnectedUsers', (updatedUsers: number[]) => {
+          setConnectedUsers(updatedUsers);
+          console.log("updateduser ::" + updatedUsers)
+        });
     
     async function fetchUsersData() {
       const jwt_token = Cookies.get("jwt_token");
@@ -90,6 +96,7 @@ function ChatBar({ socket }: someProp) {
                 style={{ borderRadius: '50%' }}
               />
               <p>{user.username}</p>
+              {connectedUsers.includes(user.id) && <span style={{ color: 'green' }}> en ligne</span>}
                 <Button variant="outlined" size="small" onClick={() => addFriend(user.username)}>Add Friend</Button>
               
             </Box>

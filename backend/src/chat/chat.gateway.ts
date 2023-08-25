@@ -28,6 +28,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
           console.log("voici lidentite du socket")
           console.log(decoded)
           this.connectedUsers.set( Number(decoded.sub), client.id);
+          const connectedUserIds = Array.from(this.connectedUsers.keys());
+          this.server.emit("updateConnectedUsers", connectedUserIds)
           //FONCTION QUI VERIFIE LES CHANNELS DONT LUTILASATEUR EST MEMBRE ET LES JOIN TOUS
         } catch (error) {
           client.disconnect();
@@ -47,6 +49,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         break;
       }
     }
+    const connectedUserIds = Array.from(this.connectedUsers.keys());
+    this.server.emit("updateConnectedUsers", connectedUserIds)
   }
 
 //Retourne le clientId du socket, si lutilisateur n<est pas connect/ la fonciton retourne undefined.

@@ -16,11 +16,17 @@ type ChatFooterProps = {
 
 
 const ChatFriends = ({ socket }: ChatFooterProps) => {
-    const [usersList, setUsersList] = useState<User[]>([]);
+  const [usersList, setUsersList] = useState<User[]>([]);
+  const [connectedUsers, setConnectedUsers] = useState<number[]>([]);
   
 
     useEffect(() => {
       async function fetchUsersData() {
+        socket.on('updateConnectedUsers', (updatedUsers: number[]) => {
+          setConnectedUsers(updatedUsers);
+          console.log("updateduser ::" + updatedUsers)
+        });
+        
         const jwt_token = Cookies.get('jwt_token');
         try {
           const response = await axios.get('http://localhost:3001/users/friendsList', {
@@ -66,7 +72,9 @@ const ChatFriends = ({ socket }: ChatFooterProps) => {
                   height="50"
                   style={{ borderRadius: '50%' }}
                 />
-                <p>{user.username}</p>
+                <p>
+                  {user.username}
+                  {connectedUsers.includes(user.id) && <span style={{ color: 'green' }}> en ligne</span>}</p>
               </Box>
             ))}
           </div>
