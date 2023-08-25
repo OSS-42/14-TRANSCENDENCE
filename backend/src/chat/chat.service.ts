@@ -58,10 +58,11 @@ export class ChatService {
     // DEUXIEME ARGUMENT : l'id du client (UTILISATEUR)
     // Morgan : Il va falloir ajouter un parsing pour le mot de passe (if password !== undefined else ...)
     // Et même chose pour un flag invit pour savoir si le channel est sur invitation (if invite === -i else ...)
-    async createRoom(roomName:string, ownerId:number, password: string, invit: string): Promise<ChatRoom>{
+    async createRoom(roomName:string, ownerId:number, password: string, invite: boolean): Promise<ChatRoom>{
         const room = await this.prisma.chatRoom.create({
             data: {
                 name: roomName,
+                invite: invite,
                 owner: { connect: { id: ownerId } },
                 members: { connect: [{ id: ownerId }] }
               },
@@ -128,26 +129,43 @@ export class ChatService {
         });
         return room;
     }
-    async isAlreadyMember(userId: number, roomName: string): Promise<boolean> {
+    async isAlreadyMember(userName: string, roomName: string): Promise<boolean> {
       const room = await this.prisma.chatRoom.findFirst({
         where: {
           name: roomName,
           members: {
-            some: { id: userId },
+            some: { username: userName },
           },
         },
       });
      return !!room
     }
 
+    async isBanFromRoom(userName: string, roomName: string): Promise<boolean> {
+      const room = await this.prisma.chatRoom.findFirst({
+        where: {
+          name: roomName,
+          bannedUsers: {
+            some: { username: userName },
+          },
+        },
+      });
+     return !!room
+    }
+    async isRoomProtected(roomName: string): Promise<boolean> {
+      const room = await this.prisma.chatRoom.findFirst({
+        where: {
+          name: roomName,
+          },
+      });
+     return !!room && !!room.hash; 
+    }
+     async createPassword(password:string) {
+    
+    }
+ 
    
   }
     
   
-/*
-  Je vais avoir besoin d'une fonction pour :
-
-  - Verifier si l'utilisateur est ban d'un channel
-  - Verifier si le channel a besoin d'un mot de passe et si c'est le cas verifier que le mot de passe fourni est le bon
-  - Verifier si le channel est sur invitation seulement
-  */
+  

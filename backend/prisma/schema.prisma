@@ -62,11 +62,5 @@ model Friendship {
 
 
 
-//  ------------------------ Commentaire Morgan ------------------------
-
-// - Il me faudrait une variable password (string) dans le tableau des ChatRoom
-// - Il me faudrait une variable invite (bool par exemple) dans le tableau des ChatRoom pour savoir si le canal est sur invitation
-
-
 
 
