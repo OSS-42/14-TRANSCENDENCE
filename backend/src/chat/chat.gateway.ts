@@ -7,7 +7,7 @@ import { ConfigService } from '@nestjs/config';
 import { stringify } from 'querystring';
 
 
-@WebSocketGateway({ cors: true})
+@WebSocketGateway({ cors: true,  namespace: 'chat' })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   // Map pour stocker les ID d'utilisateur associés aux IDs de socket
   // AVec cette map, on peut identifier le client.id à partir d'un Utilisateur ID.

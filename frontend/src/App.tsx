@@ -11,7 +11,7 @@ import Cookies from 'js-cookie'
 import { Chat, Home, Login, Pong, Profile, Welcome, Error } from './pages'
 
 
-const socket = socketIO('http://localhost:3001', {
+const socket = socketIO('http://localhost:3001/chat', {
   query: {
     token: Cookies.get('jwt_token')
   },
