@@ -110,8 +110,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const userId = await this.chatService.getUserIdFromUsername(payload.target);
       const socketId = await this.getSoketIdFromUserId(userId)
       console.log(socketId)
-      console.log(client.to(socketId).emit('messageResponse', `${payload.username}: ${payload.message}`));
-      console.log(this.connectedUsers);
+      this.server.to(socketId).emit('messageResponse', {
+        id: payload.id,
+        name: payload.username,
+        text: `${payload.username}: ${payload.message}`,
+      })
+      // je penses que j'envois pas la bonne chose. Par exemple dans le cas de 'message' j'envois directement le payload
     }
   
   //-----------------test morgan-----------------
