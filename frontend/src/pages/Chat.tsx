@@ -88,6 +88,7 @@ export function Chat({ socket }: ChatProps) {
             border: "1px solid black",
             borderRadius: "4px",
             padding: "1rem",
+            overflow: "auto"
           }}
         >
           <ChatBar socket={socket}/>
@@ -98,6 +99,7 @@ export function Chat({ socket }: ChatProps) {
             border: "1px solid black",
             borderRadius: "4px",
             padding: "1rem",
+            overflow: "auto"
           }}
         >
           <ChatFriends socket={socket}/>

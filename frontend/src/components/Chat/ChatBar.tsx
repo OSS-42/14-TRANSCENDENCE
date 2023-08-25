@@ -13,22 +13,10 @@ import { User } from "../../models/User";
 
 function ChatBar({ socket }: someProp) {
   const [usersList, setUsersList] = useState<User[]>([]);
-  const [userFriends, setUserFriends] = useState<string[]>([]);
+  //const [userFriends, setUserFriends] = useState<string[]>([]);
   const [connectedUsers, setConnectedUsers] = useState<number[]>([]);
 
-  async function fetchUserFriends() {
-    const jwt_token = Cookies.get("jwt_token");
-    try {
-      const response = await axios.get("http://localhost:3001/users/me", {
-        headers: {
-          Authorization: "Bearer " + jwt_token,
-        },
-      });
-      setUserFriends(response.data.friends.map((friend: User) => friend.username));
-    } catch (error) {
-      console.error("Error fetching user friends:", error);
-    }
-  }
+  
   useEffect(() => {
     
     socket.on('updateConnectedUsers', (updatedUsers: number[]) => {
@@ -50,7 +38,7 @@ function ChatBar({ socket }: someProp) {
       }
     }
     fetchUsersData();
-    fetchUserFriends();
+
   }, []);
 
   const addFriend = async (friendUsername: string) => {
@@ -61,7 +49,6 @@ function ChatBar({ socket }: someProp) {
           Authorization: "Bearer " + jwt_token,
         },
       });
-      fetchUserFriends();
     } catch (error) {
       console.error("Error adding friend:", error);
     }
