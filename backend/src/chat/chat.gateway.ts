@@ -7,7 +7,7 @@ import { ConfigService } from '@nestjs/config';
 import { stringify } from 'querystring';
 
 
-@WebSocketGateway({ cors: true})
+@WebSocketGateway({ cors: true,  namespace: 'chat' })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   // Map pour stocker les ID d'utilisateur associés aux IDs de socket
   // AVec cette map, on peut identifier le client.id à partir d'un Utilisateur ID.
@@ -28,6 +28,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
           console.log("voici lidentite du socket")
           console.log(decoded)
           this.connectedUsers.set( Number(decoded.sub), client.id);
+          const connectedUserIds = Array.from(this.connectedUsers.keys());
+          this.server.emit("updateConnectedUsers", connectedUserIds)
+          //FONCTION QUI VERIFIE LES CHANNELS DONT LUTILASATEUR EST MEMBRE ET LES JOIN TOUS
         } catch (error) {
           client.disconnect();
         }
@@ -46,6 +49,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         break;
       }
     }
+    const connectedUserIds = Array.from(this.connectedUsers.keys());
+    this.server.emit("updateConnectedUsers", connectedUserIds)
   }
 
 //Retourne le clientId du socket, si lutilisateur n<est pas connect/ la fonciton retourne undefined.

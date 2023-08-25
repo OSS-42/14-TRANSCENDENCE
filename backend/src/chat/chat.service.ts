@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ChatRoom } from '@prisma/client';
+import * as argon2 from 'argon2';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { createMessageDto } from './dto/create.message.dto';
 
@@ -58,10 +59,11 @@ export class ChatService {
     // DEUXIEME ARGUMENT : l'id du client (UTILISATEUR)
     // Morgan : Il va falloir ajouter un parsing pour le mot de passe (if password !== undefined else ...)
     // Et même chose pour un flag invit pour savoir si le channel est sur invitation (if invite === -i else ...)
-    async createRoom(roomName:string, ownerId:number, password: string, invit: string): Promise<ChatRoom>{
+    async createRoom(roomName:string, ownerId:number, password: string, invite: boolean): Promise<ChatRoom>{
         const room = await this.prisma.chatRoom.create({
             data: {
                 name: roomName,
+                invite: invite,
                 owner: { connect: { id: ownerId } },
                 members: { connect: [{ id: ownerId }] }
               },
@@ -117,8 +119,6 @@ export class ChatService {
         return room;
     }
 
-
-    
     async removeModerator(roomId: number, memberId: number):Promise<ChatRoom> {
         const room = await this.prisma.chatRoom.update({
         where: { id: roomId }, 
@@ -128,16 +128,64 @@ export class ChatService {
         });
         return room;
     }
-            
-}     
+    async isAlreadyMember(userName: string, roomName: string): Promise<boolean> {
+      const room = await this.prisma.chatRoom.findFirst({
+        where: {
+          name: roomName,
+          members: {
+            some: { username: userName },
+          },
+        },
+      });
+     return !!room
+    }
 
-    
+    async isBanFromRoom(userName: string, roomName: string): Promise<boolean> {
+      const room = await this.prisma.chatRoom.findFirst({
+        where: {
+          name: roomName,
+          bannedUsers: {
+            some: { username: userName },
+          },
+        },
+      });
+     return !!room
+    }
+    async isRoomProtected(roomName: string): Promise<boolean> {
+      const room = await this.prisma.chatRoom.findFirst({
+        where: {
+          name: roomName,
+          },
+      });
+     return !!room && !!room.hash; 
+    }
 
-/*
-  Je vais avoir besoin d'une fonction pour :
 
-  - Verifier si l'utilisateur est deja membre d'un channel (ex de mon utilisation frontend : const isAlreadyMember = await this.chatService.isUserMemberOfRoom(username, roomName);)
-  - Verifier si l'utilisateur est ban d'un channel
-  - Verifier si le channel a besoin d'un mot de passe et si c'est le cas verifier que le mot de passe fourni est le bon
-  - Verifier si le channel est sur invitation seulement
-  */
+    async validatePassword(password:string, roomName:string) {
+      const room = await this.prisma.chatRoom.findFirst({
+        where: {
+          name: roomName,
+          },
+      });
+      const pwMatches = await argon2.verify(
+                   room.hash,
+                    password
+              );
+      return pwMatches
+      }
+
+
+    async createPassword(password:string, roomName:string) {
+      const hash =  await argon2.hash(password);
+      const room = await this.prisma.chatRoom.update({
+        where: {
+          name: roomName,
+          },
+              data: {
+                hash :hash
+              }
+      });
+      return room
+    }
+  
+  }
