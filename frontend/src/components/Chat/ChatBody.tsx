@@ -36,15 +36,12 @@ const ChatBody = ({ messages } : ChatBodyProps) => {
       <div className="message__container">
         {messages.map((message) => (
             <div className="message__chats" key={message.id}>
-              {message.channel === undefined ? (
-                <p>
-                  <span className='nameSender'>{message.name}</span> : {message.text}
-                </p>
-              ) : (
-                <p>
-                  <span className='channelSender'>{message.channel}</span> <span className='nameSender'>{message.name}</span> : {message.text}
-                </p>
-              )}
+              <p>
+                {message.channel !== undefined && (
+                  <span className='channelSender'>{message.channel}</span>
+                )} {" "}
+                <span className='nameSender'>{message.name}</span> : {message.text}
+              </p>
             </div>
           )
         )}

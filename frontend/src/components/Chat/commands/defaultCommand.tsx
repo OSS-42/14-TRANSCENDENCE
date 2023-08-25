@@ -14,11 +14,14 @@ interface DefaultCommandProps {
   }
 
 const defaultCommand = ({data, socket, user}: DefaultCommandProps) => {
-    socket.emit("message", {
+    socket.emit('message', {
         message: data,
         name: user?.username,
         id: `${socket.id}${Math.random()}`,
         socketID: socket.id,
     })
+    console.log('xouxou')
+    console.log(user?.username)
+    console.log('xouxou')
 }
 export default defaultCommand
