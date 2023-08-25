@@ -70,10 +70,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   handleMessage(client: Socket, payload: any): void { //voir pour changer any
     this.server.emit('messageResponse', {
       id: payload.id,
-      name: payload.username,
+      name: payload.name,
       channel: 'General',
       text: payload.message
     }); // Diffuser le message à tous les clients connectés
+    console.log(payload.username)
   }
   
 
