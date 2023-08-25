@@ -9,7 +9,7 @@ import { User } from "../../models/User";
  type someProp = {
   socket: Socket;
 };
-
+//IL Y A UN PROBLEME DANS CETTE PAGE (sam). ca fonctionne mais erreur dans le console log
 
 function ChatBar({ socket }: someProp) {
   const [usersList, setUsersList] = useState<User[]>([]);

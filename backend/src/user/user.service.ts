@@ -7,6 +7,18 @@ export class UserService {
     constructor(
         private prisma: PrismaService, 
     ){}
+    
+    async getUserIdFromUsername(username: string): Promise<number | null> {
+        const user = await this.prisma.utilisateur.findFirst({
+          where: {
+            username
+          },
+          select: {
+            id: true
+          }
+        });
+        return user?.id || null; 
+    }
 
     async getUserInfo(username: string): Promise<Utilisateur> {
         const user = await this.prisma.utilisateur.findFirst({
