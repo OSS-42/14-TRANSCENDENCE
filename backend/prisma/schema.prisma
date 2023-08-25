@@ -19,63 +19,46 @@ model Utilisateur {
   gameLost Int @default(0)
   avatar String?
   email    String @unique
+
   friends  Friendship[] @relation("UserToFriendship")
   friendOf  Friendship[]  @relation("FriendToFriendship")
+
+  ownedChatRooms  ChatRoom[]   @relation("ChatRoomOwner")
+  memberChatRooms ChatRoom[]   @relation("ChatRoomMembers")
+  moderatorChatRooms ChatRoom[] @relation("ChatRoomModerators")
+  bannedChatRooms ChatRoom[]    @relation("ChatRoomBannedUsers")
 }
-model chatRoom {
+model ChatRoom {
   id Int @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   name String @unique
   
+  owner       Utilisateur  @relation("ChatRoomOwner", fields: [ownerId], references: [id])
+  ownerId     Int
+ 
+  members           Utilisateur[] @relation("ChatRoomMembers")
+  moderators        Utilisateur[] @relation("ChatRoomModerators")
+  bannedUsers       Utilisateur[] @relation("ChatRoomBannedUsers")
 }
 
 model Friendship {
   id          Int         @id @default(autoincrement())
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
-  user       Utilisateur @relation("UserToFriendship", fields: [userId], references: [id]) // Relation to Utilisateur model
+  user       Utilisateur @relation("UserToFriendship", fields: [userId], references: [id]) 
   userId     Int
-  friend     Utilisateur @relation("FriendToFriendship", fields: [friendId], references: [id]) // Different relation name
+  friend     Utilisateur @relation("FriendToFriendship", fields: [friendId], references: [id]) 
   friendId   Int
 }
 
 
 
+//match history
 
 
 
 
 
 
-
-// model User {
-//   id Int @id @default(autoincrement())
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-//   email String @unique
-//   hash String
-
-//   firstName String?
-//   lastName String?
-  
-//   bookmarks Bookmark[]
-
-//   @@map("users")
-// }
-// model Bookmark {
-//   id Int @id @default(autoincrement())
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-
-//   title String
-//   description String?
-//   link String
-
-//   userId Int
-//   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-//   //on delete cascade
-
-//   @@map("bookmarks")
-// }

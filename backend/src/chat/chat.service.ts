@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { ChatRoom } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { createMessageDto } from './dto/create.message.dto';
 
@@ -10,26 +11,124 @@ export class ChatService {
         console.log(createMessageDto)
         return createMessageDto
     }
+    //CETTE FONCTION TROUVE LE ID DUN UTILISATEUR AVEC SON USERNAME.
+    //Elle retourne null en cas dabsence
+    async getUserIdFromUsername(username: string): Promise<number | null> {
+        const user = await this.prisma.utilisateur.findFirst({
+          where: {
+            username
+          },
+          select: {
+            id: true
+          }
+        });
+        return user?.id || null; 
+      }
+    
 
-    async isRoomExist(room:string){
-        
-        const roomName = await this.prisma.chatRoom.findUnique({
-            where: { name : room},
+        //PERMET DE RECUPERER LE ID de la room : room.id
+    async isRoomExist(roomName:string): Promise <ChatRoom | null>{
+        //console.log(room)
+        const room = await this.prisma.chatRoom.findUnique({
+            where: { name : roomName},
           });
           console.log(roomName)
           //si room nameName est diffrent de null, on renvoie true. Si roomName n<est pas different de null, on renvoie false.
-          return roomName;
-        }
+          return room || null;
+    }
+
+
+    async isUserMemberOfRoom(userId: number, roomId: number): Promise<boolean> {
+        const room = await this.prisma.chatRoom.findFirst({
+          where: {
+            id: roomId,
+            members: {
+              some: {
+                id: userId
+              }
+            }
+          }
+        });
+      
+        return !!room; // Syntaxe mysterieuse : double negation, si room existe = true, si room n<existe pas= false
+    }
     
-    async createRoom(room:string){
-    
-        const roomName = await this.prisma.chatRoom.create({
+
+    //CETTE FONCTION CREE UN CHANNEL DANS LA BASE DE DONNEE. 
+    //PREMIER ARGUMENT :  le nom du channel
+    // DEUXIEME ARGUMENT : l'id du client (UTILISATEUR)
+    async createRoom(roomName:string, ownerId:number): Promise<ChatRoom>{
+        const room = await this.prisma.chatRoom.create({
             data: {
-                name: room,
-                //owner: login,
+                name: roomName,
+                owner: { connect: { id: ownerId } },
+                members: { connect: [{ id: ownerId }] }
               },
           });
-        }
+         return room 
+    } 
+
+
+
+     //CETTE FONCTION AJOUTE UN UTILISATEUR DANS UN CHANNEL  (BASE DE DONNEE)
+    //PREMIER ARGUMENT :  le ID du channnel *** CE denier peut être recpurer par la fonciton isRoomExist : cette fonction retourne un obet chatRoom
+    // DEUXIEME ARGUMENT : l'id du client (UTILISATEUR)
+    async joinRoom(roomId: number, memberId: number):Promise<ChatRoom> {
+        const room = await this.prisma.chatRoom.update({
+        where: { id: roomId }, 
+        data: {
+            members: { connect: [{ id: memberId }] } 
+            }
+        });
+        return room;
     }
+
+
+
+       //CETTE FONCTION BAN UN UTILISATEUR D'UN CHANNEL  (BASE DE DONNEE)
+    //PREMIER ARGUMENT :  le ID du channnel *** CE denier peut être recpurer par la fonciton isRoomExist : cette fonction retourne un obet chatRoom
+    // DEUXIEME ARGUMENT : l'id du cli (UTILISATEUR)
+    async banUserFromRoom(userId: number, roomId: number): Promise<void> {
+        await this.prisma.chatRoom.update({
+          where: {
+            id: roomId
+          },
+          data: {
+            bannedUsers: {
+              connect: [{ id: userId }]
+            },
+            members: {
+              disconnect: [{ id: userId }]
+            }
+          }
+        });
+      }
+    
+
+
+    async addModerator(roomId: number, memberId: number):Promise<ChatRoom> {
+        const room = await this.prisma.chatRoom.update({
+        where: { id: roomId }, 
+        data: {
+            moderators: { connect: [{ id: memberId }] } 
+            }
+        });
+        return room;
+    }
+
+
+    
+    async removeModerator(roomId: number, memberId: number):Promise<ChatRoom> {
+        const room = await this.prisma.chatRoom.update({
+        where: { id: roomId }, 
+        data: {
+            moderators: { disconnect: [{ id: memberId }] } 
+            }
+        });
+        return room;
+    }
+            
+}     
+
     
 
