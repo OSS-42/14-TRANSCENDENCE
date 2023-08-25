@@ -32,7 +32,6 @@ export class ChatService {
         const room = await this.prisma.chatRoom.findUnique({
             where: { name : roomName},
           });
-          console.log(roomName)
           //si room nameName est diffrent de null, on renvoie true. Si roomName n<est pas different de null, on renvoie false.
           return room || null;
     }
@@ -57,7 +56,9 @@ export class ChatService {
     //CETTE FONCTION CREE UN CHANNEL DANS LA BASE DE DONNEE. 
     //PREMIER ARGUMENT :  le nom du channel
     // DEUXIEME ARGUMENT : l'id du client (UTILISATEUR)
-    async createRoom(roomName:string, ownerId:number): Promise<ChatRoom>{
+    // Morgan : Il va falloir ajouter un parsing pour le mot de passe (if password !== undefined else ...)
+    // Et même chose pour un flag invit pour savoir si le channel est sur invitation (if invite === -i else ...)
+    async createRoom(roomName:string, ownerId:number, password: string, invit: string): Promise<ChatRoom>{
         const room = await this.prisma.chatRoom.create({
             data: {
                 name: roomName,
@@ -132,3 +133,11 @@ export class ChatService {
 
     
 
+/*
+  Je vais avoir besoin d'une fonction pour :
+
+  - Verifier si l'utilisateur est deja membre d'un channel (ex de mon utilisation frontend : const isAlreadyMember = await this.chatService.isUserMemberOfRoom(username, roomName);)
+  - Verifier si l'utilisateur est ban d'un channel
+  - Verifier si le channel a besoin d'un mot de passe et si c'est le cas verifier que le mot de passe fourni est le bon
+  - Verifier si le channel est sur invitation seulement
+  */

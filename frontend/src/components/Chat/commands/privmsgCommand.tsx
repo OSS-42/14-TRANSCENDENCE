@@ -15,7 +15,7 @@ interface PrivmsgCommandProps {
 
 const privmsgCommand = ({data, socket, user}: PrivmsgCommandProps) => {
     const [command, target, message] = data.split(" ");
-    if (command === "PRIVMSG" && target && message) {
+    if (command === "#PRIVMSG" && target && message) {
       // Format du message pour le serveur
       socket.emit("privmsg", {
         username: user?.username,
@@ -35,3 +35,4 @@ export default privmsgCommand
 - Si le deuxieme parametre commence par ":" alors c'est un message vers un canal
 
 */
+

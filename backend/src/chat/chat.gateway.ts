@@ -74,39 +74,51 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       // et faire les manipulations pour ajouter le chat dans la db du user, ajouter le user au db du canal etc ...            
       client.join(payload.name); 
       const userId = await this.chatService.getUserIdFromUsername(payload.username)
-      this.chatService.createRoom(payload.name, userId  )
-      client.emit('messageResponse', `You create a new room ${payload.name}!`);
+      this.chatService.createRoom(payload.name, userId, payload.password, payload.invit)
+      client.emit('messageResponse', {
+        id: payload.id,
+        name: payload.username,
+        text: `You create and join new room ${payload.name}!`,
+      })
     } else { //la room existe
       client.emit('messageResponse', {
         // ici il va falloir verifier si l'utilisateur est deja dans le canal et envoyer un message adapté.
-        // if deja dedans
+        // if pas deja dedans ... 
+          // Si il n'est pas dedans il faut verifier si il n'est pas banni
+          // ...
+          // Sinon emit un message pour dire que l'utilisateur est ban
+          // ...
+          // Si il n'est pas dedans il faut verifier si il y a un mot de passe et si l'utilisateur le fourni
+          // ...
+          // Sinon emit un message pour dire que le mot de passe est mauvais
+          // ...
+          // Si il n'est pas dedans il faut verifier si le channel n'est pas sur invitation seuelement
+          // ...
+          // Sinon emit un message pour dire que le channel est sur invitation seuelement
+          // ...
         id: payload.id, // un identifiant unique pour chaque message
         name: payload.username,
-        text: `You create and join a new room ${payload.name} !`,
-        // else vous avez rejoins la room ...
+        text: `You join the room ${payload.name} !`,
+        // else vous etes deja dans la room ...
       })
     }
   }
+
   
-  // @SubscribeMessage('privmsg')
-  // handleMessage(client: Socket, payload: any): void { //voir pour changer any
-  //   console.log(payload.name)
-  //   this.server.emit('messageResponse', payload); // Diffuser le message à tous les clients connectés
-  // }
+    @SubscribeMessage('privmsg')
+    async privateMessage(client: Socket, payload: any) {
+      const userId = await this.chatService.getUserIdFromUsername(payload.target);
+      const socketId = await this.getSoketIdFromUserId(userId)
+      console.log(socketId)
+      console.log(client.to(socketId).emit('messageResponse', `${payload.username}: ${payload.message}`));
+      console.log(this.connectedUsers);
+    }
+  
   //-----------------test morgan-----------------
   
   @SubscribeMessage('findAllMessages')
   findAllMessages(client: any, payload: any): string {
     return 'array des messages';
-  }
-
-  @SubscribeMessage('privateMessage')
-  async privateMessage(
-    @MessageBody() data: { to: string; message: string },
-    @ConnectedSocket() client: Socket
-  ) {
-    const { to, message } = data;
-    client.to(to).emit('privateMessage', `Private message from ${client.id}: ${message}`);
   }
 
   //peut etre faire une focntion qui joint les rooms a debut de l<application.
