@@ -11,7 +11,7 @@ import { Sphere, Box } from "@react-three/drei";
 import "./Pong.css"
 import * as THREE from 'three';
 
-import { ControlledCameras } from "./controlledCamera.tsx"; // Assuming it's exported from a file named ControlledCameras.tsx
+import { ControlledCameras } from "./controlledcamera.tsx"; // Assuming it's exported from a file named ControlledCameras.tsx
 
 export function Pong() {
 
