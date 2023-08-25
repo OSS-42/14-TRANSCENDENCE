@@ -118,7 +118,7 @@ export class ChatService {
     }
 
 
-    
+
     async removeModerator(roomId: number, memberId: number):Promise<ChatRoom> {
         const room = await this.prisma.chatRoom.update({
         where: { id: roomId }, 
@@ -128,15 +128,25 @@ export class ChatService {
         });
         return room;
     }
-            
-}     
+    async isAlreadyMember(userId: number, roomName: string): Promise<boolean> {
+      const room = await this.prisma.chatRoom.findFirst({
+        where: {
+          name: roomName,
+          members: {
+            some: { id: userId },
+          },
+        },
+      });
+     return !!room
+    }
 
+   
+  }
     
-
+  
 /*
   Je vais avoir besoin d'une fonction pour :
 
-  - Verifier si l'utilisateur est deja membre d'un channel (ex de mon utilisation frontend : const isAlreadyMember = await this.chatService.isUserMemberOfRoom(username, roomName);)
   - Verifier si l'utilisateur est ban d'un channel
   - Verifier si le channel a besoin d'un mot de passe et si c'est le cas verifier que le mot de passe fourni est le bon
   - Verifier si le channel est sur invitation seulement

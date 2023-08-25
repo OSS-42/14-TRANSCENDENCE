@@ -36,7 +36,8 @@ model ChatRoom {
   updatedAt DateTime @updatedAt
 
   name String @unique
-  
+  hash String?
+  invite Boolean
   owner       Utilisateur  @relation("ChatRoomOwner", fields: [ownerId], references: [id])
   ownerId     Int
  
