@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ChatRoom } from '@prisma/client';
+import * as argon2 from 'argon2';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { createMessageDto } from './dto/create.message.dto';
 
@@ -160,12 +161,32 @@ export class ChatService {
       });
      return !!room && !!room.hash; 
     }
-     async createPassword(password:string) {
-    
+
+
+    async validatePassword(password:string, roomName:string) {
+      const hash =  await argon2.hash(password);
+      const room = await this.prisma.chatRoom.findFirst({
+        where: {
+          name: roomName,
+          },
+      });
+      const pwMatches = await argon2.verify(
+                   room.hash,
+                    password
+              );
+      return pwMatches
+      }
+    async createPassword(password:string, roomName:string) {
+      const hash =  await argon2.hash(password);
+      const room = await this.prisma.chatRoom.update({
+        where: {
+          name: roomName,
+          },
+              data: {
+                hash :hash
+              }
+      });
+      
     }
- 
-   
+  
   }
-    
-  
-  
