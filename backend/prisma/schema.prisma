@@ -24,10 +24,14 @@ model Utilisateur {
   friends  Friendship[] @relation("UserToFriendship")
   friendOf  Friendship[]  @relation("FriendToFriendship")
 
+  
   ownedChatRooms  ChatRoom[]   @relation("ChatRoomOwner")
   memberChatRooms ChatRoom[]   @relation("ChatRoomMembers")
   moderatorChatRooms ChatRoom[] @relation("ChatRoomModerators")
   bannedChatRooms ChatRoom[]    @relation("ChatRoomBannedUsers")
+  
+  matchHistoryWinner Match[] @relation("MatchWinner")
+  matchHistoryLoser Match[] @relation("MatchLoser")
 }
 
 model ChatRoom {
@@ -36,7 +40,8 @@ model ChatRoom {
   updatedAt DateTime @updatedAt
 
   name String @unique
-  
+  hash String?
+  invite Boolean
   owner       Utilisateur  @relation("ChatRoomOwner", fields: [ownerId], references: [id])
   ownerId     Int
  
@@ -55,16 +60,20 @@ model Friendship {
   friendId   Int
 }
 
+model Match {
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
+  winner Utilisateur @relation(name: "MatchWinner", fields: [winnerId], references: [id])
+  winnerId Int 
+
+  loser Utilisateur @relation(name: "MatchLoser", fields: [loserId], references: [id])
+  loserId Int 
+}
 
 //match history
 
-
-
-//  ------------------------ Commentaire Morgan ------------------------
-
-// - Il me faudrait une variable password (string) dans le tableau des ChatRoom
-// - Il me faudrait une variable invite (bool par exemple) dans le tableau des ChatRoom pour savoir si le canal est sur invitation
 
 
 

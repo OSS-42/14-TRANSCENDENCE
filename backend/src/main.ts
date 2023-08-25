@@ -36,7 +36,6 @@ async function bootstrap() {
 
   SwaggerModule.setup('/', app, document);
   const configService = app.get(ConfigService);
-
   app.enableCors({
     origin: [configService.get('HOST_FORNTEND'), "https://api.intra.42.fr/"],
     credentials: true,
