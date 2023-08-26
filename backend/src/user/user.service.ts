@@ -100,6 +100,47 @@ export class UserService {
         });
         return updatedUser
     }
+
+    async getUserMatchHistory(id: number) {
+        id = Number(id)
+        const user = await this.prisma.utilisateur.findUnique({
+          where: { id },
+          include: {
+            matchHistoryWinner: {
+              include: {
+                winner: true,
+                loser: true,
+              },
+            },
+            matchHistoryLoser: {
+              include: {
+                winner: true,
+                loser: true,
+              },
+            },
+          },
+        });
+    
+        const matchesWon = user.matchHistoryWinner.map(match => ({
+          date: match.createdAt,
+          winner: match.winner.username,
+          loser: match.loser.username,
+        }));
+    
+        const matchesLost = user.matchHistoryLoser.map(match => ({
+          date: match.createdAt,
+          winner: match.winner.username,
+          loser: match.loser.username,
+        }));
+        console.log ("voici lhistorique", matchesLost, matchesWon)
+        return {
+          matchesWon,
+          matchesLost,
+        };
+      }
+    }
+
+    
         // //Je pense que je nai pas besoin de update les users, cela se fait automatiquement???
         // await this.prisma.utilisateur.update({
         //     where: { id: user.id },
@@ -110,5 +151,5 @@ export class UserService {
         //     where: { id: friend.id },
         //     data: { friendOf: { connect: { id: friendship.id } } }
         // });
-}
+
 

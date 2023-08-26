@@ -54,4 +54,10 @@ export class UserController {
     return this.userService.updateAvatar(user, requestBody)
     }
 
+    @ApiParam({ name: 'id', type: Number })
+    @Get('matchHistory/:id')
+    getUserMatchHistory(@Param('id') id:number){
+
+        return this.userService.getUserMatchHistory(id);
+    }
 }

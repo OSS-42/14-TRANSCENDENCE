@@ -37,7 +37,6 @@ export class ChatService {
           return room || null;
     }
 
-
     async isUserMemberOfRoom(userId: number, roomId: number): Promise<boolean> {
         const room = await this.prisma.chatRoom.findFirst({
           where: {
@@ -167,11 +166,11 @@ export class ChatService {
           name: roomName,
           },
       });
-      const pwMatches = await argon2.verify(
-                   room.hash,
-                    password
-              );
-      return pwMatches
+        const pwMatches = await argon2.verify(
+                    room.hash,
+                      password
+                );
+        return pwMatches
       }
 
 

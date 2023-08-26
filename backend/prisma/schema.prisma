@@ -16,8 +16,8 @@ model Utilisateur {
   updatedAt DateTime @updatedAt
 
   username String
-  gamesWon Int @default(0)
-  gameLost Int @default(0)
+  gamesWon Int? @default(0)
+  gameLost Int? @default(0)
   avatar String?
   email    String @unique
 
