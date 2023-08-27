@@ -8,10 +8,16 @@ import { PongService } from './pong.service';
 @ApiBearerAuth()
 @UseGuards(JwtGuard)
 export class PongController {
-    constructor(private userService: PongService) {}
+    constructor(private pongService: PongService) {}
 
     @Post("updateHistory")
-        updateHistory(@Body() requestBody: any){}
+        updateHistory(@Body() requestBody: any){
+
+            const winnerId = Number(requestBody.winner)
+            const loserId = Number(requestBody.loser)
+
+            return this.pongService.updateHistory(winnerId, loserId)
+        }
     
 
 }
