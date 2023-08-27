@@ -192,3 +192,7 @@ export class ChatService {
 
 
   //Une fonction pour verifier si le channel est sur invitation seulement
+  //Une fonction pour verifier si un utilisateur est un owner
+  //Une fonction pour verifier si un utilisateur est un admin
+  //Une fonction pour retirer un utilisateur d'un channel mais sans le bannir
+  //Une fonction pour bloquer un utilisateur (J'aurais besoin de pouvoir recuperer l'information dans le frontend pour savoir quel message afficher ou non)
