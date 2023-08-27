@@ -38,7 +38,7 @@ export class ChatService {
     }
 
 
-    async isUserMemberOfRoom(userId: number, roomId: number): Promise<boolean> {
+    async isUserMemberOfRoom(userId: number, roomId: number): Promise<boolean> { // C'est quoi la differnece avec isAlreadyMember ?
         const room = await this.prisma.chatRoom.findFirst({
           where: {
             id: roomId,
@@ -189,3 +189,6 @@ export class ChatService {
     }
   
   }
+
+
+  //Une fonction pour verifier si le channel est sur invitation seulement

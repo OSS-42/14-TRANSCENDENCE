@@ -21,7 +21,7 @@ interface JoinCommandProps {
         username: user?.username,
         id: `${socket.id}${Math.random()}`,
         socketID: socket.id,
-        name: channelName,
+        channelName: channelName,
         password : password,
         invite : invite
       });
