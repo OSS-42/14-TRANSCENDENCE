@@ -20,8 +20,5 @@ const defaultCommand = ({data, socket, user}: DefaultCommandProps) => {
         id: `${socket.id}${Math.random()}`,
         socketID: socket.id,
     })
-    console.log('xouxou')
-    console.log(user?.username)
-    console.log('xouxou')
 }
 export default defaultCommand

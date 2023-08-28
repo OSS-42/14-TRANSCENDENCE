@@ -37,7 +37,8 @@ export class ChatService {
           return room || null;
     }
 
-    async isUserMemberOfRoom(userId: number, roomId: number): Promise<boolean> {
+
+    async isUserMemberOfRoom(userId: number, roomId: number): Promise<boolean> { // C'est quoi la differnece avec isAlreadyMember ?
         const room = await this.prisma.chatRoom.findFirst({
           where: {
             id: roomId,
@@ -58,7 +59,7 @@ export class ChatService {
     // DEUXIEME ARGUMENT : l'id du client (UTILISATEUR)
     // Morgan : Il va falloir ajouter un parsing pour le mot de passe (if password !== undefined else ...)
     // Et même chose pour un flag invit pour savoir si le channel est sur invitation (if invite === -i else ...)
-    async createRoom(roomName:string, ownerId:number, password: string, invite: boolean): Promise<ChatRoom>{
+    async createRoom(roomName:string, ownerId:number, param: string, invite: boolean): Promise<ChatRoom>{
         const room = await this.prisma.chatRoom.create({
             data: {
                 name: roomName,
@@ -127,6 +128,7 @@ export class ChatService {
         });
         return room;
     }
+
     async isAlreadyMember(userName: string, roomName: string): Promise<boolean> {
       const room = await this.prisma.chatRoom.findFirst({
         where: {
@@ -188,3 +190,10 @@ export class ChatService {
     }
   
   }
+
+
+  //Une fonction pour verifier si le channel est sur invitation seulement
+  //Une fonction pour verifier si un utilisateur est un owner
+  //Une fonction pour verifier si un utilisateur est un admin
+  //Une fonction pour retirer un utilisateur d'un channel mais sans le bannir
+  //Une fonction pour bloquer un utilisateur (J'aurais besoin de pouvoir recuperer l'information dans le frontend pour savoir quel message afficher ou non)

@@ -7,26 +7,25 @@ interface User {
     mail: string;
 }
 
-interface JoinCommandProps {
+interface InviteCommandProps {
     data: string;
     socket: Socket;
     user : User;
   }
 
-  const joinCommand = ({data, socket, user}: JoinCommandProps) => {
-    const [command, channelName, ...param] = data.split(" ");
-    if (command === "#JOIN" && channelName) {
+  const inviteCommand = ({data, socket, user}: InviteCommandProps) => {
+    const [command, target, ...channel] = data.split(" ");
+    if (command === "#INVITE" && target !== undefined && channel !== undefined) {
       // Format du message pour le serveur
-      console.log(param)
-      socket.emit("joinRoom", {
+      socket.emit("inviteRoom", {
         username: user?.username,
         id: `${socket.id}${Math.random()}`,
         socketID: socket.id,
-        channelName: channelName,
-        param : param
+        channelName: channel,
+        target: target
       });
     }
 }
-export default joinCommand
+export default inviteCommand
 
 // 
