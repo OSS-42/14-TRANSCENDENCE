@@ -1,6 +1,8 @@
-import React from  'react';
+import React, { useEffect } from  'react';
 import { Box } from "@react-three/drei";
 import * as THREE from 'three';
+
+import { useGameContext } from './GameContext';
 
 type PowerupProps = {
 	WORLD_WIDTH: number,
@@ -10,6 +12,7 @@ type PowerupProps = {
 	powerupVisible: boolean,
 	isClassicMode: boolean,
 	powerupPosition: {x: number, y: number, z: number },
+	// setRespawnPowerup?: (respawnFunction: () => void) => void;
 }
 //------------------ GAME POWERUP ------------------------
     // powerup
@@ -22,7 +25,7 @@ const Powerup : React.FC<PowerupProps> = ({
 	powerupPosition,
 	setPowerupVisible,
 }) => {
-    React.useEffect(() => {
+    useEffect(() => {
 		const randomX = (Math.random() * (WORLD_WIDTH - 10)) - (WORLD_WIDTH / 2 - 9);
 		const randomZ = (Math.random() * (WORLD_HEIGHT - 2)) - (WORLD_HEIGHT / 2 - 1);
 		setPowerupPosition({ x: randomX, y: 0, z: randomZ });
@@ -64,6 +67,13 @@ const Powerup : React.FC<PowerupProps> = ({
 		}
 		return new THREE.CanvasTexture(canvas);
 	};
+
+	const { setRespawnPowerup, setShouldSetRespawnPowerup } = useGameContext();
+
+	useEffect(() => {
+	// 
+	setShouldSetRespawnPowerup(true);
+	}, [respawnPowerup]);
 
 	return powerupVisible && !isClassicMode ? <Powerup /> : null;
 }

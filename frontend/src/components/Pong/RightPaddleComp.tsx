@@ -2,14 +2,15 @@ import React from 'react';
 import { Box } from '@react-three/drei'
 import { useFrame } from "@react-three/fiber";
 
+import { useGameContext } from './GameContext';
 
 type RightPaddleCompProps = {
 	distanceFromCenter: number,
 	rightPaddlePositionZ: number,
 	setRightPaddlePositionZ: React.Dispatch<React.SetStateAction<number>>,
-	ballPosition: {x: number, z: number },
+	// ballPosition: { x: number, y: number, z: number },
 	WORLD_HEIGHT: number,
-	WORLD_WIDTH: number,
+	// WORLD_WIDTH: number,
 	paddleDepth: number,
 	paddleWidth: number,
 	paddleHeight: number,
@@ -20,15 +21,19 @@ const RightPaddleComp : React.FC<RightPaddleCompProps> = ({
 	distanceFromCenter,
 	rightPaddlePositionZ,
 	setRightPaddlePositionZ,
-	ballPosition,
+	// ballPosition,
 	WORLD_HEIGHT,
-	WORLD_WIDTH,
+	// WORLD_WIDTH,
 	paddleDepth,
 	paddleWidth,
 	paddleHeight,
 }) => {
 
 	const rightPaddleXPosition: number = distanceFromCenter;
+
+	const { setRightPaddlePosition, ballPosition } = useGameContext();
+	const rightPaddlePosition = { x: rightPaddleXPosition, z: rightPaddlePositionZ };
+
 	const RIGHT_PADDLE_SPEED: number = 0.8;
 
 	const lerp = (a: number, b: number, t: number) => a + t * (b - a);
@@ -47,6 +52,7 @@ const RightPaddleComp : React.FC<RightPaddleCompProps> = ({
 		newZ = -WORLD_HEIGHT / 2 + paddleDepth / 2;
 		}
 
+		setRightPaddlePosition({ x: rightPaddleXPosition, z: newZ });
 		setRightPaddlePositionZ(newZ);
 
 	});
@@ -56,5 +62,6 @@ const RightPaddleComp : React.FC<RightPaddleCompProps> = ({
 		<meshBasicMaterial color="white" />
 		</Box>
 	);
-	}
 }
+
+export default RightPaddleComp;

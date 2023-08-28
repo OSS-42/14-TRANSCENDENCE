@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Sphere } from '@react-three/drei'
 import { useFrame } from "@react-three/fiber";
 
+import { useGameContext } from './GameContext';
+
 type BallProps = {
 	handleCountdown: () => void,
 	gameStart: boolean,
@@ -17,19 +19,20 @@ type BallProps = {
 	setPowerupVisible: React.Dispatch<React.SetStateAction<boolean>>,
 	setPowerupPosition: (position: { x: number, y: number, z: number }) => void,
 	powerupPosition: { x: number, y: number, z: number },
-	respawnPowerup: () => void,
+	// respawnPowerup: () => void,
 	
 	INITIAL_BALL_SPEED: number,
-	ballPosition: {x: number, z: number},
-	ballVelocity: {x: number, z: number},
+	ballPosition: { x: number, y:  number, z: number },
+	setBallPosition: React.Dispatch<React.SetStateAction<{ x: number, y: number, z: number}>>,
+	ballVelocity: { x: number, z: number },
 	ballRadius: number,
-	setballVelocity: React.Dispatch<React.SetStateAction<{ x: number, z: number }>>,
+	// setballVelocity: React.Dispatch<React.SetStateAction<{ x: number, z: number }>>,
 	checkCollision: (ballPos: { x: number, z: number }, paddlePos: { x: number, z: number }, paddleDims: { width: number, depth: number }) => "top" | "middle" | "bottom" | false,
 
-	leftPaddleXPosition: number,
-	leftPaddlePositionZ: number,
-	rightPaddleXPosition: number,
-	rightPaddlePositionZ: number,
+	// leftPaddleXPosition: number,
+	// leftPaddlePositionZ: number,
+	// rightPaddleXPosition: number,
+	// rightPaddlePositionZ: number,
 	paddleWidth: number,
 	paddleDepth: number,
 
@@ -52,20 +55,20 @@ const Ball : React.FC<BallProps> = ({
 	gameStart,
 	powerupVisible,
 	setPowerupPosition,
-	powerupPosition,
+	// powerupPosition,
 	setPowerupVisible,
 	ballRadius,
+	// ballPosition,
 	setCameraMode,
 	playPowerupSound,
-	respawnPowerup,
 	WORLD_WIDTH,
 	WORLD_HEIGHT,
 	isClassicMode,
 	playBallWallSound,
-	leftPaddleXPosition,
-	leftPaddlePositionZ,
-	rightPaddleXPosition,
-	rightPaddlePositionZ,
+	// leftPaddleXPosition,
+	// leftPaddlePositionZ,
+	// rightPaddleXPosition,
+	// rightPaddlePositionZ,
 	paddleWidth,
 	paddleDepth,
 	checkCollision,
@@ -79,15 +82,21 @@ const Ball : React.FC<BallProps> = ({
 	leftScore,
 	setWinner,
 	setIsPaused,
-	setballVelocity,
+	// setballVelocity,
 	handleCountdown,
 }) => {
 
+	const { respawnPowerup, powerupPosition, leftPaddlePosition, rightPaddlePosition, ballPosition, setBallPosition } = useGameContext();
+
+	const context = useGameContext();
+	console.log("Context: ", context);
+	
+	// const [ballPosition, setBallPosition] = useState({ x: 0, y: 0.0001, z: 0 });
+	const [ballVelocity, setBallVelocity] = useState({ x: 0.1, z: 0.1 });  // Initialize as you like
+	
 	useFrame(() => {
 		if(isPaused || gameStart) return;
 
-		const [ballPosition, setBallPosition] = useState({ x: 0, y: 0.0001, z: 0 });
-		const [ballVelocity, setBallVelocity] = useState({ x: 0.1, z: 0.1 });  // Initialize as you like
 		
 		const INITIAL_BALL_SPEED = 0.1;
 
@@ -122,8 +131,8 @@ const Ball : React.FC<BallProps> = ({
 		}
 
 		// Validation de hit avec les paddles  
-		const leftPaddlePosition = { x: leftPaddleXPosition, z: leftPaddlePositionZ };
-		const rightPaddlePosition = { x: rightPaddleXPosition, z: rightPaddlePositionZ };
+		// const leftPaddlePosition = { x: leftPaddleXPosition, z: leftPaddlePositionZ };
+		// const rightPaddlePosition = { x: rightPaddleXPosition, z: rightPaddlePositionZ };
 		const paddleDimensions = { width: paddleWidth, depth: paddleDepth };
 
 		const hitSectionLeft = checkCollision({ x: newX, z: newZ }, leftPaddlePosition, paddleDimensions);
@@ -177,7 +186,7 @@ const Ball : React.FC<BallProps> = ({
 
 		  newX = 0;
 		  newZ = 0;
-		  setBallVelocity({ x: INITIAL_BALL_SPEED, z: INITIAL_BALL_SPEED });
+		//   setBallVelocity({ x: INITIAL_BALL_SPEED, z: INITIAL_BALL_SPEED });
 		  
 		  // Optional: Pause the game if needed
 		  setIsPaused(true);

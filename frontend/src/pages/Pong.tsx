@@ -3,7 +3,7 @@ import { Box as MaterialBox } from '@mui/material';
 import "./Pong.css";
 
 //imports for the framework, librairies and theirs functionnalities
-import React, { useState } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import * as THREE from 'three';
 
@@ -14,12 +14,14 @@ import Powerup from '../components/Pong/Powerup';
 import Net, { Borders } from '../components/Pong/Limits';
 import Ball from '../components/Pong/Ball';
 import LeftPaddle from '../components/Pong/LeftPaddle';
+import RightPaddleComp from '../components/Pong/RightPaddleComp';
 
 //specific import for the camera switching (source : https://codesandbox.io/s/r3f-camera-perspective-ortho-animated-transition-v1-forked-8uvue)
 import { ControlledCameras } from "./controlledcamera";
+import { GameProvider, useGameContext } from '../components/Pong/GameContext';
 
 export function Pong() {
-	console.log('Hello #1');
+	// console.log('Hello #1');
 
 	//------------------ SCENE SETTINGS ------------------------
     // s'assure que le canvas aura comme maximum toujours 800x600
@@ -84,6 +86,15 @@ export function Pong() {
 		return false;
 		};
 
+	// // remettre le powerup.
+	// const respawnPowerup = () => {
+	// 	const randomX = (Math.random() * (WORLD_WIDTH - 2)) - (WORLD_WIDTH / 2 - 1);
+	// 	const randomZ = (Math.random() * (WORLD_HEIGHT - 2)) - (WORLD_HEIGHT / 2 - 1);
+		
+	// 	setPowerupPosition({ x: randomX, y: 0, z: randomZ });
+	// 	setPowerupVisible(true);
+	// };
+
 	// ratio pour garder les meme proportions lors d'un resizing de la page
     // attention, a cause du positionnement de la camera, height devient depth et depth devient height.
     const paddleWidth: number = 0.000625 * dimension.width;
@@ -99,6 +110,7 @@ export function Pong() {
 	const distanceFromCenter: number = 0.024 * dimension.width;
 
 	// state variables
+	// const { setLeftPaddlePosition, setRightPaddlePosition } = useGameContext();
 	const [leftPaddlePositionZ, setLeftPaddlePositionZ] = React.useState(0);
     const [rightPaddlePositionZ, setRightPaddlePositionZ] = React.useState(0);
     const [ballSpeed, setBallSpeed] = React.useState(INITIAL_BALL_SPEED);
@@ -201,6 +213,7 @@ export function Pong() {
 			height: '92.5vh',
 			align: 'center',
 		  }}>
+			<GameProvider>
 			  <div id = "canvas-container" style = {{ width: dimension.width, height: dimension.height }}>
 				  <div className="pong-container" style={{ width: dimension.width, height: dimension.height }}>
 					  {showButtons && (
@@ -250,7 +263,6 @@ export function Pong() {
 						ballVelocity={ballVelocity}
 						setBallVelocity={setBallVelocity}
 						ballSpeed={ballSpeed} />
-			
 					<Powerup 
 						WORLD_WIDTH={WORLD_WIDTH}
 						WORLD_HEIGHT={WORLD_HEIGHT}
@@ -258,8 +270,7 @@ export function Pong() {
 						powerupVisible={powerupVisible}
 						isClassicMode={isClassicMode}
 						powerupPosition={powerupPosition}
-						setPowerupVisible={setPowerupVisible}
-						respawnPowerup={respawnPowerup} />
+						setPowerupVisible={setPowerupVisible} />
 					<Net 
 						netWidth={netWidth}
 						netDepth={netDepth} />
@@ -275,21 +286,20 @@ export function Pong() {
 						ballRadius={ballRadius}
 						setCameraMode={setCameraMode}
 						playPowerupSound={playPowerupSound}
-						respawnPowerup={respawnPowerup}
 						WORLD_WIDTH={WORLD_WIDTH}
 						WORLD_HEIGHT={WORLD_HEIGHT}
 						isClassicMode={isClassicMode}
 						playBallWallSound={playBallWallSound}
-						leftPaddleXPosition={leftPaddleXPosition}
-						leftPaddlePositionZ={eftPaddlePositionZ}
-						rightPaddleXPosition={rightPaddleXPosition}
-						rightPaddlePositionZ={rightPaddlePositionZ}
+						// leftPaddleXPosition={leftPaddleXPosition}
+						// leftPaddlePositionZ={leftPaddlePositionZ}
+						// rightPaddleXPosition={rightPaddleXPosition}
+						// rightPaddlePositionZ={rightPaddlePositionZ}
 						paddleWidth={paddleWidth}
 						paddleDepth={paddleDepth}
 						checkCollision={checkCollision}
 						playUserHitSound={playUserHitSound}
 						playCompHitSound={playCompHitSound}
-						pausePowerupSound={pausePowerupSound} // ?
+						// pausePowerupSound={pausePowerupSound} // ?
 						playGoalSound={playGoalSound}
 						setRightScore={setRightScore}
 						rightScore={rightScore}
@@ -297,7 +307,7 @@ export function Pong() {
 						leftScore={leftScore}
 						setWinner={setWinner}
 						setIsPaused={setIsPaused}
-						setballVelocity={setballVelocity}
+						// setballVelocity={setballVelocity}
 						handleCountdown={handleCountdown} />
 					<LeftPaddle 
 						distanceFromCenter={distanceFromCenter}
@@ -309,7 +319,7 @@ export function Pong() {
 						paddleWidth={paddleWidth}
 						WORLD_WIDTH={WORLD_WIDTH}
 						WORLD_HEIGHT={WORLD_HEIGHT} />
-					<RightPaddle 
+					<RightPaddleComp 
 						distanceFromCenter={distanceFromCenter}
 						rightPaddlePositionZ={rightPaddlePositionZ}
 						setRightPaddlePositionZ={setRightPaddlePositionZ}
@@ -317,7 +327,7 @@ export function Pong() {
 						paddleDepth={paddleDepth}
 						paddleHeight={paddleHeight}
 						paddleWidth={paddleWidth}
-						WORLD_WIDTH={WORLD_WIDTH}
+						// WORLD_WIDTH={WORLD_WIDTH}
 						WORLD_HEIGHT={WORLD_HEIGHT} />
 				</Canvas>
 					{/* Scoreboard */}
@@ -349,6 +359,7 @@ export function Pong() {
 					<audio ref={compHitSoundRef} src="src/assets/paddle-hit2.mp3" />
 				</div>
 			</div>
+			</GameProvider>
 		</MaterialBox>
   )
 }

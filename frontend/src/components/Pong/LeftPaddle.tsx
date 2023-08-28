@@ -2,6 +2,8 @@ import React from 'react';
 import { Box } from '@react-three/drei'
 import { useFrame, useThree } from "@react-three/fiber";
 
+import { useGameContext } from './GameContext';
+
 type LeftPaddleProps = {
 	distanceFromCenter: number,
 	leftPaddlePositionZ: number,
@@ -28,6 +30,9 @@ const LeftPaddle : React.FC<LeftPaddleProps> = ({
 
 	const leftPaddleXPosition: number = -distanceFromCenter;
 
+	const { setLeftPaddlePosition } = useGameContext();
+	const leftPaddlePosition = { x: leftPaddleXPosition, z: leftPaddlePositionZ };
+
 		// mouvement du left (user1) paddle a la souris.
 	const { mouse } = useThree();
 	
@@ -48,6 +53,7 @@ const LeftPaddle : React.FC<LeftPaddleProps> = ({
 		newPosition = -WORLD_HEIGHT / 2 + paddleDepth / 2;
 		}
 
+		setLeftPaddlePosition({ x: leftPaddleXPosition, z: newPosition });
 		setLeftPaddlePositionZ(newPosition);
 	});
 
