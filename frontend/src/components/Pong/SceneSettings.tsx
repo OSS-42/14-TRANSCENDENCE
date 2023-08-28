@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 
 const SceneSettings: React.FC<{ setSharedValues: (values: SceneParameters) => void }> = ({ setSharedValues }) => {
 	const [dimension, setDimensions] = React.useState<{ width: number, height: number }>(() => {
@@ -13,7 +13,9 @@ const SceneSettings: React.FC<{ setSharedValues: (values: SceneParameters) => vo
 		return { width: initialWidth, height: initialHeight };
 	});
 	
+	console.log('dans scenesetting.tsx');
 	// Dimensions de l'espace de jeu.
+	useEffect(() => {
 	const CAMERA_ZOOM = 20;
 	const WORLD_WIDTH: number = dimension.width / CAMERA_ZOOM;
 	const WORLD_HEIGHT: number = dimension.height / CAMERA_ZOOM;
@@ -26,6 +28,10 @@ const SceneSettings: React.FC<{ setSharedValues: (values: SceneParameters) => vo
 	};
 
 	setSharedValues(values);
+
+	return null;
+	
+	}, [dimension, setSharedValues]);
 };
 
 export type SceneParameters = {

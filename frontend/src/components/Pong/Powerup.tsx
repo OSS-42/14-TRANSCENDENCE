@@ -1,15 +1,15 @@
 import React from  'react';
 import { Box } from "@react-three/drei";
-import THREE from 'three';
+import * as THREE from 'three';
 
 type PowerupProps = {
 	WORLD_WIDTH: number,
 	WORLD_HEIGHT: number,
-	setPowerupPosition: (position: {x: number, y: number, z: number}) => void;
-	setPowerupVisible: React.Dispatch<React.SetStateAction<boolean>>;
-	powerupVisible: boolean;
-	isClassicMode: boolean;
-	powerupPosition: {x: number, y: number, z: number };
+	setPowerupPosition: (position: {x: number, y: number, z: number}) => void,
+	setPowerupVisible: React.Dispatch<React.SetStateAction<boolean>>,
+	powerupVisible: boolean,
+	isClassicMode: boolean,
+	powerupPosition: {x: number, y: number, z: number },
 }
 //------------------ GAME POWERUP ------------------------
     // powerup

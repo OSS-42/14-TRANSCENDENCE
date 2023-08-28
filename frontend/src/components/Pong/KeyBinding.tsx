@@ -2,7 +2,7 @@ import React from 'react';
 
 type GameKeyBindingProps = {
 	isClassicMode: boolean,
-	setCameraMode: React.Dispatch<React.SetStateAction<"perspective" | "orthographic">>;
+	setCameraMode: React.Dispatch<React.SetStateAction<"perspective" | "orthographic">>,
 };
 
 //------------------ GAME KEY BINDING ------------------------

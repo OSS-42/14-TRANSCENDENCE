@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box } from "@react-three/drei";
-import THREE from 'three';
+// import * as THREE from 'three';
 
 type NetProps = {
 	netDepth: number,
@@ -35,3 +35,29 @@ const Net : React.FC<NetProps> = ({
 };
 
 export default Net;
+
+// border lines
+type BordersProps = {
+  WORLD_WIDTH: number,
+  WORLD_HEIGHT: number,
+}
+
+export const Borders: React.FC<BordersProps> = ({
+  WORLD_WIDTH,
+  WORLD_HEIGHT
+}) => {
+  const borderThickness = 0.05; // You can adjust this value
+  return (
+    <>
+      {/* Top Border */}
+      <Box position={[0, 0, WORLD_HEIGHT / 2]} args={[WORLD_WIDTH, 1, borderThickness]}>
+        <meshBasicMaterial color="white" />
+      </Box>
+      {/* Bottom Border */}
+      <Box position={[0, 0, -WORLD_HEIGHT / 2]} args={[WORLD_WIDTH, 1, borderThickness]}>
+        <meshBasicMaterial color="white" />
+      </Box>
+      
+    </>
+  );
+};
