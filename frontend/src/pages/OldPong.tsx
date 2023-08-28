@@ -5,7 +5,7 @@
 
 import { Box as MaterialBox } from '@mui/material'
 
-import React, { useRef } from 'react';
+import React from 'react';
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Sphere, Box } from "@react-three/drei";
 import "./Pong.css"

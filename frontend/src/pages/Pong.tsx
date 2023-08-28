@@ -5,32 +5,53 @@ import "./Pong.css";
 //imports for the framework, librairies and theirs functionnalities
 import React, { useState } from 'react';
 import { Canvas } from '@react-three/fiber';
+import * as THREE from 'three';
 
-//imports for child components use
-import SceneSettings, { SceneParameters } from '../components/Pong/SceneSettings.tsx';
-import GameKeyBinding from '../components/Pong/KeyBinding.tsx';
-import GameResize from '../components/Pong/Resize.tsx';
-import Powerup from '../components/Pong/Powerup.tsx';
-import Net, { Borders } from '../components/Pong/Limits.tsx';
-import Ball from '../components/Pong/Ball.tsx';
-import LeftPaddle from '../components/Pong/LeftPaddle.tsx';
+//imports for child components useimport GameKeyBinding from '../components/Pong/KeyBinding';
+import GameKeyBinding from '../components/Pong/KeyBinding';
+import GameResize from '../components/Pong/Resize';
+import Powerup from '../components/Pong/Powerup';
+import Net, { Borders } from '../components/Pong/Limits';
+import Ball from '../components/Pong/Ball';
+import LeftPaddle from '../components/Pong/LeftPaddle';
 
 //specific import for the camera switching (source : https://codesandbox.io/s/r3f-camera-perspective-ortho-animated-transition-v1-forked-8uvue)
-import { ControlledCameras } from "./controlledcamera.tsx";
+import { ControlledCameras } from "./controlledcamera";
 
 export function Pong() {
+	console.log('Hello #1');
+
+	//------------------ SCENE SETTINGS ------------------------
+    // s'assure que le canvas aura comme maximum toujours 800x600
+    const [dimension, setDimensions] = React.useState<{ width: number, height: number }>(() => {
+		let initialWidth = window.innerWidth;
+		let initialHeight = window.innerWidth * 3 / 4;
+	  
+		if (initialWidth > 800) {
+		  initialWidth = 800;
+		  initialHeight = 600;
+		}
+	  
+		return { width: initialWidth, height: initialHeight };
+	  });
+  
+		// Dimensions de l'espace de jeu.
+	  const CAMERA_ZOOM = 20;
+	  const WORLD_WIDTH: number = dimension.width / CAMERA_ZOOM;
+	  const WORLD_HEIGHT: number = dimension.height / CAMERA_ZOOM;
 	
 	// ------------------ GAME CONSTANTS ------------------------
 	// necessary to keep them here for better data flow and components construction.
 
 	// const from components.
 	const [sharedValues, setSharedValues] = useState<SceneParameters | null>(null);
-	if (!sharedValues) {
-		console.log('Shared Values missing!');
-		return null; // You can return a loading spinner or an error message here
-	}
+	// if (!sharedValues) {
+	// 	console.log('Shared Values missing!');
+	// 	// return null; // You can return a loading spinner or an error message here
+	// 	return <div>Loading...</div>;
+	// }
 
-	const { dimension, WORLD_WIDTH, WORLD_HEIGHT } = sharedValues;
+	// const { dimension, WORLD_WIDTH, WORLD_HEIGHT } = sharedValues;
 	const [countdown, setCountdown] = React.useState<number | null>(null);
 
 	// ------------------ GAME UTILS ------------------------
@@ -196,10 +217,11 @@ export function Pong() {
 						  </div>
 				  </div>
 				  )}
+				{/* Canvas Container */}
 				  <Canvas 
 					  style={{ background: cameraMode === "perspective" ? 'url(src/assets/pong_3d_bg2b.png) no-repeat center center / cover' : 'black' }}>
-					  <SceneSettings 
-						  setSharedValues={setSharedValues} />
+					  {/* <SceneSettings 
+						  setSharedValues={setSharedValues} /> */}
 					  {/* Camera Controller */}
 					  <ControlledCameras
 					  mode={cameraMode}
@@ -229,7 +251,6 @@ export function Pong() {
 						setBallVelocity={setBallVelocity}
 						ballSpeed={ballSpeed} />
 			
-			{/* Canvas Container */}
 					<Powerup 
 						WORLD_WIDTH={WORLD_WIDTH}
 						WORLD_HEIGHT={WORLD_HEIGHT}
@@ -238,7 +259,7 @@ export function Pong() {
 						isClassicMode={isClassicMode}
 						powerupPosition={powerupPosition}
 						setPowerupVisible={setPowerupVisible}
-						respawnPowerup={respawnPowerUp} />
+						respawnPowerup={respawnPowerup} />
 					<Net 
 						netWidth={netWidth}
 						netDepth={netDepth} />
