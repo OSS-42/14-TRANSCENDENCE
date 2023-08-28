@@ -17,6 +17,8 @@ interface User {
   mail: string;
 }
 
+
+// Voir avec Sam : est-ce que je n'ai pas deja le userId et le socketId grace a l'objet User et socket ?
 const ChatFooter = ({ socket }: ChatFooterProps) => {
   const [data, setData] = useState("");
   const [user, setUser] = useState<User>({
@@ -52,6 +54,8 @@ const ChatFooter = ({ socket }: ChatFooterProps) => {
       if (data.startsWith("#JOIN"))
         joinCommand({ data, socket, user });
       else if (data.startsWith("#PRIVMSG"))
+        privmsgCommand({ data, socket, user });
+      else if (data.startsWith("#INVITE"))
         privmsgCommand({ data, socket, user });
       // else if (message.startsWith("#KICK"))
       //   kickCommand({ message, socket, user });

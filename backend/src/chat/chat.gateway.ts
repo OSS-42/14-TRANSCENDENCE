@@ -73,7 +73,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   //VERIFIER TOUT CE QUI A ETAIT FAIT AVEC SAM POUR VOIR SI CA FONCTIONNE
   @SubscribeMessage('joinRoom')
   async joinRoom(client: Socket, payload: any) {
-    if (await this.chatService.isRoomExist(payload.channelName) == null){ // le channel n'existe pas donc l'utilisateur la créé
+    if (await this.chatService.isRoomExist(payload.channelName) === null){ // le channel n'existe pas donc l'utilisateur la créé
       // Verifier si le channel a un mot de passe *est-ce que avec la fonction createPassword c'est suffisant ?*
       // Verifier si le channel est sur invitation *je crois que sam fais deja ca dans la fonction createRoom*
       // et faire les manipulations pour ajouter le chat dans la db du user          
@@ -177,7 +177,20 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
     }
     
-  //-----------------test morgan-----------------
+
+  // @SubscribeMessage('inviteRoom')
+  // async inviteRoom(client: Socket, payload: any) {
+  //   if (await this.chatService.isRoomExist(payload.channelName) === null){ // le channel n'existe pas
+  //     client.emit('messageResponse', {
+  //       id: payload.id,
+  //       name: payload.username,
+  //       text: `The room ${payload.channelName} don't exist`,
+  //     })
+  //   } 
+  //   else if { //le channel existe
+  //   }
+  // }
+  // //-----------------test morgan-----------------
   
   @SubscribeMessage('findAllMessages')
   findAllMessages(client: any, payload: any): string {
