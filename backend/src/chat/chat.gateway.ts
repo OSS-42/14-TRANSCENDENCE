@@ -86,7 +86,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     
     // ------------------------ Creation d'un channel ------------------------
     else if (await this.chatService.isRoomExist(payload.channelName) === null){
-      console.log('coucou')
       // et faire les manipulations pour ajouter le channel dans la db du user      
       let invite : boolean = false;
       if (payload.param[0] === '+i')
@@ -207,57 +206,39 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async inviteRoom(client: Socket, payload: any) {
     const userId = await this.chatService.getUserIdFromUsername(payload.username)
     const targetId = await this.chatService.getUserIdFromUsername(payload.target)
+    const targetSocket = await this.getSoketIdFromUserId(targetId)
     const roomObject = await this.chatService.isRoomExist(payload.channelName[0])
+    let message : string = ''
+    let event : string = "notice"
 
     // ------------------------ Trop de parametre ------------------------
     if (payload.channelName[1] !== undefined)
-    client.emit('messageResponse', {
+      message = `#INVITE : bad format`
+    // ------------------------ Le channel n'existe pas ------------------------
+    else if (roomObject === null)
+      message = `The room ${payload.channelName[0]} don't exist`
+    // ------------------------ L'utilisateur n'est pas membre de la room ------------------------
+    else if (await this.chatService.isUserMemberOfRoom(userId, roomObject.id) === false)
+      message = `The room ${payload.channelName[0]} don't exist`
+    // ------------------------ La cible n'existe pas ------------------------
+    else if (targetId === null)
+      message = `The user ${payload.target} doesn't exist`
+    // ------------------------ La cible est deja membre de la room ------------------------
+    else if (await this.chatService.isUserMemberOfRoom(targetId, roomObject.id) === true)
+      message = `The user ${payload.target} is already a member of the room ${payload.channelName[0]}`
+    // ------------------------ La cible est ajouté dans la room ------------------------
+    else {
+      event = 'messageResponse'
+      message = `${payload.username} invited you to the channel ${payload.channelName}`
+      await this.chatService.joinRoom(roomObject.id, targetId)
+      this.server.to(targetSocket).socketsJoin(payload.channelName) //faire des tests
+        // faire les manipulations dans la base de donnée pour l'utilisateur
+    }   
+    this.server.to(targetSocket).emit( event, {
       id: payload.id,
       name: payload.username,
-      text: `#INVITE : bad format`,
+      text: message,
     })
-
-    // ------------------------ Le channel n'existe pas ------------------------
-    else if (roomObject === null){
-      client.emit('messageResponse', {
-        id: payload.id,
-        name: payload.username,
-        text: `The room ${payload.channelName[0]} don't exist`,
-      })
-    }
-
-    // ------------------------ Le channel exite ------------------------
-    else {
-      if (await this.chatService.isUserMemberOfRoom(userId, roomObject.id) === false) //L'utilisateur n'est pas membre de la room
-        client.emit('messageResponse', {
-          id: payload.id,
-          name: payload.username,
-          text: `You need to be a member of the room ${payload.channelName[0]} to send a invitation`,
-        })
-      else if (targetId === null) // La cible n'existe pas
-        client.emit('messageResponse', {
-          id: payload.id,
-          name: payload.username,
-          text: `The user ${payload.target} doesn't exist`,
-        })
-      else if (await this.chatService.isUserMemberOfRoom(targetId, roomObject.id) === true) // La cible est deja membre de la room
-        client.emit('messageResponse', {
-          id: payload.id,
-          name: payload.username,
-          text: `The user ${payload.target} is already a member of the room ${payload.channelName[0]}`,
-        })
-        else {
-          await this.chatService.joinRoom(roomObject.id, targetId)
-          const targetSocket = await this.getSoketIdFromUserId(targetId)
-          this.server.to(targetSocket).socketsJoin(payload.channelName) //faire des tests
-          // faire les manipulations dans la base de donnée pour l'utilisateur   
-          this.server.to(targetSocket).emit('messageResponse', {
-            id: payload.id,
-            name: payload.username,
-            text: `${payload.username} invited you to the channel ${payload.channelName}`,
-          })
-        }
-    }
   }
 
   // //-------------------------------------------------------- TEST MORGAN --------------------------------------------------------

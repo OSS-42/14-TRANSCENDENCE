@@ -5,6 +5,7 @@ import Cookies from "js-cookie";
 import joinCommand from "./commands/joinCommand";
 import defaultCommand from "./commands/defaultCommand";
 import privmsgCommand from "./commands/privmsgCommand";
+import inviteCommand from "./commands/inviteCommand";
 
 type ChatFooterProps = {
   socket: Socket; // Assurez-vous que ce type correspond au type de socket que vous utilisez
@@ -56,7 +57,7 @@ const ChatFooter = ({ socket }: ChatFooterProps) => {
       else if (data.startsWith("#PRIVMSG"))
         privmsgCommand({ data, socket, user });
       else if (data.startsWith("#INVITE"))
-        privmsgCommand({ data, socket, user });
+        inviteCommand({ data, socket, user });
       // else if (message.startsWith("#KICK"))
       //   kickCommand({ message, socket, user });
       // else if (message.startsWith("#BAN"))
@@ -81,7 +82,7 @@ const ChatFooter = ({ socket }: ChatFooterProps) => {
           placeholder="Write message"
           className="message"
           value={data}
-          onChange={(e) => setData(e.target.value)}
+          onChange={(e) => setData(e.target.value)} // C'est ici que la variable data est remplie
         />
         <button className="sendBtn">SEND</button>
       </form>

@@ -1,5 +1,5 @@
 // import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 
 type ChatMessage = {
   id: number; // un identifiant unique pour chaque message
@@ -10,41 +10,28 @@ type ChatMessage = {
 
 type ChatBodyProps = {
   messages: ChatMessage[];
+  notice: boolean;
 };
 
-const ChatBody = ({ messages } : ChatBodyProps) => {
-  // const navigate = useNavigate();
-
-  // const handleLeaveChat = () => {
-  //   // Cette ligne supprime l'élément 'userName' du stockage local (localStorage) du navigateur. 
-  //   // Le stockage local est une petite base de données intégrée au navigateur web qui permet de stocker des données en permanence, même après la fermeture du navigateur. 
-  //   localStorage.removeItem('userName');
-  //   // Redirige l'utilisateur vers l'accueil
-  //   navigate('/');
-  //   window.location.reload();
-  //   // gestion de la db. Deconnexion du channel, nombre de membre present etc ...
-  // };
-  console.log(messages)
+const ChatBody = ({ messages, notice }: ChatBodyProps) => {
   return (
     <>
-      {/* <header className="chat__mainHeader">
-        <button className="leaveChat__btn" onClick={handleLeaveChat}>
-          LEAVE CHAT
-        </button>
-      </header> */}
-
       <div className="message__container">
         {messages.map((message) => (
-            <div className="message__chats" key={message.id}>
+          <div className="message__chats" key={message.id}>
+            {notice ? (
+              <p>{message.text}</p>
+            ) : (
               <p>
                 {message.channel !== undefined && (
-                  <span className='channelSender'>{message.channel}</span>
-                )} {" "}
-                <span className='nameSender'>{message.name}</span> : {message.text}
+                  <span className="channelSender">{message.channel}</span>
+                )}{" "}
+                <span className="nameSender">{message.name}</span> :{" "}
+                {message.text}
               </p>
-            </div>
-          )
-        )}
+            )}
+          </div>
+        ))}
       </div>
     </>
   );

@@ -17,7 +17,6 @@ interface JoinCommandProps {
     const [command, channelName, ...param] = data.split(" ");
     if (command === "#JOIN" && channelName) {
       // Format du message pour le serveur
-      console.log(param)
       socket.emit("joinRoom", {
         username: user?.username,
         id: `${socket.id}${Math.random()}`,
