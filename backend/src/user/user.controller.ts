@@ -40,6 +40,14 @@ export class UserController {
         return this.userService.getUserInfo(username);
     }
 
+    @ApiParam({ name: 'id', type: Number })
+    @Get('plus/:id')
+    getUserInfoPlus(@Param('username') id:number){
+
+        return this.userService.getUserInfoPlus(id);
+    }
+
+
     //ajout d<une relation d'amitié
     @ApiParam({ name: 'username', type: String })
     @Get('addFriend/:username')

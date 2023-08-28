@@ -16,10 +16,11 @@ model Utilisateur {
   updatedAt DateTime @updatedAt
 
   username String
-  gamesWon Int? @default(0)
-  gameLost Int? @default(0)
   avatar String?
   email    String @unique
+
+  blockedBy Banissement[] @relation("UserToBanishment")
+  blockedUsers Banissement[] @relation("BanningUser")
 
   friends  Friendship[] @relation("UserToFriendship")
   friendOf  Friendship[]  @relation("FriendToFriendship")
@@ -59,6 +60,18 @@ model Friendship {
   friend     Utilisateur @relation("FriendToFriendship", fields: [friendId], references: [id]) 
   friendId   Int
 }
+model Banissement {
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  bannedUser Utilisateur @relation("UserToBanishment", fields: [bannedUserId], references: [id])
+  bannedUserId Int
+
+  byUser Utilisateur @relation("BanningUser", fields: [byUserId], references: [id])
+  byUserId Int
+}
+
 
 model Match {
   id Int @id @default(autoincrement())

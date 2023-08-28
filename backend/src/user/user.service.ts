@@ -33,6 +33,27 @@ export class UserService {
 
         return user;
     }
+    async getUserInfoPlus(id: number): Promise<Utilisateur> {
+      const user = await this.prisma.utilisateur.findFirst({
+          where: {
+              id: id,
+          },
+          include: {
+            friends: true,
+            friendOf: true,
+            ownedChatRooms: true,
+            memberChatRooms: true,
+            moderatorChatRooms: true,
+            bannedChatRooms: true,
+            matchHistoryWinner: true,
+            matchHistoryLoser: true,
+          },
+      });
+      if (!user) {
+          throw new NotFoundException(`User with username ${id} not found`);
+      }
+      return user;
+  }
 
     async getAllUsers(): Promise<Utilisateur[]> {
         return this.prisma.utilisateur.findMany();
