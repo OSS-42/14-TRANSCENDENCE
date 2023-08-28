@@ -14,16 +14,16 @@ interface JoinCommandProps {
   }
 
   const joinCommand = ({data, socket, user}: JoinCommandProps) => {
-    const [command, channelName, password, invite] = data.split(" ");
+    const [command, channelName, ...param] = data.split(" ");
     if (command === "#JOIN" && channelName) {
       // Format du message pour le serveur
+      console.log(param)
       socket.emit("joinRoom", {
         username: user?.username,
         id: `${socket.id}${Math.random()}`,
         socketID: socket.id,
         channelName: channelName,
-        password : password,
-        invite : invite
+        param : param
       });
     }
 }

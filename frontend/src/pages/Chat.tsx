@@ -32,6 +32,7 @@ export function Chat({ socket }: ChatProps) {
       "messageResponse",
       (data: ChatMessage) => setMessages([...messages, data]) //Cette partie met à jour l'état messages. Elle utilise le spread operator ... pour créer un nouveau tableau qui contient les anciens messages (messages) ainsi que le nouveau message data. Ensuite, elle appelle setMessages pour mettre à jour la valeur de messages avec ce nouveau tableau.
     );
+    console.log('coucou')
   }, [socket, messages]); // Le contenu du tableau signifie qu'il y a des dépendances, donc cet effet se déclenche a chaque fois que le statut d'une des variables change.
   
   return (

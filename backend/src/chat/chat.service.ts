@@ -59,7 +59,7 @@ export class ChatService {
     // DEUXIEME ARGUMENT : l'id du client (UTILISATEUR)
     // Morgan : Il va falloir ajouter un parsing pour le mot de passe (if password !== undefined else ...)
     // Et même chose pour un flag invit pour savoir si le channel est sur invitation (if invite === -i else ...)
-    async createRoom(roomName:string, ownerId:number, password: string, invite: boolean): Promise<ChatRoom>{
+    async createRoom(roomName:string, ownerId:number, param: string, invite: boolean): Promise<ChatRoom>{
         const room = await this.prisma.chatRoom.create({
             data: {
                 name: roomName,
@@ -128,6 +128,7 @@ export class ChatService {
         });
         return room;
     }
+
     async isAlreadyMember(userName: string, roomName: string): Promise<boolean> {
       const room = await this.prisma.chatRoom.findFirst({
         where: {
