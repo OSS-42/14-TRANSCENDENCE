@@ -3,17 +3,17 @@ import {
   createBrowserRouter,
   createRoutesFromElements,
   RouterProvider,
-} from 'react-router-dom'
+} from "react-router-dom";
 
-import RootLayout from './layouts/RootLayout'
-import socketIO from 'socket.io-client'
-import Cookies from 'js-cookie'
-import { Chat, Home, Login, Pong, Profile, Welcome, Error } from './pages'
+import RootLayout from "./layouts/RootLayout";
+import socketIO from "socket.io-client";
+import Cookies from "js-cookie";
+import { Chat, Home, Login, Pong, Profile, Welcome, Error } from "./pages";
 
-//On va surement faire un autre  websocket pour le pong. 
-const socket = socketIO('http://localhost:3001/chat', {
+//On va surement faire un autre  websocket pour le pong.
+const socket = socketIO("http://localhost:3001/chat", {
   query: {
-    token: Cookies.get('jwt_token')
+    token: Cookies.get("jwt_token"),
   },
 });
 
@@ -23,16 +23,16 @@ const router = createBrowserRouter(
       <Route path="/" element={<Home />} />
       <Route path="login" element={<Login />} />
       <Route path="chat" element={<Chat socket={socket} />} />
-      <Route path="game" element={<Pong socket={socket} />} />
+      <Route path="game" element={<Pong />} />
       <Route path="profile" element={<Profile />} />
       <Route path="welcome" element={<Welcome />} />
       <Route path="*" element={<Error />} />
     </Route>
   )
-)
+);
 
 function App() {
-  return <RouterProvider router={router} />
+  return <RouterProvider router={router} />;
 }
 
 export default App;

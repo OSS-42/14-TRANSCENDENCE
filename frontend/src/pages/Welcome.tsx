@@ -1,5 +1,5 @@
-import { Button, Typography, Grid } from '@mui/material'
-import { Link } from 'react-router-dom'
+import { Box, Button, Typography, Grid } from "@mui/material";
+import { Link } from "react-router-dom";
 
 // To do: Connect the button to a function
 // that deals with the 42 API for authentification
@@ -7,40 +7,42 @@ import { Link } from 'react-router-dom'
 
 export function Welcome() {
   return (
-    <Grid
-      container
-      display="flex"
-      flexDirection="column"
-      height="100vh"
-      style={{ minHeight: '90vh', background: '#66cccc' }}
-    >
+    <div className="welcome">
       <Grid
-        xs
+        container
         display="flex"
-        justifyContent="center"
-        alignItems="center"
-        padding="50px"
+        flexDirection="column"
+        height="100vh"
+        style={{ minHeight: "90vh", background: "#66cccc" }}
       >
-        <Typography
-          sx={{
-            textShadow:
-              '0px 2px 5px rgba(0, 0, 0, 0.25), -2px -2px 4px rgba(0, 0, 0, 0.25)',
-          }}
-          style={{ color: '#fffff6' }}
-          variant="h1"
+        <Grid
+          xs
+          display="flex"
           justifyContent="center"
+          alignItems="center"
+          padding="50px"
         >
-          Welcome to Pong!
-        </Typography>
+          <Typography
+            sx={{
+              textShadow:
+                "0px 2px 5px rgba(0, 0, 0, 0.25), -2px -2px 4px rgba(0, 0, 0, 0.25)",
+            }}
+            style={{ color: "#fffff6" }}
+            variant="h1"
+            justifyContent="center"
+          >
+            Welcome to Pong!
+          </Typography>
+        </Grid>
+        <Grid xs display="flex" justifyContent="center" alignItems="center">
+          <img src="welcome.gif" alt="" />
+        </Grid>
+        <Grid xs display="flex" justifyContent="center" alignItems="center">
+          <Link to="http://localhost:3001/auth/42">
+            <Button variant="contained">LOG IN</Button>
+          </Link>
+        </Grid>
       </Grid>
-      <Grid xs display="flex" justifyContent="center" alignItems="center">
-        <img src="welcome.gif" alt="" />
-      </Grid>
-      <Grid xs display="flex" justifyContent="center" alignItems="center">
-        <Link to="http://localhost:3001/auth/42">
-          <Button variant="contained" >LOG IN</Button>
-        </Link>
-      </Grid>
-    </Grid>
-  )
+    </div>
+  );
 }

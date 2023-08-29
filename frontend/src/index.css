@@ -1,7 +1,7 @@
 * {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  font-family: 'Montserrat', sans-serif;
+  font-family: "Montserrat", sans-serif;
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -20,6 +20,11 @@ body {
   background-color: #fffff6;
 }
 
+.welcome {
+  height: 100vh;
+  background-color: red;
+}
+
 .nameSender {
   color: green;
   font-weight: bold; /* Texte gras */
@@ -31,10 +36,9 @@ body {
 }
 
 .notice {
-  color: #FFD700; /* Jaune doré */
+  color: #ffd700; /* Jaune doré */
   font-weight: bold; /* Texte gras */
 }
-
 
 header nav {
   display: flex;
