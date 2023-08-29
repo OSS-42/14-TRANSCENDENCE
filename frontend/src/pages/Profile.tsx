@@ -3,6 +3,7 @@ import Cookies from "js-cookie";
 import { useEffect, useState } from "react";
 import { User } from "../models/User";
 import axios from "axios";
+import { LeftBox } from "../components/Profile/LeftBox";
 
 export function Profile() {
   const [user, setUser] = useState<User>();
@@ -79,7 +80,8 @@ export function Profile() {
           margin: "20px",
         }}
       >
-        <Box
+		<LeftBox/>
+        {/* <Box
           sx={{
             border: "1px solid black",
             borderRadius: "5px",
@@ -91,7 +93,7 @@ export function Profile() {
           }}
         >
           UserName: {user?.username}
-        </Box>
+        </Box> */}
         <Box
           sx={{
             border: "1px solid black",
