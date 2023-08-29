@@ -5,7 +5,7 @@
 
 import { Box as MaterialBox } from '@mui/material'
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Sphere, Box } from "@react-three/drei";
 import "./Pong.css"
@@ -13,6 +13,10 @@ import * as THREE from 'three';
 
 // import { ControlledCameras } from "./controlledcamera";
 import { ControlledCameras } from "../components/Pong/controlledcamera-2"; // Assuming it's exported from a file named ControlledCameras.tsx
+
+// import for DB
+import axios from "axios";
+import Cookies from "js-cookie";
 
 export function Pong() {
 
@@ -34,6 +38,39 @@ export function Pong() {
     const CAMERA_ZOOM = 20;
     const WORLD_WIDTH: number = dimension.width / CAMERA_ZOOM;
     const WORLD_HEIGHT: number = dimension.height / CAMERA_ZOOM;
+
+    //------------------ USER NAME - LEFT ------------------------
+    const [username, setUsername] = React.useState(null);
+    
+    useEffect(() => {
+      const jwt_token = Cookies.get("jwt_token");
+    
+      // Create a new CancelToken
+      const source = axios.CancelToken.source();
+    
+      async function fetchUsersData() {
+        try {
+          const response = await axios.get("http://localhost:3001/users/me", {
+            headers: {
+              Authorization: "Bearer " + jwt_token,
+            },
+            cancelToken: source.token, // Pass cancel token to axios
+          });
+          setUsername(response.data.username);
+        } catch (error) {
+          if (axios.isCancel(error)) {
+            console.log("Request cancelled");
+          }
+        }
+      }
+    
+      fetchUsersData();
+    
+      // Cleanup function
+      return () => {
+        source.cancel("Operation canceled by the user.");
+      };
+    }, []);
 
 //------------------ GAME VARIABLES ------------------------
     // ratio pour garder les meme proportions lors d'un resizing de la page
@@ -248,9 +285,9 @@ export function Pong() {
       if (rightScore === 3 || leftScore === 3) {
         setIsPaused(true);
         if (rightScore === 3) {
-          setWinner("Right Player Wins!");
+          setWinner("Computers wins!");
         } else {
-          setWinner("Left Player Wins!");
+          setWinner(username + " wins!");
         }
       }
     }, [leftScore, rightScore]);
@@ -612,7 +649,7 @@ export function Pong() {
           {/* Scoreboard */}
           <div className="scoreboard">
             <div className="player-info">
-              <span className="player-name">Player 1</span>
+              <span className="player-name">{username}</span>
               <span className="left-score" style={{fontSize: `${fontSize}px` }}>{leftScore}</span>
             </div>
             <div className="player-info">
