@@ -12,7 +12,7 @@ import "./Pong.css"
 import * as THREE from 'three';
 
 // import { ControlledCameras } from "./controlledcamera";
-import { ControlledCameras } from "./controlledcamera-2"; // Assuming it's exported from a file named ControlledCameras.tsx
+import { ControlledCameras } from "../components/Pong/controlledcamera-2"; // Assuming it's exported from a file named ControlledCameras.tsx
 
 export function Pong() {
 
