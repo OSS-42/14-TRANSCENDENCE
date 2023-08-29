@@ -62,14 +62,16 @@ export class UserController {
     @UseInterceptors(FileInterceptor('avatar')) 
     updateAvatar(@GetUser() user: Utilisateur, @UploadedFile() avatarFile: any){
         
-        const originalname = avatarFile.originalname;
+    const originalname = avatarFile.originalname;
     const mimetype = avatarFile.mimetype;
     const buffer = avatarFile.buffer; 
 
-    const imagePath = `./uploads/${originalname}`;
+    let imagePath = `./uploads/${originalname}`;
     fs.writeFileSync(imagePath, buffer);
+    imagePath = imagePath.substring(1);
+    const Url = "http://localhost:3001" + imagePath
     console.log(imagePath)
-    return this.userService.updateAvatar(user, imagePath)
+    return this.userService.updateAvatar(user, Url)
     }
 
     @ApiParam({ name: 'id', type: Number })

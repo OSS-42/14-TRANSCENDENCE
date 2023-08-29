@@ -137,6 +137,7 @@ export class UserService {
         // if (!userToChange) {
         //     throw new Error("Utilisateur non trouvé"); 
         // }
+      
         const updatedUser= await this.prisma.utilisateur.update({
             where: {
                 id: user.id

@@ -17,6 +17,7 @@ import { MulterModule } from '@nestjs/platform-express';
   }) ,
   ServeStaticModule.forRoot({
     rootPath: join(__dirname, '..', 'uploads'),
+    serveRoot: '/uploads',
   }),
   MulterModule.register({
     dest: join(__dirname, '..', 'uploads'),
