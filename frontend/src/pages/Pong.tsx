@@ -80,6 +80,12 @@ export function Pong() {
       let currentCountdown = 3;
       setCountdown(currentCountdown);
       const timer = setInterval(() => {
+        if (winner) {
+          clearInterval(timer);
+          return;
+        }
+
+        // issue : last countdown after a winner.
         currentCountdown -= 1;
         setCountdown(currentCountdown);
         if (currentCountdown === 0) {
@@ -237,6 +243,18 @@ export function Pong() {
     // Scoreboard
     const [leftScore, setLeftScore] = React.useState(0);
     const [rightScore, setRightScore] = React.useState(0);
+
+    React.useEffect(() => {
+      if (rightScore === 3 || leftScore === 3) {
+        setIsPaused(true);
+        if (rightScore === 3) {
+          setWinner("Right Player Wins!");
+        } else {
+          setWinner("Left Player Wins!");
+        }
+      }
+    }, [leftScore, rightScore]);
+
     const baseCanvasWidth: number = 800;
     const baseFontSize: number = 60;
     const fontSize: number = (dimension.width / baseCanvasWidth) * baseFontSize;
@@ -302,7 +320,7 @@ export function Pong() {
     const Ball: React.FC<BallProps> = ({ ballPosition, setBallPosition, ballVelocity, setBallVelocity }) => {
 
       useFrame(() => {
-          if(isPaused || gameStart) return;
+          if(isPaused || gameStart || winner) return;
 
           let newX: number = ballPosition.x + ballVelocity.x;
           // ne pas oublier la position de la camera pour la vue top-down
@@ -373,20 +391,20 @@ export function Pong() {
 
             // Update scores
             if (newX - ballRadius <= -WORLD_WIDTH / 2) {
-              setRightScore(rightScore + 1);
+              setRightScore(prevScore => prevScore + 1);
             } else if (newX + ballRadius >= WORLD_WIDTH / 2) {
-              setLeftScore(leftScore + 1);
+              setLeftScore(prevScore => prevScore + 1);
             }
 
-            if (rightScore === 3 || leftScore === 3) {
-              if (rightScore === 3) {
-                setWinner("Right Player Wins!");
-              } else if(leftScore === 3) {
-                setWinner("Left Player Wins!");
-              }
-              setIsPaused(true);
-              return;
-            }
+            // if (rightScore === 3 || leftScore === 3) {
+            //   if (rightScore === 3) {
+            //     setWinner("Right Player Wins!");
+            //   } else if(leftScore === 3) {
+            //     setWinner("Left Player Wins!");
+            //   }
+            //   setIsPaused(true);
+            //   return;
+            // }
 
             setCameraMode("orthographic");
 
