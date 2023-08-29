@@ -170,7 +170,7 @@ export function Pong() {
     const distanceFromCenter: number = 0.024 * dimension.width;
 
 //------------------ GAME OBJECTS ------------------------
-    // powerup
+
     React.useEffect(() => {
       // const randomX = (Math.random() * (WORLD_WIDTH - 10)) - (WORLD_WIDTH / 2 - 9);
       const randomZ = (Math.random() * (WORLD_HEIGHT - 2)) - (WORLD_HEIGHT / 2 - 1);
