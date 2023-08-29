@@ -7,6 +7,8 @@ import { AvatarBox } from "../components/Profile/AvatarBox";
 import { NameBox } from "../components/Profile/NameBox";
 import { ContentBox } from "../components/Profile/ContentBox";
 import { ContainerGrid } from "../components/Profile/ContainerGrid";
+import { RightSideGrid } from "../components/Profile/RightSideGrid";
+import { LeftSideGrid } from "../components/Profile/LeftSideGrid";
 
 
 export function Profile() {
@@ -65,15 +67,7 @@ export function Profile() {
 
   return (
 	<ContainerGrid>
-      <Grid
-        item
-        xs={4}
-        sx={{
-          border: "1px solid black",
-          borderRadius: "5px",
-          margin: "20px",
-        }}
-      >
+      <LeftSideGrid>
 		<NameBox />           
 		<AvatarBox/>
         <Box
@@ -122,20 +116,12 @@ export function Profile() {
             </Button>
           </label>
         </Box>
-      </Grid>
-      <Grid
-        item
-        xs={7}
-        sx={{
-          border: "1px solid black",
-          borderRadius: "5px",
-          margin: "20px",
-        }}
-      >
+	  </LeftSideGrid>
+	 <RightSideGrid>
 		<ContentBox content="ABOUT"/>
 		<ContentBox content="STATS"/>
-		<ContentBox content="FRIENDLIST"/>
-      </Grid>
+		<ContentBox content="FRIENDS LIST"/>
+	 </RightSideGrid>
     </ContainerGrid>
   );
 }
