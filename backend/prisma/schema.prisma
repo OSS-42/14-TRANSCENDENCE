@@ -51,6 +51,7 @@ model ChatRoom {
   bannedUsers       Utilisateur[] @relation("ChatRoomBannedUsers")
 }
 
+
 model Friendship {
   id          Int         @id @default(autoincrement())
   createdAt   DateTime    @default(now())
@@ -65,8 +66,8 @@ model Banissement {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  bannedUser Utilisateur @relation("UserToBanishment", fields: [bannedUserId], references: [id])
-  bannedUserId Int
+  blockedUser Utilisateur @relation("UserToBanishment", fields: [blockedUserId], references: [id])
+  blockedUserId Int
 
   byUser Utilisateur @relation("BanningUser", fields: [byUserId], references: [id])
   byUserId Int

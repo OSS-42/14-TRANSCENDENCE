@@ -83,7 +83,7 @@ export class UserService {
         if (!friend) {
             throw new NotFoundException("Friend not found");
         }
-        console.log(user.username +" and " + username + " are now friends" )
+       
         const existingFriendship = await this.prisma.friendship.findFirst({
             where: {
                 OR: [
@@ -94,7 +94,11 @@ export class UserService {
         if (existingFriendship) {
             throw new ConflictException("Friendship already exists");
         }
+        if(user.username === username){
+          throw new ConflictException("You can't yourself as friend, sorry you are ALONE");
+        }
         // Créer l'enregistrement d'amitié
+        console.log(user.username +" and " + username + " are now friends" )
         const friendship = await this.prisma.friendship.create({
             data: {
                 user: { connect: { id: user.id } },
@@ -102,6 +106,28 @@ export class UserService {
             }
         });
     }
+    async destroyFriend(userId: number, friendUserId: number): Promise<void> {
+      const friendship = await this.prisma.friendship.findFirst({
+        where: {
+          AND: [
+            { userId: userId },
+            { friendId: friendUserId },
+          ],
+        },
+      });
+  
+      if (!friendship) {
+        throw new NotFoundException('Friendship not found');
+      }
+  
+      // Supprimer l'amitié
+      await this.prisma.friendship.delete({
+        where: {
+          id: friendship.id,
+        },
+      });
+    }
+
     async updateAvatar(user : Utilisateur, image: any) {
         // const userToChange = await this.prisma.utilisateur.findUnique({
         //     where: {
