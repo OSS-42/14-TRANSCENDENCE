@@ -4,6 +4,8 @@ import axios from "axios";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 
+// const clientSecret= "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"
+// const clientID= "u-s4t2ud-c14a5526d27b133c2732f5848ea8a11d76ae8e503f6e495cd3016623aa0c382e"
 
 @Injectable({})
 export class AuthService{

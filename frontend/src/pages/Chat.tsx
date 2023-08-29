@@ -4,6 +4,7 @@ import { Socket } from "socket.io-client";
 import ChatBar from "../components/Chat/ChatBar";
 import ChatBody from "../components/Chat/ChatBody";
 import ChatFooter from "../components/Chat/ChatFooter";
+import ChatFriends from "../components/Chat/ChatFriends";
 
 // I'll refactor this, but the componenets placement would still be
 // where the simple texts are. As it is, I'm not yet confident the
@@ -13,7 +14,9 @@ import ChatFooter from "../components/Chat/ChatFooter";
 type ChatMessage = {
   id: number; // un identifiant unique pour chaque message
   name: string;
+  channel: string;
   text: string;
+  notice: string;
 };
 
 type ChatProps = {
@@ -22,20 +25,21 @@ type ChatProps = {
 
 export function Chat({ socket }: ChatProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-
   // useEffect peut être utilisé pour s'abonner à des flux et mettre à jour l'état du
   // composant lorsque de nouvelles données sont disponibles.
   useEffect(() => {
-    socket.on(
-      "messageResponse",
-      (data: ChatMessage) => setMessages([...messages, data]) //Cette partie met à jour l'état messages. Elle utilise le spread operator ... pour créer un nouveau tableau qui contient les anciens messages (messages) ainsi que le nouveau message data. Ensuite, elle appelle setMessages pour mettre à jour la valeur de messages avec ce nouveau tableau.
+    socket.on( "messageResponse", (data: ChatMessage) => 
+      setMessages([...messages, data]) //Cette partie met à jour l'état messages. Elle utilise le spread operator ... pour créer un nouveau tableau qui contient les anciens messages (messages) ainsi que le nouveau message data. Ensuite, elle appelle setMessages pour mettre à jour la valeur de messages avec ce nouveau tableau.
+      );
+      socket.on( "notice", (data: ChatMessage) => {
+      setMessages([...messages, data]) //Cette partie met à jour l'état messages. Elle utilise le spread operator ... pour créer un nouveau tableau qui contient les anciens messages (messages) ainsi que le nouveau message data. Ensuite, elle appelle setMessages pour mettre à jour la valeur de messages avec ce nouveau tableau.
+    }
     );
+    return () => {
+      socket.off("messageResponse");
+      socket.off("notice");
+    };
   }, [socket, messages]); // Le contenu du tableau signifie qu'il y a des dépendances, donc cet effet se déclenche a chaque fois que le statut d'une des variables change.
-  
-  // socket.emit('allo'); //Pourquoi j'ai deux message dans le console du serveur ?
-  // socket.on('allo', () => {
-  //   alert('allo');
-  // })
   
   return (
     // main box
@@ -62,9 +66,10 @@ export function Chat({ socket }: ChatProps) {
             border: "1px solid black",
             borderRadius: "4px",
             padding: "1rem",
+            overflow: "auto"
           }}
         >
-          <ChatBody messages={messages} />
+          <ChatBody messages={messages}/>
           {/* I'm a chat room box for the messages received. Replace this line with
           a component. */}
         </Box>
@@ -91,9 +96,10 @@ export function Chat({ socket }: ChatProps) {
             border: "1px solid black",
             borderRadius: "4px",
             padding: "1rem",
+            overflow: "auto"
           }}
         >
-          <ChatBar someProp={socket}/>
+          <ChatBar socket={socket}/>
           {/* I'm a box for the friends list. Replace this line with a component. */}
         </Box>
         <Box
@@ -101,11 +107,32 @@ export function Chat({ socket }: ChatProps) {
             border: "1px solid black",
             borderRadius: "4px",
             padding: "1rem",
+            overflow: "auto"
           }}
         >
-          I'm a box for the friends list. Replace this line with a component.
+          <ChatFriends socket={socket}/>
         </Box>
       </Box>
     </Box>
   );
 }
+
+
+/*
+  Pour le channel on a besoin :
+  - Son nom
+  - Son proprietaire
+  - Ses admins
+  - Ses membres
+  - Qui est ban
+  - Flag de mdp
+  - mdp
+  - Flag invitation ? 
+  - 
+
+  Pour les utilisateurs : 
+  - Son nom
+  - Ses channels
+  - Ses amis
+  - Les personnes qu'il a bloqué
+*/

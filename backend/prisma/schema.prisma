@@ -9,23 +9,81 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
 model Utilisateur {
   id Int @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   username String
-  // gamesWon Int
   avatar String?
   email    String @unique
+
+  blockedBy Banissement[] @relation("UserToBanishment")
+  blockedUsers Banissement[] @relation("BanningUser")
+
+  friends  Friendship[] @relation("UserToFriendship")
+  friendOf  Friendship[]  @relation("FriendToFriendship")
+
+  
+  ownedChatRooms  ChatRoom[]   @relation("ChatRoomOwner")
+  memberChatRooms ChatRoom[]   @relation("ChatRoomMembers")
+  moderatorChatRooms ChatRoom[] @relation("ChatRoomModerators")
+  bannedChatRooms ChatRoom[]    @relation("ChatRoomBannedUsers")
+  
+  matchHistoryWinner Match[] @relation("MatchWinner")
+  matchHistoryLoser Match[] @relation("MatchLoser")
 }
-model chatRoom {
+
+model ChatRoom {
   id Int @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   name String @unique
-  
+  hash String?
+  invite Boolean
+  owner       Utilisateur  @relation("ChatRoomOwner", fields: [ownerId], references: [id])
+  ownerId     Int
+ 
+  members           Utilisateur[] @relation("ChatRoomMembers")
+  moderators        Utilisateur[] @relation("ChatRoomModerators")
+  bannedUsers       Utilisateur[] @relation("ChatRoomBannedUsers")
+}
+
+
+model Friendship {
+  id          Int         @id @default(autoincrement())
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  user       Utilisateur @relation("UserToFriendship", fields: [userId], references: [id]) 
+  userId     Int
+  friend     Utilisateur @relation("FriendToFriendship", fields: [friendId], references: [id]) 
+  friendId   Int
+}
+model Banissement {
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  blockedUser Utilisateur @relation("UserToBanishment", fields: [blockedUserId], references: [id])
+  blockedUserId Int
+
+  byUser Utilisateur @relation("BanningUser", fields: [byUserId], references: [id])
+  byUserId Int
+}
+
+
+model Match {
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  winner Utilisateur @relation(name: "MatchWinner", fields: [winnerId], references: [id])
+  winnerId Int 
+
+  loser Utilisateur @relation(name: "MatchLoser", fields: [loserId], references: [id])
+  loserId Int 
 }
 
 
@@ -33,32 +91,4 @@ model chatRoom {
 
 
 
-// model User {
-//   id Int @id @default(autoincrement())
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-//   email String @unique
-//   hash String
 
-//   firstName String?
-//   lastName String?
-  
-//   bookmarks Bookmark[]
-
-//   @@map("users")
-// }
-// model Bookmark {
-//   id Int @id @default(autoincrement())
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-
-//   title String
-//   description String?
-//   link String
-
-//   userId Int
-//   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-//   //on delete cascade
-
-//   @@map("bookmarks")
-// }

@@ -5,13 +5,24 @@ import { UserModule } from './user/user.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ChatModule } from './chat/chat.module';
 import { PongModule } from './pong/pong.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
+import { MulterModule } from '@nestjs/platform-express';
 
 
 
 @Module({
   imports: [ ConfigModule.forRoot({
     isGlobal: true
-  }) ,AuthModule, 
+  }) ,
+  ServeStaticModule.forRoot({
+    rootPath: join(__dirname, '..', 'uploads'),
+    serveRoot: '/uploads',
+  }),
+  MulterModule.register({
+    dest: join(__dirname, '..', 'uploads'),
+  }),
+  AuthModule, 
   UserModule,
   PrismaModule,
   ChatModule,

@@ -1,60 +1,40 @@
 // import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 
 type ChatMessage = {
   id: number; // un identifiant unique pour chaque message
   name: string;
+  channel: string;
   text: string;
+  notice : string;
 };
 
 type ChatBodyProps = {
   messages: ChatMessage[];
 };
 
-const ChatBody = ({ messages } : ChatBodyProps) => {
-  const navigate = useNavigate();
-
-  const handleLeaveChat = () => {
-    // Cette ligne supprime l'élément 'userName' du stockage local (localStorage) du navigateur. 
-    // Le stockage local est une petite base de données intégrée au navigateur web qui permet de stocker des données en permanence, même après la fermeture du navigateur. 
-    localStorage.removeItem('userName');
-    // Redirige l'utilisateur vers l'accueil
-    navigate('/');
-    window.location.reload();
-    // gestion de la db. Deconnexion du channel, nombre de membre present etc ...
-  };
-
+const ChatBody = ({ messages }: ChatBodyProps) => {
   return (
     <>
-      <header className="chat__mainHeader">
-        <p>Hangout with Colleagues</p>
-        <button className="leaveChat__btn" onClick={handleLeaveChat}>
-          LEAVE CHAT
-        </button>
-      </header>
-
       <div className="message__container">
-        {messages.map((message) =>
-          message.name === localStorage.getItem('userName') ? (
-            <div className="message__chats" key={message.id}>
-              <p className="sender__name">You</p>
-              <div className="message__sender">
-                <p>{message.text}</p>
-              </div>
-            </div>
-          ) : (
-            <div className="message__chats" key={message.id}>
-              <p>{message.name}</p>
-              <div className="message__recipient">
-                <p>{message.text}</p>
-              </div>
-            </div>
-          )
-        )}
-
-        <div className="message__status">
-          <p>Someone is typing...</p>
-        </div>
+        {messages.map((message) => (
+          <div className="message__chats" key={message.id}>
+              <p>
+              {message.notice ? (
+                // Si message.notice n'est pas nulle, affichez son contenu.
+                <span className='notice'>{message.notice}</span>
+                ) : (
+                <>
+                {message.channel !== undefined && (
+                  <span className="channelSender">{message.channel}</span>
+                )}{" "}
+                <span className="nameSender">{message.name}</span> :{" "}
+                {message.text}
+                </>
+                )}
+              </p>
+          </div>
+        ))}
       </div>
     </>
   );

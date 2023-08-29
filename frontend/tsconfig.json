@@ -8,6 +8,7 @@
 
     /* Bundler mode */
     "moduleResolution": "node",
+    "allowImportingTsExtensions": true, //from eric
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
