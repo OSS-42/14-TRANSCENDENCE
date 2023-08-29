@@ -10,18 +10,15 @@ type ChatMessage = {
 
 type ChatBodyProps = {
   messages: ChatMessage[];
-  notice: boolean;
+  notices: ChatMessage[];
 };
 
-const ChatBody = ({ messages, notice }: ChatBodyProps) => {
+const ChatBody = ({ messages, notices }: ChatBodyProps) => {
   return (
     <>
       <div className="message__container">
         {messages.map((message) => (
           <div className="message__chats" key={message.id}>
-            {notice ? (
-              <p><span className='notice'>{message.text}</span></p>
-            ) : (
               <p>
                 {message.channel !== undefined && (
                   <span className="channelSender">{message.channel}</span>
@@ -29,7 +26,13 @@ const ChatBody = ({ messages, notice }: ChatBodyProps) => {
                 <span className="nameSender">{message.name}</span> :{" "}
                 {message.text}
               </p>
-            )}
+          </div>
+        ))}
+        {notices.map((notice) => (
+          <div className="message__chats" key={notice.id}>
+              <p>
+                <span className="notice">{notice.text}</span>
+              </p>
           </div>
         ))}
       </div>

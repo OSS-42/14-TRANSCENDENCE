@@ -24,7 +24,7 @@ type ChatProps = {
 
 export function Chat({ socket }: ChatProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  let notice : boolean = false
+  const [notices, setNotices] = useState<ChatMessage[]>([]);
   // useEffect peut être utilisé pour s'abonner à des flux et mettre à jour l'état du
   // composant lorsque de nouvelles données sont disponibles.
   useEffect(() => {
@@ -32,8 +32,7 @@ export function Chat({ socket }: ChatProps) {
       setMessages([...messages, data]) //Cette partie met à jour l'état messages. Elle utilise le spread operator ... pour créer un nouveau tableau qui contient les anciens messages (messages) ainsi que le nouveau message data. Ensuite, elle appelle setMessages pour mettre à jour la valeur de messages avec ce nouveau tableau.
     );
     socket.on( "notice", (data: ChatMessage) => {
-      setMessages([...messages, data]) //Cette partie met à jour l'état messages. Elle utilise le spread operator ... pour créer un nouveau tableau qui contient les anciens messages (messages) ainsi que le nouveau message data. Ensuite, elle appelle setMessages pour mettre à jour la valeur de messages avec ce nouveau tableau.
-      notice = true;
+      setNotices([...notices, data]) //Cette partie met à jour l'état messages. Elle utilise le spread operator ... pour créer un nouveau tableau qui contient les anciens messages (messages) ainsi que le nouveau message data. Ensuite, elle appelle setMessages pour mettre à jour la valeur de messages avec ce nouveau tableau.
     }
     );
     return () => {
@@ -70,7 +69,7 @@ export function Chat({ socket }: ChatProps) {
             overflow: "auto"
           }}
         >
-          <ChatBody messages={messages} notice={notice}/>
+          <ChatBody messages={messages} notices={notices}/>
           {/* I'm a chat room box for the messages received. Replace this line with
           a component. */}
         </Box>
