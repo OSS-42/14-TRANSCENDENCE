@@ -1,6 +1,6 @@
 import { Box } from "@mui/material";
 
-export function AboutBox() {
+export function AboutBox({content}) {
   return (
     <div>
       <Box
@@ -14,7 +14,7 @@ export function AboutBox() {
           overflow: "auto", // Enable scrolling when content overflows
         }}
       >
-        ABOUT
+        {content}
       </Box>
     </div>
   );

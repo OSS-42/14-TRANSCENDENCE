@@ -140,45 +140,9 @@ export function Profile() {
           margin: "20px",
         }}
       >
-		<AboutBox/>
-       {/* <Box
-          sx={{
-            border: "1px solid black",
-            borderRadius: "5px",
-            margin: "20px",
-            fontWeight: "bold",
-            height: "28vh",
-            maxHeight: "370px", // Set a maximum height for scrolling
-            overflow: "auto", // Enable scrolling when content overflows
-          }}
-        >
-          ABOUT
-        </Box> */}
-        <Box
-          sx={{
-            border: "1px solid black",
-            margin: "20px",
-            fontWeight: "bold",
-            height: "28vh",
-            maxHeight: "370px", // Set a maximum height for scrolling
-            overflow: "auto", // Enable scrolling when content overflows
-          }}
-        >
-          STATS
-        </Box>
-        <Box
-          sx={{
-            border: "1px solid black",
-            borderRadius: "5px",
-            margin: "20px",
-            fontWeight: "bold",
-            height: "28vh",
-            maxHeight: "370px", // Set a maximum height for scrolling
-            overflow: "auto", // Enable scrolling when content overflows
-          }}
-        >
-          FRIEND LISTS
-        </Box>
+		<AboutBox content="ABOUT"/>
+		<AboutBox content="STATS"/>
+		<AboutBox content="FRIENDLIST"/>
       </Grid>
     </Grid>
   );
