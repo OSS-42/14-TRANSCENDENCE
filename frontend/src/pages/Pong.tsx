@@ -378,10 +378,10 @@ export function Pong() {
               setLeftScore(leftScore + 1);
             }
 
-            if (rightScore + 1 === 11 || leftScore + 1 === 11) {
-              if (rightScore + 1 === 11) {
+            if (rightScore === 3 || leftScore === 3) {
+              if (rightScore === 3) {
                 setWinner("Right Player Wins!");
-              } else if(leftScore + 1 === 11) {
+              } else if(leftScore === 3) {
                 setWinner("Left Player Wins!");
               }
               setIsPaused(true);
