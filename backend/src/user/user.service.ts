@@ -33,6 +33,27 @@ export class UserService {
 
         return user;
     }
+    async getUserInfoPlus(id: number): Promise<Utilisateur> {
+      const user = await this.prisma.utilisateur.findFirst({
+          where: {
+              id: id,
+          },
+          include: {
+            friends: true,
+            friendOf: true,
+            ownedChatRooms: true,
+            memberChatRooms: true,
+            moderatorChatRooms: true,
+            bannedChatRooms: true,
+            matchHistoryWinner: true,
+            matchHistoryLoser: true,
+          },
+      });
+      if (!user) {
+          throw new NotFoundException(`User with username ${id} not found`);
+      }
+      return user;
+  }
 
     async getAllUsers(): Promise<Utilisateur[]> {
         return this.prisma.utilisateur.findMany();
@@ -62,7 +83,7 @@ export class UserService {
         if (!friend) {
             throw new NotFoundException("Friend not found");
         }
-        console.log(user.username +" and " + username + " are now friends" )
+       
         const existingFriendship = await this.prisma.friendship.findFirst({
             where: {
                 OR: [
@@ -73,7 +94,11 @@ export class UserService {
         if (existingFriendship) {
             throw new ConflictException("Friendship already exists");
         }
+        if(user.username === username){
+          throw new ConflictException("You can't yourself as friend, sorry you are ALONE");
+        }
         // Créer l'enregistrement d'amitié
+        console.log(user.username +" and " + username + " are now friends" )
         const friendship = await this.prisma.friendship.create({
             data: {
                 user: { connect: { id: user.id } },
@@ -81,6 +106,28 @@ export class UserService {
             }
         });
     }
+    async destroyFriend(userId: number, friendUserId: number): Promise<void> {
+      const friendship = await this.prisma.friendship.findFirst({
+        where: {
+          AND: [
+            { userId: userId },
+            { friendId: friendUserId },
+          ],
+        },
+      });
+  
+      if (!friendship) {
+        throw new NotFoundException('Friendship not found');
+      }
+  
+      // Supprimer l'amitié
+      await this.prisma.friendship.delete({
+        where: {
+          id: friendship.id,
+        },
+      });
+    }
+
     async updateAvatar(user : Utilisateur, image: any) {
         // const userToChange = await this.prisma.utilisateur.findUnique({
         //     where: {
@@ -90,6 +137,7 @@ export class UserService {
         // if (!userToChange) {
         //     throw new Error("Utilisateur non trouvé"); 
         // }
+      
         const updatedUser= await this.prisma.utilisateur.update({
             where: {
                 id: user.id
@@ -100,6 +148,47 @@ export class UserService {
         });
         return updatedUser
     }
+
+    async getUserMatchHistory(id: number) {
+        id = Number(id)
+        const user = await this.prisma.utilisateur.findUnique({
+          where: { id },
+          include: {
+            matchHistoryWinner: {
+              include: {
+                winner: true,
+                loser: true,
+              },
+            },
+            matchHistoryLoser: {
+              include: {
+                winner: true,
+                loser: true,
+              },
+            },
+          },
+        });
+    
+        const matchesWon = user.matchHistoryWinner.map(match => ({
+          date: match.createdAt,
+          winner: match.winner.username,
+          loser: match.loser.username,
+        }));
+    
+        const matchesLost = user.matchHistoryLoser.map(match => ({
+          date: match.createdAt,
+          winner: match.winner.username,
+          loser: match.loser.username,
+        }));
+        console.log ("voici lhistorique", matchesLost, matchesWon)
+        return {
+          matchesWon,
+          matchesLost,
+        };
+      }
+    }
+
+    
         // //Je pense que je nai pas besoin de update les users, cela se fait automatiquement???
         // await this.prisma.utilisateur.update({
         //     where: { id: user.id },
@@ -110,5 +199,5 @@ export class UserService {
         //     where: { id: friend.id },
         //     data: { friendOf: { connect: { id: friendship.id } } }
         // });
-}
+
 
