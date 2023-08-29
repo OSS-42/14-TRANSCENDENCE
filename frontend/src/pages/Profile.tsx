@@ -5,6 +5,7 @@ import { User } from "../models/User";
 import axios from "axios";
 import { AvatarBox } from "../components/Profile/AvatarBox";
 import { NameBox } from "../components/Profile/NameBox";
+import { AboutBox } from "../components/Profile/AboutBox";
 
 export function Profile() {
   const [user, setUser] = useState<User>();
@@ -81,42 +82,7 @@ export function Profile() {
           margin: "20px",
         }}
       >
-		<NameBox />
-        {/* <Box
-          sx={{
-            border: "1px solid black",
-            borderRadius: "5px",
-            margin: "20px",
-            fontWeight: "bold",
-            fontSize: "20px",
-            height: "5vh",
-            padding: "20px", //Avoid that when box gets too little, it overlap box font overlaps
-          }}
-        >
-          UserName: {user?.username}
-        </Box> */}
-        {/* <Box
-          sx={{
-            border: "1px solid black",
-            borderRadius: "5px",
-            margin: "20px",
-            fontWeight: "bold",
-            height: "30vh",
-            width: "50%",
-            display: "flex",
-            alignItems: "center",
-          }}
-        >
-          <Avatar
-            alt="Username"
-            src={user?.avatar}
-            sx={{
-              width: "100%", // Allow width to adjust
-              height: "100%", // Fill the available height
-              maxWidth: "100%",
-            }}
-          />
-        </Box> */}
+		<NameBox />           
 		<AvatarBox/>
         <Box
           sx={{
@@ -155,7 +121,6 @@ export function Profile() {
         >
           <input
             type="text" // Indicated that we will select a type file
-            onChange={handleAvatarSelected}
             style={{ display: "none" }} // Hide the input element totally
             id="username-input" // Creates a specific id for the input
           />
@@ -175,7 +140,8 @@ export function Profile() {
           margin: "20px",
         }}
       >
-        <Box
+		<AboutBox/>
+       {/* <Box
           sx={{
             border: "1px solid black",
             borderRadius: "5px",
@@ -187,7 +153,7 @@ export function Profile() {
           }}
         >
           ABOUT
-        </Box>
+        </Box> */}
         <Box
           sx={{
             border: "1px solid black",
