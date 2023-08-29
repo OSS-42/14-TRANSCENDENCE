@@ -1,10 +1,12 @@
-import { Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiBody, ApiHeader, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { Utilisateur } from '@prisma/client';
 import { GetUser } from 'src/auth/decorator';
 import { JwtGuard } from 'src/auth/guard';
 import { UserService } from "./user.service";
+import * as fs from 'fs';
 
 @Controller('users')
 @ApiTags('users')
@@ -57,9 +59,17 @@ export class UserController {
     }
 
     @Post('updateAvatar')
-    updateAvatar(@GetUser() user: Utilisateur, @Body() requestBody: any){
-        console.log()
-    return this.userService.updateAvatar(user, requestBody)
+    @UseInterceptors(FileInterceptor('avatar')) 
+    updateAvatar(@GetUser() user: Utilisateur, @UploadedFile() avatarFile: any){
+        
+        const originalname = avatarFile.originalname;
+    const mimetype = avatarFile.mimetype;
+    const buffer = avatarFile.buffer; 
+
+    const imagePath = `./uploads/${originalname}`;
+    fs.writeFileSync(imagePath, buffer);
+    console.log(imagePath)
+    return this.userService.updateAvatar(user, imagePath)
     }
 
     @ApiParam({ name: 'id', type: Number })
