@@ -5,7 +5,9 @@ import { User } from "../models/User";
 import axios from "axios";
 import { AvatarBox } from "../components/Profile/AvatarBox";
 import { NameBox } from "../components/Profile/NameBox";
-import { AboutBox } from "../components/Profile/AboutBox";
+import { ContentBox } from "../components/Profile/ContentBox";
+import { ContainerGrid } from "../components/Profile/ContainerGrid";
+
 
 export function Profile() {
   const [user, setUser] = useState<User>();
@@ -62,17 +64,7 @@ export function Profile() {
   };
 
   return (
-    <Grid
-      container
-      sx={{
-        border: "1px solid black",
-        borderRadius: "5px",
-        height: "95vh",
-        width: "95vw",
-        margin: "10px",
-        boxSizing: "border-box",
-      }}
-    >
+	<ContainerGrid>
       <Grid
         item
         xs={4}
@@ -140,10 +132,10 @@ export function Profile() {
           margin: "20px",
         }}
       >
-		<AboutBox content="ABOUT"/>
-		<AboutBox content="STATS"/>
-		<AboutBox content="FRIENDLIST"/>
+		<ContentBox content="ABOUT"/>
+		<ContentBox content="STATS"/>
+		<ContentBox content="FRIENDLIST"/>
       </Grid>
-    </Grid>
+    </ContainerGrid>
   );
 }

@@ -1,6 +1,6 @@
 import { Box } from "@mui/material";
 
-export function AboutBox({content}) {
+export function ContentBox({content}) {
   return (
     <div>
       <Box
