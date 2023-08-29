@@ -180,6 +180,7 @@ export class ChatService {
       });
      return !!room
     }
+
     async isRoomProtected(roomName: string): Promise<boolean> {
       const room = await this.prisma.chatRoom.findFirst({
         where: {
@@ -226,6 +227,7 @@ export class ChatService {
       return room;
     }
 
+    //Si le channel est privé renvoie vrai sinon faux
     async isRoomPrivate(roomName:string) {
       const room = await this.prisma.chatRoom.findUnique({
         where: {
@@ -243,6 +245,8 @@ export class ChatService {
       });
       return user;
     }
+
+    //retourne un user
     async isOwner(username:string, roomName:string) {
       const user = await this.prisma.utilisateur.findFirst({
         where: {
@@ -251,8 +255,9 @@ export class ChatService {
       });
       return user;
     }
-
-
+    
+    
+    //retourne vrai ou faux
     async isUserOwnerOfChatRoom(userId:number, chatRoomId:number): Promise<boolean> {
       const user = await this.prisma.utilisateur.findFirst({
         where: {
@@ -336,4 +341,3 @@ export class ChatService {
   }
   
   
-  //Une fonction pour bloquer un utilisateur (J'aurais besoin de pouvoir recuperer l'information dans le frontend pour savoir quel message afficher ou non)

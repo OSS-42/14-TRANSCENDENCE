@@ -4,8 +4,6 @@ CREATE TABLE "Utilisateur" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "username" TEXT NOT NULL,
-    "gamesWon" INTEGER NOT NULL DEFAULT 0,
-    "gameLost" INTEGER NOT NULL DEFAULT 0,
     "avatar" TEXT,
     "email" TEXT NOT NULL,
 
@@ -34,6 +32,17 @@ CREATE TABLE "Friendship" (
     "friendId" INTEGER NOT NULL,
 
     CONSTRAINT "Friendship_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Banissement" (
+    "id" SERIAL NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "blockedUserId" INTEGER NOT NULL,
+    "byUserId" INTEGER NOT NULL,
+
+    CONSTRAINT "Banissement_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -97,6 +106,12 @@ ALTER TABLE "Friendship" ADD CONSTRAINT "Friendship_userId_fkey" FOREIGN KEY ("u
 
 -- AddForeignKey
 ALTER TABLE "Friendship" ADD CONSTRAINT "Friendship_friendId_fkey" FOREIGN KEY ("friendId") REFERENCES "Utilisateur"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Banissement" ADD CONSTRAINT "Banissement_blockedUserId_fkey" FOREIGN KEY ("blockedUserId") REFERENCES "Utilisateur"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Banissement" ADD CONSTRAINT "Banissement_byUserId_fkey" FOREIGN KEY ("byUserId") REFERENCES "Utilisateur"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Match" ADD CONSTRAINT "Match_winnerId_fkey" FOREIGN KEY ("winnerId") REFERENCES "Utilisateur"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
