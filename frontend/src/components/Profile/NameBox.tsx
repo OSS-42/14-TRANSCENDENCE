@@ -12,9 +12,9 @@ export function NameBox() {
           fontWeight: "bold",
           fontSize: "20px",
           height: "5vh",
-          padding: "20px", 
+          padding: "20px",
         }}
-      >Name: </Box>
+      ></Box>
     </div>
   );
 }

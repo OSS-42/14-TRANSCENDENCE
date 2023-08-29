@@ -3,7 +3,8 @@ import Cookies from "js-cookie";
 import { useEffect, useState } from "react";
 import { User } from "../models/User";
 import axios from "axios";
-import { LeftBox } from "../components/Profile/LeftBox";
+import { AvatarBox } from "../components/Profile/AvatarBox";
+import { NameBox } from "../components/Profile/NameBox";
 
 export function Profile() {
   const [user, setUser] = useState<User>();
@@ -80,7 +81,7 @@ export function Profile() {
           margin: "20px",
         }}
       >
-		<LeftBox/>
+		<NameBox />
         {/* <Box
           sx={{
             border: "1px solid black",
@@ -94,7 +95,7 @@ export function Profile() {
         >
           UserName: {user?.username}
         </Box> */}
-        <Box
+        {/* <Box
           sx={{
             border: "1px solid black",
             borderRadius: "5px",
@@ -115,7 +116,8 @@ export function Profile() {
               maxWidth: "100%",
             }}
           />
-        </Box>
+        </Box> */}
+		<AvatarBox/>
         <Box
           sx={{
             border: "1px solid black",
