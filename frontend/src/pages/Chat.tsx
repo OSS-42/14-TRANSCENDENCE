@@ -28,18 +28,18 @@ export function Chat({ socket }: ChatProps) {
   // useEffect peut être utilisé pour s'abonner à des flux et mettre à jour l'état du
   // composant lorsque de nouvelles données sont disponibles.
   useEffect(() => {
-    socket.on( "messageResponse", (data: ChatMessage) => 
-      setMessages([...messages, data]) //Cette partie met à jour l'état messages. Elle utilise le spread operator ... pour créer un nouveau tableau qui contient les anciens messages (messages) ainsi que le nouveau message data. Ensuite, elle appelle setMessages pour mettre à jour la valeur de messages avec ce nouveau tableau.
-      );
-      socket.on( "notice", (data: ChatMessage) => {
-      setMessages([...messages, data]) //Cette partie met à jour l'état messages. Elle utilise le spread operator ... pour créer un nouveau tableau qui contient les anciens messages (messages) ainsi que le nouveau message data. Ensuite, elle appelle setMessages pour mettre à jour la valeur de messages avec ce nouveau tableau.
-    }
-    );
-    return () => {
-      socket.off("messageResponse");
-      socket.off("notice");
-    };
-  }, [socket, messages]); // Le contenu du tableau signifie qu'il y a des dépendances, donc cet effet se déclenche a chaque fois que le statut d'une des variables change.
+	socket.on("messageResponse", (data: ChatMessage) => 
+	  setMessages(prevMessages => [...prevMessages, data])
+	);
+	socket.on("notice", (data: ChatMessage) => {
+	  setMessages(prevMessages => [...prevMessages, data])
+	});
+  
+	return () => {
+	  socket.off("messageResponse");
+	  socket.off("notice");
+	};
+  }, [socket]);
   
   return (
     // main box

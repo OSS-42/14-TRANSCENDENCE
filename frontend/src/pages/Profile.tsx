@@ -27,9 +27,13 @@ export function Profile() {
     fetchUsersData();
   }, []);
 
+  function handleUsername() {
+	console.log("Click Button");
+  }
+
   const handleAvatarSelected = (event) => {
-    const selectedFile = event.target.files[0];    
-	//console.log(selectedFile);                      // To be removed 
+    const selectedFile = event.target.files[0];
+    //console.log(selectedFile);                      // To be removed
     if (selectedFile) {
       setSelectedAvatar(selectedFile);
       handleAvatarUpdate(selectedFile);
@@ -38,19 +42,19 @@ export function Profile() {
 
   const handleAvatarUpdate = async (avatarFile: File) => {
     const formData = new FormData();
-	console.log(avatarFile);
-    formData.append('avatar', avatarFile);
-	const jwt_token = Cookies.get("jwt_token");
+    console.log(avatarFile);
+    formData.append("avatar", avatarFile);
+    const jwt_token = Cookies.get("jwt_token");
 
     try {
       await axios.post("http://localhost:3001/users/updateAvatar", formData, {
-		headers: {
-		  Authorization: "Bearer " + jwt_token,
-		},
-	  });
-      console.log('Avatar updated successfully');
+        headers: {
+          Authorization: "Bearer " + jwt_token,
+        },
+      });
+      console.log("Avatar updated successfully");
     } catch (error) {
-      console.error('Error updating avatar:', error);
+      console.error("Error updating avatar:", error);
     }
   };
 
@@ -71,27 +75,27 @@ export function Profile() {
         xs={4}
         sx={{
           border: "1px solid black",
-		  borderRadius: "5px",
+          borderRadius: "5px",
           margin: "20px",
         }}
       >
         <Box
           sx={{
             border: "1px solid black",
-			borderRadius: "5px",
+            borderRadius: "5px",
             margin: "20px",
             fontWeight: "bold",
-			fontSize: "20px",
+            fontSize: "20px",
             height: "5vh",
-            //padding: "20px", //Avoid that when box gets too little, it overlap box font overlaps
+            padding: "20px", //Avoid that when box gets too little, it overlap box font overlaps
           }}
         >
-          Name: {user?.username}
+          UserName: {user?.username}
         </Box>
         <Box
           sx={{
             border: "1px solid black",
-			borderRadius: "5px",
+            borderRadius: "5px",
             margin: "20px",
             fontWeight: "bold",
             height: "30vh",
@@ -113,12 +117,12 @@ export function Profile() {
         <Box
           sx={{
             border: "1px solid black",
-			borderRadius: "5px",
+            borderRadius: "5px",
             margin: "20px",
-			width: "50%",
-			display: 'flex',
-			justifyContent: 'center', // Center horizontally
-			alignItems: 'center', // Center vertically
+            width: "50%",
+            display: "flex",
+            justifyContent: "center", // Center horizontally
+            alignItems: "center", // Center vertically
           }}
         >
           <input
@@ -134,20 +138,43 @@ export function Profile() {
             </Button>
           </label>
         </Box>
+        <Box
+          sx={{
+            border: "1px solid black",
+            borderRadius: "5px",
+            margin: "20px",
+            width: "50%",
+            display: "flex",
+            justifyContent: "center", // Center horizontally
+            alignItems: "center", // Center vertically
+          }}
+        >
+          <input
+            type="text" // Indicated that we will select a type file
+            onChange={handleAvatarSelected}
+            style={{ display: "none" }} // Hide the input element totally
+            id="username-input" // Creates a specific id for the input
+          />
+          <label htmlFor="username-input">
+            <Button variant="contained" size="large" component="span" onClick={handleUsername}>
+              Change Username
+            </Button>
+          </label>
+        </Box>
       </Grid>
       <Grid
         item
         xs={7}
         sx={{
           border: "1px solid black",
-		  borderRadius: "5px",
+          borderRadius: "5px",
           margin: "20px",
         }}
       >
         <Box
           sx={{
             border: "1px solid black",
-			borderRadius: "5px",
+            borderRadius: "5px",
             margin: "20px",
             fontWeight: "bold",
             height: "28vh",
@@ -172,7 +199,7 @@ export function Profile() {
         <Box
           sx={{
             border: "1px solid black",
-			borderRadius: "5px",
+            borderRadius: "5px",
             margin: "20px",
             fontWeight: "bold",
             height: "28vh",
