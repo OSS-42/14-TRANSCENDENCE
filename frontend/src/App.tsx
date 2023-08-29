@@ -21,7 +21,6 @@ const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<RootLayout />}>
       <Route path="/" element={<Home />} />
-      <Route path="login" element={<Login />} />
       <Route path="chat" element={<Chat socket={socket} />} />
       <Route path="game" element={<Pong />} />
       <Route path="profile" element={<Profile />} />

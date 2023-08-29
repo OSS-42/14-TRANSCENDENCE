@@ -1,20 +1,19 @@
-import { NavLink, Outlet } from 'react-router-dom'
-import { Welcome } from '../pages'
-import  Cookies  from 'js-cookie';
+import { NavLink, Outlet } from "react-router-dom";
+import { Welcome } from "../pages";
+import Cookies from "js-cookie";
 
 // I'd like to change the header for a Material UI component,
 // but I'm still not sure how it would work.
 // For now we have a simple NavBar. :)
 
 export default function RootLayout() {
-  const secureCookieValue = Cookies.get('jwt_token');
+  const secureCookieValue = Cookies.get("jwt_token");
   if (!secureCookieValue) {
-    return <Welcome />
-
+    return <Welcome />;
   }
 
   return (
-    <div className="root-layout">
+    <>
       <header>
         <nav>
           <NavLink to="chat">Chat</NavLink>
@@ -26,8 +25,8 @@ export default function RootLayout() {
       <main>
         <Outlet />
       </main>
-    </div>
-  )
+    </>
+  );
 }
 
 // the state of a logged user is hard coded right now, by setting [user] to true or false.
