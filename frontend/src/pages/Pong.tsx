@@ -64,7 +64,7 @@ export function Pong() {
     const [powerupVisible, setPowerupVisible] = React.useState(false);
 
 //------------------ GAME UTILS ------------------------
-    function getSpeedFactor(width: number) {
+    function getSpeedFactor(width: number): number {
       if (width < 300) {
         return 0.2;
       } else if (width < 450) {
@@ -76,7 +76,7 @@ export function Pong() {
     }
 
 //------------------ GAME GENERAL BEHAVIOR ------------------------
-    const handleCountdown = () => {
+    const handleCountdown = (): void => {
       let currentCountdown = 3;
       setCountdown(currentCountdown);
       const timer = setInterval(() => {
@@ -96,7 +96,7 @@ export function Pong() {
     // Timer to restart
     const [countdown, setCountdown] = React.useState<number | null>(null);
 
-    const handleKeyPress = (event: KeyboardEvent) => {
+    const handleKeyPress = (event: KeyboardEvent): void => {
       if (isClassicMode) return;
       if (event.key === "c" || event.key === "C") {
         // Toggle the camera mode when the "C" key is pressed
@@ -115,7 +115,7 @@ export function Pong() {
     }, [isClassicMode]);
 
 //------------------ GAME MODES ------------------------
-    const handleClassicMode = () => {
+    const handleClassicMode = (): void => {
       setGameLaunched(true);
       setCameraMode("orthographic");
       setIsClassicMode(true);
@@ -123,7 +123,7 @@ export function Pong() {
       handleCountdown();
     };
 
-    const handlePowerupMode = () => {
+    const handlePowerupMode = (): void => {
       setGameLaunched(true);
       setCameraMode("orthographic");
       setPowerupVisible(true);
@@ -138,7 +138,7 @@ export function Pong() {
       // const initialSpeedFactor = getSpeedFactor(dimension.width);
       // const [ballSpeed, setBallSpeed] = React.useState(INITIAL_BALL_SPEED * initialSpeedFactor);
       
-      function handleResize() {
+      const handleResize: () => void = () => {
         let newWidth: number = window.innerWidth;
         let newHeight: number = window.innerWidth * 3 / 4;
 
@@ -181,7 +181,7 @@ export function Pong() {
       setPowerupPosition({ x: 0, y: 0, z: randomZ });
     }, []);
 
-    const Powerup = () => {
+    const Powerup: React.FC<{}> = () => {
       if (!powerupVisible || isClassicMode) return null;
 
       const textTexture = React.useMemo(createTextTexture, []);
@@ -193,7 +193,7 @@ export function Pong() {
       );
     };
 
-    const respawnPowerup = () => {
+    const respawnPowerup: () => void = () => {
       // const randomX = (Math.random() * (WORLD_WIDTH - 2)) - (WORLD_WIDTH / 2 - 1);
       const randomZ = (Math.random() * (WORLD_HEIGHT - 2)) - (WORLD_HEIGHT / 2 - 1);
     
@@ -201,7 +201,7 @@ export function Pong() {
       setPowerupVisible(true);
     };
 
-    const createTextTexture = () => {
+    const createTextTexture: () => THREE.CanvasTexture = () => {
       const canvas = document.createElement('canvas');
       canvas.width = 256;
       canvas.height = 256;
@@ -248,32 +248,32 @@ export function Pong() {
     const userHitSoundRef = React.useRef<HTMLAudioElement>(null);
     const compHitSoundRef = React.useRef<HTMLAudioElement>(null);
 
-    const playGoalSound = () => {
+    const playGoalSound: () => void = () => {
       goalSoundRef.current?.play();
     };
 
-    const playPowerupSound = () => {
+    const playPowerupSound: () => void = () => {
       powerupHitSoundRef.current?.play();
     };
 
-    const pausePowerupSound = () => {
+    const pausePowerupSound: () => void = () => {
       powerupHitSoundRef.current?.pause();
     };
 
-    const playBallWallSound = () => {
+    const playBallWallSound: () => void = () => {
       ballWallSoundRef.current?.play();
     };
 
-    const playUserHitSound = () => {
+    const playUserHitSound: () => void = () => {
       userHitSoundRef.current?.play();
     }
 
-    const playCompHitSound = () => {
+    const playCompHitSound: () => void = () => {
       compHitSoundRef.current?.play();
     }
 
     // border lines
-      const Borders = () => {
+      const Borders: React.FC<{}> = () => {
         const borderThickness = 0.05; // You can adjust this value
         return (
           <>
@@ -292,7 +292,14 @@ export function Pong() {
 
 //------------------ GAME BALL LOGIC ------------------------
     // Ball mechanics
-    const Ball = ({ ballPosition, setBallPosition, ballVelocity, setBallVelocity }) => {
+    interface BallProps {
+      ballPosition: Position;
+      setBallPosition: React.Dispatch<React.SetStateAction<Position>>;
+      ballVelocity: Position;
+      setBallVelocity: React.Dispatch<React.SetStateAction<Position>>;
+      speedFactor: number;
+    }
+    const Ball: React.FC<BallProps> = ({ ballPosition, setBallPosition, ballVelocity, setBallVelocity }) => {
 
       useFrame(() => {
           if(isPaused || gameStart) return;
@@ -315,7 +322,7 @@ export function Pong() {
             setTimeout(() => {
               setCameraMode("orthographic");
               respawnPowerup();
-            }, 15000);
+            }, 12000);
           }
 
           // Validation de hit avec les murs
@@ -361,6 +368,8 @@ export function Pong() {
               pausePowerupSound();
               playGoalSound();
             }
+
+            //bug a 10 points...
 
             // Update scores
             if (newX - ballRadius <= -WORLD_WIDTH / 2) {
@@ -410,7 +419,14 @@ export function Pong() {
     const rightPaddleXPosition: number = distanceFromCenter;
 
     // Collision Logic with Paddles
-    const checkCollision = (ballPos, paddlePos, paddleDims) => {
+    type Position = { x: number, z: number };
+    type PaddleDimensions = { width: number, depth: number };
+
+    const checkCollision = (
+      ballPos: Position,
+      paddlePos: Position,
+      paddleDims: PaddleDimensions
+    ): boolean | string => {
       const distX: number = Math.abs(ballPos.x - paddlePos.x);
       const distZ: number = Math.abs(ballPos.z - paddlePos.z);
 
@@ -428,7 +444,12 @@ export function Pong() {
     };
 
     // mouvement du left (user1) paddle a la souris.
-    const LeftPaddle = ({ leftPaddlePositionZ, setLeftPaddlePositionZ }) => {
+    interface LeftPaddleProps {
+      leftPaddlePositionZ : number;
+      setLeftPaddlePositionZ: React.Dispatch<React.SetStateAction<number>>;
+    }
+
+    const LeftPaddle: React.FC<LeftPaddleProps> = ({ leftPaddlePositionZ, setLeftPaddlePositionZ }) => {
       const { mouse } = useThree();
       
       useFrame(() => {
@@ -461,9 +482,14 @@ export function Pong() {
     // Right paddle (Computer - User2)
     const RIGHT_PADDLE_SPEED: number = 0.8;
 
-    const lerp = (a, b, t) => a + t * (b - a);
+    const lerp = (a: number, b: number, t: number): number => a + t * (b - a);
 
-    const RightPaddle = ({ rightPaddlePositionZ, setRightPaddlePositionZ }) => {
+    interface RightPaddleProps {
+      RightPaddlePositionZ : number;
+      setRightPaddlePositionZ: React.Dispatch<React.SetStateAction<number>>;
+    }
+
+    const RightPaddle: React.FC<RightPaddleProps> = ({ rightPaddlePositionZ, setRightPaddlePositionZ }) => {
 
       useFrame(() => {
         const direction: number = Math.sign(ballPosition.z - rightPaddlePositionZ);
