@@ -38,6 +38,8 @@ export function Pong() {
 //------------------ GAME VARIABLES ------------------------
     // ratio pour garder les meme proportions lors d'un resizing de la page
     // attention, a cause du positionnement de la camera, height devient depth et depth devient height.
+    const [gameLaunched, setGameLaunched] = React.useState(false);
+    
     const paddleWidth: number = 0.000625 * dimension.width;
     const paddleHeight: number = 1;
     const paddleDepth: number = 0.008333333333 * dimension.height;
@@ -114,6 +116,7 @@ export function Pong() {
 
 //------------------ GAME MODES ------------------------
     const handleClassicMode = () => {
+      setGameLaunched(true);
       setCameraMode("orthographic");
       setIsClassicMode(true);
       setShowButtons(false);
@@ -121,6 +124,7 @@ export function Pong() {
     };
 
     const handlePowerupMode = () => {
+      setGameLaunched(true);
       setCameraMode("orthographic");
       setPowerupVisible(true);
       setIsClassicMode(false);
@@ -503,20 +507,22 @@ export function Pong() {
       }}
     >
         <div className="pong-container" style={{ width: dimension.width, height: dimension.height }}>
-        {showButtons && (
-          <div className="starting-screen">
-            <img src="../src/assets/arcade_2k.png" alt="Starting Screen" />
-            <div className="game-buttons" style={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)'
-            }}>
-              <button onClick={handleClassicMode}>Classic 1 vs IA</button>
-              <button onClick={handlePowerupMode}>Powerup 1 vs IA</button>
+        {!gameLaunched ? (
+          showButtons && (
+            <div className="starting-screen">
+              <img src="../src/assets/arcade_2k.png" alt="Starting Screen" />
+              <div className="game-buttons" style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)'
+              }}>
+                <button onClick={handleClassicMode}>Classic 1 vs IA</button>
+                <button onClick={handlePowerupMode}>Powerup 1 vs IA</button>
+              </div>
             </div>
-          </div>
-        )}
+          )
+        ) : (
         <div id = "canvas-container" style = {{ width: dimension.width, height: dimension.height }}>
         <Canvas 
             style={{ background: cameraMode === "perspective" ? 'url(src/assets/pong_3d_bg2b.png) no-repeat center center / cover' : 'black' }}>
@@ -589,6 +595,7 @@ export function Pong() {
           <audio ref={userHitSoundRef} src="src/assets/paddle-hit.mp3" />
           <audio ref={compHitSoundRef} src="src/assets/paddle-hit2.mp3" />
         </div>
+        )}
       </div>
     </MaterialBox>
   )
