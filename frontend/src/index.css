@@ -21,12 +21,20 @@ body {
 }
 
 .nameSender {
-  color: green
+  color: green;
+  font-weight: bold; /* Texte gras */
 }
 
 .channelSender {
-  color: blue
+  color: blue;
+  font-weight: bold; /* Texte gras */
 }
+
+.notice {
+  color: #FFD700; /* Jaune doré */
+  font-weight: bold; /* Texte gras */
+}
+
 
 header nav {
   display: flex;

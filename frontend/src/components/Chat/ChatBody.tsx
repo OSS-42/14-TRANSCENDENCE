@@ -20,7 +20,7 @@ const ChatBody = ({ messages, notice }: ChatBodyProps) => {
         {messages.map((message) => (
           <div className="message__chats" key={message.id}>
             {notice ? (
-              <p>{message.text}</p>
+              <p><span className='notice'>{message.text}</span></p>
             ) : (
               <p>
                 {message.channel !== undefined && (

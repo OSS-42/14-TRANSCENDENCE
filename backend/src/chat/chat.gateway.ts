@@ -210,33 +210,35 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const roomObject = await this.chatService.isRoomExist(payload.channelName[0])
     let message : string = ''
     let event : string = "notice"
+    let socketId = await this.getSoketIdFromUserId(userId)
 
     // ------------------------ Trop de parametre ------------------------
     if (payload.channelName[1] !== undefined)
       message = `#INVITE : bad format`
     // ------------------------ Le channel n'existe pas ------------------------
     else if (roomObject === null)
-      message = `The room ${payload.channelName[0]} don't exist`
+    message = `The room ${payload.channelName[0]} don't exist`
     // ------------------------ L'utilisateur n'est pas membre de la room ------------------------
     else if (await this.chatService.isUserMemberOfRoom(userId, roomObject.id) === false)
-      message = `The room ${payload.channelName[0]} don't exist`
+    message = `The room ${payload.channelName[0]} don't exist`
     // ------------------------ La cible n'existe pas ------------------------
     else if (targetId === null)
-      message = `The user ${payload.target} doesn't exist`
+    message = `The user ${payload.target} doesn't exist`
     // ------------------------ La cible est deja membre de la room ------------------------
     else if (await this.chatService.isUserMemberOfRoom(targetId, roomObject.id) === true)
-      message = `The user ${payload.target} is already a member of the room ${payload.channelName[0]}`
-    // ------------------------ La cible est ajouté dans la room ------------------------
+    message = `The user ${payload.target} is already a member of the room ${payload.channelName[0]}`
+    // ------------------------ Sinon on ajoute la cible dans la room ------------------------
     else {
       event = 'messageResponse'
+      socketId = await this.getSoketIdFromUserId(targetId)
       message = `${payload.username} invited you to the channel ${payload.channelName}`
       await this.chatService.joinRoom(roomObject.id, targetId)
       this.server.to(targetSocket).socketsJoin(payload.channelName) //faire des tests
-        // faire les manipulations dans la base de donnée pour l'utilisateur
-    }   
-    this.server.to(targetSocket).emit( event, {
+    }
+    this.server.to(socketId).emit( event, {
       id: payload.id,
       name: payload.username,
+      channel: undefined,
       text: message,
     })
   }
