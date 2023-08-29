@@ -639,10 +639,14 @@ export function Pong() {
             />
 
             {/* Left Paddle */}
-            <LeftPaddle leftPaddlePositionZ={leftPaddlePositionZ} setLeftPaddlePositionZ={setLeftPaddlePositionZ} />
+            <LeftPaddle 
+              leftPaddlePositionZ={leftPaddlePositionZ}
+              setLeftPaddlePositionZ={setLeftPaddlePositionZ} />
 
             {/* Right Paddle */}
-            <RightPaddle rightPaddlePositionZ={rightPaddlePositionZ} setRightPaddlePositionZ={setRightPaddlePositionZ} />
+            <RightPaddle 
+              rightPaddlePositionZ={rightPaddlePositionZ}
+              setRightPaddlePositionZ={setRightPaddlePositionZ} />
 
           </Canvas>
 
