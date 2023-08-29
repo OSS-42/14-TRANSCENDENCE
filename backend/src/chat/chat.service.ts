@@ -6,7 +6,10 @@ import { createMessageDto } from './dto/create.message.dto';
 export class ChatService {
     constructor(private prisma : PrismaService){}
 
-    createMessage(createMessageDto : createMessageDto){}
+    createMessage(createMessageDto : createMessageDto){
+        console.log(createMessageDto)
+        return createMessageDto
+    }
 
     async isRoomExist(room:string){
         

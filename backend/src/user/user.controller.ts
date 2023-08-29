@@ -22,7 +22,7 @@ export class UserController {
 
 
     //retourne un array d'objets utilisateurs
-    @Get('AllUsers')
+    @Get('allUsers')
     getAllUsers(){
         return this.userService.getAllUsers();
     }

@@ -12,3 +12,7 @@ Installation (version avec makefile)
    - le fichier .env se cree automatiquement
    - lancement de docker compose up automatiquement
    - disponibilite des logs soit de builds (auto) ou des dockers (avec la commande "make logs")
+
+
+***IMPORTANT : Lorsque les modèles prisma ont été modifiés, ou simplement que la base de données a été restet 
+   Lancez cette commande à la racine du container backend :   "npx prisma migrate deploy"

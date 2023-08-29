@@ -3,6 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
+import * as cors from "cors";
 
 
 async function bootstrap() {
@@ -12,6 +13,12 @@ async function bootstrap() {
   }),
   );
 
+  app.use(cors())
+  app.enableCors({
+    origin: '*',
+    methods: '*',
+  });
+
   const config = new DocumentBuilder()
   .setTitle('Transcendence API')
   .setDescription('the description of the API')
@@ -20,7 +27,7 @@ async function bootstrap() {
   .addBearerAuth({
     type: 'http',
     scheme: 'bearer',
-    bearerFormat: 'JWT', // Specify the bearer format
+    bearerFormat: 'JWT', 
   })
   .build()
 
