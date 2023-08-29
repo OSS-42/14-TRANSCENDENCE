@@ -369,7 +369,7 @@ export function Pong() {
               playGoalSound();
             }
 
-            //bug a 10 points...
+            //bug: asynchronous issue.
 
             // Update scores
             if (newX - ballRadius <= -WORLD_WIDTH / 2) {
