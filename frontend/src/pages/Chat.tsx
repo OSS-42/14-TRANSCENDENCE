@@ -16,6 +16,7 @@ type ChatMessage = {
   name: string;
   channel: string;
   text: string;
+  notice: string;
 };
 
 type ChatProps = {
@@ -24,15 +25,14 @@ type ChatProps = {
 
 export function Chat({ socket }: ChatProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [notices, setNotices] = useState<ChatMessage[]>([]);
   // useEffect peut être utilisé pour s'abonner à des flux et mettre à jour l'état du
   // composant lorsque de nouvelles données sont disponibles.
   useEffect(() => {
     socket.on( "messageResponse", (data: ChatMessage) => 
       setMessages([...messages, data]) //Cette partie met à jour l'état messages. Elle utilise le spread operator ... pour créer un nouveau tableau qui contient les anciens messages (messages) ainsi que le nouveau message data. Ensuite, elle appelle setMessages pour mettre à jour la valeur de messages avec ce nouveau tableau.
-    );
-    socket.on( "notice", (data: ChatMessage) => {
-      setNotices([...notices, data]) //Cette partie met à jour l'état messages. Elle utilise le spread operator ... pour créer un nouveau tableau qui contient les anciens messages (messages) ainsi que le nouveau message data. Ensuite, elle appelle setMessages pour mettre à jour la valeur de messages avec ce nouveau tableau.
+      );
+      socket.on( "notice", (data: ChatMessage) => {
+      setMessages([...messages, data]) //Cette partie met à jour l'état messages. Elle utilise le spread operator ... pour créer un nouveau tableau qui contient les anciens messages (messages) ainsi que le nouveau message data. Ensuite, elle appelle setMessages pour mettre à jour la valeur de messages avec ce nouveau tableau.
     }
     );
     return () => {
@@ -69,7 +69,7 @@ export function Chat({ socket }: ChatProps) {
             overflow: "auto"
           }}
         >
-          <ChatBody messages={messages} notices={notices}/>
+          <ChatBody messages={messages}/>
           {/* I'm a chat room box for the messages received. Replace this line with
           a component. */}
         </Box>
