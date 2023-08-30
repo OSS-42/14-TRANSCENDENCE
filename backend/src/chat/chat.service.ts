@@ -250,17 +250,7 @@ export class ChatService {
       return user;
     }
 
-    //retourne un user
-    async isOwner(username:string, roomName:string) {
-      const user = await this.prisma.utilisateur.findFirst({
-        where: {
-          username:username,
-        },
-      });
-      return user;
-    }
-    
-    
+      
     //retourne vrai ou faux
     async isUserOwnerOfChatRoom(userId:number, chatRoomId:number): Promise<boolean> {
       const user = await this.prisma.utilisateur.findFirst({
@@ -351,3 +341,9 @@ export class ChatService {
   }
   
   
+  // Une fonction pour kick un utilisateur d'un channel (un kick n'est pas definitif)
+  // Une fonction pour mute un utilisateur dans un channel
+  // Une fonction pour verifier si un utilisateur est mute dans un channel
+  // Une fonction pour retirer le mot de passe d'un channel
+  // Une fonction pour que la channel ne soit plus sur invitation
+  // Une fonction pour que la channel soit sur invitation
