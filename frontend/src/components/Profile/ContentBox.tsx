@@ -14,7 +14,7 @@ export function ContentBox({ content }) {
         overflow: "auto", // Enable scrolling when content overflows
       }}
     >
-      {content}
+      <h1>{content}</h1>
     </Box>
   );
 }
