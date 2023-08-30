@@ -91,7 +91,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       if (payload.param[0] === '+i')
         invite = true;
       await this.chatService.createRoom(payload.channelName, userId, payload.param, invite)// voir avec sam pour le param invit
-      client.join(payload.channelName); 
+      client.join(payload.channelName);
       if (payload.param[0] !== undefined && payload.param[0] !== '+i') //Channel avec mdp
         await this.chatService.createPassword(payload.param[0], payload.channelName)
       notice = `You create and join new room ${payload.channelName}`
@@ -240,7 +240,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       targetNotice = `${payload.username} invited you to the channel ${payload.channelName}`
       userNotice = `#INVITE: The user ${payload.target} is now a member of the room ${payload.channelName[0]}`
       await this.chatService.joinRoom(roomObject.id, targetId)
-      this.server.to(targetSocketId).socketsJoin(payload.channelName) //faire des tests
+      this.server.to(targetSocketId).socketsJoin(payload.channelName) 
     }
     if (targetNotice !== null)
       this.server.to(targetSocketId).emit('notice', {
@@ -261,9 +261,67 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 
   // ---------------------------------------------------------- MUTE ----------------------------------------------------------
-  // Utilisation :  #INVITE nomCible nomDuChannel   
+  // Utilisation :  #MUTE nomCible nomDuChannel   
   @SubscribeMessage('mute')
-  async mute(client: Socket, payload: any) {
+  async muteUser(client: Socket, payload: any) {
+    const userId = await this.chatService.getUserIdFromUsername(payload.username)
+    const userSocketId = await this.getSoketIdFromUserId(userId)
+    const targetId = await this.chatService.getUserIdFromUsername(payload.target)
+    const targetSocketId = await this.getSoketIdFromUserId(targetId)
+    const roomObject = await this.chatService.isRoomExist(payload.channelName[0])
+    let userNotice : string = null
+    let targetNotice : string = null
+    // ------------------------ Trop de parametre ------------------------
+    if (payload.channelName[1] !== undefined)
+    userNotice = `#MUTE : bad format`
+    // ------------------------ Le channel n'existe pas ------------------------
+    else if (roomObject === null)
+    userNotice = `#MUTE: The room ${payload.channelName[0]} don't exist`
+    // ------------------------ L'utilisateur n'est pas membre de la room ------------------------
+    else if (await this.chatService.isUserMemberOfRoom(userId, roomObject.id) === false)
+    userNotice = `#MUTE: You need to be a member of the room ${payload.channelName[0]} to mute the user ${payload.target}`
+    // ------------------------ La cible n'existe pas ------------------------
+    else if (targetId === null)
+    userNotice = `#MUTE: The user ${payload.target} doesn't exist`
+    // ------------------------ La cible n'est pas membre de la room ------------------------
+    else if (await this.chatService.isUserMemberOfRoom(targetId, roomObject.id) === false)
+    userNotice = `#MUTE: The user ${payload.target} is not a member of the room ${payload.channelName[0]}`
+    // ------------------------ L'utilisateur n'a pas les autorisations (n'est pas owner ou admin du channel) ------------------------
+    else if (await this.chatService.isUserOwnerOfChatRoom(userId, roomObject.id) === false 
+    && await this.chatService.isUserModeratorOfChatRoom(userId, roomObject.id) === false)
+    userNotice = `#MUTE: You don't have the right to mute a user of the room ${payload.channelName}`
+    // ------------------------ La cible est owner du chat ------------------------
+    else if (await this.chatService.isUserOwnerOfChatRoom(targetId, roomObject.id) === true)
+    userNotice = `#MUTE: The target is the owner of the room ${payload.channelName}`
+    // ------------------------ L'utilisateur est deja mute ------------------------
+    // ...
+    // ------------------------ Sinon on mute la cible ------------------------
+    else {
+      targetNotice = `You are muted in the channel ${payload.channelName}`
+      userNotice = `#MUTE: The user ${payload.target} is now mute in the room ${payload.channelName[0]}`
+      // await this.chatService.muteUser(roomObject.id, targetId)
+      //faire des tests
+    }
+    if (targetNotice !== null)
+      this.server.to(targetSocketId).emit('notice', {
+        id: payload.id,
+        name: payload.username,
+        channel: undefined,
+        text: null,
+        notice: targetNotice
+      })
+      this.server.to(userSocketId).emit('notice', {
+        id: payload.id,
+        name: payload.username,
+        channel: undefined,
+        text: null,
+        notice: userNotice
+      })
+  }
+  // ---------------------------------------------------------- ADMIN ----------------------------------------------------------
+  // Utilisation :  #ADMIN nomCible nomDuChannel   
+  @SubscribeMessage('admin')
+  async adminUser(client: Socket, payload: any) {
     const userId = await this.chatService.getUserIdFromUsername(payload.username)
     const userSocketId = await this.getSoketIdFromUserId(userId)
     const targetId = await this.chatService.getUserIdFromUsername(payload.target)
@@ -274,28 +332,37 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     // ------------------------ Trop de parametre ------------------------
     if (payload.channelName[1] !== undefined)
-    userNotice = `#MUTE : bad format`
+    userNotice = `#ADMIN : bad format`
     // ------------------------ Le channel n'existe pas ------------------------
     else if (roomObject === null)
-    userNotice = `#MUTE: The room ${payload.channelName[0]} don't exist`
+    userNotice = `#ADMIN: The room ${payload.channelName[0]} don't exist`
     // ------------------------ L'utilisateur n'est pas membre de la room ------------------------
     else if (await this.chatService.isUserMemberOfRoom(userId, roomObject.id) === false)
-    userNotice = `#MUTE: You need to be a member of the room ${payload.channelName[0]} to send a invite`
+    userNotice = `#ADMIN: You need to be a member of the room ${payload.channelName[0]} to mute the user ${payload.target}`
     // ------------------------ La cible n'existe pas ------------------------
     else if (targetId === null)
-    userNotice = `#MUTE: The user ${payload.target} doesn't exist`
-    // ------------------------ La cible est deja membre de la room ------------------------
-    else if (await this.chatService.isUserMemberOfRoom(targetId, roomObject.id) === true)
-    userNotice = `#MUTE: The user ${payload.target} is already a member of the room ${payload.channelName[0]}`
-    // ------------------------ Sinon on ajoute la cible dans la room ------------------------
+    userNotice = `#ADMIN: The user ${payload.target} doesn't exist`
+    // ------------------------ La cible n'est pas membre de la room ------------------------
+    else if (await this.chatService.isUserMemberOfRoom(targetId, roomObject.id) === false)
+    userNotice = `#ADMIN: The user ${payload.target} is not a member of the room ${payload.channelName[0]}`
+    // ------------------------ L'utilisateur n'a pas les autorisations (n'est pas owner ou admin du channel) ------------------------
+    else if (await this.chatService.isUserOwnerOfChatRoom(userId, roomObject.id) === false 
+    && await this.chatService.isUserModeratorOfChatRoom(userId, roomObject.id) === false) {
+      console.log('coucou')
+      userNotice = `#ADMIN: You don't have the right to add a admin to the room ${payload.channelName}`
+    }
+    // ------------------------ L'utilisateur est deja admin ------------------------
+    else if (await this.chatService.isUserModeratorOfChatRoom(targetId, roomObject.id) === true)
+    userNotice = `#ADMIN: The user ${payload.target} is already a admin of the room ${payload.channelName}`
+    // ------------------------ Sinon on ajoute la cible comme admin du channel ------------------------
     else {
-      targetNotice = `${payload.username} invited you to the channel ${payload.channelName}`
-      userNotice = `#MUTE: The user ${payload.target} is now a member of the room ${payload.channelName[0]}`
-      await this.chatService.joinRoom(roomObject.id, targetId)
-      this.server.to(targetSocketId).socketsJoin(payload.channelName) //faire des tests
+      targetNotice = `You are now a admin of the channel ${payload.channelName}`
+      userNotice = `#ADMIN: The user ${payload.target} is now a admin the room ${payload.channelName[0]}`
+      await this.chatService.addModerator(roomObject.id, targetId)
+      //faire des tests
     }
     if (targetNotice !== null)
-      this.server.to(targetSocketId).emit('notice', {
+      this.server.to(targetSocketId).emit('notice', { //probleme ici 
         id: payload.id,
         name: payload.username,
         channel: undefined,

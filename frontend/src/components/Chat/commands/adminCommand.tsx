@@ -7,17 +7,17 @@ interface User {
     mail: string;
 }
 
-interface MuteCommandProps {
+interface AdminCommandProps {
     data: string;
     socket: Socket;
     user : User;
   }
 
-  const muteCommand = ({data, socket, user}: MuteCommandProps) => {
+  const adminCommand = ({data, socket, user}: AdminCommandProps) => {
     const [command, target, ...channel] = data.split(" ");
-    if (command === "#MUTE" && target !== undefined && channel !== undefined) {
+    if (command === "#ADMIN" && target !== undefined && channel !== undefined) {
       // Format du message pour le serveur
-      socket.emit('mute', {
+      socket.emit("admin", {
         username: user?.username,
         id: `${socket.id}${Math.random()}`,
         socketID: socket.id,
@@ -26,6 +26,6 @@ interface MuteCommandProps {
       });
     }
 }
-export default muteCommand
+export default adminCommand
 
 // 
