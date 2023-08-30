@@ -234,13 +234,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         text: payload.message,
         notice : notice
       })
-      client.emit(event, {
-        id: payload.id,
-        name: payload.username,
-        channel: roomName,
-        text: payload.message,
-        notice : notice
-      })
+      // client.emit(event, {
+      //   id: payload.id,
+      //   name: payload.username,
+      //   channel: roomName,
+      //   text: payload.message,
+      //   notice : notice
+      // })
     } 
     
     // ---------------------- LE MESSAGE S'ADRESSE A UN UTILISATEUR ----------------------
