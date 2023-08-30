@@ -62,41 +62,44 @@ export function Profile() {
   };
 
   const FriendsList = () => {
-	const [friends, setFriends] = useState(["No friends for the moment ..."]); // SetState. Initialize friend to empty array 
-	const jwt_token = Cookies.get("jwt_token"); // Cookies to identify user. 	
+    const [friends, setFriends] = useState(["No friends for the moment ..."]); // SetState. Initialize friend to empty array
+    const jwt_token = Cookies.get("jwt_token"); // Cookies to identify user.
 
-	useEffect(() => {
-		const fetchFriends = async () => {
-		  try {
-			// Test qui force le contenu qui se trouve dans response.data
-			// const response = {   
-			// 	data: ["Cesar", "Ana"],
-  			// };
-			const response = await axios.get("http://localhost:3001/users/friendsList", {
-			  headers: {
-				Authorization: "Bearer " + jwt_token,
-			  }
-		  	});
-			console.log("Friends list fetching successful");
-			console.log(response);
-			setFriends(response.data); // Assuming the friend data is in the 'data' property of the response
-		  } catch (error) {
-			console.error("Friends list fetching:", error);
-		  }
-		};
-	
-		fetchFriends();
-	  }, []); 
+    useEffect(() => {
+      const fetchFriends = async () => {
+        try {
+          //Test qui force le contenu qui se trouve dans response.data
+          const response = {
+            data: ["Cesar", "Ana"],
+          };
+          // const response = await axios.get("http://localhost:3001/users/friendsList", {
+          //   headers: {
+          // 	Authorization: "Bearer " + jwt_token,
+          //   }
+          // });
+          console.log("Friends list fetching successful");
+          console.log(response);
+          setFriends(response.data); // Assuming the friend data is in the 'data' property of the response
+        } catch (error) {
+          console.error("Friends list fetching:", error);
+        }
+      };
 
-	  return (
-		<>
-		  {/* Render your friend list here using the 'friends' state */}
-		  FRIENDS:
-		  <ul>
-		  	<li>{friends}</li>
-		  </ul>
-		</>
-	  );
+      fetchFriends();
+    }, []);
+
+    return (
+      <>
+        <div>
+          <h1>FRIENDS</h1>
+          <ul>
+            {friends.map((friend, index) => (
+              <li key={index}>{friend}</li>
+            ))}
+          </ul>
+        </div>
+      </>
+    );
   };
 
   return (
@@ -122,7 +125,7 @@ export function Profile() {
             overflow: "auto", // Enable scrolling when content overflows
           }}
         >
-		  <FriendsList/>
+          <FriendsList />
         </Box>
       </RightSideGrid>
     </ContainerGrid>
