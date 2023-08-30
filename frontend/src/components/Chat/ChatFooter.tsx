@@ -58,13 +58,13 @@ const ChatFooter = ({ socket }: ChatFooterProps) => {
         privmsgCommand({ data, socket, user });
       else if (data.startsWith("#INVITE"))
         inviteCommand({ data, socket, user });
+      else if (data.startsWith("#MUTE"))
+        muteCommand({ data, socket, user });
       // else if (message.startsWith("#KICK"))
       //   kickCommand({ message, socket, user });
       // else if (message.startsWith("#BAN"))
       //   banCommand({ message, socket, user });
       // else if (message.startsWith("#ADMIN"))
-      //   adminCommand({ message, socket, user });
-      // else if (message.startsWith("#MUTE"))
       //   adminCommand({ message, socket, user });
       // else if (message.startsWith("#LEAVE")) Moins sur de la commande leave
       //   joinCommand({ message, socket, user });

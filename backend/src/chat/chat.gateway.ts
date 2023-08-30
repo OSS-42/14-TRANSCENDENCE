@@ -139,7 +139,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     let notice : string = null
     let event : string = "notice"
 
-                                   // ---------------------- LE MESSAGE S'ADRESSE A UN CHANNEL ----------------------
+    // --------------------------------------------- LE MESSAGE S'ADRESSE A UN CHANNEL ---------------------------------------------
     if (payload.target.startsWith("!")) {
       // ---------------------- LE  CHANNEL N'EXISTE PAS ----------------------
       if (roomObject === null)
@@ -173,7 +173,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       })
     } 
     
-                                    // ---------------------- LE MESSAGE S'ADRESSE A UN UTILISATEUR ----------------------
+    // ------------------------------------------ LE MESSAGE S'ADRESSE A UN UTILISATEUR ------------------------------------------
     else { //le message s'adresse a un utilistateur 
       const userId = await this.chatService.getUserIdFromUsername(payload.target);
       const socketId = await this.getSoketIdFromUserId(userId)
@@ -257,7 +257,58 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         text: null,
         notice: userNotice
       })
+  }
 
+
+  // ---------------------------------------------------------- MUTE ----------------------------------------------------------
+  // Utilisation :  #INVITE nomCible nomDuChannel   
+  @SubscribeMessage('mute')
+  async mute(client: Socket, payload: any) {
+    const userId = await this.chatService.getUserIdFromUsername(payload.username)
+    const userSocketId = await this.getSoketIdFromUserId(userId)
+    const targetId = await this.chatService.getUserIdFromUsername(payload.target)
+    const targetSocketId = await this.getSoketIdFromUserId(targetId)
+    const roomObject = await this.chatService.isRoomExist(payload.channelName[0])
+    let userNotice : string = null
+    let targetNotice : string = null
+
+    // ------------------------ Trop de parametre ------------------------
+    if (payload.channelName[1] !== undefined)
+    userNotice = `#MUTE : bad format`
+    // ------------------------ Le channel n'existe pas ------------------------
+    else if (roomObject === null)
+    userNotice = `#MUTE: The room ${payload.channelName[0]} don't exist`
+    // ------------------------ L'utilisateur n'est pas membre de la room ------------------------
+    else if (await this.chatService.isUserMemberOfRoom(userId, roomObject.id) === false)
+    userNotice = `#MUTE: You need to be a member of the room ${payload.channelName[0]} to send a invite`
+    // ------------------------ La cible n'existe pas ------------------------
+    else if (targetId === null)
+    userNotice = `#MUTE: The user ${payload.target} doesn't exist`
+    // ------------------------ La cible est deja membre de la room ------------------------
+    else if (await this.chatService.isUserMemberOfRoom(targetId, roomObject.id) === true)
+    userNotice = `#MUTE: The user ${payload.target} is already a member of the room ${payload.channelName[0]}`
+    // ------------------------ Sinon on ajoute la cible dans la room ------------------------
+    else {
+      targetNotice = `${payload.username} invited you to the channel ${payload.channelName}`
+      userNotice = `#MUTE: The user ${payload.target} is now a member of the room ${payload.channelName[0]}`
+      await this.chatService.joinRoom(roomObject.id, targetId)
+      this.server.to(targetSocketId).socketsJoin(payload.channelName) //faire des tests
+    }
+    if (targetNotice !== null)
+      this.server.to(targetSocketId).emit('notice', {
+        id: payload.id,
+        name: payload.username,
+        channel: undefined,
+        text: null,
+        notice: targetNotice
+      })
+      this.server.to(userSocketId).emit('notice', {
+        id: payload.id,
+        name: payload.username,
+        channel: undefined,
+        text: null,
+        notice: userNotice
+      })
   }
 
   // //-------------------------------------------------------- TEST MORGAN --------------------------------------------------------
