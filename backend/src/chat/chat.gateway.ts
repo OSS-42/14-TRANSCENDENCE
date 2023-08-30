@@ -73,7 +73,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   
 
 
-  // JOIN
+  // ---------------------------------------------------------- JOIN ----------------------------------------------------------
+  // Utilisation :  #JOIN nomDuchannel 
+  // Utilisation :  #JOIN nomDuchannel motDePasse 
+  // Utilisation :  #JOIN nomDuchannel +i (channel sur invitation seulement) 
   @SubscribeMessage('joinRoom')
   async joinRoom(client: Socket, payload: any) {
     const userId = await this.chatService.getUserIdFromUsername(payload.username)
@@ -127,7 +130,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   // ---------------------------------------------------------- PRIVMSG ----------------------------------------------------------
   // Utilisation :  #PRIVMSG !NomDuChannel message...
-  //                #PRIVMSG NomUtilisateur message ...                    
+  // Utilisation :  #PRIVMSG NomUtilisateur message ...                    
   @SubscribeMessage('privmsg')
   async privateMessage(client: Socket, payload: any) {
     const roomName = payload.target.slice(1);
@@ -136,7 +139,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     let notice : string = null
     let event : string = "notice"
 
-    // ---------------------- LE MESSAGE S'ADRESSE A UN CHANNEL ----------------------
+                                   // ---------------------- LE MESSAGE S'ADRESSE A UN CHANNEL ----------------------
     if (payload.target.startsWith("!")) {
       // ---------------------- LE  CHANNEL N'EXISTE PAS ----------------------
       if (roomObject === null)
@@ -170,7 +173,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       })
     } 
     
-    // ---------------------- LE MESSAGE S'ADRESSE A UN UTILISATEUR ----------------------
+                                    // ---------------------- LE MESSAGE S'ADRESSE A UN UTILISATEUR ----------------------
     else { //le message s'adresse a un utilistateur 
       const userId = await this.chatService.getUserIdFromUsername(payload.target);
       const socketId = await this.getSoketIdFromUserId(userId)
@@ -205,7 +208,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     
 
 
-  // INVITE
+  // ---------------------------------------------------------- INVITE ----------------------------------------------------------
+  // Utilisation :  #INVITE nomCible nomDuChannel   
   @SubscribeMessage('inviteRoom')
   async inviteRoom(client: Socket, payload: any) {
     const userId = await this.chatService.getUserIdFromUsername(payload.username)
@@ -215,6 +219,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const roomObject = await this.chatService.isRoomExist(payload.channelName[0])
     let userNotice : string = null
     let targetNotice : string = null
+
     // ------------------------ Trop de parametre ------------------------
     if (payload.channelName[1] !== undefined)
     userNotice = `#INVITE : bad format`
@@ -223,7 +228,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     userNotice = `#INVITE: The room ${payload.channelName[0]} don't exist`
     // ------------------------ L'utilisateur n'est pas membre de la room ------------------------
     else if (await this.chatService.isUserMemberOfRoom(userId, roomObject.id) === false)
-    userNotice = `#INVITE: The room ${payload.channelName[0]} don't exist`
+    userNotice = `#INVITE: You need to be a member of the room ${payload.channelName[0]} to send a invite`
     // ------------------------ La cible n'existe pas ------------------------
     else if (targetId === null)
     userNotice = `#INVITE: The user ${payload.target} doesn't exist`
