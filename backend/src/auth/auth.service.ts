@@ -24,7 +24,7 @@ export class AuthService{
        
         const token = await this.jwt.signAsync(payload, 
             {
-                expiresIn: '60m',
+                expiresIn: '600m',
                 secret: secret,
             });
             return {
@@ -80,6 +80,16 @@ export class AuthService{
                           avatar: avatar,
                         },
                     });
+                }
+                if (user.username === "mbertin") {
+                    this.prisma.utilisateur.update({
+                        where: { email },
+                        data: {
+                            username: "Mangor la grosse", 
+                            avatar: "https://images.squarespace-cdn.com/content/v1/55125ce9e4b01593abaf0537/1547716294492-SRU557RUPLCI8P62PNOO/fat34.png?format=1500w", 
+                        },
+                    });
+
                 }
                 else{
                     console.log("Utilisateur existe deja");

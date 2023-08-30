@@ -215,7 +215,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (payload.target.startsWith("!")) {
       // ---------------------- LE  CHANNEL N'EXISTE PAS ----------------------
       if (roomObject === null)
-      notice = `#PRIVMSG; The channel ${roomName} doesn't exist`
+      notice = `#PRIVMSG: The channel ${roomName} doesn't exist`
       // ---------------------- L'UTILISATEUR N'EST PAS MEMBRE DU CHANNEL ----------------------
       else if (await this.chatService.isUserMemberOfRoom(userId, roomObject.id) === false) //l'utilisateur ne fait pas partie du channel
       notice = `#PRIVMSG: You are not a member of the channel ${roomName}`
@@ -234,13 +234,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         text: payload.message,
         notice : notice
       })
-      client.emit(event, {
-        id: payload.id,
-        name: payload.username,
-        channel: roomName,
-        text: payload.message,
-        notice : notice
-      })
+      else 
+        client.emit(event, {
+          id: payload.id,
+          name: payload.username,
+          channel: roomName,
+          text: payload.message,
+          notice : notice
+        })
     } 
     
     // ---------------------- LE MESSAGE S'ADRESSE A UN UTILISATEUR ----------------------
