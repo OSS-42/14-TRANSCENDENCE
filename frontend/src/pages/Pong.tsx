@@ -18,6 +18,13 @@ import { ControlledCameras } from "../components/Pong/controlledcamera-2"; // As
 import axios from "axios";
 import Cookies from "js-cookie";
 
+
+const [hostStatus, setHostStatus] = React.useState<boolean>(0);
+const username: string = "";
+
+
+
+
 export function Pong() {
 
 //------------------ SCENE SETTINGS ------------------------
