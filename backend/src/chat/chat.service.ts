@@ -1,12 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ChatRoom } from '@prisma/client';
 import * as argon2 from 'argon2';
+import moment from 'moment';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { createMessageDto } from './dto/create.message.dto';
 
 @Injectable()
 export class ChatService {
     constructor(private prisma : PrismaService){}
+    private mutedUsers: Map<number, moment.Moment> = new Map();
 
     createMessage(createMessageDto : createMessageDto){
         console.log(createMessageDto)
@@ -68,6 +70,7 @@ export class ChatService {
                 members: { connect: [{ id: ownerId }] }
               },
           });
+          
          return room 
     } 
 
@@ -83,6 +86,7 @@ export class ChatService {
             members: { connect: [{ id: memberId }] } 
             }
         });
+        
         return room;
     }
 
@@ -336,6 +340,12 @@ export class ChatService {
   
       return blockedUsers.map(blockedUser => blockedUser.blockedUserId);
     }
+
+    async muteUser(mutedUserId: number, roomId: number): Promise<void> {
+      const muteEndTime = moment().add(15, "minutes")
+      this.muteUser
+      
+ }
 
 
   }

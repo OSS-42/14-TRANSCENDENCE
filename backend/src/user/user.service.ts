@@ -146,8 +146,9 @@ export class UserService {
                 avatar:image,
             }
         });
-        return updatedUser
+      return updatedUser 
     }
+  
 
     async getUserMatchHistory(id: number) {
         id = Number(id)

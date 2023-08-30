@@ -68,7 +68,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       name: payload.name,
       channel: 'General',
       text: payload.message
-    }); // Diffuser le message à tous les clients connectés
+    });
+   // Diffuser le message à tous les clients connectés
   }
   
 
