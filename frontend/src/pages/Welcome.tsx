@@ -1,11 +1,22 @@
 import { Box, Button, Typography, Grid } from "@mui/material";
-import { Link } from "react-router-dom";
+import { useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../utils/AuthContext";
 
 // To do: Connect the button to a function
 // that deals with the 42 API for authentification
 // and proceeds with the redirection to our homepage
 
 export function Welcome() {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (user) {
+      navigate("/");
+    }
+  }, []);
+
   return (
     <Grid
       container

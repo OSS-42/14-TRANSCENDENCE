@@ -43,14 +43,14 @@ export function Chat({ socket }: ChatProps) {
   
   return (
     // main box
-    <Box
+    <Box component="div"
       sx={{
         display: "flex",
         padding: "10px",
         height: "92.5vh",
       }}
     >
-      <Box
+      <Box component="div"
         sx={{
           display: "grid",
           gridTemplateRows: "11fr .5fr",
@@ -61,7 +61,7 @@ export function Chat({ socket }: ChatProps) {
         }}
       >
         {/* Chat Box */}
-        <Box
+        <Box component="div"
           sx={{
             border: "1px solid black",
             borderRadius: "4px",
@@ -81,7 +81,7 @@ export function Chat({ socket }: ChatProps) {
         /> */}
       </Box>
       {/* Lists Box */}
-      <Box
+      <Box component="div"
         sx={{
           display: "grid",
           gridTemplateRows: "8fr 4fr",
@@ -91,7 +91,7 @@ export function Chat({ socket }: ChatProps) {
           gap: "10px",
         }}
       >
-        <Box
+        <Box component="div"
           sx={{
             border: "1px solid black",
             borderRadius: "4px",
@@ -102,7 +102,7 @@ export function Chat({ socket }: ChatProps) {
           <ChatBar socket={socket}/>
           {/* I'm a box for the friends list. Replace this line with a component. */}
         </Box>
-        <Box
+        <Box component="div"
           sx={{
             border: "1px solid black",
             borderRadius: "4px",

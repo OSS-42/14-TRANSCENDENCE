@@ -1,5 +1,5 @@
 import { Button } from "@mui/material";
-import { Box } from "@mui/system";
+import { Box } from "@mui/material";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { useEffect, useState } from "react";
@@ -63,7 +63,7 @@ function ChatBar({ socket }: someProp) {
         <div className="chat__users">
           <p></p>
           {usersList.map((user, index) => (
-            <Box
+            <Box component="div"
               key={index}
               sx={{
                 display: 'flex',
