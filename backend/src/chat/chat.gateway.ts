@@ -121,88 +121,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     })
   }
   
-  // // JOIN
-  // @SubscribeMessage('joinRoom')
-  // async joinRoom(client: Socket, payload: any) {
-  //   // ------------------------ Trop de parametre ------------------------
-  //   if (payload.param[1] !== undefined)
-  //   client.emit('messageResponse', {
-  //     id: payload.id,
-  //     name: payload.username,
-  //     text: `#JOIN : bad format`,
-  //   })
-    
-  //   // ------------------------ Creation d'un channel ------------------------
-  //   else if (await this.chatService.isRoomExist(payload.channelName) === null){
-  //     // et faire les manipulations pour ajouter le channel dans la db du user      
-  //     let invite : boolean = false;
-  //     if (payload.param[0] === '+i')
-  //       invite = true;
-  //     const userId = await this.chatService.getUserIdFromUsername(payload.username)
-  //     await this.chatService.createRoom(payload.channelName, userId, payload.param, invite)// voir avec sam pour le param invit
-  //     client.join(payload.channelName); 
-  //     if (payload.param[0] !== undefined && payload.param[0] !== '+i') //Channel avec mdp
-  //       await this.chatService.createPassword(payload.param[0], payload.channelName)
-  //     // else if (payload.param !== undefined && payload.param === "+i") //channel sur invitation seulement
-  //       //Fonction pour determiner un channel sur invitation seulement
-  //     client.emit('messageResponse', {
-  //       id: payload.id,
-  //       name: payload.username,
-  //       text: `You create and join new room ${payload.channelName}`,
-  //     })
-  //   }
-
-  //   // ------------------------ le channel existe ------------------------
-  //   else { 
-  //     const room = await this.chatService.isRoomExist(payload.channelName) 
-  //     const userId = await this.chatService.getUserIdFromUsername(payload.username)
-  //     if (await this.chatService.isUserMemberOfRoom(userId, room.id) === true) { //Si l'utilisateur est deja membre du channel ERREUR : la fonction attend l'id de l'utilisateur
-  //       client.emit('messageResponse', {
-  //         id: payload.id,
-  //         name: payload.username,
-  //         text: `You already are a member of the room ${payload.channelName} `,
-  //       })
-  //     } 
-  //     else if ( await this.chatService.isBanFromRoom(payload.username, payload.channelName) === true){ //Si l'utilisateur est banni du channel
-  //       client.emit('messageResponse', {
-  //         id: payload.id,
-  //         name: payload.username,
-  //         text: `You are ban from the room ${payload.channelName} `,
-  //       })
-  //     }
-  //     else if ( await this.chatService.isRoomProtected(payload.channelName) === true 
-  //       && ( payload.param[0] === undefined 
-  //       || await this.chatService.validatePassword(payload.param[0], payload.channelName) === false)) { // Si l'utilisateur a rentré un mauvais mot de passe
-  //       client.emit('messageResponse', {
-  //         id: payload.id,
-  //         name: payload.username,
-  //         text: `Error when trying to join ${payload.channelName} : bad password`,
-  //       })
-  //     }
-  //     // else if ( await this.chatService.isRoominviteOnly(payload.channelName) === true) {
-  //       //   client.emit('messageResponse', {
-  //         //     id: payload.id,
-  //         //     name: payload.username,
-  //         //     text: `Error when trying to join ${payload.name} :  you need to be invited`,
-  //         //   })
-  //         // }
-  //     else { // L'utilisateur rejoint la room         
-  //           const userId = await this.chatService.getUserIdFromUsername(payload.username)
-  //           await this.chatService.joinRoom(room.id, userId)
-  //           client.join(payload.channelName);
-  //           // faire les manipulations  
-  //           client.emit('messageResponse', {
-  //             id: payload.id,
-  //             name: payload.username,
-  //             text: `You join ${payload.channelName}`,
-  //           })
-  //     }
-  //   }
-  // }
+  
 
 
 
-  // PRIVMSG   
+  // ---------------------------------------------------------- PRIVMSG ----------------------------------------------------------
+  // Utilisation :  #PRIVMSG !NomDuChannel message...
+  //                #PRIVMSG NomUtilisateur message ...                    
   @SubscribeMessage('privmsg')
   async privateMessage(client: Socket, payload: any) {
     const roomName = payload.target.slice(1);
@@ -225,7 +150,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       // ---------------------- ON ENVOI LE MESSAGE AU CHANNEL  ----------------------
       else
       event = "messageResponse"
-      // ---------------------- SI L'EVENT N'EST PAS UNE NOTICE  ----------------------
+      // ---------------------- J'ENVOIS LE MESSAGE AU CHANNEL ----------------------
       if (event === "messageResponse")
       this.server.to(roomName).emit(event, {
         id: payload.id,
@@ -234,14 +159,15 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         text: payload.message,
         notice : notice
       })
+      // ---------------------- J'ENVOIS UNE NOTICE A L'UTILSATEUR DE LA COMMANDE (ERREUR)  ----------------------
       else 
-        client.emit(event, {
-          id: payload.id,
-          name: payload.username,
-          channel: roomName,
-          text: payload.message,
-          notice : notice
-        })
+      client.emit(event, {
+        id: payload.id,
+        name: payload.username,
+        channel: roomName,
+        text: payload.message,
+        notice : notice
+      })
     } 
     
     // ---------------------- LE MESSAGE S'ADRESSE A UN UTILISATEUR ----------------------
@@ -250,20 +176,22 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const socketId = await this.getSoketIdFromUserId(userId)
       // ---------------------- L'UTILISATEUR N'EXISTE PAS ----------------------
       if (userId === null)
-        notice = `#PRIVMSG: The user ${payload.target} doesn't exist`
+      notice = `#PRIVMSG: The user ${payload.target} doesn't exist`
       // il faut verifier si l'utilisateur n'est pas bloqué. Mais c'est plus frontend je penses
       // ---------------------- SINON ON ENVOI LE MESSAGE A L'UTILISATEUR  ----------------------
       else
-        event = 'messageResponse'
+      event = 'messageResponse'
+      // ---------------------- J'ENVOIS LE MESSAGE A LA CIBLE ----------------------
       if (event === 'messageResponse')
-        this.server.to(socketId).emit(event, {
+      this.server.to(socketId).emit(event, {
         id: payload.id,
         name: payload.username,
         channel: undefined,
         text: payload.message,
         notice : notice
-        })
+      })
       else
+      // ---------------------- J'ENVOIS UNE NOTICE A L'UTILSATEUR DE LA COMMANDE (ERREUR)  ----------------------
         client.emit(event, {
         id: payload.id,
         name: payload.username,
@@ -281,41 +209,50 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('inviteRoom')
   async inviteRoom(client: Socket, payload: any) {
     const userId = await this.chatService.getUserIdFromUsername(payload.username)
-    let socketId = await this.getSoketIdFromUserId(userId)
+    const userSocketId = await this.getSoketIdFromUserId(userId)
     const targetId = await this.chatService.getUserIdFromUsername(payload.target)
-    const targetSocket = await this.getSoketIdFromUserId(targetId)
+    const targetSocketId = await this.getSoketIdFromUserId(targetId)
     const roomObject = await this.chatService.isRoomExist(payload.channelName[0])
-    let message : string = null
-    let notice : string = null
+    let userNotice : string = null
+    let targetNotice : string = null
     // ------------------------ Trop de parametre ------------------------
     if (payload.channelName[1] !== undefined)
-    notice = `#INVITE : bad format`
+    userNotice = `#INVITE : bad format`
     // ------------------------ Le channel n'existe pas ------------------------
     else if (roomObject === null)
-    notice = `#INVITE: The room ${payload.channelName[0]} don't exist`
+    userNotice = `#INVITE: The room ${payload.channelName[0]} don't exist`
     // ------------------------ L'utilisateur n'est pas membre de la room ------------------------
     else if (await this.chatService.isUserMemberOfRoom(userId, roomObject.id) === false)
-    notice = `#INVITE: The room ${payload.channelName[0]} don't exist`
+    userNotice = `#INVITE: The room ${payload.channelName[0]} don't exist`
     // ------------------------ La cible n'existe pas ------------------------
     else if (targetId === null)
-    notice = `#INVITE: The user ${payload.target} doesn't exist`
+    userNotice = `#INVITE: The user ${payload.target} doesn't exist`
     // ------------------------ La cible est deja membre de la room ------------------------
     else if (await this.chatService.isUserMemberOfRoom(targetId, roomObject.id) === true)
-    notice = `#INVITE: The user ${payload.target} is already a member of the room ${payload.channelName[0]}`
+    userNotice = `#INVITE: The user ${payload.target} is already a member of the room ${payload.channelName[0]}`
     // ------------------------ Sinon on ajoute la cible dans la room ------------------------
     else {
-      socketId = await this.getSoketIdFromUserId(targetId)
-      notice = `${payload.username} invited you to the channel ${payload.channelName}`
+      targetNotice = `${payload.username} invited you to the channel ${payload.channelName}`
+      userNotice = `#INVITE: The user ${payload.target} is now a member of the room ${payload.channelName[0]}`
       await this.chatService.joinRoom(roomObject.id, targetId)
-      this.server.to(targetSocket).socketsJoin(payload.channelName) //faire des tests
+      this.server.to(targetSocketId).socketsJoin(payload.channelName) //faire des tests
     }
-    this.server.to(socketId).emit('notice', {
-      id: payload.id,
-      name: payload.username,
-      channel: undefined,
-      text: message,
-      notice: notice
-    })
+    if (targetNotice !== null)
+      this.server.to(targetSocketId).emit('notice', {
+        id: payload.id,
+        name: payload.username,
+        channel: undefined,
+        text: null,
+        notice: targetNotice
+      })
+      this.server.to(userSocketId).emit('notice', {
+        id: payload.id,
+        name: payload.username,
+        channel: undefined,
+        text: null,
+        notice: userNotice
+      })
+
   }
 
   // //-------------------------------------------------------- TEST MORGAN --------------------------------------------------------
