@@ -76,6 +76,7 @@ export function Profile() {
         }}
       >
         <Box
+          component="div"
           sx={{
             border: "1px solid black",
 			borderRadius: "5px",
@@ -83,12 +84,12 @@ export function Profile() {
             fontWeight: "bold",
 			fontSize: "20px",
             height: "5vh",
-            //padding: "20px", //Avoid that when box gets too little, it overlap box font overlaps
           }}
         >
           Name: {user?.username}
         </Box>
         <Box
+        component="div"
           sx={{
             border: "1px solid black",
 			borderRadius: "5px",
@@ -111,6 +112,7 @@ export function Profile() {
           />
         </Box>
         <Box
+         component="div"
           sx={{
             border: "1px solid black",
 			borderRadius: "5px",
@@ -145,6 +147,7 @@ export function Profile() {
         }}
       >
         <Box
+         component="div"
           sx={{
             border: "1px solid black",
 			borderRadius: "5px",

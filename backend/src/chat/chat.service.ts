@@ -8,7 +8,8 @@ import { createMessageDto } from './dto/create.message.dto';
 @Injectable()
 export class ChatService {
     constructor(private prisma : PrismaService){}
-    private mutedUsers: Map<number, moment.Moment> = new Map();
+    private roomMutedUsers: Map<number, Map<number, moment.Moment>> = new Map();
+   
 
     createMessage(createMessageDto : createMessageDto){
         console.log(createMessageDto)
@@ -119,8 +120,23 @@ export class ChatService {
         });
         return room
       }
-    
-
+     
+      async getRoomNamesUserIsMemberOf(userId: number): Promise<string[]> {
+        const user = await this.prisma.utilisateur.findUnique({
+          where: {
+            id: userId,
+          },
+          include: {
+            memberChatRooms: true,
+          },
+        });
+      
+        if (!user) {
+          throw new NotFoundException(`User with ID ${userId} not found`);
+        }
+      
+        return user.memberChatRooms.map((room) => room.name);
+      }
 
     async addModerator(roomId: number, memberId: number):Promise<ChatRoom> {
         const room = await this.prisma.chatRoom.update({
@@ -331,19 +347,67 @@ export class ChatService {
       return blockedUsers.map(blockedUser => blockedUser.blockedUserId);
     }
 
-    async muteUser(mutedUserId: number, roomId: number): Promise<void> {
-      const muteEndTime = moment().add(15, "minutes")
-      this.muteUser
+  
       
- }
+ 
+  async changeInvite(roomId:number, invite : boolean){
+    const room = await this.prisma.chatRoom.update({
+      where: {id : roomId},
+          data:{
+                invite : invite
+          }
 
+    })
+    return room
+  }
+  async removePassword(roomId :number){
+    const room = await this.prisma.chatRoom.update({
+      where: {
+        id: roomId
+      },
+        data: {
+          hash: null
+        }
+    });
+    return room
+  }
+ 
+
+  //mute un utilisateur dans un room pour X time. (En minutes)
+  //SI le serveur restart on perd on perd les donnes.
+  // J'utilise une map de map pour garder en memoire qui est mute.
+  //Il 
+  muteUserInRoom(mutedUserId: number, roomId: number, time :number): void {
+    const muteEndTime = moment().add(time, 'minutes');
+    if (!this.roomMutedUsers.has(roomId)) {
+      this.roomMutedUsers.set(roomId, new Map());
+    }
+    this.roomMutedUsers.get(roomId).set(mutedUserId, muteEndTime);
+
+    setTimeout(() => {
+      this.unmuteUserInRoom(mutedUserId, roomId);
+    }, time * 60 * 1000);
+  }
+
+  isUserMutedInRoom(mutedUserId: number, roomId: number): boolean {
+    if (this.roomMutedUsers.has(roomId)) {
+      const mutedUsersMap = this.roomMutedUsers.get(roomId);
+      const muteEndTime = mutedUsersMap.get(mutedUserId);
+      if (muteEndTime && moment().isBefore(muteEndTime)) {
+        return true;
+      }
+    }
+    return false;
+  }
+  //j'ai mis la methode private acr seuleement la classe service l'utilise
+  private unmuteUserInRoom(mutedUserId: number, roomId: number): void {
+    if (this.roomMutedUsers.has(roomId)) {
+      const mutedUsersMap = this.roomMutedUsers.get(roomId);
+      mutedUsersMap.delete(mutedUserId);
+    }
+  }
 
   }
   
-  
-  // Une fonction pour kick un utilisateur d'un channel (un kick n'est pas definitif)
-  // Une fonction pour mute un utilisateur dans un channel
-  // Une fonction pour verifier si un utilisateur est mute dans un channel
-  // Une fonction pour retirer le mot de passe d'un channel
-  // Une fonction pour que la channel ne soit plus sur invitation
-  // Une fonction pour que la channel soit sur invitation
+
+ 

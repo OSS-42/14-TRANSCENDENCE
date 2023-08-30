@@ -1,10 +1,8 @@
 import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer, OnGatewayConnection, OnGatewayDisconnect} from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { ChatService } from './chat.service';
-import { createMessageDto } from './dto/create.message.dto';
 import { verify } from 'jsonwebtoken';
 import { ConfigService } from '@nestjs/config';
-import { stringify } from 'querystring';
 
 
 @WebSocketGateway({ cors: true,  namespace: 'chat' })
@@ -16,7 +14,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(private chatService: ChatService, private config: ConfigService) {}
   @WebSocketServer()
   server: Server
-
+ 
   //Fonction qui gère les nouvelles connexion au socket
   //dès qu'il y a un nouveau client, cette fonction est appelée
   handleConnection(client: Socket): void {
@@ -31,12 +29,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
           const connectedUserIds = Array.from(this.connectedUsers.keys());
           this.server.emit("updateConnectedUsers", connectedUserIds)
           //FONCTION QUI VERIFIE LES CHANNELS DONT LUTILASATEUR EST MEMBRE ET LES JOIN TOUS
+          this.joinRoomsAtConnection(Number(decoded.sub), client)
         } catch (error) {
           client.disconnect();
         }
       } else {
         client.disconnect();
       }
+     
    }
   //Fonction qui gère les déconnexions au socket
   //dès qu'un client se déconnecte du socket, cette fonction est appelée
@@ -57,7 +57,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   getSoketIdFromUserId(id: number): string | undefined {
     return this.connectedUsers.get(id);
   }
+  //join chaque channel dont le user est membre
+  private  async joinRoomsAtConnection(userId:number, client:Socket){
+    const memberOf = await this.chatService.getRoomNamesUserIsMemberOf(userId)
+    memberOf.forEach((roomName) => {
+      client.join(roomName);
+    });
 
+  }
 
   // //-------------------------------------------------------- TEST MORGAN --------------------------------------------------------
   
