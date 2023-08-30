@@ -31,10 +31,8 @@ export function Profile() {
         console.error("Error fetching user data:", error);
       }
     }
-
     fetchUsersData();
   }, []);
-
 
   const handleAvatarSelected = (event) => {
     const selectedFile = event.target.files[0];
@@ -63,19 +61,69 @@ export function Profile() {
     }
   };
 
+  const FriendsList = () => {
+	const [friends, setFriends] = useState(["No friends for the moment ..."]); // SetState. Initialize friend to empty array 
+	const jwt_token = Cookies.get("jwt_token"); // Cookies to identify user. 	
+
+	useEffect(() => {
+		const fetchFriends = async () => {
+		  try {
+			// const response = {
+			// 	data: ["Cesar", "Ana"],
+  			// };
+			const response = await axios.get("http://localhost:3001/users/friendsList", {
+			  headers: {
+				Authorization: "Bearer " + jwt_token,
+			  }
+		  	});
+			console.log("Friends list fetching successful");
+			console.log(response);
+			setFriends(response.data); // Assuming the friend data is in the 'data' property of the response
+		  } catch (error) {
+			console.error("Friends list fetching:", error);
+		  }
+		};
+	
+		fetchFriends();
+	  }, []); 
+
+	  return (
+		<>
+		  {/* Render your friend list here using the 'friends' state */}
+		  FRIENDS:
+		  <ul>
+		  	<li>{friends}</li>
+		  </ul>
+		</>
+	  );
+  };
+
   return (
-	<ContainerGrid>
+    <ContainerGrid>
       <LeftSideGrid>
-		<NameBox />           
-		<AvatarBox user={user}/>
-		<ChangeAvatarBox onChange={handleAvatarSelected}/>
-		<ChangeNameBox/>
-	  </LeftSideGrid>
-	 <RightSideGrid>
-		<ContentBox content="ABOUT"/>
-		<ContentBox content="STATS"/>
-		<ContentBox content="FRIENDS LIST"/>
-	 </RightSideGrid>
+        <NameBox />
+        <AvatarBox user={user} />
+        <ChangeAvatarBox onChange={handleAvatarSelected} />
+        <ChangeNameBox />
+      </LeftSideGrid>
+      <RightSideGrid>
+        <ContentBox content="ABOUT" />
+        <ContentBox content="STATS" />
+        <Box
+          component="div"
+          sx={{
+            border: "1px solid black",
+            borderRadius: "5px",
+            margin: "20px",
+            fontWeight: "bold",
+            height: "28vh",
+            maxHeight: "370px", // Set a maximum height for scrolling
+            overflow: "auto", // Enable scrolling when content overflows
+          }}
+        >
+		  <FriendsList/>
+        </Box>
+      </RightSideGrid>
     </ContainerGrid>
   );
 }
