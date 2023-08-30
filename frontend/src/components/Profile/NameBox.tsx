@@ -1,9 +1,7 @@
 import { Box } from "@mui/material";
-import { User } from "../models/User";
 
 export function NameBox() {
   return (
-    <div>
       <Box
         sx={{
           border: "1px solid black",
@@ -15,6 +13,5 @@ export function NameBox() {
           padding: "20px",
         }}
       ></Box>
-    </div>
   );
 }

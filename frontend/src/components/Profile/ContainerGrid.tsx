@@ -2,7 +2,6 @@ import { Grid } from "@mui/material";
 
 export function ContainerGrid({children}) {
   return (
-    <div>
       <Grid
         container
         sx={{
@@ -14,6 +13,5 @@ export function ContainerGrid({children}) {
           boxSizing: "border-box",
         }}
       >{children}</Grid>
-    </div>
   );
 }

@@ -1,8 +1,7 @@
 import { Box, Avatar } from "@mui/material";
 
-export function AvatarBox() {
+export function AvatarBox({user}) {
   return (
-    <div>
       <Box
         sx={{
           border: "1px solid black",
@@ -17,7 +16,7 @@ export function AvatarBox() {
       >
         <Avatar
           alt="Username"
-          //   src={user?.avatar}
+          src={user?.avatar}
           sx={{
             width: "100%", // Allow width to adjust
             height: "100%", // Fill the available height
@@ -25,6 +24,5 @@ export function AvatarBox() {
           }}
         />
       </Box>
-    </div>
   );
 }

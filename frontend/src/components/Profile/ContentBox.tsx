@@ -2,7 +2,6 @@ import { Box } from "@mui/material";
 
 export function ContentBox({content}) {
   return (
-    <div>
       <Box
         sx={{
           border: "1px solid black",
@@ -16,6 +15,5 @@ export function ContentBox({content}) {
       >
         {content}
       </Box>
-    </div>
   );
 }
