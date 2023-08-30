@@ -19,13 +19,14 @@ import axios from "axios";
 import Cookies from "js-cookie";
 
 
-const [hostStatus, setHostStatus] = React.useState<boolean>(0);
-const username: string = "";
-
 
 
 
 export function Pong() {
+//------------------ CLIENT-SERVER SETTINGS ------------------------
+  const [hostStatus, setHostStatus] = React.useState<boolean>(false);
+  const hostUsername: string = ("");
+  
 
 //------------------ SCENE SETTINGS ------------------------
     // s'assure que le canvas aura comme maximum toujours 800x600
