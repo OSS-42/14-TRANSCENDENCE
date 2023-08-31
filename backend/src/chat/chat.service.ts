@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ChatRoom } from '@prisma/client';
 import * as argon2 from 'argon2';
-import moment from 'moment';
+import * as moment from 'moment';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { createMessageDto } from './dto/create.message.dto';
 

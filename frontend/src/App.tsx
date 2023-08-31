@@ -15,13 +15,13 @@ const socket = socketIO('http://localhost:3001/chat', {
   query: {
     token: Cookies.get('jwt_token')
   },
-});
+})
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<RootLayout />}>
       <Route path="/" element={<Home />} />
-      <Route path="login" element={<Login />} />
+      <Route path="login"element={<Login />} />
       <Route path="chat" element={<Chat socket={socket} />} />
       <Route path="game" element={<Pong socket={socket} />} />
       <Route path="profile" element={<Profile />} />

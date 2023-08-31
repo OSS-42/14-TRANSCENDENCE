@@ -8,6 +8,9 @@ import privmsgCommand from "./commands/privmsgCommand";
 import inviteCommand from "./commands/inviteCommand";
 import muteCommand from "./commands/muteCommand";
 import adminCommand from "./commands/adminCommand";
+import kickCommand from "./commands/kickCommand";
+import banCommand from "./commands/banCommand";
+import blockCommand from "./commands/blockCommand";
 
 type ChatFooterProps = {
   socket: Socket; // Assurez-vous que ce type correspond au type de socket que vous utilisez
@@ -64,12 +67,12 @@ const ChatFooter = ({ socket }: ChatFooterProps) => {
         muteCommand({ data, socket, user });
       else if (data.startsWith("#ADMIN"))
         adminCommand({ data, socket, user });
-      // else if (message.startsWith("#KICK"))
-      //   kickCommand({ message, socket, user });
-      // else if (message.startsWith("#BAN"))
-      //   banCommand({ message, socket, user });
-      // else if (message.startsWith("#LEAVE")) Moins sur de la commande leave
-      //   joinCommand({ message, socket, user });
+      else if (data.startsWith("#KICK"))
+        kickCommand({ data, socket, user });
+      else if (data.startsWith("#BAN"))
+        banCommand({ data, socket, user });
+      else if (data.startsWith("#BLOCK"))
+        blockCommand({ data, socket, user });
       else
         defaultCommand({ data, socket, user });
     }
