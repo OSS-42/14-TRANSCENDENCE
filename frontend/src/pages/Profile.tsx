@@ -17,7 +17,7 @@ import { FriendsListBox } from "../components/Profile/FriendsListBox";
 export function Profile() {
   const [user, setUser] = useState<User>();
   const [selectedAvatar, setSelectedAvatar] = useState(null); // This set the selectedAvatar variable to null.
-  const [match, setMatch] = useState(); // SetState. Mentions that it is expecting a value of type Match.
+  const [match, setMatch] = useState({}); // SetState. Mentions that it is expecting a value of type Match.
 
   useEffect(() => {
     async function fetchUsersData() {
@@ -64,7 +64,7 @@ export function Profile() {
   };
 
   // This is the function to do get the matchmaking stats
-  const matchMakingStats = () => {
+  const MatchMakingStats = () => {
     const jwt_token = Cookies.get("jwt_token"); // Token that identifies user
 
     useEffect(() => {
@@ -79,9 +79,8 @@ export function Profile() {
             }
           );
           console.log("Match stats fetching successful");
-          console.log(response);
-          setMatch(response.data); // Assuming the friend data is in the 'data' property of the response
-          console.log(match);
+          console.log(response.data);
+          setMatch(response.data);
         } catch (error) {
           console.error("Match stats fetching:", error);
         }
@@ -90,13 +89,27 @@ export function Profile() {
       fetchMatch();
     }, [user]);
 
-	// return (
-	// 	<>
-	// 	 <Box>
+	if (!match.matchesWon) {
+		return <p>No match data available.</p>;
+	  }
 
-	// 	 </Box>
-	// 	</>
-	//   );
+    return (
+      <div>
+        <ul>
+          {match.matchesWon.map((matches, index) => {
+            return (
+              <li key={index}>
+                Date: {matches.date}
+                <br />
+                Winner: {matches.winner}
+                <br />
+                Loser: {matches.loser}
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    );
   };
 
   //   This is the function call that allows to connect the FriendLists Box with list of all friends
@@ -150,9 +163,9 @@ export function Profile() {
         <ChangeNameBox />
       </LeftSideGrid>
       <RightSideGrid>
-		<AboutBox/>
+        <AboutBox />
         <MatchStatsBox>
-			{matchMakingStats()}
+			<MatchMakingStats/>
 		</MatchStatsBox>
         <FriendsListBox>
           <FriendsList />

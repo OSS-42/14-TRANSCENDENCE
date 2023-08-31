@@ -3,6 +3,7 @@ import { Box, Avatar } from "@mui/material";
 export function AvatarBox({user}) {
   return (
       <Box
+	  	component="div"
         sx={{
           border: "1px solid black",
           borderRadius: "5px",

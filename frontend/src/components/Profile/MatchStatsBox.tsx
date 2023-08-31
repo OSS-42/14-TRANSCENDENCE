@@ -14,7 +14,7 @@ export function MatchStatsBox({children}) {
         overflow: "auto", // Enable scrolling when content overflows
       }}
     >
-		MATCH STATS 
+		MATCH STATS
 		{children}
     </Box>
   );
