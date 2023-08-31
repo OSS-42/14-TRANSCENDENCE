@@ -10,7 +10,7 @@ import ChatFriends from "../components/Chat/ChatFriends";
 // where the simple texts are. As it is, I'm not yet confident the
 // layout is gonna be responsive to the components' size, etc.
 // I'm still not sure how everything interacts, but I'll find out soon enough.
-
+// Il y une facon de garder l'historique du chat on refresh, avec le local storage. EZCLAP voir le video discord
 type ChatMessage = {
   id: number; // un identifiant unique pour chaque message
   name: string;

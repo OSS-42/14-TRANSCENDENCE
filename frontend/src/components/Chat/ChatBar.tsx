@@ -44,7 +44,7 @@ function ChatBar({ socket }: someProp) {
   const addFriend = async (friendUsername: string) => {
     const jwt_token = Cookies.get("jwt_token");
     try {
-      await axios.get(`http://localhost:3001/users/addFriend/${friendUsername}`, {
+      await axios.get('http://localhost:3001git /users/addFriend/${friendUsername}', {
         headers: {
           Authorization: "Bearer " + jwt_token,
         },
