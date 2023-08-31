@@ -1,4 +1,17 @@
-import { Grid, Box, Button, Avatar } from "@mui/material";
+import {
+  Grid,
+  Box,
+  Button,
+  Avatar,
+  TableContainer,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+  Paper,
+  Typography,
+} from "@mui/material";
 import Cookies from "js-cookie";
 import { useEffect, useState } from "react";
 import { Match, User } from "../models/User";
@@ -89,26 +102,41 @@ export function Profile() {
       fetchMatch();
     }, [user]);
 
-	if (!match.matchesWon) {
-		return <p>No match data available.</p>;
-	  }
+    if (!match.matchesWon) {
+      return <p>No match data available.</p>;
+    }
 
     return (
-      <div>
-        <ul>
-          {match.matchesWon.map((matches, index) => {
-            return (
-              <li key={index}>
-                Date: {matches.date}
-                <br />
-                Winner: {matches.winner}
-                <br />
-                Loser: {matches.loser}
-              </li>
-            );
-          })}
-        </ul>
-      </div>
+      <TableContainer component={Paper} sx={{ backgroundColor: "white" }} >
+        <Typography variant="h6" sx={{ padding: "16px" }}>
+          Match History
+        </Typography>
+        <Table >
+          <TableHead>
+            <TableRow>
+              <TableCell>Date</TableCell>
+              <TableCell>Winner</TableCell>
+              <TableCell>Loser</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {match.matchesWon.map((matches, index) => (
+              <TableRow key={index}>
+                <TableCell>{matches.date}</TableCell>
+                <TableCell>{matches.winner}</TableCell>
+                <TableCell>{matches.loser}</TableCell>
+              </TableRow>
+            ))}
+			{match.matchesLost.map((matches, index) => (
+              <TableRow key={index}>
+                <TableCell>{matches.date}</TableCell>
+                <TableCell>{matches.winner}</TableCell>
+                <TableCell>{matches.loser}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
     );
   };
 
@@ -165,8 +193,8 @@ export function Profile() {
       <RightSideGrid>
         <AboutBox />
         <MatchStatsBox>
-			<MatchMakingStats/>
-		</MatchStatsBox>
+          <MatchMakingStats />
+        </MatchStatsBox>
         <FriendsListBox>
           <FriendsList />
         </FriendsListBox>
