@@ -297,18 +297,19 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     // ------------------------ L'utilisateur n'a pas les autorisations (n'est pas owner ou admin du channel) ------------------------
     else if (await this.chatService.isUserOwnerOfChatRoom(userId, roomObject.id) === false 
     && await this.chatService.isUserModeratorOfChatRoom(userId, roomObject.id) === false)
-    userNotice = `#MUTE: You don't have the right to mute a user of the room ${payload.channelName}`
+      userNotice = `#MUTE: You don't have the right to mute a user of the room ${payload.channelName}`
     // ------------------------ La cible est owner du chat ------------------------
     else if (await this.chatService.isUserOwnerOfChatRoom(targetId, roomObject.id) === true)
-    userNotice = `#MUTE: The target is the owner of the room ${payload.channelName}`
-    // ------------------------ L'utilisateur est deja mute ------------------------
-    // ...
+      userNotice = `#MUTE: The target is the owner of the room ${payload.channelName}`
+  // ------------------------ L'utilisateur est deja mute ------------------------
+    else if (await this.chatService.isUserMutedInRoom(targetId, roomObject.id))
+      userNotice = `#MUTE: The target is already mute in the room ${payload.channelName}`
+  
     // ------------------------ Sinon on mute la cible ------------------------
     else {
       targetNotice = `You are muted in the channel ${payload.channelName}`
       userNotice = `#MUTE: The user ${payload.target} is now mute in the room ${payload.channelName[0]}`
-      // await this.chatService.muteUser(roomObject.id, targetId)
-      //faire des tests
+      await this.chatService.muteUserInRoom(targetId, roomObject.id, 0.5)
     }
     if (targetNotice !== null)
       this.server.to(targetSocketId).emit('notice', {
@@ -326,6 +327,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         notice: userNotice
       })
   }
+
+  
   // ---------------------------------------------------------- ADMIN ----------------------------------------------------------
   // Utilisation :  #ADMIN nomCible nomDuChannel   
   @SubscribeMessage('admin')
