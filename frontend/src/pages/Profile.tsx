@@ -144,7 +144,7 @@ export function Profile() {
   return (
     <ContainerGrid>
       <LeftSideGrid>
-        <NameBox />
+        <NameBox user={user?.username} />
         <AvatarBox user={user} />
         <ChangeAvatarBox onChange={handleAvatarSelected} />
         <ChangeNameBox />
