@@ -14,7 +14,8 @@ type ChatFooterProps = {
 };
 
 
-
+//Allez chercher la liste des des utilisateurs connectedUsers a linititon du component.
+//
 const ChatFriends = ({ socket }: ChatFooterProps) => {
   const [usersList, setUsersList] = useState<User[]>([]);
   const [connectedUsers, setConnectedUsers] = useState<number[]>([]);

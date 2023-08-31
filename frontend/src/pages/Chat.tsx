@@ -5,6 +5,7 @@ import ChatBar from "../components/Chat/ChatBar";
 import ChatBody from "../components/Chat/ChatBody";
 import ChatFooter from "../components/Chat/ChatFooter";
 import ChatFriends from "../components/Chat/ChatFriends";
+import { User } from "../models/User";
 
 // I'll refactor this, but the componenets placement would still be
 // where the simple texts are. As it is, I'm not yet confident the
@@ -25,21 +26,25 @@ type ChatProps = {
 
 export function Chat({ socket }: ChatProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  // useEffect peut être utilisé pour s'abonner à des flux et mettre à jour l'état du
-  // composant lorsque de nouvelles données sont disponibles.
+  const [usersList, setUsersList] = useState<User[]>([]);
+  const [connectedUsers, setConnectedUsers] = useState<number[]>([]);
   useEffect(() => {
-    socket.on( "messageResponse", (data: ChatMessage) => 
-      setMessages([...messages, data]) //Cette partie met à jour l'état messages. Elle utilise le spread operator ... pour créer un nouveau tableau qui contient les anciens messages (messages) ainsi que le nouveau message data. Ensuite, elle appelle setMessages pour mettre à jour la valeur de messages avec ce nouveau tableau.
-      );
-      socket.on( "notice", (data: ChatMessage) => {
-      setMessages([...messages, data]) //Cette partie met à jour l'état messages. Elle utilise le spread operator ... pour créer un nouveau tableau qui contient les anciens messages (messages) ainsi que le nouveau message data. Ensuite, elle appelle setMessages pour mettre à jour la valeur de messages avec ce nouveau tableau.
-    }
-    );
-    return () => {
-      socket.off("messageResponse");
-      socket.off("notice");
+    const handleMessageResponse = (data: ChatMessage) => {
+      setMessages(prevMessages => [...prevMessages, data]);
     };
-  }, [socket, messages]); // Le contenu du tableau signifie qu'il y a des dépendances, donc cet effet se déclenche a chaque fois que le statut d'une des variables change.
+
+    const handleNotice = (data: ChatMessage) => {
+      setMessages(prevMessages => [...prevMessages, data]);
+    };
+
+    socket.on("messageResponse", handleMessageResponse);
+    socket.on("notice", handleNotice);
+
+    return () => {
+      socket.off("messageResponse", handleMessageResponse);
+      socket.off("notice", handleNotice);
+    };
+  }, [socket]); // Le contenu du tableau signifie qu'il y a des dépendances, donc cet effet se déclenche a chaque fois que le statut d'une des variables change.
   
   return (
     // main box
