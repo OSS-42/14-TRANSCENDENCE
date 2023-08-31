@@ -18,7 +18,7 @@ const socket = socketIO("http://localhost:3001/chat", {
 function App() {
   return (
     <Router>
-      <AuthProvider>
+      <AuthProvider> 
         <Header />
         <Routes>
           <Route path="/welcome" element={<Welcome />} />
