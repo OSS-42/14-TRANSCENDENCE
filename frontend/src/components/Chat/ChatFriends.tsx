@@ -25,7 +25,7 @@ const ChatFriends = ({ socket }: ChatFooterProps) => {
       async function fetchUsersData() {
         socket.on('updateConnectedUsers', (updatedUsers: number[]) => {
           setConnectedUsers(updatedUsers);
-          console.log("updateduser ::" + updatedUsers)
+
         });
         
         const jwt_token = Cookies.get('jwt_token');

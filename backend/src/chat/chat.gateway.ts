@@ -69,13 +69,15 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   // //-------------------------------------------------------- TEST MORGAN --------------------------------------------------------
   
   @SubscribeMessage('message')
-  handleMessage(client: Socket, payload: any): void { //voir pour changer any
+  async handleMessage(client: Socket, payload: any) { //voir pour changer any
     this.server.emit('messageResponse', {
       id: payload.id,
       name: payload.name,
       channel: 'General',
       text: payload.message
     });
+     const test = await this.chatService.getBlockedUserIds(2)
+     console.log(test)
    // Diffuser le message à tous les clients connectés
   }
   

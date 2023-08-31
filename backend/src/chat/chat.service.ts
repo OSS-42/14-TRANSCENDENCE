@@ -337,14 +337,18 @@ export class ChatService {
     // Cette fonction retourne une liste de tous les utilisateurs bloqués par cet Utilisteur(UserId).  C'est une liste de IDs. JE PEUX TE RETOURNE UNE LISTE DE USERNAMES aussi si c'est plus simple pour toi.
     //Avec cette fonction, tu pourras savoir si le client doit afficher les messages; s'il y a une correspondance entre le id de l'expéditeur avec un des ids présent dans blockedUsers
     
+    
     async getBlockedUserIds(userId: number): Promise<number[]> {
-      const blockedUsers = await this.prisma.utilisateur.findUnique({
+      const userWithBlockedUsers = await this.prisma.utilisateur.findUnique({
         where: { id: userId },
-        // Sélectionne seulement les IDs des utilisateurs bannis
-        include: { blockedUsers: { select: { blockedUserId: true } } }, 
-      }).blockedUsers();
-  
-      return blockedUsers.map(blockedUser => blockedUser.blockedUserId);
+        include: {
+          blockedUsers: {
+            select: { blockedUserId: true }
+          }
+        }
+      });
+    
+      return userWithBlockedUsers.blockedUsers.map(blockedUser => blockedUser.blockedUserId);
     }
 
   
