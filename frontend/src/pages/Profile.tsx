@@ -89,6 +89,14 @@ export function Profile() {
 
       fetchMatch();
     }, [user]);
+
+	// return (
+	// 	<>
+	// 	 <Box>
+
+	// 	 </Box>
+	// 	</>
+	//   );
   };
 
   //   This is the function call that allows to connect the FriendLists Box with list of all friends
@@ -143,11 +151,12 @@ export function Profile() {
       </LeftSideGrid>
       <RightSideGrid>
 		<AboutBox/>
-        <MatchStatsBox/>
+        <MatchStatsBox>
+			{matchMakingStats()}
+		</MatchStatsBox>
         <FriendsListBox>
           <FriendsList />
         </FriendsListBox>
-        {/* {matchMakingStats()} */}
       </RightSideGrid>
     </ContainerGrid>
   );

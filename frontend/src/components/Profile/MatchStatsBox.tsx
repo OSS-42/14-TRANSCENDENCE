@@ -1,6 +1,6 @@
 import { Box } from "@mui/material";
 
-export function MatchStatsBox() {
+export function MatchStatsBox({children}) {
   return (
     <Box
 	  component="div"
@@ -14,7 +14,8 @@ export function MatchStatsBox() {
         overflow: "auto", // Enable scrolling when content overflows
       }}
     >
-		MATCH STATS
+		MATCH STATS 
+		{children}
     </Box>
   );
 }
