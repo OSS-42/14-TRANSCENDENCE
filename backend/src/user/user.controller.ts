@@ -80,4 +80,10 @@ export class UserController {
 
         return this.userService.getUserMatchHistory(id);
     }
+    @ApiParam({ name: 'id', type: Number })
+    @Get('blockedUsers/:id')
+    getBlockedUsers(@Param('id') id:number){
+
+        return this.userService. blockedUserIds(id);
+    }
 }

@@ -187,7 +187,32 @@ export class UserService {
           matchesLost,
         };
       }
+      
+
+      async  blockedUserIds(userId:number) {
+          const id = Number(userId)
+          const blockedUsers = await this.prisma.utilisateur.findUnique({
+            
+            where: { id: id },
+            select: {
+              blockedUsers: {
+                select: {
+                  blockedUserId: true,
+                },
+              },
+            },
+          });
+      
+          if (!blockedUsers) {
+            return [];
+          }
+          else {
+            const blockedUserIds = blockedUsers.blockedUsers.map((ban) => ban.blockedUserId);
+            return blockedUserIds 
+          }
+      }
     }
+  
 
     
         // //Je pense que je nai pas besoin de update les users, cela se fait automatiquement???
