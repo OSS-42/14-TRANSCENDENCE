@@ -1,20 +1,6 @@
-import {
-  Grid,
-  Box,
-  Button,
-  Avatar,
-  TableContainer,
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody,
-  Paper,
-  Typography,
-} from "@mui/material";
 import Cookies from "js-cookie";
 import { useEffect, useState } from "react";
-import { Match, User } from "../models/User";
+import { User } from "../models/User";
 import axios from "axios";
 import { AvatarBox } from "../components/Profile/AvatarBox";
 import { NameBox } from "../components/Profile/NameBox";
@@ -75,46 +61,6 @@ export function Profile() {
     }
   };
 
-  // const FriendsList = () => {
-  //   const [friends, setFriends] = useState(["No friends for the moment ..."]); // SetState. Initialize friend to empty array
-  //   const jwt_token = Cookies.get("jwt_token"); // Cookies to identify user.
-
-  //   useEffect(() => {
-  //     const fetchFriends = async () => {
-  //       try {
-  //         const response = await axios.get(
-  //           "http://localhost:3001/users/friendsList",
-  //           {
-  //             headers: {
-  //               Authorization: "Bearer " + jwt_token,
-  //             },
-  //           }
-  //         );
-  //         console.log("Friends list fetching successful");
-  //         console.log(response);
-  //         setFriends(response.data); // Assuming the friend data is in the 'data' property of the response
-  //       } catch (error) {
-  //         console.error("Friends list fetching:", error);
-  //       }
-  //     };
-
-  //     fetchFriends();
-  //   }, []);
-
-  //   return (
-  //     <>
-  //       <div>
-  //         FRIENDS
-  //         <ul>
-  //           {friends.map((friend, index) => (
-  //             <li key={index}>{friend}</li>
-  //           ))}
-  //         </ul>
-  //       </div>
-  //     </>
-  //   );
-  // };
-
   return (
     <ContainerGrid>
       <LeftSideGrid>
@@ -128,9 +74,7 @@ export function Profile() {
        <MatchHistoryBox>
           <MatchHistory user={user}/>
        </MatchHistoryBox>
-        {/* <FriendsListBox>
-          <FriendsList />
-        </FriendsListBox> */}
+        <FriendsListBox/>
       </RightSideGrid>
     </ContainerGrid>
   );
