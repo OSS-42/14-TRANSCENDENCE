@@ -145,8 +145,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       notice = '#BLOCK : bad format'
     else if (targetId === null)
       notice = `#BLOCK: The user ${payload.target} doesn't exist`
-    // else if (blockedUserIds.find((id) => id === targetId)  === undefined)
-    //   notice = `#BLOCK: The user ${payload.target} doesn't exist`
+    else if (blockedUserIds.find((id) => id === targetId)  === undefined)
+      notice = `#BLOCK: The user ${payload.target} is already block`
     else {
       notice = `BLOCK : You block ${payload.target}`
       this.chatService.blockUser(userId, targetId)
@@ -265,7 +265,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     else if (await this.chatService.isUserMemberOfRoom(userId, roomObject.id) === false)
       userNotice = `#INVITE: You need to be a member of the room ${payload.channelName[0]} to send a invite`
     // ------------------------ L'utilisateur est ban de la room ------------------------
-    else if (await this.chatService.isBanFromRoom(payload.username, payload.channelName[0]) === false)
+    else if (await this.chatService.isBanFromRoom(payload.username, payload.channelName[0]) === true)
       userNotice = `#INVITE: The user ${[payload.target]} is ban of the room ${payload.channelName[0]}`
     // ------------------------ La cible n'existe pas ------------------------
     else if (targetId === null)
@@ -280,7 +280,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       await this.chatService.joinRoom(roomObject.id, targetId)
       this.server.to(targetSocketId).socketsJoin(payload.channelName) 
     }
-    if (targetNotice !== null)
+    console.log(targetNotice)
+    if (targetNotice !== null) {
       this.server.to(targetSocketId).emit('notice', {
         id: payload.id,
         name: payload.username,
@@ -288,6 +289,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         text: null,
         notice: targetNotice
       })
+    }
     this.server.to(userSocketId).emit('notice', {
       id: payload.id,
       name: payload.username,
