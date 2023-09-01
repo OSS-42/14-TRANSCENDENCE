@@ -38,7 +38,8 @@ export function Profile() {
   const handleAvatarSelected = (event: any) => {
     const selectedFile = event.target.files[0];
     if (selectedFile) {
-      setSelectedAvatar(selectedFile);
+      //setSelectedAvatar(selectedFile);
+      //console.log("The selected file is:", selectedFile);
       handleAvatarUpdate(selectedFile);
     }
   };
@@ -50,12 +51,14 @@ export function Profile() {
     const jwt_token = Cookies.get("jwt_token");
 
     try {
-      await axios.post("http://localhost:3001/users/updateAvatar", formData, {
+      const responseUser = await axios.post("http://localhost:3001/users/updateAvatar", formData, {
         headers: {
           Authorization: "Bearer " + jwt_token,
         },
       });
       console.log("Avatar updated successfully");
+      setUser(responseUser.data);
+      console.log(responseUser);
     } catch (error) {
       console.error("Error updating avatar:", error);
     }
