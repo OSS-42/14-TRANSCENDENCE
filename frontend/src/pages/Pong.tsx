@@ -18,14 +18,22 @@ import { ControlledCameras } from "../components/Pong/controlledcamera-2"; // As
 import axios from "axios";
 import Cookies from "js-cookie";
 
-
-
-
-
 export function Pong() {
+//------------------ CONSTANTS NECESSARY AT TOP --------------------
+const [gameLaunched, setGameLaunched] = React.useState(false);
+const [cameraMode, setCameraMode] = React.useState<"perspective" | "orthographic">("orthographic");
+const [isPaused, setIsPaused] = React.useState(true);
+const [gameStart, setGameStart] = React.useState(true);
+
+const [isClassicModeIA, setIsClassicModeIA] = React.useState(false);
+const [isClassicModeMulti, setIsClassicModeMulti] = React.useState(false);
+const [showButtons, setShowButtons] = React.useState(true);
+
 //------------------ CLIENT-SERVER SETTINGS ------------------------
   const [hostStatus, setHostStatus] = React.useState<boolean>(false);
-  const hostUsername: string = ("");
+  const [hostName, setHostName] = React.useState<string>("");
+  const [clientName, setClientName ] = React.useState<string>("");
+  
   
 
 //------------------ SCENE SETTINGS ------------------------
@@ -48,7 +56,7 @@ export function Pong() {
     const WORLD_HEIGHT: number = dimension.height / CAMERA_ZOOM;
 
     //------------------ USER NAME - LEFT ------------------------
-    const [username, setUsername] = React.useState(null);
+    // const [username, setUsername] = React.useState(null);
     
     useEffect(() => {
       const jwt_token = Cookies.get("jwt_token");
@@ -64,7 +72,18 @@ export function Pong() {
             },
             cancelToken: source.token, // Pass cancel token to axios
           });
-          setUsername(response.data.username);
+          if (isClassicModeIA === true) {
+              setHostName(response.data.username);
+              setClientName("Computer");
+          } else {
+            if (hostStatus === true) {
+              setHostName(response.data.username);
+              setClientName("Player 2");
+            } else {
+              setHostName("Player 2");
+              setClientName(response.data.username);
+            }
+          }
         } catch (error) {
           if (axios.isCancel(error)) {
             console.log("Request cancelled");
@@ -78,13 +97,11 @@ export function Pong() {
       return () => {
         source.cancel("Operation canceled by the user.");
       };
-    }, []);
+    }, [isClassicModeIA, isClassicModeMulti, hostStatus]);
 
 //------------------ GAME VARIABLES ------------------------
     // ratio pour garder les meme proportions lors d'un resizing de la page
     // attention, a cause du positionnement de la camera, height devient depth et depth devient height.
-    const [gameLaunched, setGameLaunched] = React.useState(false);
-    
     const paddleWidth: number = 0.000625 * dimension.width;
     const paddleHeight: number = 1;
     const paddleDepth: number = 0.008333333333 * dimension.height;
@@ -93,18 +110,13 @@ export function Pong() {
     const INITIAL_BALL_SPEED: number = 0.3 * initialSpeedFactor;
     const netWidth: number = 0.000625 * dimension.width;
     const netDepth: number = 0.008333333333 * dimension.height;
-
+    
     const [leftPaddlePositionZ, setLeftPaddlePositionZ] = React.useState(0);
     const [rightPaddlePositionZ, setRightPaddlePositionZ] = React.useState(0);
     const [ballSpeed, setBallSpeed] = React.useState(INITIAL_BALL_SPEED);
     const [ballPosition, setBallPosition] = React.useState({ x: 0, y: 0, z: 0.00001 });
     const [ballVelocity, setBallVelocity] = React.useState({ x: INITIAL_BALL_SPEED, z: INITIAL_BALL_SPEED });
-    const [isPaused, setIsPaused] = React.useState(true);
-    const [gameStart, setGameStart] = React.useState(true);
-    const [cameraMode, setCameraMode] = React.useState<"perspective" | "orthographic">("orthographic");
     const [winner, setWinner] = React.useState<string | null>(null);
-    const [isClassicMode, setIsClassicMode] = React.useState(false);
-    const [showButtons, setShowButtons] = React.useState(true);
     const [powerupPosition, setPowerupPosition] = React.useState({ x: 0, y: 0, z: 0 });
     const [powerupVisible, setPowerupVisible] = React.useState(false);
 
@@ -148,7 +160,7 @@ export function Pong() {
     const [countdown, setCountdown] = React.useState<number | null>(null);
 
     const handleKeyPress = (event: KeyboardEvent): void => {
-      if (isClassicMode) return;
+      if (isClassicModeIA) return;
       if (event.key === "c" || event.key === "C") {
         // Toggle the camera mode when the "C" key is pressed
         console.log('c has been pressed');
@@ -163,22 +175,47 @@ export function Pong() {
       return () => {
         window.removeEventListener("keydown", handleKeyPress);
       };
-    }, [isClassicMode]);
+    }, [isClassicModeIA]);
 
-//------------------ GAME MODES ------------------------
-    const handleClassicMode = (): void => {
+    //------------------ GAME MODES ------------------------
+    const handleClassicModeIA = (): void => {
+      console.log('classic 1 vs IA');
       setGameLaunched(true);
       setCameraMode("orthographic");
-      setIsClassicMode(true);
+      setIsClassicModeIA(true);
+      setIsClassicModeMulti(false);
       setShowButtons(false);
       handleCountdown();
     };
 
-    const handlePowerupMode = (): void => {
+    const handlePowerupModeIA = (): void => {
+      console.log('powerup 1 vs IA');
       setGameLaunched(true);
       setCameraMode("orthographic");
       setPowerupVisible(true);
-      setIsClassicMode(false);
+      setIsClassicModeIA(true);
+      setIsClassicModeMulti(false);
+      setShowButtons(false);
+      handleCountdown();
+    };
+
+    const handleClassicModeMulti = (): void => {
+      console.log('classic 1 vs 1');
+      setGameLaunched(true);
+      setCameraMode("orthographic");
+      setIsClassicModeIA(false);
+      setIsClassicModeMulti(true);
+      setShowButtons(false);
+      handleCountdown();
+    };
+
+    const handlePowerupModeMulti = (): void => {
+      console.log('powerup 1 vs multi');
+      setGameLaunched(true);
+      setCameraMode("orthographic");
+      setPowerupVisible(true);
+      setIsClassicModeIA(false);
+      setIsClassicModeMulti(true);
       setShowButtons(false);
       handleCountdown();
     };
@@ -233,7 +270,7 @@ export function Pong() {
     }, []);
 
     const Powerup: React.FC<{}> = () => {
-      if (!powerupVisible || isClassicMode) return null;
+      if (!powerupVisible || isClassicModeIA) return null;
 
       const textTexture = React.useMemo(createTextTexture, []);
 
@@ -293,9 +330,13 @@ export function Pong() {
       if (rightScore === 3 || leftScore === 3) {
         setIsPaused(true);
         if (rightScore === 3) {
-          setWinner("Computers wins!");
+          if (isClassicModeIA) {
+            setWinner("Computers wins!");
+          } else {
+            setWinner(clientName + " wins !");
+          }
         } else {
-          setWinner(username + " wins!");
+          setWinner(hostName + " wins!");
         }
       }
     }, [leftScore, rightScore]);
@@ -393,7 +434,7 @@ export function Pong() {
           (directionZ < 0 && newZ - ballRadius < -WORLD_HEIGHT / 2)) {
             ballVelocity.z = -ballVelocity.z;
             newZ = ballPosition.z + ballVelocity.z;
-            if(!isClassicMode)
+            if(!isClassicModeIA)
               playBallWallSound();
           }
 
@@ -407,9 +448,9 @@ export function Pong() {
 
           if (hitSectionLeft || hitSectionRight) {
             const hitPaddlePosition = hitSectionLeft ? leftPaddlePosition : rightPaddlePosition;
-            if (hitSectionLeft && !isClassicMode) {
+            if (hitSectionLeft && !isClassicModeIA) {
               playUserHitSound();
-            } else if (hitSectionRight && !isClassicMode) {
+            } else if (hitSectionRight && !isClassicModeIA) {
               playCompHitSound();
             }
 
@@ -427,7 +468,7 @@ export function Pong() {
           }
 
           if (newX - ballRadius <= -WORLD_WIDTH / 2 || newX + ballRadius >= WORLD_WIDTH / 2) {
-            if (!isClassicMode) {
+            if (!isClassicModeIA) {
               pausePowerupSound();
               playGoalSound();
             }
@@ -602,12 +643,15 @@ export function Pong() {
               <img src="../src/assets/arcade_2k.png" alt="Starting Screen" />
               <div className="game-buttons" style={{
                 position: 'absolute',
-                top: '50%',
+                top: '70%',
+
                 left: '50%',
                 transform: 'translate(-50%, -50%)'
               }}>
-                <button onClick={handleClassicMode}>Classic 1 vs IA</button>
-                <button onClick={handlePowerupMode}>Powerup 1 vs IA</button>
+                <button onClick={handleClassicModeIA}>Classic 1 vs IA</button>
+                <button onClick={handlePowerupModeIA}>Powerup 1 vs IA</button>
+                <button onClick={handleClassicModeMulti}>Classic 1 vs 1</button>
+                <button onClick={handlePowerupModeMulti}>Powerup 1 vs 1</button>
               </div>
             </div>
           )
@@ -661,11 +705,11 @@ export function Pong() {
           {/* Scoreboard */}
           <div className="scoreboard">
             <div className="player-info">
-              <span className="player-name">{username}</span>
+              <span className="player-name">{hostName}</span>
               <span className="left-score" style={{fontSize: `${fontSize}px` }}>{leftScore}</span>
             </div>
             <div className="player-info">
-              <span className="player-name">Computer</span>
+              <span className="player-name">{clientName}</span>
               <span className="right-score"  style={{fontSize: `${fontSize}px` }}>{rightScore}</span>
             </div>
             <div className="winner-message">
