@@ -145,11 +145,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       notice = '#BLOCK : bad format'
     else if (targetId === null)
       notice = `#BLOCK: The user ${payload.target} doesn't exist`
-    else if (blockedUserIds.find((id) => id === targetId)  === undefined)
+    else if (blockedUserIds.find((id) => id === targetId)  !== undefined)
       notice = `#BLOCK: The user ${payload.target} is already block`
     else {
       notice = `BLOCK : You block ${payload.target}`
-      this.chatService.blockUser(userId, targetId)
+      this.chatService.blockUser(targetId, userId)
     }
       client.emit('notice', {
       id: payload.id,
