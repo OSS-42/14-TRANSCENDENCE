@@ -1,6 +1,6 @@
 import { Box } from "@mui/material";
 
-export function MatchStatsBox({children}) {
+export function MatchHistoryBox({children}) {
   return (
     <Box
 	  component="div"

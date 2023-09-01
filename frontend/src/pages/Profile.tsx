@@ -24,13 +24,13 @@ import { LeftSideGrid } from "../components/Profile/LeftSideGrid";
 import { ChangeAvatarBox } from "../components/Profile/ChangeAvatarBox";
 import { ChangeNameBox } from "../components/Profile/ChangeNameBox";
 import { AboutBox } from "../components/Profile/AboutBox";
-import { MatchStatsBox } from "../components/Profile/MatchStatsBox";
+import { MatchHistoryBox } from "../components/Profile/MatchHistoryBox";
 import { FriendsListBox } from "../components/Profile/FriendsListBox";
+import { MatchHistory } from "../components/Profile/MatchHistory";
 
 export function Profile() {
   const [user, setUser] = useState<User>();
   const [selectedAvatar, setSelectedAvatar] = useState(null); // This set the selectedAvatar variable to null.
-  const [match, setMatch] = useState({}); // SetState. Mentions that it is expecting a value of type Match.
 
   useEffect(() => {
     async function fetchUsersData() {
@@ -42,7 +42,6 @@ export function Profile() {
           },
         });
         setUser(response.data);
-        console.log(user);
       } catch (error) {
         console.error("Error fetching user data:", error);
       }
@@ -76,111 +75,45 @@ export function Profile() {
     }
   };
 
-  // This is the function to do get the matchmaking stats
-  const MatchMakingStats = () => {
-    const jwt_token = Cookies.get("jwt_token"); // Token that identifies user
+  // const FriendsList = () => {
+  //   const [friends, setFriends] = useState(["No friends for the moment ..."]); // SetState. Initialize friend to empty array
+  //   const jwt_token = Cookies.get("jwt_token"); // Cookies to identify user.
 
-    useEffect(() => {
-      const fetchMatch = async () => {
-        try {
-          const response = await axios.get(
-            "http://localhost:3001/users/matchHistory/" + user?.id.toString(),
-            {
-              headers: {
-                Authorization: "Bearer " + jwt_token,
-              },
-            }
-          );
-          console.log("Match stats fetching successful");
-          console.log(response.data);
-          setMatch(response.data);
-        } catch (error) {
-          console.error("Match stats fetching:", error);
-        }
-      };
+  //   useEffect(() => {
+  //     const fetchFriends = async () => {
+  //       try {
+  //         const response = await axios.get(
+  //           "http://localhost:3001/users/friendsList",
+  //           {
+  //             headers: {
+  //               Authorization: "Bearer " + jwt_token,
+  //             },
+  //           }
+  //         );
+  //         console.log("Friends list fetching successful");
+  //         console.log(response);
+  //         setFriends(response.data); // Assuming the friend data is in the 'data' property of the response
+  //       } catch (error) {
+  //         console.error("Friends list fetching:", error);
+  //       }
+  //     };
 
-      fetchMatch();
-    }, [user]);
+  //     fetchFriends();
+  //   }, []);
 
-    if (!match.matchesWon) {
-      return <p>No match data available.</p>;
-    }
-
-    return (
-      <TableContainer component={Paper} sx={{ backgroundColor: "white" }} >
-        <Typography variant="h6" sx={{ padding: "16px" }}>
-          Match History
-        </Typography>
-        <Table >
-          <TableHead>
-            <TableRow>
-              <TableCell>Date</TableCell>
-              <TableCell>Winner</TableCell>
-              <TableCell>Loser</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {match.matchesWon.map((matches, index) => (
-              <TableRow key={index}>
-                <TableCell>{matches.date}</TableCell>
-                <TableCell>{matches.winner}</TableCell>
-                <TableCell>{matches.loser}</TableCell>
-              </TableRow>
-            ))}
-			{match.matchesLost.map((matches, index) => (
-              <TableRow key={index}>
-                <TableCell>{matches.date}</TableCell>
-                <TableCell>{matches.winner}</TableCell>
-                <TableCell>{matches.loser}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    );
-  };
-
-  //   This is the function call that allows to connect the FriendLists Box with list of all friends
-  //   The code below becomes a component. It is identified as <FriendList/>
-  const FriendsList = () => {
-    const [friends, setFriends] = useState(["No friends for the moment ..."]); // SetState. Initialize friend to empty array
-    const jwt_token = Cookies.get("jwt_token"); // Cookies to identify user.
-
-    useEffect(() => {
-      const fetchFriends = async () => {
-        try {
-          const response = await axios.get(
-            "http://localhost:3001/users/friendsList",
-            {
-              headers: {
-                Authorization: "Bearer " + jwt_token,
-              },
-            }
-          );
-          console.log("Friends list fetching successful");
-          console.log(response);
-          setFriends(response.data); // Assuming the friend data is in the 'data' property of the response
-        } catch (error) {
-          console.error("Friends list fetching:", error);
-        }
-      };
-
-      fetchFriends();
-    }, []);
-
-    return (
-      <>
-        <div>
-          FRIENDS
-          <ul>
-            {friends.map((friend, index) => (
-              <li key={index}>{friend}</li>
-            ))}
-          </ul>
-        </div>
-      </>
-    );
-  };
+  //   return (
+  //     <>
+  //       <div>
+  //         FRIENDS
+  //         <ul>
+  //           {friends.map((friend, index) => (
+  //             <li key={index}>{friend}</li>
+  //           ))}
+  //         </ul>
+  //       </div>
+  //     </>
+  //   );
+  // };
 
   return (
     <ContainerGrid>
@@ -192,12 +125,12 @@ export function Profile() {
       </LeftSideGrid>
       <RightSideGrid>
         <AboutBox />
-        <MatchStatsBox>
-          <MatchMakingStats />
-        </MatchStatsBox>
-        <FriendsListBox>
+       <MatchHistoryBox>
+          <MatchHistory user={user}/>
+       </MatchHistoryBox>
+        {/* <FriendsListBox>
           <FriendsList />
-        </FriendsListBox>
+        </FriendsListBox> */}
       </RightSideGrid>
     </ContainerGrid>
   );
