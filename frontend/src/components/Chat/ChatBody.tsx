@@ -1,5 +1,6 @@
 // import React from 'react';
 import { useNavigate } from "react-router-dom";
+import { Socket } from "socket.io-client";
 
 type ChatMessage = {
   id: number; // un identifiant unique pour chaque message
@@ -11,9 +12,11 @@ type ChatMessage = {
 
 type ChatBodyProps = {
   messages: ChatMessage[];
+  socket: Socket;
 };
 
-const ChatBody = ({ messages }: ChatBodyProps) => {
+const ChatBody = ({ messages, socket }: ChatBodyProps) => {
+  
   return (
     <>
       <div className="message__container">

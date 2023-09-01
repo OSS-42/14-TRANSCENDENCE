@@ -73,6 +73,8 @@ const ChatFooter = ({ socket }: ChatFooterProps) => {
         banCommand({ data, socket, user });
       else if (data.startsWith("#BLOCK"))
         blockCommand({ data, socket, user });
+      // else if (data.startsWith("#MODE"))
+      //   modeCommand({ data, socket, user });
       else
         defaultCommand({ data, socket, user });
     }
