@@ -89,7 +89,7 @@ export class AuthService{
                 const test = await this.prisma.utilisateur.update({
                     where: { email: "mbertin@student.42quebec.com"},
                     data: {
-                        username: "Mangor la grosse", 
+                        username: "Mangor_la_grosse", 
                         avatar: "https://images.squarespace-cdn.com/content/v1/55125ce9e4b01593abaf0537/1547716294492-SRU557RUPLCI8P62PNOO/fat34.png?format=1500w", 
                     },
                 }); 

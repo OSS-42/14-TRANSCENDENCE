@@ -14,7 +14,8 @@ import { User } from "../models/User";
 // I'm still not sure how everything interacts, but I'll find out soon enough.
 // Il y une facon de garder l'historique du chat on refresh, avec le local storage. EZCLAP voir le video discord
 type ChatMessage = {
-  id: number;
+  id: number; // un identifiant unique pour chaque message
+  userId: number;
   name: string;
   channel: string;
   text: string;
