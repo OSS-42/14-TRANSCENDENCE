@@ -12,6 +12,7 @@ import { ChangeNameBox } from "../components/Profile/ChangeNameBox";
 import { AboutBox } from "../components/Profile/AboutBox";
 import { MatchHistoryBox } from "../components/Profile/MatchHistoryBox";
 import { FriendsListBox } from "../components/Profile/FriendsListBox";
+import { MatchHistory } from "../components/Profile/MatchHistory";
 
 export function Profile() {
   const [user, setUser] = useState<User>();
@@ -63,7 +64,7 @@ export function Profile() {
       <RightSideGrid>
         <AboutBox />
         <MatchHistoryBox>
-          <MatchHistoryBox user={user} />
+          <MatchHistory user={user} />
         </MatchHistoryBox>
         <FriendsListBox />
       </RightSideGrid>
