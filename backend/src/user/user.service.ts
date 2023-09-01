@@ -198,7 +198,7 @@ export class UserService {
         id: user.id,
       },
       data: {
-        username: username
+        username: username,
       },
     });
     return updatedUser;

@@ -89,10 +89,10 @@ export class UserController {
     return this.userService.getUserMatchHistory(id);
   }
   @Post("updateUsername")
-
-  updateUsername(@GetUser() user: Utilisateur,@Body() updateData: { newUsername: string } ) {
-
-    return this.userService.updateUsername(updateData.newUsername)
-
-    }
+  updateUsername(
+    @GetUser() user: Utilisateur,
+    @Body() updateData: { newUsername: string }
+  ) {
+    return this.userService.updateUsername(user, updateData.newUsername);
+  }
 }
