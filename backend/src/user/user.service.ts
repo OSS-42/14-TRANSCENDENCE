@@ -182,6 +182,27 @@ export class UserService {
       matchesLost,
     };
   }
+
+  async updateUsername(user: Utilisateur, username: string) {
+    // const userToChange = await this.prisma.utilisateur.findUnique({
+    //     where: {
+    //     id: user.id,
+    //     },
+    // });
+    // if (!userToChange) {
+    //     throw new Error("Utilisateur non trouvé");
+    // }
+
+    const updatedUser = await this.prisma.utilisateur.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        username: username
+      },
+    });
+    return updatedUser;
+  }
 }
 
 // //Je pense que je nai pas besoin de update les users, cela se fait automatiquement???
