@@ -19,11 +19,10 @@ export function NameBox(props) {
   async function handleBlur() {
     if (editedName !== props.user) {
       const jwt_token = Cookies.get("jwt_token");
-
       try {
         const response = await axios.post(
           "http://localhost:3001/users/updateUsername",
-          editedName,
+          {newUsername: editedName},  
           {
             headers: {
               Authorization: "Bearer " + jwt_token,
@@ -32,6 +31,7 @@ export function NameBox(props) {
         );
         console.log("Updating name was successful");
         props.setUser(response.data);
+        console.log(response.data);
       } catch (error) {
         console.error("Error updating user data:", error);
       }
