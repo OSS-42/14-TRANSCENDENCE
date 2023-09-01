@@ -34,29 +34,10 @@ export function Profile() {
     fetchUsersData();
   }, []);
 
-  const handleNameEdit = async (editedUser) => {
-    const jwt_token = Cookies.get("jwt_token");
-    try {
-      const response = await axios.post(
-        "http://localhost:3001/users/me",
-        editedUser,
-        {
-          headers: {
-            Authorization: "Bearer " + jwt_token,
-          },
-        }
-      );
-      console.log("User data updated:", response.data);
-      setUser(editedUser);
-    } catch (error) {
-      console.error("Error updating user data:", error);
-    }
-  };
-
   return (
     <ContainerGrid>
       <LeftSideGrid>
-        <NameBox user={user?.username} onEdit={handleNameEdit} />
+        <NameBox user={user?.username} onEdit={setUser} />
         <AvatarBox user={user} />
         <ChangeAvatarBox setUser={setUser} />
         <ChangeNameBox />

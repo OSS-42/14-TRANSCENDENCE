@@ -1,23 +1,41 @@
 import { Box } from "@mui/material";
 import { useState } from "react";
 
-export function NameBox(props, set) {
+export function NameBox(props) {
   const [isEditing, setIsEditing] = useState(false);
-  const [editedUser, setEditedUser] = useState(props.user);
+  const [editedUser, setEditedUser] = useState("");
 
   function handleDoubleClick() {
     setIsEditing(true);
   }
 
   function handleBlur() {
-    setIsEditing(false);
-    // Save the edited user content when blur (e.g., when clicking outside the input field)
-	props.onEdit(editedUser)
+	
   }
 
   function handleChange(event) {
-    setEditedUser(event.target.value);
+	const newUserName = event.target.value;
+	console.log ("New User Name:", newUserName);
   }
+
+//   const handleNameEdit = async (editedUser) => {
+//     const jwt_token = Cookies.get("jwt_token");
+//     try {
+//       const response = await axios.post(
+//         "http://localhost:3001/users/updateUsername",
+//         editedUser,
+//         {
+//           headers: {
+//             Authorization: "Bearer " + jwt_token,
+//           },
+//         }
+//       );
+//       console.log("HandleNameEdit:", response.data);
+//       setUser(editedUser);
+//     } catch (error) {
+//       console.error("Error updating user data:", error);
+//     }
+//   };
 
   return (
     <Box

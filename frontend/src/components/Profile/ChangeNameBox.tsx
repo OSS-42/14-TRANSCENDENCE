@@ -7,6 +7,7 @@ function handleUsername() {
 export function ChangeNameBox() {
   return (
     <Box
+	  component="div"
       sx={{
         border: "1px solid black",
         borderRadius: "5px",
