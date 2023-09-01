@@ -16,7 +16,7 @@ import { MatchHistory } from "../components/Profile/MatchHistory";
 
 export function Profile() {
   const [user, setUser] = useState<User>();
-  const [selectedAvatar, setSelectedAvatar] = useState(null); // This set the selectedAvatar variable to null.
+//   const [selectedAvatar, setSelectedAvatar] = useState(null); // This set the selectedAvatar variable to null.
 
   useEffect(() => {
     async function fetchUsersData() {
@@ -35,41 +35,12 @@ export function Profile() {
     fetchUsersData();
   }, []);
 
-  const handleAvatarSelected = (event: any) => {
-    const selectedFile = event.target.files[0];
-    if (selectedFile) {
-      //setSelectedAvatar(selectedFile);
-      //console.log("The selected file is:", selectedFile);
-      handleAvatarUpdate(selectedFile);
-    }
-  };
-
-  const handleAvatarUpdate = async (avatarFile: File) => {
-    const formData = new FormData();
-    console.log(avatarFile);
-    formData.append("avatar", avatarFile);
-    const jwt_token = Cookies.get("jwt_token");
-
-    try {
-      const responseUser = await axios.post("http://localhost:3001/users/updateAvatar", formData, {
-        headers: {
-          Authorization: "Bearer " + jwt_token,
-        },
-      });
-      console.log("Avatar updated successfully");
-      setUser(responseUser.data);
-      console.log(responseUser);
-    } catch (error) {
-      console.error("Error updating avatar:", error);
-    }
-  };
-
   return (
     <ContainerGrid>
       <LeftSideGrid>
         <NameBox user={user?.username} />
         <AvatarBox user={user} />
-        <ChangeAvatarBox onChange={handleAvatarSelected} />
+		<ChangeAvatarBox setUser={setUser}/>
         <ChangeNameBox />
       </LeftSideGrid>
       <RightSideGrid>

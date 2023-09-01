@@ -15,7 +15,7 @@ export function NameBox(props) {
         padding: "20px",
       }}
     >
-      UserName: {props.user}
+      {props.user}
     </Box>
   );
 }
