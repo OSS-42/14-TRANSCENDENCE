@@ -12,11 +12,9 @@ import { ChangeNameBox } from "../components/Profile/ChangeNameBox";
 import { AboutBox } from "../components/Profile/AboutBox";
 import { MatchHistoryBox } from "../components/Profile/MatchHistoryBox";
 import { FriendsListBox } from "../components/Profile/FriendsListBox";
-import { MatchHistory } from "../components/Profile/MatchHistory";
 
 export function Profile() {
   const [user, setUser] = useState<User>();
-//   const [selectedAvatar, setSelectedAvatar] = useState(null); // This set the selectedAvatar variable to null.
 
   useEffect(() => {
     async function fetchUsersData() {
@@ -35,20 +33,39 @@ export function Profile() {
     fetchUsersData();
   }, []);
 
+  const handleNameEdit = async (editedUser) => {
+    const jwt_token = Cookies.get("jwt_token");
+    try {
+      const response = await axios.post(
+        "http://localhost:3001/users/me",
+        editedUser,
+        {
+          headers: {
+            Authorization: "Bearer " + jwt_token,
+          },
+        }
+      );
+      console.log("User data updated:", response.data);
+      setUser(editedUser);
+    } catch (error) {
+      console.error("Error updating user data:", error);
+    }
+  };
+
   return (
     <ContainerGrid>
       <LeftSideGrid>
-        <NameBox user={user?.username} />
+        <NameBox user={user?.username} onEdit={handleNameEdit} />
         <AvatarBox user={user} />
-		<ChangeAvatarBox setUser={setUser}/>
+        <ChangeAvatarBox setUser={setUser} />
         <ChangeNameBox />
       </LeftSideGrid>
       <RightSideGrid>
         <AboutBox />
-       <MatchHistoryBox>
-          <MatchHistory user={user}/>
-       </MatchHistoryBox>
-        <FriendsListBox/>
+        <MatchHistoryBox>
+          <MatchHistoryBox user={user} />
+        </MatchHistoryBox>
+        <FriendsListBox />
       </RightSideGrid>
     </ContainerGrid>
   );
