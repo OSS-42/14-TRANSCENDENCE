@@ -1,42 +1,44 @@
 import { Box } from "@mui/material";
+import axios from "axios";
+import Cookies from "js-cookie";
 import { useState } from "react";
 
 export function NameBox(props) {
   const [isEditing, setIsEditing] = useState(false);
-  const [editedUser, setEditedUser] = useState("");
+  const [editedName, setEditedName] = useState("");
 
   function handleDoubleClick() {
     setIsEditing(true);
   }
 
-  function handleBlur() {
-	
-  }
-
   function handleChange(event) {
-	const newUserName = event.target.value;
-	console.log ("New User Name:", newUserName);
+    const newName = event.target.value;
+    setEditedName(newName);
   }
 
-//   const handleNameEdit = async (editedUser) => {
-//     const jwt_token = Cookies.get("jwt_token");
-//     try {
-//       const response = await axios.post(
-//         "http://localhost:3001/users/updateUsername",
-//         editedUser,
-//         {
-//           headers: {
-//             Authorization: "Bearer " + jwt_token,
-//           },
-//         }
-//       );
-//       console.log("HandleNameEdit:", response.data);
-//       setUser(editedUser);
-//     } catch (error) {
-//       console.error("Error updating user data:", error);
-//     }
-//   };
+  async function handleBlur() {
+    if (editedName !== props.user) {
+      const jwt_token = Cookies.get("jwt_token");
 
+      try {
+        const response = await axios.post(
+          "http://localhost:3001/users/updateUsername",
+          editedName,
+          {
+            headers: {
+              Authorization: "Bearer " + jwt_token,
+            },
+          }
+        );
+        console.log("Updating name was successful");
+        props.setUser(response.data);
+      } catch (error) {
+        console.error("Error updating user data:", error);
+      }
+    }
+    setIsEditing(false);
+  }
+  
   return (
     <Box
       onDoubleClick={handleDoubleClick}
@@ -54,7 +56,7 @@ export function NameBox(props) {
       {isEditing ? (
         <input
           type="text"
-          value={editedUser}
+          value={editedName}
           onChange={handleChange}
           onBlur={handleBlur}
           autoFocus

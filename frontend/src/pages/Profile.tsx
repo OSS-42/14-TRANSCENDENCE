@@ -27,6 +27,7 @@ export function Profile() {
           },
         });
         setUser(response.data);
+        console.log("Here is the updated user: ", user);
       } catch (error) {
         console.error("Error fetching user data:", error);
       }
@@ -37,7 +38,7 @@ export function Profile() {
   return (
     <ContainerGrid>
       <LeftSideGrid>
-        <NameBox user={user?.username} onEdit={setUser} />
+        <NameBox user={user?.username} setUser={setUser} />
         <AvatarBox user={user} />
         <ChangeAvatarBox setUser={setUser} />
         <ChangeNameBox />

@@ -93,6 +93,7 @@ export class UserController {
     @GetUser() user: Utilisateur,
     @Body() updateData: { newUsername: string }
   ) {
+    console.log("New Username:", updateData.newUsername);
     return this.userService.updateUsername(user, updateData.newUsername);
   }
 }
