@@ -69,9 +69,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   // //-------------------------------------------------------- TEST MORGAN --------------------------------------------------------
   
   @SubscribeMessage('message')
-  handleMessage(client: Socket, payload: any): void { //voir pour changer any
+  async handleMessage(client: Socket, payload: any){ //voir pour changer any
+    const userId = await this.chatService.getUserIdFromUsername(payload.name)
     this.server.emit('messageResponse', {
       id: payload.id,
+      userId: userId,
       name: payload.name,
       channel: 'General',
       text: payload.message
@@ -193,6 +195,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       if (event === "messageResponse")
         this.server.to(roomName).emit(event, {
           id: payload.id,
+          userId: userId,
           name: payload.username,
           channel: roomName,
           text: payload.message,
@@ -202,6 +205,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       else 
         client.emit(event, {
           id: payload.id,
+          userId: userId,
           name: payload.username,
           channel: roomName,
           text: payload.message,
@@ -224,6 +228,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       if (event === 'messageResponse')
         this.server.to(socketId).emit(event, {
           id: payload.id,
+          userId: userId,
           name: payload.username,
           channel: undefined,
           text: payload.message,
