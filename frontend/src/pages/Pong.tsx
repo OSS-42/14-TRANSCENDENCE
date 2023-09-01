@@ -640,7 +640,8 @@ const [showButtons, setShowButtons] = React.useState(true);
         {!gameLaunched ? (
           showButtons && (
             <div className="starting-screen">
-              <img src="../src/assets/arcade_2k.png" alt="Starting Screen" />
+              {/* <img src="../src/assets/arcade_2k.png" alt="Starting Screen" /> */}
+              <img src="../src/assets/animated.gif" alt="Starting Screen" />
               <div className="game-buttons" style={{
                 position: 'absolute',
                 top: '70%',
