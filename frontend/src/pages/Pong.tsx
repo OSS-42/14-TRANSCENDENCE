@@ -5,7 +5,7 @@
 
 import { Box as MaterialBox } from '@mui/material'
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Sphere, Box } from "@react-three/drei";
 import "./Pong.css"
@@ -18,86 +18,123 @@ import { ControlledCameras } from "../components/Pong/controlledcamera-2"; // As
 import axios from "axios";
 import Cookies from "js-cookie";
 
-export function Pong() {
-//------------------ CONSTANTS NECESSARY AT TOP --------------------
-const [gameLaunched, setGameLaunched] = React.useState(false);
-const [cameraMode, setCameraMode] = React.useState<"perspective" | "orthographic">("orthographic");
-const [isPaused, setIsPaused] = React.useState(true);
-const [gameStart, setGameStart] = React.useState(true);
+// import for websocket
+import { Socket } from "socket.io-client";
 
-const [isClassicModeIA, setIsClassicModeIA] = React.useState(false);
-const [isClassicModeMulti, setIsClassicModeMulti] = React.useState(false);
-const [showButtons, setShowButtons] = React.useState(true);
+//------------------ INFOS QUI TRANSITENT ENTRE SOCKETS ------------
+type GameStartInfos = {
+  hostStatus: boolean;
+  clientName: string;
+}
+
+type ObjectsPositions = {
+
+}
+
+type PongProps = {
+  socket : Socket;
+}
+
+export function Pong({ socket }: PongProps) {
+
+  //------------------ CONSTANTS NECESSARY AT TOP --------------------
+  const [gameLaunched, setGameLaunched] = React.useState(false);
+  const [cameraMode, setCameraMode] = React.useState<"perspective" | "orthographic">("orthographic");
+  const [isPaused, setIsPaused] = React.useState(true);
+  const [gameStart, setGameStart] = React.useState(true);
+
+  const [isClassicModeIA, setIsClassicModeIA] = React.useState(false);
+  const [isClassicModeMulti, setIsClassicModeMulti] = React.useState(false);
+  const [showButtons, setShowButtons] = React.useState(true);
 
 //------------------ CLIENT-SERVER SETTINGS ------------------------
   const [hostStatus, setHostStatus] = React.useState<boolean>(false);
-  const [hostName, setHostName] = React.useState<string>("");
+  const [hostname, setHostname] = React.useState<string>("");
   const [clientName, setClientName ] = React.useState<string>("");
-  
-  
+
+  const [gameInfos, setGameInfos] = useState<GameStartInfos[]>([]);
+  const [objectsInfos, setObjectsInfos] = useState<ObjectsPositions[]>([]);
+
+  // Ecoute parle le socket
+  useEffect(() => {
+    socket.on( "gameStartInfos", (data: GameStartInfos) => 
+      setGameInfos([gameInfos, data]) //Cette partie met à jour l'état messages. Elle utilise le spread operator ... pour créer un nouveau tableau qui contient les anciens messages (messages) ainsi que le nouveau message data. Ensuite, elle appelle setMessages pour mettre à jour la valeur de messages avec ce nouveau tableau.
+      );
+      socket.on( "objectsPositions", (data: ObjectsPositions) => {
+      setObjectsInfos([objectsInfos, data]) //Cette partie met à jour l'état messages. Elle utilise le spread operator ... pour créer un nouveau tableau qui contient les anciens messages (messages) ainsi que le nouveau message data. Ensuite, elle appelle setMessages pour mettre à jour la valeur de messages avec ce nouveau tableau.
+    }
+    );
+
+    setHostStatus(gameInfos.hostStatus); 
+
+    return () => {
+      socket.off("gameStartInfos");
+      socket.off("objectsPositions");
+    };
+  }, [socket, gameInfos, objectsInfos]);
 
 //------------------ SCENE SETTINGS ------------------------
     // s'assure que le canvas aura comme maximum toujours 800x600
-    const [dimension, setDimensions] = React.useState<{ width: number, height: number }>(() => {
-      let initialWidth = window.innerWidth;
-      let initialHeight = window.innerWidth * 3 / 4;
-    
-      if (initialWidth > 800) {
-        initialWidth = 800;
-        initialHeight = 600;
-      }
-    
-      return { width: initialWidth, height: initialHeight };
-    });
+  const [dimension, setDimensions] = React.useState<{ width: number, height: number }>(() => {
+    let initialWidth = window.innerWidth;
+    let initialHeight = window.innerWidth * 3 / 4;
+  
+    if (initialWidth > 800) {
+      initialWidth = 800;
+      initialHeight = 600;
+    }
+  
+    return { width: initialWidth, height: initialHeight };
+  });
 
-      // Dimensions de l'espace de jeu.
-    const CAMERA_ZOOM = 20;
-    const WORLD_WIDTH: number = dimension.width / CAMERA_ZOOM;
-    const WORLD_HEIGHT: number = dimension.height / CAMERA_ZOOM;
+    // Dimensions de l'espace de jeu.
+  const CAMERA_ZOOM = 20;
+  const WORLD_WIDTH: number = dimension.width / CAMERA_ZOOM;
+  const WORLD_HEIGHT: number = dimension.height / CAMERA_ZOOM;
 
     //------------------ USER NAME - LEFT ------------------------
     // const [username, setUsername] = React.useState(null);
     
-    useEffect(() => {
-      const jwt_token = Cookies.get("jwt_token");
-    
-      // Create a new CancelToken
-      const source = axios.CancelToken.source();
-    
-      async function fetchUsersData() {
-        try {
-          const response = await axios.get("http://localhost:3001/users/me", {
-            headers: {
-              Authorization: "Bearer " + jwt_token,
-            },
-            cancelToken: source.token, // Pass cancel token to axios
-          });
-          if (isClassicModeIA === true) {
-              setHostName(response.data.username);
-              setClientName("Computer");
+  useEffect(() => {
+    const jwt_token = Cookies.get("jwt_token");
+  
+    // Create a new CancelToken
+    const source = axios.CancelToken.source();
+  
+    async function fetchUsersData() {
+      try {
+        const response = await axios.get("http://localhost:3001/users/me", {
+          headers: {
+            Authorization: "Bearer " + jwt_token,
+          },
+          cancelToken: source.token, // Pass cancel token to axios
+        });
+        if (isClassicModeIA === true) {
+            setHostname(response.data.username);
+            setClientName("Computer");
+        } else {
+          if (hostStatus === true) {
+            setHostname(response.data.username);
+            setClientName(gameInfos.clientName);
           } else {
-            if (hostStatus === true) {
-              setHostName(response.data.username);
-              setClientName("Player 2");
-            } else {
-              setHostName("Player 2");
-              setClientName(response.data.username);
-            }
-          }
-        } catch (error) {
-          if (axios.isCancel(error)) {
-            console.log("Request cancelled");
+            setHostname(gameInfos.clientName);
+            setClientName(response.data.username);
           }
         }
+      } catch (error) {
+        if (axios.isCancel(error)) {
+          console.log("Request cancelled");
+        }
       }
-    
-      fetchUsersData();
-    
-      // Cleanup function
-      return () => {
-        source.cancel("Operation canceled by the user.");
-      };
-    }, [isClassicModeIA, isClassicModeMulti, hostStatus]);
+    }
+  
+    fetchUsersData();
+  
+    // Cleanup function
+    return () => {
+      source.cancel("Operation canceled by the user.");
+    };
+  }, [isClassicModeIA, isClassicModeMulti, hostStatus]);
 
 //------------------ GAME VARIABLES ------------------------
     // ratio pour garder les meme proportions lors d'un resizing de la page
@@ -336,7 +373,7 @@ const [showButtons, setShowButtons] = React.useState(true);
             setWinner(clientName + " wins !");
           }
         } else {
-          setWinner(hostName + " wins!");
+          setWinner(hostname + " wins!");
         }
       }
     }, [leftScore, rightScore]);
@@ -706,7 +743,7 @@ const [showButtons, setShowButtons] = React.useState(true);
           {/* Scoreboard */}
           <div className="scoreboard">
             <div className="player-info">
-              <span className="player-name">{hostName}</span>
+              <span className="player-name">{hostname}</span>
               <span className="left-score" style={{fontSize: `${fontSize}px` }}>{leftScore}</span>
             </div>
             <div className="player-info">
