@@ -11,12 +11,13 @@ type ChatFriendsProps = {
   socket: Socket; // Assurez-vous que ce type correspond au type de socket que vous utilisez // Setter pour usersList
   connectedUsers: number[]; 
   friendsList: User[]; 
+  handleUserClick: (user: User) => void;
 };
 
 
 //Allez chercher la liste des des utilisateurs connectedUsers a linititon du component.
 //
-const ChatFriends = ({ socket, connectedUsers, friendsList }: ChatFriendsProps) => {
+const ChatFriends = ({ socket, connectedUsers, handleUserClick, friendsList }: ChatFriendsProps) => {
  
   
   console.log(friendsList)
@@ -48,6 +49,7 @@ const ChatFriends = ({ socket, connectedUsers, friendsList }: ChatFriendsProps) 
                   width="50"
                   height="50"
                   style={{ borderRadius: '50%' }}
+                  onClick={() => handleUserClick(user)} 
                 />
                 <p>
                   {user.username}

@@ -1,6 +1,7 @@
 import { Box, Button, Dialog, DialogContent, Typography } from "@mui/material";
 import { User } from "../../models/User";
 import {colors} from "../../styles/colors"
+import { MatchHistory } from "../Profile/MatchHistory";
 
 
 type UserDetailsProps = {
@@ -26,12 +27,17 @@ type UserDetailsProps = {
               {selectedUser?.username}
             </Typography>
             <Typography variant="body1">
-              Autres informations sur l'utilisateur...
+            <MatchHistory user={selectedUser}></MatchHistory>
             </Typography>
+             <Box mt={2}>
+                <Button variant="contained" onClick={closeUserDetails}>
+                    Invite to play
+                </Button>
+            </Box>
             <Box mt={2}>
-              <Button variant="contained" onClick={closeUserDetails}>
-                Fermer
-              </Button>
+                <Button variant="contained" onClick={closeUserDetails}>
+                    Fermer
+                </Button>
             </Box>
           </Box>
         </DialogContent>

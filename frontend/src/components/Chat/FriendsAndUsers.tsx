@@ -77,9 +77,11 @@ export function FriendsAndUsers({ socket} :someProp) {
       handleUserClick={handleUserClick}
 
       />
-      <ChatFriends socket={socket}
+      <ChatFriends 
+      socket={socket}
       friendsList={friendsList}
       connectedUsers={connectedUsers} 
+      handleUserClick={handleUserClick}
       />
 
 

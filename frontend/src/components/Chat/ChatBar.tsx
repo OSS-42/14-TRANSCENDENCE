@@ -71,13 +71,20 @@ function ChatBar({ socket, setUsersList, handleUserClick, friendsList, setFriend
                 style={{ borderRadius: '50%' }}
                 onClick={() => handleUserClick(user)} 
               />
-              <p>{user.username}</p>
-              {connectedUsers.includes(user.id) && <span style={{ color: 'green' }}> en ligne</span>}
-              {!friendsList.some((friend) => friend.id === user.id) && (
-                <Button variant="outlined" size="small" onClick={() => addFriend(user.username)}>
+              <div>
+                <p>{user.username}</p>
+                {connectedUsers.includes(user.id) && <span style={{ color: 'green' }}> en ligne</span>}
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', flex: '1' }}>
+                {!friendsList.some((friend) => friend.id === user.id) && (
+                <Button variant="contained" onClick={() => addFriend(user.username)}>
                   Add Friend
                 </Button>
-              )}
+                  // <Button variant="outlined" size="small" onClick={() => addFriend(user.username)}>
+                  //   Add Friend
+                  // </Button>
+                )}
+              </div>
             </Box>
           ))}
         </div>
