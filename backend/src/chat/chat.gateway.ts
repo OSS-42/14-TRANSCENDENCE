@@ -65,6 +65,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     });
 
   }
+  @SubscribeMessage('getConnectedUsers')
+  getConnectedUsers(client: Socket) {
+    const connectedUserIds = Array.from(this.connectedUsers.keys());
+    client.emit("updateConnectedUsers", connectedUserIds)
+  }
 
   // //-------------------------------------------------------- TEST MORGAN --------------------------------------------------------
   
@@ -539,6 +544,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   // //-------------------------------------------------------- TEST MORGAN --------------------------------------------------------
   
+
+
   @SubscribeMessage('findAllMessages')
   findAllMessages(client: any, payload: any): string {
     return 'array des messages';

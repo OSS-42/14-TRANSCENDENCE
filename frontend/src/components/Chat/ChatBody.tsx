@@ -21,7 +21,6 @@ type ChatBodyProps = {
 };
 
 const ChatBody = ({ messages, socket }: ChatBodyProps) => {
-  const [user, setUser] = useState<User>();
   const [banList, setBanList] = useState<number[]>();
 
   useEffect(() => {
@@ -33,21 +32,20 @@ const ChatBody = ({ messages, socket }: ChatBodyProps) => {
             Authorization: "Bearer " + jwt_token,
           },
         });
-        setUser(response.data);
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      }
-      try {
-        const banResponse = await axios.get(
-          `http://localhost:3001/users/blockedUsers/${user.id}`,
-          {
-            // id du receveur
-            headers: {
-              Authorization: "Bearer " + jwt_token,
-            },
-          }
-        );
-        setBanList(banResponse.data);
+        // Une fois la première requête terminée, vous pouvez exécuter la deuxième
+        try {
+          const banResponse = await axios.get(
+            `http://localhost:3001/users/blockedUsers/${response.data.id}`, // Utilisez response.data.id au lieu de user.id
+            {
+              headers: {
+                Authorization: "Bearer " + jwt_token,
+              },
+            }
+          );
+          setBanList(banResponse.data);
+        } catch (error) {
+          console.error("Error fetching ban list:", error);
+        }
       } catch (error) {
         console.error("Error fetching user data:", error);
       }

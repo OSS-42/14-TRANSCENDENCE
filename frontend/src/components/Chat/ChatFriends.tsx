@@ -1,7 +1,5 @@
-import { useState, useEffect } from "react";
+
 import { Socket } from "socket.io-client";
-import axios from "axios";
-import Cookies from "js-cookie";
 import { Box } from "@mui/material";
 import { User } from "../../models/User";
 
@@ -9,41 +7,19 @@ import { User } from "../../models/User";
 ////ON VA DEVOIR PEUT ETRE UTILISER REDUX AFIN DAVOIR DES STATES GLOBALES
 
 
-type ChatFooterProps = {
-  socket: Socket; // Assurez-vous que ce type correspond au type de socket que vous utilisez
+type ChatFriendsProps = {
+  socket: Socket; // Assurez-vous que ce type correspond au type de socket que vous utilisez // Setter pour usersList
+  connectedUsers: number[]; 
+  friendsList: User[]; 
 };
 
 
 //Allez chercher la liste des des utilisateurs connectedUsers a linititon du component.
 //
-const ChatFriends = ({ socket }: ChatFooterProps) => {
-  const [usersList, setUsersList] = useState<User[]>([]);
-  const [connectedUsers, setConnectedUsers] = useState<number[]>([]);
+const ChatFriends = ({ socket, connectedUsers, friendsList }: ChatFriendsProps) => {
+ 
   
-
-    useEffect(() => {
-      async function fetchUsersData() {
-        socket.on('updateConnectedUsers', (updatedUsers: number[]) => {
-          setConnectedUsers(updatedUsers);
-
-        });
-        
-        const jwt_token = Cookies.get('jwt_token');
-        try {
-          const response = await axios.get('http://localhost:3001/users/friendsList', {
-            headers: {
-              Authorization: "Bearer " + jwt_token,
-            },
-          });
-          // setUsersList(response.data)
-          setUsersList(response.data)
-        } catch (error) {
-          console.error('Error fetching user data:', error);
-        }
-      }
-  
-      fetchUsersData();
-    }, []);
+  console.log(friendsList)
   
     return (
       <div className="chat__sidebar">
@@ -53,9 +29,9 @@ const ChatFriends = ({ socket }: ChatFooterProps) => {
           <h4 className="chat__header">FRIENDS LIST</h4>
           <div className="chat__users">
             <p></p>
-            {usersList.map((user, index) => (
+            {friendsList.map((user, index) => (
               <Box
-                key={index}
+                key={user.id}
                 sx={{
                   display: 'flex',
                   alignItems: 'center',
