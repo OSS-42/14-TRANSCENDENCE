@@ -11,12 +11,13 @@ type ChatFriendsProps = {
   setFriendsList: React.Dispatch<React.SetStateAction<User[]>>; 
   usersList: User[]
   friendsList: User[]  
-  connectedUsers: number[]; 
+  connectedUsers: number[];
+  handleUserClick: (user: User) => void;
   
 };
 //IL Y A UN PROBLEME DANS CETTE PAGE (sam). ca fonctionne mais erreur dans le console log
 
-function ChatBar({ socket, setUsersList, friendsList, setFriendsList, usersList,  connectedUsers }: ChatFriendsProps) {
+function ChatBar({ socket, setUsersList, handleUserClick, friendsList, setFriendsList, usersList,  connectedUsers }: ChatFriendsProps) {
 
   const addFriend = async (friendUsername: string) => {
     const jwt_token = Cookies.get("jwt_token");
@@ -49,7 +50,7 @@ function ChatBar({ socket, setUsersList, friendsList, setFriendsList, usersList,
         <h4 className="chat__header">USERS LIST</h4>
         <div className="chat__users">
           <p></p>
-          {usersList.map((user, index) => (
+          {usersList.map((user) => (
             <Box
               key={user.id}
               sx={{
@@ -68,6 +69,7 @@ function ChatBar({ socket, setUsersList, friendsList, setFriendsList, usersList,
                 width="50"
                 height="50"
                 style={{ borderRadius: '50%' }}
+                onClick={() => handleUserClick(user)} 
               />
               <p>{user.username}</p>
               {connectedUsers.includes(user.id) && <span style={{ color: 'green' }}> en ligne</span>}

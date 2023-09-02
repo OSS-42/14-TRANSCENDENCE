@@ -1,4 +1,3 @@
-import { WebSocketServer } from "@nestjs/websockets";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { useEffect, useState } from "react";
@@ -6,6 +5,9 @@ import { Socket } from "socket.io-client";
 import { User } from "../../models/User";
 import ChatBar from "./ChatBar";
 import ChatFriends from "./ChatFriends";
+import ReactModal from 'react-modal';
+import UserDetails from "./UserDetails";
+
 
 type someProp = {
   socket: Socket;
@@ -15,6 +17,8 @@ export function FriendsAndUsers({ socket} :someProp) {
     const [usersList, setUsersList] = useState<User[]>([]);
     const [friendsList, setFriendsList] = useState<User[]>([]);
     const [connectedUsers, setConnectedUsers] = useState<number[]>([]);
+    const [selectedUser, setSelectedUser] = useState<User | null>(null);
+    const [modalIsOpen, setModalIsOpen] = useState(false);
    
     useEffect(() => {
       async function fetchUsersData() {
@@ -49,6 +53,17 @@ export function FriendsAndUsers({ socket} :someProp) {
       fetchUsersData();
       socket.emit("getConnectedUsers")
     }, []);
+
+    const handleUserClick = (user: User) => {
+      setSelectedUser(user);
+      setModalIsOpen(true);
+    };
+  
+    // Fonction pour fermer les informations détaillées de l'utilisateur
+    const closeUserDetails = () => {
+      setModalIsOpen(false);
+      setSelectedUser(null);
+    };
   
     return (
       <>
@@ -59,11 +74,29 @@ export function FriendsAndUsers({ socket} :someProp) {
       friendsList={friendsList}
       connectedUsers={connectedUsers}
       socket={socket} 
+      handleUserClick={handleUserClick}
+
       />
       <ChatFriends socket={socket}
       friendsList={friendsList}
       connectedUsers={connectedUsers} 
       />
-      </>
-    );
-  }
+
+
+      {/* Modal pour afficher les informations détaillées de l'utilisateur */}
+      <ReactModal
+        isOpen={modalIsOpen}
+        onRequestClose={closeUserDetails}
+        contentLabel="Informations de l'utilisateur"
+      >
+        {selectedUser && (
+          <UserDetails 
+           selectedUser={selectedUser}
+           closeUserDetails= {closeUserDetails}
+          />
+  
+        )}
+      </ReactModal>
+    </>
+  );
+}
