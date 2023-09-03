@@ -107,3 +107,16 @@ export async function updateAvatarApi(avatar: FormData): Promise<void> {
         console.error('Error updating avatar:', error);
     }
 }
+
+export async function destroyFriend(userId:number, friendId :number): Promise<void> {
+    try {
+      await axios.get(`${BASE_URL}/users/addFriend/${friendUsername}`, {
+        headers: {
+          Authorization: `Bearer ${jwt_token}`,
+        },
+      });
+    } catch (error) {
+      console.error('Error adding friend:', error);
+      throw error; 
+    }
+  }
