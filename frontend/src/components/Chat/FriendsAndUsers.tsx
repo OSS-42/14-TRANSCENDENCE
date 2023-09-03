@@ -20,6 +20,7 @@ export function FriendsAndUsers({ socket} :someProp) {
     const [connectedUsers, setConnectedUsers] = useState<number[]>([]);
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [modalIsOpen, setModalIsOpen] = useState(false);
+    
    
     useEffect(() => {
       async function fetchUsersData() {
@@ -55,6 +56,7 @@ export function FriendsAndUsers({ socket} :someProp) {
        <ChatFriends 
       socket={socket}
       friendsList={friendsList}
+      setFriendsList={setFriendsList}
       connectedUsers={connectedUsers} 
       handleUserClick={handleUserClick}
       />

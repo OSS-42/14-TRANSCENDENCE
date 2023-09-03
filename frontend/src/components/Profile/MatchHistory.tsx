@@ -47,7 +47,7 @@ export function MatchHistory({user} : MatchHistoryProps ) {
   }, [user]);  // No need to put match as a dependency here, because user class has a gamewon gamelost variable that will change
 
   if (!match.matchesWon || match.matchesWon.length === 0) {
-    return <p >No match data available.</p>;
+    return <p>No match data available.</p>;
   }
 
   return (

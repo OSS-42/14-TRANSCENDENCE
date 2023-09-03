@@ -83,7 +83,7 @@ export class UserController {
 
         return this.userService. blockedUserIds(id);
     }
-    @ApiParam({ name: 'username', type: String })
+    @ApiParam({ name: 'friendId', type: Number })
     @Get('removeFriend/:friendId')
     revomeFriend(@Param('friendId') friendId:number, @GetUser() user: Utilisateur){
 

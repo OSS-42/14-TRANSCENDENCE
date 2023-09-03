@@ -107,6 +107,7 @@ export class UserService {
         });
     }
     async destroyFriend(userId: number, friendUserId: number): Promise<void> {
+       friendUserId = Number(friendUserId) 
       const friendship = await this.prisma.friendship.findFirst({
         where: {
           AND: [

@@ -108,9 +108,9 @@ export async function updateAvatarApi(avatar: FormData): Promise<void> {
     }
 }
 
-export async function destroyFriend(userId:number, friendId :number): Promise<void> {
+export async function destroyFriend(friendId :number): Promise<void> {
     try {
-      await axios.get(`${BASE_URL}/users/addFriend/${friendUsername}`, {
+      await axios.get(`${BASE_URL}/users/removeFriend/${friendId}`, {
         headers: {
           Authorization: `Bearer ${jwt_token}`,
         },

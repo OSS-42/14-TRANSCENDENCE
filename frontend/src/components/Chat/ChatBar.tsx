@@ -1,11 +1,10 @@
 import { Button } from "@mui/material";
 import { Box } from "@mui/system";
-import axios from "axios";
-import Cookies from "js-cookie";
 import { Socket } from "socket.io-client";
 import { addFriendApi, fetchFriendsList } from "../../api/requests";
 import { User } from "../../models/User";
 
+const UserId= 2
 type ChatFriendsProps = {
   socket: Socket; 
   setUsersList: React.Dispatch<React.SetStateAction<User[]>>;
@@ -14,7 +13,6 @@ type ChatFriendsProps = {
   friendsList: User[]  
   connectedUsers: number[];
   handleUserClick: (user: User) => void;
-  
 };
 
 function ChatBar({ socket, setUsersList, handleUserClick, friendsList, setFriendsList, usersList,  connectedUsers }: ChatFriendsProps) {
@@ -57,13 +55,10 @@ function ChatBar({ socket, setUsersList, handleUserClick, friendsList, setFriend
                 {connectedUsers.includes(user.id) && <span style={{ color: 'green' }}> en ligne</span>}
               </div>
               <div style={{ display: 'flex', justifyContent: 'flex-end', flex: '1' }}>
-                {!friendsList.some((friend) => friend.id === user.id) && (
+                {user.id !== UserId && !friendsList.some((friend) => friend.id === user.id) && (
                 <Button variant="contained" onClick={() => addFriend(user.username)}>
                   Add Friend
                 </Button>
-                  // <Button variant="outlined" size="small" onClick={() => addFriend(user.username)}>
-                  //   Add Friend
-                  // </Button>
                 )}
               </div>
             </Box>

@@ -1,7 +1,8 @@
 
 import { Socket } from "socket.io-client";
-import { Box } from "@mui/material";
+import { Box, Button } from "@mui/material";
 import { User } from "../../models/User";
+import { destroyFriend, fetchFriendsList } from "../../api/requests";
 
 
 ////ON VA DEVOIR PEUT ETRE UTILISER REDUX AFIN DAVOIR DES STATES GLOBALES
@@ -10,17 +11,22 @@ import { User } from "../../models/User";
 type ChatFriendsProps = {
   socket: Socket; // Assurez-vous que ce type correspond au type de socket que vous utilisez // Setter pour usersList
   connectedUsers: number[]; 
-  friendsList: User[]; 
+  friendsList: User[];
+  setFriendsList: React.Dispatch<React.SetStateAction<User[]>>; 
   handleUserClick: (user: User) => void;
 };
 
 
 //Allez chercher la liste des des utilisateurs connectedUsers a linititon du component.
 //
-const ChatFriends = ({ socket, connectedUsers, handleUserClick, friendsList }: ChatFriendsProps) => {
+const ChatFriends = ({ socket, setFriendsList, connectedUsers, handleUserClick, friendsList }: ChatFriendsProps) => {
  
-  
-  console.log(friendsList)
+async function removeFriend(id:number) {
+  await destroyFriend(id)
+  const newFriendList = await fetchFriendsList()
+  setFriendsList(newFriendList);
+} 
+
   
     return (
       <div className="chat__sidebar">
@@ -49,9 +55,15 @@ const ChatFriends = ({ socket, connectedUsers, handleUserClick, friendsList }: C
                   style={{ borderRadius: '50%' }}
                   onClick={() => handleUserClick(user)} 
                 />
-                <p>
-                  {user.username}
-                  {connectedUsers.includes(user.id) && <span style={{ color: 'green' }}> en ligne</span>}</p>
+               
+                <div>
+                  <p> {user.username}</p>
+                  {connectedUsers.includes(user.id) && <span style={{ color: 'green' }}> en ligne</span>}
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', flex: '1' }}></div>
+                  <Button variant="contained" onClick={() => removeFriend(user.id)}>
+                  Remove Friend
+                </Button>
               </Box>
             ))}
           </div>
