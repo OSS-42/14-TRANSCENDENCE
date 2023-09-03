@@ -1,5 +1,4 @@
 import { Body, Controller, Get, Param, Post, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiBody, ApiHeader, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { Utilisateur } from '@prisma/client';
@@ -49,8 +48,6 @@ export class UserController {
         return this.userService.getUserInfoPlus(id);
     }
 
-
-    //ajout d<une relation d'amitié
     @ApiParam({ name: 'username', type: String })
     @Get('addFriend/:username')
     addFriend(@Param('username') username:string, @GetUser() user: Utilisateur){
@@ -85,5 +82,11 @@ export class UserController {
     getBlockedUsers(@Param('id') id:number){
 
         return this.userService. blockedUserIds(id);
+    }
+    @ApiParam({ name: 'username', type: String })
+    @Get('addFriend/:username')
+    revomeFriend(@Param('username') id:number, @GetUser() user: Utilisateur){
+
+        return this.userService.removeFriend(user, id);
     }
 }

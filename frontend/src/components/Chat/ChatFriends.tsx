@@ -24,13 +24,11 @@ const ChatFriends = ({ socket, connectedUsers, handleUserClick, friendsList }: C
   
     return (
       <div className="chat__sidebar">
-        <h2>Open Chat</h2>
-  
         <div>
           <h4 className="chat__header">FRIENDS LIST</h4>
           <div className="chat__users">
             <p></p>
-            {friendsList.map((user, index) => (
+            {friendsList.map((user) => (
               <Box
                 key={user.id}
                 sx={{

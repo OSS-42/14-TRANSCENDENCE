@@ -5,6 +5,7 @@ import { Socket } from "socket.io-client";
 import Cookies from "js-cookie";
 import { useEffect, useState } from "react";
 import { User } from "../../models/User";
+import { fetchBlockedUsers, fetchUserMe } from "../../api/requests";
 
 type ChatMessage = {
   id: number; // un identifiant unique pour chaque message
@@ -21,38 +22,22 @@ type ChatBodyProps = {
 };
 
 const ChatBody = ({ messages, socket }: ChatBodyProps) => {
-  const [banList, setBanList] = useState<number[]>();
+const [banList, setBanList] = useState<number[]>()
 
   useEffect(() => {
     async function fetchUsersData() {
-      const jwt_token = Cookies.get("jwt_token");
-      try {
-        const response = await axios.get("http://localhost:3001/users/me", {
-          headers: {
-            Authorization: "Bearer " + jwt_token,
-          },
-        });
-        // Une fois la première requête terminée, vous pouvez exécuter la deuxième
-        try {
-          const banResponse = await axios.get(
-            `http://localhost:3001/users/blockedUsers/${response.data.id}`, // Utilisez response.data.id au lieu de user.id
-            {
-              headers: {
-                Authorization: "Bearer " + jwt_token,
-              },
-            }
-          );
-          setBanList(banResponse.data);
-        } catch (error) {
-          console.error("Error fetching ban list:", error);
-        }
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      }
+    const user = await fetchUserMe();
+      if (user) {
+        const banList = await fetchBlockedUsers(user.id);
+        setBanList(banList); 
+      }   
     }
-
+  
     fetchUsersData();
   }, [messages]);
+  
+  
+  
   return (
     <>
       <div className="message__container">

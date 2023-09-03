@@ -7,6 +7,7 @@ import ChatBar from "./ChatBar";
 import ChatFriends from "./ChatFriends";
 import ReactModal from 'react-modal';
 import UserDetails from "./UserDetails";
+import { fetchFriendsList, fetchUsersList } from "../../api/requests";
 
 
 type someProp = {
@@ -28,27 +29,11 @@ export function FriendsAndUsers({ socket} :someProp) {
 
         });
         
-        const jwt_token = Cookies.get('jwt_token');
-        try {
-          const response = await axios.get('http://localhost:3001/users/friendsList', {
-            headers: {
-              Authorization: "Bearer " + jwt_token,
-            },
-          });
-          setFriendsList(response.data)
-        } catch (error) {
-          console.error('Error fetching user data:', error);
-        }
-      try {
-        const response = await axios.get('http://localhost:3001/users/allUsers', {
-          headers: {
-            Authorization: "Bearer " + jwt_token,
-          },
-        });
-        setUsersList(response.data);
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      }
+        const newFriendsList = await fetchFriendsList()
+        setFriendsList(newFriendsList)
+        const newUsersList = await fetchUsersList()
+        setUsersList(newUsersList)
+
       }
       fetchUsersData();
       socket.emit("getConnectedUsers")
@@ -67,7 +52,14 @@ export function FriendsAndUsers({ socket} :someProp) {
   
     return (
       <>
-      <ChatBar 
+       <ChatFriends 
+      socket={socket}
+      friendsList={friendsList}
+      connectedUsers={connectedUsers} 
+      handleUserClick={handleUserClick}
+      />
+
+       <ChatBar 
       setUsersList={setUsersList}
       setFriendsList={setFriendsList} 
       usersList={usersList}
@@ -77,16 +69,12 @@ export function FriendsAndUsers({ socket} :someProp) {
       handleUserClick={handleUserClick}
 
       />
-      <ChatFriends 
-      socket={socket}
-      friendsList={friendsList}
-      connectedUsers={connectedUsers} 
-      handleUserClick={handleUserClick}
-      />
+      
 
 
       {/* Modal pour afficher les informations détaillées de l'utilisateur */}
-      <ReactModal
+      <ReactModal 
+        ariaHideApp={false}
         isOpen={modalIsOpen}
         onRequestClose={closeUserDetails}
         contentLabel="Informations de l'utilisateur"

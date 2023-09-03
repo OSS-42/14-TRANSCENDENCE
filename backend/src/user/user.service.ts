@@ -214,16 +214,3 @@ export class UserService {
     }
   
 
-    
-        // //Je pense que je nai pas besoin de update les users, cela se fait automatiquement???
-        // await this.prisma.utilisateur.update({
-        //     where: { id: user.id },
-        //     data: { friends: { connect: { id: friendship.id } } }
-        // });
-    
-        // await this.prisma.utilisateur.update({
-        //     where: { id: friend.id },
-        //     data: { friendOf: { connect: { id: friendship.id } } }
-        // });
-
-
