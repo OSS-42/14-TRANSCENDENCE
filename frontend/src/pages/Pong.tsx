@@ -73,10 +73,10 @@ export function Pong({ socket }: PongProps) {
   const [hostname, setHostname] = React.useState<string>("");
   const [clientName, setClientName ] = React.useState<string>("");
 
-  const [gameInfos, setGameInfos] = useState<GameStartInfos[]>([]);
-  const [gameParameters, setGameParameters] = useState<GameParameters[]>([]);
+  const [gameInfos, setGameInfos] = useState<GameStartInfos>({ hostStatus: false, clientName: "", gameLaunched: false });
+  const [gameParameters, setGameParameters] = useState<GameParameters>();
   const [waitingForPlayer, setWaitingForPlayer] = React.useState(false);
-  const [gameId, setGameId] = React.useState<PlayerJoined[]>([]);
+  const [gameId, setGameId] = React.useState<string>("");
   const [isHostWinner, setIsHostWinner] = React.useState(false);
 
   // Ecoute parle le socket
@@ -120,10 +120,10 @@ export function Pong({ socket }: PongProps) {
       });
     } else {
       socket.on("gameParameters", (data: GameParameters) => {
-        if (gameId != data.gameId) {
-          socket.disconnect();
-          return;
-        } 
+        // if (gameId != data.gameId) {
+        //   socket.disconnect();
+        //   return;
+        // } 
         setIsHostWinner(data.isHostWinner);
         setGameLaunched(data.gameLaunched);
         setIsPaused(data.isPaused);
