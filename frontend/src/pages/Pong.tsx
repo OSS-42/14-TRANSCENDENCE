@@ -15,7 +15,8 @@ import axios from "axios";
 import Cookies from "js-cookie";
 
 // import for websocket
-import { Socket } from "socket.io-client";
+// import { Socket } from "socket.io-client";
+import socketIO from 'socket.io-client'
 
 //------------------ INFOS QUI TRANSITENT ENTRE SOCKETS ------------
 type GameStartInfos = {
@@ -51,11 +52,13 @@ type WeHaveAWinner = {
   isHostWinner: boolean,
 }
 
-type PongProps = {
-  socket : Socket;
-}
+const socket = socketIO('http://localhost:3001/pongGame', {
+  query: {
+    token: Cookies.get('jwt_token')
+  },
+});
 
-export function Pong({ socket }: PongProps) {
+export function Pong() {
 
   //------------------ CONSTANTS NECESSARY AT TOP --------------------
   // const history = useHistory();
@@ -368,6 +371,7 @@ export function Pong({ socket }: PongProps) {
       setIsHostWinner(false);
     }
     socket.emit("weHaveAWinner", { gameId, isHostWinner });
+    
   };
 
 //------------------ GAME RESIZING MANAGEMENT ------------------------
