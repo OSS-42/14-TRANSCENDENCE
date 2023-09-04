@@ -1,8 +1,3 @@
-// Complete Pong code. To be sliced accross multiples files for clarity.
-// TO DO : create a 1 vs 1 mode (the right paddle becomes user controlled)
-// TO DO : websocket connections for data transfer (for the second client (user) to be able to play)
-// TO DO : matchmaking system.
-
 import { Box as MaterialBox } from '@mui/material'
 
 import React, { useEffect, useState } from 'react';
@@ -29,6 +24,7 @@ type GameStartInfos = {
 }
 
 type GameParameters = {
+  gameId: string,
   gameLaunched: boolean,
   isPaused: boolean,
   winner: boolean,
@@ -46,7 +42,7 @@ type GameParameters = {
 }
 
 type PlayerJoined = {
-  gameId: number;
+  gameId: string;
 }
 
 type PongProps = {
@@ -77,13 +73,14 @@ export function Pong({ socket }: PongProps) {
 
   // Ecoute parle le socket
   useEffect(() => {
-    socket.on( "gameStartInfos", (data: GameStartInfos) => 
-      setGameInfos([gameInfos, data]) //Cette partie met à jour l'état messages. Elle utilise le spread operator ... pour créer un nouveau tableau qui contient les anciens messages (messages) ainsi que le nouveau message data. Ensuite, elle appelle setMessages pour mettre à jour la valeur de messages avec ce nouveau tableau.
-      );
-      socket.on( "gameParameters", (data: GameParameters) => {
-      setGameParameters([gameParameters, data]) //Cette partie met à jour l'état messages. Elle utilise le spread operator ... pour créer un nouveau tableau qui contient les anciens messages (messages) ainsi que le nouveau message data. Ensuite, elle appelle setMessages pour mettre à jour la valeur de messages avec ce nouveau tableau.
-    }
-    );
+    socket.on( "gameStartInfos", (data: GameStartInfos) => {
+      setGameInfos([gameInfos, data]);
+      setHostStatus(data.hostStatus);
+      console.log('mon status host est : ', hostStatus);
+    });
+      // socket.on( "gameParameters", (data: GameParameters) => {
+      // setGameParameters([gameParameters, data]) 
+      // });
 
     socket.on('playerJoined', (data: PlayerJoined) => {
       // setGameLaunched(true);
@@ -97,6 +94,7 @@ export function Pong({ socket }: PongProps) {
     setHostStatus(gameInfos.hostStatus); 
     if (hostStatus) {
       socket.emit("gameParameters", {
+        gameId,
         gameLaunched,
         isPaused,
         winner,
@@ -114,6 +112,10 @@ export function Pong({ socket }: PongProps) {
       });
     } else {
       socket.on("gameParameters", (data: GameParameters) => {
+        if (gameId != data.gameId) {
+          socket.disconnect();
+          return;
+        } 
         setGameLaunched(data.gameLaunched);
         setIsPaused(data.isPaused);
         setWinner(data.winner);
@@ -134,6 +136,7 @@ export function Pong({ socket }: PongProps) {
     return () => {
       socket.off("gameStartInfos");
       socket.off("gameParameters");
+      socket.off("playerJoined");
     };
   }, [socket, gameInfos, gameParameters]);
 
@@ -235,22 +238,25 @@ export function Pong({ socket }: PongProps) {
 
 //------------------ GAME UTILS ------------------------
   // not necessary if no game resize
-    // function getSpeedFactor(width: number): number {
-    //   if (width < 300) {
-    //     return 0.2;
-    //   } else if (width < 450) {
-    //     return 0.5;
-    //   } else if (width < 700) {
-    //     return 0.8;
-    //   }
-    //   return 1;
-    // }
+  function getSpeedFactor(width: number): number {
+    if (width < 300) {
+      return 0.2;
+    } else if (width < 450) {
+      return 0.5;
+    } else if (width < 700) {
+      return 0.8;
+    }
+    return 1;
+  }
 
 //------------------ GAME GENERAL BEHAVIOR ------------------------
 // Timer to restart
 const [countdown, setCountdown] = React.useState<number | null>(null);
 
     const handleCountdown = (): void => {
+      console.log('je suis host ? ', hostStatus);
+      console.log('gameID: ', gameId);
+
       let currentCountdown = 3;
       setCountdown(currentCountdown);
       const timer = setInterval(() => {
@@ -297,6 +303,7 @@ const [countdown, setCountdown] = React.useState<number | null>(null);
       setGameLaunched(true);
       setCameraMode("orthographic");
       setGameMode(1);
+      setHostStatus(true);
       setShowButtons(false);
       handleCountdown();
     };
@@ -307,6 +314,7 @@ const [countdown, setCountdown] = React.useState<number | null>(null);
       setCameraMode("orthographic");
       setPowerupVisible(true);
       setGameMode(2);
+      setHostStatus(true);
       setShowButtons(false);
       handleCountdown();
     };
@@ -623,134 +631,145 @@ const [countdown, setCountdown] = React.useState<number | null>(null);
     }
 
 //------------------ GAME PADDLES LOGIC ------------------------
-    // fixation de la position gauche du paddle
-    const leftPaddleXPosition: number = -distanceFromCenter;
+// Collision Logic with Paddles
+type Position = { x: number, z: number };
+type PaddleDimensions = { width: number, depth: number };
+
+const checkCollision = (
+  ballPos: Position,
+  paddlePos: Position,
+  paddleDims: PaddleDimensions
+  ): boolean | string => {
+    const distX: number = Math.abs(ballPos.x - paddlePos.x);
+    const distZ: number = Math.abs(ballPos.z - paddlePos.z);
     
-    // Collision Logic with Paddles
-    type Position = { x: number, z: number };
-    type PaddleDimensions = { width: number, depth: number };
-    
-    const checkCollision = (
-      ballPos: Position,
-      paddlePos: Position,
-      paddleDims: PaddleDimensions
-      ): boolean | string => {
-        const distX: number = Math.abs(ballPos.x - paddlePos.x);
-        const distZ: number = Math.abs(ballPos.z - paddlePos.z);
-        
-        if (distX <= (paddleDims.width / 2 + ballRadius) && (distZ <= paddleDims.depth / 2 + ballRadius)) {
-          const relativeCollisionPoint: number = (ballPos.z - paddlePos.z) / (paddleDepth / 2);
-          if (relativeCollisionPoint > 0.5) {
-            return "top";
-          } else if (relativeCollisionPoint < -0.5) {
-            return "bottom";
-          } else {
-            return "middle";
-          }
-        }
-        return false;
-      };
-      
-      // mouvement du left (user1) paddle a la souris.
-      interface LeftPaddleProps {
-        leftPaddlePositionZ : number;
-        setLeftPaddlePositionZ: React.Dispatch<React.SetStateAction<number>>;
+    if (distX <= (paddleDims.width / 2 + ballRadius) && (distZ <= paddleDims.depth / 2 + ballRadius)) {
+      const relativeCollisionPoint: number = (ballPos.z - paddlePos.z) / (paddleDepth / 2);
+      if (relativeCollisionPoint > 0.5) {
+        return "top";
+      } else if (relativeCollisionPoint < -0.5) {
+        return "bottom";
+      } else {
+        return "middle";
       }
+    }
+    return false;
+  };
+
+  // fixation de la position gauche du paddle
+  const leftPaddleXPosition: number = -distanceFromCenter;
       
-      const LeftPaddle: React.FC<LeftPaddleProps> = ({ leftPaddlePositionZ, setLeftPaddlePositionZ }) => {
-        const { mouse } = useThree();
-        
-        useFrame(() => {
-          let newPosition;
-          if (cameraMode === "perspective") {
-            newPosition = mouse.x * (WORLD_WIDTH / 2);
-          } else {
-            newPosition = -mouse.y * (WORLD_HEIGHT / 2);
-          }
-          
-          const paddleTopEdge = newPosition + paddleDepth / 2;
-          const paddleBottomEdge = newPosition - paddleDepth / 2;
-          
-          if (paddleTopEdge > WORLD_HEIGHT / 2) {
-            newPosition = WORLD_HEIGHT / 2 - paddleDepth / 2;
-          } else if (paddleBottomEdge < -WORLD_HEIGHT / 2) {
-            newPosition = -WORLD_HEIGHT / 2 + paddleDepth / 2;
-          }
-          
-          setLeftPaddlePositionZ(newPosition);
-        });
-        
-        return (
-          <Box position={[leftPaddleXPosition, 0, leftPaddlePositionZ]} args={[paddleWidth, paddleHeight, paddleDepth]}>
-          <meshBasicMaterial attach="material" color="white" />
-        </Box>
-      )
-    }
+  // mouvement du left (user1) paddle a la souris.
+  interface LeftPaddleProps {
+    leftPaddlePositionZ : number;
+    setLeftPaddlePositionZ: React.Dispatch<React.SetStateAction<number>>;
+  }
+      
+  const LeftPaddle: React.FC<LeftPaddleProps> = ({ leftPaddlePositionZ, setLeftPaddlePositionZ }) => {
+    const { mouse } = useThree();
     
-    // Right paddle (Computer - User2)
-    // fixation de la position droite du paddle
-    const rightPaddleXPosition: number = distanceFromCenter;
+    useFrame(() => {
+      let newPosition;
+      if (hostStatus) {
+        if (cameraMode === "perspective") {
+          newPosition = mouse.x * (WORLD_WIDTH / 2);
+        } else {
+          newPosition = -mouse.y * (WORLD_HEIGHT / 2);
+        }
+      } else {
+        newPosition = leftPaddlePositionZ;
+      }
+        
+      const paddleTopEdge = newPosition + paddleDepth / 2;
+      const paddleBottomEdge = newPosition - paddleDepth / 2;
+      
+      if (paddleTopEdge > WORLD_HEIGHT / 2) {
+        newPosition = WORLD_HEIGHT / 2 - paddleDepth / 2;
+      } else if (paddleBottomEdge < -WORLD_HEIGHT / 2) {
+        newPosition = -WORLD_HEIGHT / 2 + paddleDepth / 2;
+      }
+        
+      setLeftPaddlePositionZ(newPosition);
+    });
+        
+    return (
+      <Box position={[leftPaddleXPosition, 0, leftPaddlePositionZ]} args={[paddleWidth, paddleHeight, paddleDepth]}>
+        <meshBasicMaterial attach="material" color="white" />
+      </Box>
+    )
+  }
+    
+  // Right paddle (Computer - User2)
+  // fixation de la position droite du paddle
+  const rightPaddleXPosition: number = distanceFromCenter;
 
-    interface RightPaddleProps {
-      RightPaddlePositionZ : number;
-      setRightPaddlePositionZ: React.Dispatch<React.SetStateAction<number>>;
-    }
+  interface RightPaddleProps {
+    RightPaddlePositionZ : number;
+    setRightPaddlePositionZ: React.Dispatch<React.SetStateAction<number>>;
+  }
 
-    const RightPaddle: React.FC<RightPaddleProps> = ({ rightPaddlePositionZ, setRightPaddlePositionZ }) => {
+  const RightPaddle: React.FC<RightPaddleProps> = ({ rightPaddlePositionZ, setRightPaddlePositionZ }) => {
 
     if (gameMode === 1 || gameMode === 2) { // si computer
       const RIGHT_PADDLE_SPEED: number = 0.8;
 
       const lerp = (a: number, b: number, t: number): number => a + t * (b - a);
 
-        useFrame(() => {
-          const direction: number = Math.sign(ballPosition.z - rightPaddlePositionZ);
+      useFrame(() => {
+        const direction: number = Math.sign(ballPosition.z - rightPaddlePositionZ);
 
-          let newZ = lerp(rightPaddlePositionZ, rightPaddlePositionZ + direction * RIGHT_PADDLE_SPEED, 0.2);
+        let newZ = lerp(rightPaddlePositionZ, rightPaddlePositionZ + direction * RIGHT_PADDLE_SPEED, 0.2);
 
-          const paddleTopEdge: number = newZ + paddleDepth / 2;
-          const paddleBottomEdge: number = newZ - paddleDepth / 2;
+        const paddleTopEdge: number = newZ + paddleDepth / 2;
+        const paddleBottomEdge: number = newZ - paddleDepth / 2;
 
-          if (paddleTopEdge > WORLD_HEIGHT / 2) {
-            newZ = WORLD_HEIGHT / 2 - paddleDepth / 2;
-          } else if (paddleBottomEdge < - WORLD_HEIGHT / 2) {
-            newZ = -WORLD_HEIGHT / 2 + paddleDepth / 2;
-          }
+        if (paddleTopEdge > WORLD_HEIGHT / 2) {
+          newZ = WORLD_HEIGHT / 2 - paddleDepth / 2;
+        } else if (paddleBottomEdge < - WORLD_HEIGHT / 2) {
+          newZ = -WORLD_HEIGHT / 2 + paddleDepth / 2;
+        }
 
-          setRightPaddlePositionZ(newZ);
+        setRightPaddlePositionZ(newZ);
 
-        });
+      });
     } else {
 
       // mouvement du right (user2) paddle a la souris.      
-        const { mouse } = useThree();
+      const { mouse } = useThree();
         
-        useFrame(() => {
-          let newPosition;
+      useFrame(() => {
+        let newPosition;
+        if (hostStatus) {
           if (cameraMode === "perspective") {
             newPosition = mouse.x * (WORLD_WIDTH / 2);
           } else {
             newPosition = -mouse.y * (WORLD_HEIGHT / 2);
           }
-          
-          const paddleTopEdge = newPosition + paddleDepth / 2;
-          const paddleBottomEdge = newPosition - paddleDepth / 2;
-          
-          if (paddleTopEdge > WORLD_HEIGHT / 2) {
-            newPosition = WORLD_HEIGHT / 2 - paddleDepth / 2;
-          } else if (paddleBottomEdge < -WORLD_HEIGHT / 2) {
-            newPosition = -WORLD_HEIGHT / 2 + paddleDepth / 2;
-          }
-          
-          setRightPaddlePositionZ(newPosition);
-        });
+        } else {
+          newPosition = leftPaddlePositionZ;
+        }
+        
+        const paddleTopEdge = newPosition + paddleDepth / 2;
+        const paddleBottomEdge = newPosition - paddleDepth / 2;
+        
+        if (paddleTopEdge > WORLD_HEIGHT / 2) {
+          newPosition = WORLD_HEIGHT / 2 - paddleDepth / 2;
+        } else if (paddleBottomEdge < -WORLD_HEIGHT / 2) {
+          newPosition = -WORLD_HEIGHT / 2 + paddleDepth / 2;
+        }
+        
+        setRightPaddlePositionZ(newPosition);
+      });
     }
+
     return (
       <Box position={[rightPaddleXPosition, 0, rightPaddlePositionZ]} args={[paddleWidth, paddleHeight, paddleDepth]}>
         <meshBasicMaterial attach="material" color="white" />
       </Box>
-  )
+    )
   }
+
+
 
 
 //------------------ GAME SCENE RENDERER ------------------------

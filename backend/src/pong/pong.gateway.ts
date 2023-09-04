@@ -18,7 +18,10 @@ export class PongGateway {
 
   handleConnection(client: Socket) {
     console.log(`⚡: ${client.id} user just connected!`);
-    const token = client.handshake.query.token as string
+    const token = client.handshake.query.token as string;
+
+    console.log("Received Token:", token);
+
       if (token) {
         try {
           const decoded = verify(token, this.config.get("JWT_SECRET"));
@@ -26,8 +29,11 @@ export class PongGateway {
           console.log(decoded)
           this.connectedUsers.set( Number(decoded.sub), client.id);
 
+          console.log("Connected Users:", this.connectedUsers)
+
           // Check if two clients are connected
           if (this.connectedUsers.size === 2) {
+            console.log('⚡ 2 clients !! ⚡');
             // Choose a host logic : first client in map
             const [hostUserId, hostSocketId] = Array.from(this.connectedUsers.entries())[0];
             const [clientUserId, clientSocketId] = Array.from(this.connectedUsers.entries())[1];
@@ -50,9 +56,11 @@ export class PongGateway {
           const connectedUserIds = Array.from(this.connectedUsers.keys());
           this.server.emit("updateConnectedUsers", connectedUserIds)
         } catch (error) {
+          console.log("Error:", error.message);
           client.disconnect();
         }
       } else {
+        console.log('je suis passe par la');
         client.disconnect();
       }
   }
@@ -68,6 +76,7 @@ export class PongGateway {
     for (const [userId, socketId] of this.connectedUsers.entries()) {
       if (socketId === client.id) {
         this.connectedUsers.delete(userId);
+        console.log("Connected Users:", this.connectedUsers)
         break;
       }
     }
@@ -82,13 +91,20 @@ export class PongGateway {
       const player2 = this.matchmaking.shift();
       const gameId = uuid();
   
+      player1.join(gameId);
+      player2.join(gameId);
+
       // Emit an event to both clients to indicate that the match is ready to start
       player1.emit('playerJoined', { gameId: gameId });
       player2.emit('playerJoined', { gameId: gameId });
-
     }
   }
 
+  @SubscribeMessage('gameParameters')
+  handleGameParameters(client: Socket, payload: any) {
+    const gameId = payload.gameId; // Make sure to send gameId from client
+    this.server.to(gameId).emit('gameParameters', payload);
+  }
 
 
 
