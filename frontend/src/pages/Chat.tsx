@@ -1,12 +1,10 @@
-import { Box, TextField } from "@mui/material";
+import { Box } from "@mui/material";
 import { useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
-import ChatBar from "../components/Chat/ChatBar";
 import ChatBody from "../components/Chat/ChatBody";
 import ChatFooter from "../components/Chat/ChatFooter";
-import ChatFriends from "../components/Chat/ChatFriends";
 import { FriendsAndUsers } from "../components/Chat/FriendsAndUsers";
-import { User } from "../models/User";
+
 
 // I'll refactor this, but the componenets placement would still be
 // where the simple texts are. As it is, I'm not yet confident the
@@ -35,13 +33,14 @@ export function Chat({ socket }: ChatProps) {
   });
 
   //QUand la variable messages change, on l<enregistre dans le localStorage
-  useEffect(() => {
-    const messagesJSON = JSON.stringify(messages);
-    localStorage.setItem("chatMessages", messagesJSON);
-  }, [messages]);
+  // useEffect(() => {
+  //   const messagesJSON = JSON.stringify(messages);
+  //   localStorage.setItem("chatMessages", messagesJSON);
+  // }, [messages]);
 
   useEffect(() => {
     const handleMessageResponse = (data: ChatMessage) => {
+      console.log(data)
       setMessages(prevMessages => [...prevMessages, data]);
     };
 

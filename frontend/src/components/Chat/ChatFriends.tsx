@@ -19,7 +19,7 @@ type ChatFriendsProps = {
 
 //Allez chercher la liste des des utilisateurs connectedUsers a linititon du component.
 //
-const ChatFriends = ({ socket, setFriendsList, connectedUsers, handleUserClick, friendsList }: ChatFriendsProps) => {
+const ChatFriends = ({ setFriendsList, connectedUsers, handleUserClick, friendsList }: ChatFriendsProps) => {
  
 async function removeFriend(id:number) {
   await destroyFriend(id)

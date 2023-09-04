@@ -15,7 +15,7 @@ type ChatFriendsProps = {
   handleUserClick: (user: User) => void;
 };
 
-function ChatBar({ socket, setUsersList, handleUserClick, friendsList, setFriendsList, usersList,  connectedUsers }: ChatFriendsProps) {
+function ChatBar({ handleUserClick, friendsList, setFriendsList, usersList,  connectedUsers }: ChatFriendsProps) {
   
   const addFriend = async (friendUsername: string) => {
     await addFriendApi(friendUsername);
