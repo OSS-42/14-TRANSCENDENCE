@@ -1,5 +1,3 @@
-import axios from "axios";
-import Cookies from "js-cookie";
 import { useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
 import { User } from "../../models/User";
@@ -29,7 +27,7 @@ export function FriendsAndUsers({ socket} :someProp) {
           fetchUsersData()
 
         });
-        
+       
         const newFriendsList = await fetchFriendsList()
         setFriendsList(newFriendsList)
         const newUsersList = await fetchUsersList()
@@ -37,7 +35,11 @@ export function FriendsAndUsers({ socket} :someProp) {
 
       }
       fetchUsersData();
-      socket.emit("getConnectedUsers")
+       socket.emit("getConnectedUsers") 
+        return () => {
+    socket.off('updateConnectedUsers');
+  };
+       
     }, []);
 
     const handleUserClick = (user: User) => {

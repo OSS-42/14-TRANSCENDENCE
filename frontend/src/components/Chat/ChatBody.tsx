@@ -1,10 +1,6 @@
 // import React from 'react';
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
 import { Socket } from "socket.io-client";
-import Cookies from "js-cookie";
 import { useEffect, useState } from "react";
-import { User } from "../../models/User";
 import { fetchBlockedUsers, fetchUserMe } from "../../api/requests";
 
 type ChatMessage = {
@@ -18,10 +14,10 @@ type ChatMessage = {
 
 type ChatBodyProps = {
   messages: ChatMessage[];
-  socket: Socket;
+  socket: Socket; 
 };
 
-const ChatBody = ({ messages, socket }: ChatBodyProps) => {
+const ChatBody = ({ messages,}: ChatBodyProps) => {
 const [banList, setBanList] = useState<number[]>()
 
   useEffect(() => {
@@ -35,8 +31,6 @@ const [banList, setBanList] = useState<number[]>()
   
     fetchUsersData();
   }, [messages]);
-  
-  
   
   return (
     <>

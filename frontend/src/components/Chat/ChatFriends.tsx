@@ -5,11 +5,11 @@ import { User } from "../../models/User";
 import { destroyFriend, fetchFriendsList } from "../../api/requests";
 
 
-////ON VA DEVOIR PEUT ETRE UTILISER REDUX AFIN DAVOIR DES STATES GLOBALES
+
 
 
 type ChatFriendsProps = {
-  socket: Socket; // Assurez-vous que ce type correspond au type de socket que vous utilisez // Setter pour usersList
+  socket: Socket; 
   connectedUsers: number[]; 
   friendsList: User[];
   setFriendsList: React.Dispatch<React.SetStateAction<User[]>>; 

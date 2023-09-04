@@ -27,7 +27,18 @@ type ChatProps = {
 };
 
 export function Chat({ socket }: ChatProps) {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  //la valeur de base de setMessage est prise dans le localStorage
+  const [messages, setMessages] = useState<ChatMessage[]>(()=>{
+    const localValues= localStorage.getItem("chatMessages")
+    if(localValues ==null) return []
+    return JSON.parse(localValues)
+  });
+
+  //QUand la variable messages change, on l<enregistre dans le localStorage
+  useEffect(() => {
+    const messagesJSON = JSON.stringify(messages);
+    localStorage.setItem("chatMessages", messagesJSON);
+  }, [messages]);
 
   useEffect(() => {
     const handleMessageResponse = (data: ChatMessage) => {
@@ -74,7 +85,8 @@ export function Chat({ socket }: ChatProps) {
             overflow: 'auto',
           }}
         >
-          <ChatBody messages={messages} />
+          <ChatBody messages={messages} 
+           socket={socket} />
         </Box>
         <ChatFooter socket={socket} />
       </Box>
