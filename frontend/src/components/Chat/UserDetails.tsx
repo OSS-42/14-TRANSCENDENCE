@@ -18,7 +18,7 @@ type UserDetailsProps = {
         <DialogContent>
         <Box display="flex" flexDirection="column" justifyContent="flex-start">
             <Typography variant="h5" gutterBottom>
-              Informations détaillées de l'utilisateur
+              User details
             </Typography>
             <img
               src={selectedUser?.avatar}
