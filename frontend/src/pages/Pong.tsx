@@ -84,7 +84,7 @@ export function Pong({ socket }: PongProps) {
     socket.on( "gameStartInfos", (data: GameStartInfos) => {
       setGameInfos([gameInfos, data]);
       setHostStatus(data.hostStatus);
-      console.log('mon status host est : ', hostStatus);
+      console.log('🏓   mon status host est : ', hostStatus);
     });
       // socket.on( "gameParameters", (data: GameParameters) => {
       // setGameParameters([gameParameters, data]) 
@@ -151,7 +151,7 @@ export function Pong({ socket }: PongProps) {
 
 //------------------ GAME MODES ------------------------
   const handleClassicModeIA = (): void => {
-    console.log('classic 1 vs IA');
+    console.log('🏓   classic 1 vs IA');
     setGameLaunched(true);
     setCameraMode("orthographic");
     setGameMode(1);
@@ -161,7 +161,7 @@ export function Pong({ socket }: PongProps) {
   };
 
   const handlePowerupModeIA = (): void => {
-    console.log('powerup 1 vs IA');
+    console.log('🏓   powerup 1 vs IA');
     setGameLaunched(true);
     setCameraMode("orthographic");
     setPowerupVisible(true);
@@ -172,7 +172,7 @@ export function Pong({ socket }: PongProps) {
   };
 
   const handleClassicModeMulti = (): void => {
-    console.log('classic 1 vs 1');
+    console.log('🏓   classic 1 vs 1');
     socket.emit('waitingForPlayer', { gameMode: 3 });
     setWaitingForPlayer(true);
     setGameLaunched(true);
@@ -183,7 +183,7 @@ export function Pong({ socket }: PongProps) {
   };
 
   const handlePowerupModeMulti = (): void => {
-    console.log('powerup 1 vs multi');
+    console.log('🏓   powerup 1 vs multi');
     socket.emit('waitingForPlayer', { gameMode: 4 });
     setWaitingForPlayer(true);
     setGameLaunched(true);
@@ -308,8 +308,8 @@ export function Pong({ socket }: PongProps) {
   const [countdown, setCountdown] = React.useState<number | null>(null);
 
   const handleCountdown = (): void => {
-    console.log('je suis host ? ', hostStatus);
-    console.log('gameID: ', gameId);
+    console.log('🏓   je suis host ? ', hostStatus);
+    console.log('🏓   gameID: ', gameId);
 
     let currentCountdown = 3;
     setCountdown(currentCountdown);
@@ -337,7 +337,7 @@ export function Pong({ socket }: PongProps) {
     if (gameMode === 1 || gameMode === 3) return;
     if (event.key === "c" || event.key === "C") {
       // Toggle the camera mode when the "C" key is pressed
-      console.log('c has been pressed');
+      console.log('🏓   c has been pressed');
       setCameraMode(prevMode => (prevMode === "orthographic" ? "perspective" : "orthographic"));
     }
   };
