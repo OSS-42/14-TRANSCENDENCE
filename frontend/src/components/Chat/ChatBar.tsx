@@ -30,6 +30,7 @@ function ChatBar({ socket, setUsersList, handleUserClick, friendsList, setFriend
         <div className="chat__users">
           <p></p>
           {usersList.map((user) => (
+           !friendsList.some((friend) => friend.id === user.id) && ( 
             <Box
               key={user.id}
               sx={{
@@ -62,6 +63,7 @@ function ChatBar({ socket, setUsersList, handleUserClick, friendsList, setFriend
                 )}
               </div>
             </Box>
+           )
           ))}
         </div>
       </div>
