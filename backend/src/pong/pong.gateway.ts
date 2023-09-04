@@ -25,6 +25,28 @@ export class PongGateway {
           console.log("voici lidentite du socket")
           console.log(decoded)
           this.connectedUsers.set( Number(decoded.sub), client.id);
+
+          // Check if two clients are connected
+          if (this.connectedUsers.size === 2) {
+            // Choose a host logic : first client in map
+            const [hostUserId, hostSocketId] = Array.from(this.connectedUsers.entries())[0];
+            const [clientUserId, clientSocketId] = Array.from(this.connectedUsers.entries())[1];
+            
+            // Emit gameStartInfos to host
+            this.server.to(hostSocketId).emit("gameStartInfos", {
+              hostStatus: true,
+              clientName: clientUserId.toString(),
+              gameLaunched: false,
+            });
+
+            // Emit gameStartInfos to client
+            this.server.to(clientSocketId).emit("gameStartInfos", {
+              hostStatus: false,
+              clientName: hostUserId.toString(),
+              gameLaunched: false,
+            });
+
+          }
           const connectedUserIds = Array.from(this.connectedUsers.keys());
           this.server.emit("updateConnectedUsers", connectedUserIds)
         } catch (error) {
@@ -50,56 +72,82 @@ export class PongGateway {
       }
     }
   }
-  
-//IL faudra faire un bouton pour join queue
-  @SubscribeMessage('joinQueue')
-  handleJoinQueue(client: Socket) {
-    // Ajouter le joueur à la salle d'attente uniquement s'il le souhaite
+
+  @SubscribeMessage('waitingForPlayer')
+  handleWaitingForPlayer(client: Socket, payload: any) {
     this.matchmaking.push(client);
-    client.emit('queued'); // Informer le joueur qu'il est maintenant dans la salle d'attente
-    //je pourrais retourner lavatar pour mettre de la queue
-  }
-
-  @SubscribeMessage('leaveQueue')
-  handleLeaveQueue(client: Socket) {
-    // Retirer le joueur de la salle d'attente s'il le souhaite
-    const index = this.matchmaking.indexOf(client);
-    if (index !== -1) {
-      this.matchmaking.splice(index, 1);
-      client.emit('leftQueue'); // Informer le joueur qu'il a quitté la salle d'attente
-    }
-  }
-
-  @SubscribeMessage('startQueue')
-  handleStartQueue(client: Socket) {
+  
     if (this.matchmaking.length >= 2) {
-      // Assez de joueurs pour commencer une partie
-      //shift retire les joueur de la quque
-      const gameRoom = `game-${uuid()}`;
-      this.matchmaking.shift().join(gameRoom);
-      this.matchmaking.shift().join(gameRoom);
-      this.server.to(gameRoom).emit('gameStart');
-    } else {
-      client.emit('notEnoughPlayers');
+      const player1 = this.matchmaking.shift();
+      const player2 = this.matchmaking.shift();
+      const gameId = uuid();
+  
+      // Emit an event to both clients to indicate that the match is ready to start
+      player1.emit('playerJoined', { gameId: gameId });
+      player2.emit('playerJoined', { gameId: gameId });
+
     }
-  }
-  handleUpdateBallPosition(client: Socket, ballPosition: { x: number, y: number }) {
-    // Récupérer la salle du client
-    const gameRoom = this.getGameRoom(client);
-    
-    // Émettre l'événement de mise à jour de la position de la balle à la salle
-    this.server.to(gameRoom).emit('ballPositionUpdated', ballPosition);
   }
 
-  // Méthode pour obtenir la salle du client
-  private getGameRoom(client: Socket): string | null {
-    for (const room of client.rooms.values()) {
-      if (room !== client.id) {
-        return room;
-      }
-    }
-    return null;
-  }
+
+
+
+
+
+
+
+
+
+
+//IL faudra faire un bouton pour join queue
+  // @SubscribeMessage('joinQueue')
+  // handleJoinQueue(client: Socket) {
+  //   // Ajouter le joueur à la salle d'attente uniquement s'il le souhaite
+  //   this.matchmaking.push(client);
+  //   client.emit('queued'); // Informer le joueur qu'il est maintenant dans la salle d'attente
+  //   //je pourrais retourner lavatar pour mettre de la queue
+  // }
+
+  // @SubscribeMessage('leaveQueue')
+  // handleLeaveQueue(client: Socket) {
+  //   // Retirer le joueur de la salle d'attente s'il le souhaite
+  //   const index = this.matchmaking.indexOf(client);
+  //   if (index !== -1) {
+  //     this.matchmaking.splice(index, 1);
+  //     client.emit('leftQueue'); // Informer le joueur qu'il a quitté la salle d'attente
+  //   }
+  // }
+
+  // @SubscribeMessage('startQueue')
+  // handleStartQueue(client: Socket) {
+  //   if (this.matchmaking.length >= 2) {
+  //     // Assez de joueurs pour commencer une partie
+  //     //shift retire les joueur de la quque
+  //     const gameRoom = `game-${uuid()}`;
+  //     this.matchmaking.shift().join(gameRoom);
+  //     this.matchmaking.shift().join(gameRoom);
+  //     this.server.to(gameRoom).emit('gameStart');
+  //   } else {
+  //     client.emit('notEnoughPlayers');
+  //   }
+  // }
+  // handleUpdateBallPosition(client: Socket, ballPosition: { x: number, y: number }) {
+  //   // Récupérer la salle du client
+  //   const gameRoom = this.getGameRoom(client);
+    
+  //   // Émettre l'événement de mise à jour de la position de la balle à la salle
+  //   this.server.to(gameRoom).emit('ballPositionUpdated', ballPosition);
+  // }
+
+  // // Méthode pour obtenir la salle du client
+  // private getGameRoom(client: Socket): string | null {
+  //   for (const room of client.rooms.values()) {
+  //     if (room !== client.id) {
+  //       return room;
+  //     }
+  //   }
+  //   return null;
+  // }
 
   
 }

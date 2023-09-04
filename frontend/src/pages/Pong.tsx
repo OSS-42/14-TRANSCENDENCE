@@ -25,10 +25,28 @@ import { Socket } from "socket.io-client";
 type GameStartInfos = {
   hostStatus: boolean;
   clientName: string;
+  gameLaunched: boolean;
 }
 
-type ObjectsPositions = {
+type GameParameters = {
+  gameLaunched: boolean,
+  isPaused: boolean,
+  winner: boolean,
+  gameMode: number,
+  leftScore: number,
+  rightScore: number,
+  ballPosition: { x: number, y: number, z: number },
+  ballVelocity: { x: number, y: number, z: number },
+  leftPaddlePositionZ: number,
+  rightPaddlePositionZ: number,
+  powerupVisible: boolean,
+  powerupPosition: { x: number, y: number, z: number },
+  countdown: number,
+  cameraMode: string
+}
 
+type PlayerJoined = {
+  gameId: number;
 }
 
 type PongProps = {
@@ -43,8 +61,8 @@ export function Pong({ socket }: PongProps) {
   const [isPaused, setIsPaused] = React.useState(true);
   const [gameStart, setGameStart] = React.useState(true);
 
-  const [isClassicModeIA, setIsClassicModeIA] = React.useState(false);
-  const [isClassicModeMulti, setIsClassicModeMulti] = React.useState(false);
+  const [gameMode, setGameMode] = React.useState<0 | 1 | 2 | 3 | 4>(0);
+  // const [isClassicModeMulti, setIsClassicModeMulti] = React.useState(false);
   const [showButtons, setShowButtons] = React.useState(true);
 
 //------------------ CLIENT-SERVER SETTINGS ------------------------
@@ -53,25 +71,71 @@ export function Pong({ socket }: PongProps) {
   const [clientName, setClientName ] = React.useState<string>("");
 
   const [gameInfos, setGameInfos] = useState<GameStartInfos[]>([]);
-  const [objectsInfos, setObjectsInfos] = useState<ObjectsPositions[]>([]);
+  const [gameParameters, setGameParameters] = useState<GameParameters[]>([]);
+  const [waitingForPlayer, setWaitingForPlayer] = React.useState(false);
+  const [gameId, setGameId] = React.useState<PlayerJoined[]>([]);
 
   // Ecoute parle le socket
   useEffect(() => {
     socket.on( "gameStartInfos", (data: GameStartInfos) => 
       setGameInfos([gameInfos, data]) //Cette partie met à jour l'état messages. Elle utilise le spread operator ... pour créer un nouveau tableau qui contient les anciens messages (messages) ainsi que le nouveau message data. Ensuite, elle appelle setMessages pour mettre à jour la valeur de messages avec ce nouveau tableau.
       );
-      socket.on( "objectsPositions", (data: ObjectsPositions) => {
-      setObjectsInfos([objectsInfos, data]) //Cette partie met à jour l'état messages. Elle utilise le spread operator ... pour créer un nouveau tableau qui contient les anciens messages (messages) ainsi que le nouveau message data. Ensuite, elle appelle setMessages pour mettre à jour la valeur de messages avec ce nouveau tableau.
+      socket.on( "gameParameters", (data: GameParameters) => {
+      setGameParameters([gameParameters, data]) //Cette partie met à jour l'état messages. Elle utilise le spread operator ... pour créer un nouveau tableau qui contient les anciens messages (messages) ainsi que le nouveau message data. Ensuite, elle appelle setMessages pour mettre à jour la valeur de messages avec ce nouveau tableau.
     }
     );
 
+    socket.on('playerJoined', (data: PlayerJoined) => {
+      // setGameLaunched(true);
+      // setWaitingForPlayer(false);
+      // setCameraMode("orthographic");
+      // setShowButtons(false);
+      setGameId(data.gameId);
+      handleCountdown();
+    });
+
     setHostStatus(gameInfos.hostStatus); 
+    if (hostStatus) {
+      socket.emit("gameParameters", {
+        gameLaunched,
+        isPaused,
+        winner,
+        gameMode,
+        leftScore,
+        rightScore,
+        ballPosition,
+        ballVelocity,
+        leftPaddlePositionZ,
+        rightPaddlePositionZ,
+        powerupVisible,
+        powerupPosition,
+        countdown,
+        cameraMode
+      });
+    } else {
+      socket.on("gameParameters", (data: GameParameters) => {
+        setGameLaunched(data.gameLaunched);
+        setIsPaused(data.isPaused);
+        setWinner(data.winner);
+        setGameMode(data.gameMode);
+        setLeftScore(data.leftScore);
+        setRightScore(data.rightScore);
+        setBallPosition(data.ballPosition);
+        setBallVelocity(data.ballVelocity);
+        setLeftPaddlePositionZ(data.leftPaddlePositionZ);
+        setRightPaddlePositionZ(data.rightPaddlePositionZ);
+        setPowerupVisible(data.powerupVisible);
+        setPowerupPosition(data.powerupPosition);
+        setCountdown(data.countdown);
+        setCameraMode(data.cameraMode);
+      })
+   };
 
     return () => {
       socket.off("gameStartInfos");
-      socket.off("objectsPositions");
+      socket.off("gameParameters");
     };
-  }, [socket, gameInfos, objectsInfos]);
+  }, [socket, gameInfos, gameParameters]);
 
 //------------------ SCENE SETTINGS ------------------------
     // s'assure que le canvas aura comme maximum toujours 800x600
@@ -109,7 +173,7 @@ export function Pong({ socket }: PongProps) {
           },
           cancelToken: source.token, // Pass cancel token to axios
         });
-        if (isClassicModeIA === true) {
+        if (gameMode === 1 || gameMode === 2) {
             setHostname(response.data.username);
             setClientName("Computer");
         } else {
@@ -134,19 +198,31 @@ export function Pong({ socket }: PongProps) {
     return () => {
       source.cancel("Operation canceled by the user.");
     };
-  }, [isClassicModeIA, isClassicModeMulti, hostStatus]);
+  }, [gameMode, hostStatus]);
 
 //------------------ GAME VARIABLES ------------------------
     // ratio pour garder les meme proportions lors d'un resizing de la page
     // attention, a cause du positionnement de la camera, height devient depth et depth devient height.
-    const paddleWidth: number = 0.000625 * dimension.width;
+    
+    // variables avec resizing
+    // const paddleWidth: number = 0.000625 * dimension.width;
+    // const paddleHeight: number = 1;
+    // const paddleDepth: number = 0.008333333333 * dimension.height;
+    // const ballRadius: number = 0.000625 * dimension.width;
+    // const initialSpeedFactor = getSpeedFactor(dimension.width);
+    // const INITIAL_BALL_SPEED: number = 0.3 * initialSpeedFactor;
+    // const netWidth: number = 0.000625 * dimension.width;
+    // const netDepth: number = 0.008333333333 * dimension.height;
+
+    // variables sans resizing
+    const paddleWidth: number = 0.5;
     const paddleHeight: number = 1;
-    const paddleDepth: number = 0.008333333333 * dimension.height;
-    const ballRadius: number = 0.000625 * dimension.width;
-    const initialSpeedFactor = getSpeedFactor(dimension.width);
-    const INITIAL_BALL_SPEED: number = 0.3 * initialSpeedFactor;
-    const netWidth: number = 0.000625 * dimension.width;
-    const netDepth: number = 0.008333333333 * dimension.height;
+    const paddleDepth: number = 5;
+    const ballRadius: number = 0.5;
+    // const initialSpeedFactor = getSpeedFactor(dimension.width);
+    const INITIAL_BALL_SPEED: number = 0.3;
+    const netWidth: number = 0.5;
+    const netDepth: number = 8;
     
     const [leftPaddlePositionZ, setLeftPaddlePositionZ] = React.useState(0);
     const [rightPaddlePositionZ, setRightPaddlePositionZ] = React.useState(0);
@@ -158,18 +234,22 @@ export function Pong({ socket }: PongProps) {
     const [powerupVisible, setPowerupVisible] = React.useState(false);
 
 //------------------ GAME UTILS ------------------------
-    function getSpeedFactor(width: number): number {
-      if (width < 300) {
-        return 0.2;
-      } else if (width < 450) {
-        return 0.5;
-      } else if (width < 700) {
-        return 0.8;
-      }
-      return 1;
-    }
+  // not necessary if no game resize
+    // function getSpeedFactor(width: number): number {
+    //   if (width < 300) {
+    //     return 0.2;
+    //   } else if (width < 450) {
+    //     return 0.5;
+    //   } else if (width < 700) {
+    //     return 0.8;
+    //   }
+    //   return 1;
+    // }
 
 //------------------ GAME GENERAL BEHAVIOR ------------------------
+// Timer to restart
+const [countdown, setCountdown] = React.useState<number | null>(null);
+
     const handleCountdown = (): void => {
       let currentCountdown = 3;
       setCountdown(currentCountdown);
@@ -193,11 +273,8 @@ export function Pong({ socket }: PongProps) {
       }, 1000);
     };
 
-    // Timer to restart
-    const [countdown, setCountdown] = React.useState<number | null>(null);
-
     const handleKeyPress = (event: KeyboardEvent): void => {
-      if (isClassicModeIA) return;
+      if (gameMode === 1 || gameMode === 3) return;
       if (event.key === "c" || event.key === "C") {
         // Toggle the camera mode when the "C" key is pressed
         console.log('c has been pressed');
@@ -212,15 +289,14 @@ export function Pong({ socket }: PongProps) {
       return () => {
         window.removeEventListener("keydown", handleKeyPress);
       };
-    }, [isClassicModeIA]);
+    }, [gameMode]);
 
     //------------------ GAME MODES ------------------------
     const handleClassicModeIA = (): void => {
       console.log('classic 1 vs IA');
       setGameLaunched(true);
       setCameraMode("orthographic");
-      setIsClassicModeIA(true);
-      setIsClassicModeMulti(false);
+      setGameMode(1);
       setShowButtons(false);
       handleCountdown();
     };
@@ -230,35 +306,37 @@ export function Pong({ socket }: PongProps) {
       setGameLaunched(true);
       setCameraMode("orthographic");
       setPowerupVisible(true);
-      setIsClassicModeIA(true);
-      setIsClassicModeMulti(false);
+      setGameMode(2);
       setShowButtons(false);
       handleCountdown();
     };
 
     const handleClassicModeMulti = (): void => {
       console.log('classic 1 vs 1');
+      socket.emit('waitingForPlayer', { gameMode: 3 });
+      setWaitingForPlayer(true);
       setGameLaunched(true);
       setCameraMode("orthographic");
-      setIsClassicModeIA(false);
-      setIsClassicModeMulti(true);
+      setGameMode(3);
       setShowButtons(false);
-      handleCountdown();
+      // handleCountdown();
     };
 
     const handlePowerupModeMulti = (): void => {
       console.log('powerup 1 vs multi');
+      socket.emit('waitingForPlayer', { gameMode: 4 });
+      setWaitingForPlayer(true);
       setGameLaunched(true);
       setCameraMode("orthographic");
       setPowerupVisible(true);
-      setIsClassicModeIA(false);
-      setIsClassicModeMulti(true);
+      setGameMode(4);
       setShowButtons(false);
-      handleCountdown();
+      // handleCountdown();
     };
 
 //------------------ GAME RESIZING MANAGEMENT ------------------------
     // methode pour conserver les ratio sur l'evenement resize
+    // a enlever si pas de resize
     React.useEffect(() => {
       // const initialSpeedFactor = getSpeedFactor(dimension.width);
       // const [ballSpeed, setBallSpeed] = React.useState(INITIAL_BALL_SPEED * initialSpeedFactor);
@@ -299,15 +377,17 @@ export function Pong({ socket }: PongProps) {
     const distanceFromCenter: number = 0.024 * dimension.width;
 
 //------------------ GAME OBJECTS ------------------------
+// fixed objects : net, scoreboard, borders.
+// mobile objects: powerup, ball, paddle.
 
+    // powerup seulement sur le net pour jouabilite
     React.useEffect(() => {
-      // const randomX = (Math.random() * (WORLD_WIDTH - 10)) - (WORLD_WIDTH / 2 - 9);
       const randomZ = (Math.random() * (WORLD_HEIGHT - 2)) - (WORLD_HEIGHT / 2 - 1);
       setPowerupPosition({ x: 0, y: 0, z: randomZ });
     }, []);
 
     const Powerup: React.FC<{}> = () => {
-      if (!powerupVisible || isClassicModeIA) return null;
+      if (!powerupVisible || gameMode === 1 || gameMode === 3) return null;
 
       const textTexture = React.useMemo(createTextTexture, []);
 
@@ -367,7 +447,7 @@ export function Pong({ socket }: PongProps) {
       if (rightScore === 3 || leftScore === 3) {
         setIsPaused(true);
         if (rightScore === 3) {
-          if (isClassicModeIA) {
+          if (gameMode === 1 || gameMode === 3) {
             setWinner("Computers wins!");
           } else {
             setWinner(clientName + " wins !");
@@ -381,6 +461,24 @@ export function Pong({ socket }: PongProps) {
     const baseCanvasWidth: number = 800;
     const baseFontSize: number = 60;
     const fontSize: number = (dimension.width / baseCanvasWidth) * baseFontSize;
+    
+    // border lines
+    const Borders: React.FC<{}> = () => {
+      const borderThickness = 0.05;
+      return (
+        <>
+          {/* Top Border */}
+          <Box position={[0, 0, WORLD_HEIGHT / 2]} args={[WORLD_WIDTH, 1, borderThickness]}>
+            <meshBasicMaterial color="white" />
+          </Box>
+          {/* Bottom Border */}
+          <Box position={[0, 0, -WORLD_HEIGHT / 2]} args={[WORLD_WIDTH, 1, borderThickness]}>
+            <meshBasicMaterial color="white" />
+          </Box>
+          
+        </>
+      );
+    };
 
     // sound effects
     const goalSoundRef = React.useRef<HTMLAudioElement>(null);
@@ -412,24 +510,6 @@ export function Pong({ socket }: PongProps) {
     const playCompHitSound: () => void = () => {
       compHitSoundRef.current?.play();
     }
-
-    // border lines
-      const Borders: React.FC<{}> = () => {
-        const borderThickness = 0.05; // You can adjust this value
-        return (
-          <>
-            {/* Top Border */}
-            <Box position={[0, 0, WORLD_HEIGHT / 2]} args={[WORLD_WIDTH, 1, borderThickness]}>
-              <meshBasicMaterial color="white" />
-            </Box>
-            {/* Bottom Border */}
-            <Box position={[0, 0, -WORLD_HEIGHT / 2]} args={[WORLD_WIDTH, 1, borderThickness]}>
-              <meshBasicMaterial color="white" />
-            </Box>
-            
-          </>
-        );
-      };
 
 //------------------ GAME BALL LOGIC ------------------------
     // Ball mechanics
@@ -471,7 +551,7 @@ export function Pong({ socket }: PongProps) {
           (directionZ < 0 && newZ - ballRadius < -WORLD_HEIGHT / 2)) {
             ballVelocity.z = -ballVelocity.z;
             newZ = ballPosition.z + ballVelocity.z;
-            if(!isClassicModeIA)
+            if(gameMode === 2 || gameMode === 4)
               playBallWallSound();
           }
 
@@ -485,9 +565,9 @@ export function Pong({ socket }: PongProps) {
 
           if (hitSectionLeft || hitSectionRight) {
             const hitPaddlePosition = hitSectionLeft ? leftPaddlePosition : rightPaddlePosition;
-            if (hitSectionLeft && !isClassicModeIA) {
+            if (hitSectionLeft && (gameMode === 2 || gameMode === 4)) {
               playUserHitSound();
-            } else if (hitSectionRight && !isClassicModeIA) {
+            } else if (hitSectionRight && (gameMode === 2 || gameMode === 4)) { //attention si 1 vs 1, laissez le son utilisateur
               playCompHitSound();
             }
 
@@ -505,12 +585,10 @@ export function Pong({ socket }: PongProps) {
           }
 
           if (newX - ballRadius <= -WORLD_WIDTH / 2 || newX + ballRadius >= WORLD_WIDTH / 2) {
-            if (!isClassicModeIA) {
+            if (gameMode === 2|| gameMode === 4) {
               pausePowerupSound();
               playGoalSound();
             }
-
-            //bug: asynchronous issue.
 
             // Update scores
             if (newX - ballRadius <= -WORLD_WIDTH / 2) {
@@ -518,16 +596,6 @@ export function Pong({ socket }: PongProps) {
             } else if (newX + ballRadius >= WORLD_WIDTH / 2) {
               setLeftScore(prevScore => prevScore + 1);
             }
-
-            // if (rightScore === 3 || leftScore === 3) {
-            //   if (rightScore === 3) {
-            //     setWinner("Right Player Wins!");
-            //   } else if(leftScore === 3) {
-            //     setWinner("Left Player Wins!");
-            //   }
-            //   setIsPaused(true);
-            //   return;
-            // }
 
             setCameraMode("orthographic");
 
@@ -555,75 +623,73 @@ export function Pong({ socket }: PongProps) {
     }
 
 //------------------ GAME PADDLES LOGIC ------------------------
-    // fixation des positions gauche et droite des paddles
+    // fixation de la position gauche du paddle
     const leftPaddleXPosition: number = -distanceFromCenter;
-    const rightPaddleXPosition: number = distanceFromCenter;
-
+    
     // Collision Logic with Paddles
     type Position = { x: number, z: number };
     type PaddleDimensions = { width: number, depth: number };
-
+    
     const checkCollision = (
       ballPos: Position,
       paddlePos: Position,
       paddleDims: PaddleDimensions
-    ): boolean | string => {
-      const distX: number = Math.abs(ballPos.x - paddlePos.x);
-      const distZ: number = Math.abs(ballPos.z - paddlePos.z);
-
-      if (distX <= (paddleDims.width / 2 + ballRadius) && (distZ <= paddleDims.depth / 2 + ballRadius)) {
-        const relativeCollisionPoint: number = (ballPos.z - paddlePos.z) / (paddleDepth / 2);
-        if (relativeCollisionPoint > 0.5) {
-          return "top";
-        } else if (relativeCollisionPoint < -0.5) {
-          return "bottom";
-        } else {
-          return "middle";
+      ): boolean | string => {
+        const distX: number = Math.abs(ballPos.x - paddlePos.x);
+        const distZ: number = Math.abs(ballPos.z - paddlePos.z);
+        
+        if (distX <= (paddleDims.width / 2 + ballRadius) && (distZ <= paddleDims.depth / 2 + ballRadius)) {
+          const relativeCollisionPoint: number = (ballPos.z - paddlePos.z) / (paddleDepth / 2);
+          if (relativeCollisionPoint > 0.5) {
+            return "top";
+          } else if (relativeCollisionPoint < -0.5) {
+            return "bottom";
+          } else {
+            return "middle";
+          }
         }
-      }
-      return false;
-    };
-
-    // mouvement du left (user1) paddle a la souris.
-    interface LeftPaddleProps {
-      leftPaddlePositionZ : number;
-      setLeftPaddlePositionZ: React.Dispatch<React.SetStateAction<number>>;
-    }
-
-    const LeftPaddle: React.FC<LeftPaddleProps> = ({ leftPaddlePositionZ, setLeftPaddlePositionZ }) => {
-      const { mouse } = useThree();
+        return false;
+      };
       
-      useFrame(() => {
-        let newPosition;
-        if (cameraMode === "perspective") {
-          newPosition = mouse.x * (WORLD_WIDTH / 2);
-        } else {
-          newPosition = -mouse.y * (WORLD_HEIGHT / 2);
-        }
-
-        const paddleTopEdge = newPosition + paddleDepth / 2;
-        const paddleBottomEdge = newPosition - paddleDepth / 2;
-
-        if (paddleTopEdge > WORLD_HEIGHT / 2) {
-          newPosition = WORLD_HEIGHT / 2 - paddleDepth / 2;
-        } else if (paddleBottomEdge < -WORLD_HEIGHT / 2) {
-          newPosition = -WORLD_HEIGHT / 2 + paddleDepth / 2;
-        }
-
-        setLeftPaddlePositionZ(newPosition);
-      });
-
-      return (
-        <Box position={[leftPaddleXPosition, 0, leftPaddlePositionZ]} args={[paddleWidth, paddleHeight, paddleDepth]}>
+      // mouvement du left (user1) paddle a la souris.
+      interface LeftPaddleProps {
+        leftPaddlePositionZ : number;
+        setLeftPaddlePositionZ: React.Dispatch<React.SetStateAction<number>>;
+      }
+      
+      const LeftPaddle: React.FC<LeftPaddleProps> = ({ leftPaddlePositionZ, setLeftPaddlePositionZ }) => {
+        const { mouse } = useThree();
+        
+        useFrame(() => {
+          let newPosition;
+          if (cameraMode === "perspective") {
+            newPosition = mouse.x * (WORLD_WIDTH / 2);
+          } else {
+            newPosition = -mouse.y * (WORLD_HEIGHT / 2);
+          }
+          
+          const paddleTopEdge = newPosition + paddleDepth / 2;
+          const paddleBottomEdge = newPosition - paddleDepth / 2;
+          
+          if (paddleTopEdge > WORLD_HEIGHT / 2) {
+            newPosition = WORLD_HEIGHT / 2 - paddleDepth / 2;
+          } else if (paddleBottomEdge < -WORLD_HEIGHT / 2) {
+            newPosition = -WORLD_HEIGHT / 2 + paddleDepth / 2;
+          }
+          
+          setLeftPaddlePositionZ(newPosition);
+        });
+        
+        return (
+          <Box position={[leftPaddleXPosition, 0, leftPaddlePositionZ]} args={[paddleWidth, paddleHeight, paddleDepth]}>
           <meshBasicMaterial attach="material" color="white" />
         </Box>
       )
     }
-
+    
     // Right paddle (Computer - User2)
-    const RIGHT_PADDLE_SPEED: number = 0.8;
-
-    const lerp = (a: number, b: number, t: number): number => a + t * (b - a);
+    // fixation de la position droite du paddle
+    const rightPaddleXPosition: number = distanceFromCenter;
 
     interface RightPaddleProps {
       RightPaddlePositionZ : number;
@@ -632,30 +698,60 @@ export function Pong({ socket }: PongProps) {
 
     const RightPaddle: React.FC<RightPaddleProps> = ({ rightPaddlePositionZ, setRightPaddlePositionZ }) => {
 
-      useFrame(() => {
-        const direction: number = Math.sign(ballPosition.z - rightPaddlePositionZ);
+    if (gameMode === 1 || gameMode === 2) { // si computer
+      const RIGHT_PADDLE_SPEED: number = 0.8;
 
-        let newZ = lerp(rightPaddlePositionZ, rightPaddlePositionZ + direction * RIGHT_PADDLE_SPEED, 0.2);
+      const lerp = (a: number, b: number, t: number): number => a + t * (b - a);
 
-        const paddleTopEdge: number = newZ + paddleDepth / 2;
-        const paddleBottomEdge: number = newZ - paddleDepth / 2;
+        useFrame(() => {
+          const direction: number = Math.sign(ballPosition.z - rightPaddlePositionZ);
 
-        if (paddleTopEdge > WORLD_HEIGHT / 2) {
-          newZ = WORLD_HEIGHT / 2 - paddleDepth / 2;
-        } else if (paddleBottomEdge < - WORLD_HEIGHT / 2) {
-          newZ = -WORLD_HEIGHT / 2 + paddleDepth / 2;
-        }
+          let newZ = lerp(rightPaddlePositionZ, rightPaddlePositionZ + direction * RIGHT_PADDLE_SPEED, 0.2);
 
-        setRightPaddlePositionZ(newZ);
+          const paddleTopEdge: number = newZ + paddleDepth / 2;
+          const paddleBottomEdge: number = newZ - paddleDepth / 2;
 
-      });
+          if (paddleTopEdge > WORLD_HEIGHT / 2) {
+            newZ = WORLD_HEIGHT / 2 - paddleDepth / 2;
+          } else if (paddleBottomEdge < - WORLD_HEIGHT / 2) {
+            newZ = -WORLD_HEIGHT / 2 + paddleDepth / 2;
+          }
 
-      return (
-        <Box position={[rightPaddleXPosition, 0, rightPaddlePositionZ]} args={[paddleWidth, paddleHeight, paddleDepth]}>
-          <meshBasicMaterial color="white" />
-        </Box>
-      );
+          setRightPaddlePositionZ(newZ);
+
+        });
+    } else {
+
+      // mouvement du right (user2) paddle a la souris.      
+        const { mouse } = useThree();
+        
+        useFrame(() => {
+          let newPosition;
+          if (cameraMode === "perspective") {
+            newPosition = mouse.x * (WORLD_WIDTH / 2);
+          } else {
+            newPosition = -mouse.y * (WORLD_HEIGHT / 2);
+          }
+          
+          const paddleTopEdge = newPosition + paddleDepth / 2;
+          const paddleBottomEdge = newPosition - paddleDepth / 2;
+          
+          if (paddleTopEdge > WORLD_HEIGHT / 2) {
+            newPosition = WORLD_HEIGHT / 2 - paddleDepth / 2;
+          } else if (paddleBottomEdge < -WORLD_HEIGHT / 2) {
+            newPosition = -WORLD_HEIGHT / 2 + paddleDepth / 2;
+          }
+          
+          setRightPaddlePositionZ(newPosition);
+        });
     }
+    return (
+      <Box position={[rightPaddleXPosition, 0, rightPaddlePositionZ]} args={[paddleWidth, paddleHeight, paddleDepth]}>
+        <meshBasicMaterial attach="material" color="white" />
+      </Box>
+  )
+  }
+
 
 //------------------ GAME SCENE RENDERER ------------------------
   return (
@@ -761,6 +857,13 @@ export function Pong({ socket }: PongProps) {
             <div className="countdown">
               {countdown !== null && <span style={{ fontSize: `${fontSize}px` }}>{countdown}</span>}
             </div>
+
+            {/* player waiting */}
+            {waitingForPlayer ? (
+              <div className="winner-message">
+                "waiting for another player"
+              </div>
+            ): null}
           </div>
 
           {/* Sound elements */}
