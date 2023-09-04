@@ -106,7 +106,11 @@ export class PongGateway {
     this.server.to(gameId).emit('gameParameters', payload);
   }
 
-
+  @SubscribeMessage('weHaveAWinner')
+  handleWinner(client: Socket, payload: any) {
+    const gameId = payload.gameId; // Make sure to send gameId from client
+    this.server.to(gameId).emit('weHaveAWinner', payload);
+  }
 
 
 
