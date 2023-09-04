@@ -19,11 +19,11 @@ import Cookies from "js-cookie";
 import socketIO from 'socket.io-client'
 
 //------------------ INFOS QUI TRANSITENT ENTRE SOCKETS ------------
-type GameStartInfos = {
-  hostStatus: boolean;
-  clientName: string;
-  gameLaunched: boolean;
-}
+// type GameStartInfos = {
+//   hostStatus: boolean;
+//   clientName: string;
+//   gameLaunched: boolean;
+// }
 
 type GameParameters = {
   gameId: string,
@@ -46,6 +46,7 @@ type GameParameters = {
 
 type PlayerJoined = {
   gameId: string;
+  hostStatus: boolean,
 }
 
 type WeHaveAWinner = {
@@ -84,11 +85,11 @@ export function Pong() {
 
   // Ecoute parle le socket
   useEffect(() => {
-    socket.on( "gameStartInfos", (data: GameStartInfos) => {
-      setGameInfos([gameInfos, data]);
-      setHostStatus(data.hostStatus);
-      console.log('🏓   mon status host est : ', hostStatus);
-    });
+    // socket.on( "gameStartInfos", (data: GameStartInfos) => {
+    //   setGameInfos([gameInfos, data]);
+    //   // setHostStatus(data.hostStatus);
+    //   console.log('🏓   mon status host est : ', hostStatus);
+    // });
       // socket.on( "gameParameters", (data: GameParameters) => {
       // setGameParameters([gameParameters, data]) 
       // });
@@ -98,6 +99,7 @@ export function Pong() {
       // setWaitingForPlayer(false);
       // setCameraMode("orthographic");
       // setShowButtons(false);
+      setHostStatus(data.hostStatus);
       setGameId(data.gameId);
       handleCountdown();
     });

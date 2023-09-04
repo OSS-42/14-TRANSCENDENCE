@@ -98,9 +98,9 @@ export class PongGateway {
       const player1 = this.matchmaking.shift();
       const player2 = this.matchmaking.shift();
       console.log('🏓   player1: ', player1.id);
-      console.log('🏓   player1 username: ', this.pongService.getUsernameFromUserId(this.connectedUsers.keys(player1.id)));
+      // console.log('🏓   player1 username: ', this.pongService.getUsernameFromUserId(this.connectedUsers.keys(player1.id)));
       console.log('🏓   player2: ', player2.id);
-      console.log('🏓   player2 username: ', this.pongService.getUsernameFromUserId(1));
+      // console.log('🏓   player2 username: ', this.pongService.getUsernameFromUserId(1));
   
       player1.join(gameId);
       player2.join(gameId);
@@ -122,8 +122,8 @@ export class PongGateway {
       // });
 
       // Emit an event to both clients to indicate that the match is ready to start
-      player1.emit('playerJoined', { gameId: gameId });
-      player2.emit('playerJoined', { gameId: gameId });
+      player1.emit('playerJoined', { gameId: gameId, hostStatus: true });
+      player2.emit('playerJoined', { gameId: gameId, hostStatus: false });
       console.log("🏓   partie creee: ", gameId);
     }
   }
