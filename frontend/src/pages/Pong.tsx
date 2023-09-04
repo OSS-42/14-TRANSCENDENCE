@@ -142,15 +142,6 @@ export function Pong({ socket }: PongProps) {
       })
    };
 
-   const gameResult = (): void => {
-     if (leftScore === 3) {
-       setIsHostWinner(true);
-     } else {
-       setIsHostWinner(false);
-     }
-     socket.emit("weHaveAWinner", { gameId, isHostWinner });
-   };
-
     return () => {
       socket.off("gameStartInfos");
       socket.off("gameParameters");
@@ -369,6 +360,15 @@ export function Pong({ socket }: PongProps) {
       // history.push('/game')
     }
   }, [winner]);
+
+  const gameResult = (): void => {
+    if (leftScore === 3) {
+      setIsHostWinner(true);
+    } else {
+      setIsHostWinner(false);
+    }
+    socket.emit("weHaveAWinner", { gameId, isHostWinner });
+  };
 
 //------------------ GAME RESIZING MANAGEMENT ------------------------
     // methode pour conserver les ratio sur l'evenement resize
