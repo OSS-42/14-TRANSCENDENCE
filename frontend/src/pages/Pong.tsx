@@ -264,13 +264,13 @@ export function Pong() {
   // const INITIAL_BALL_SPEED: number = 0.3 * initialSpeedFactor;
   // const netWidth: number = 0.000625 * dimension.width;
   // const netDepth: number = 0.008333333333 * dimension.height;
+  // const initialSpeedFactor = getSpeedFactor(dimension.width);
 
   // variables sans resizing
   const paddleWidth: number = 0.5;
   const paddleHeight: number = 1;
   const paddleDepth: number = 5;
   const ballRadius: number = 0.5;
-  // const initialSpeedFactor = getSpeedFactor(dimension.width);
   const INITIAL_BALL_SPEED: number = 0.3;
   const netWidth: number = 0.5;
   const netDepth: number = 8;
@@ -280,6 +280,8 @@ export function Pong() {
   const [ballSpeed, setBallSpeed] = React.useState(INITIAL_BALL_SPEED);
   const [ballPosition, setBallPosition] = React.useState({ x: 0, y: 0, z: 0.00001 });
   const [ballVelocity, setBallVelocity] = React.useState({ x: INITIAL_BALL_SPEED, z: INITIAL_BALL_SPEED });
+  const [leftScore, setLeftScore] = React.useState(0);
+  const [rightScore, setRightScore] = React.useState(0);
   const [winner, setWinner] = React.useState<string | null>(null);
   const [powerupPosition, setPowerupPosition] = React.useState({ x: 0, y: 0, z: 0 });
   const [powerupVisible, setPowerupVisible] = React.useState(false);
@@ -344,6 +346,7 @@ export function Pong() {
     }, 1000);
   };
 
+  // Key press on multi
   const handleKeyPress = (event: KeyboardEvent): void => {
     if (gameMode === 1 || gameMode === 3) return;
     if (event.key === "c" || event.key === "C") {
@@ -370,7 +373,7 @@ export function Pong() {
       window.location.href = '/game';
       // history.push('/game')
     }
-  }, [winner]);
+  }, [winner, leftScore, rightScore] );
 
   const gameResult = (): void => {
     if (leftScore === 3) {
@@ -426,7 +429,7 @@ export function Pong() {
 
 //------------------ GAME OBJECTS ------------------------
   // fixed objects : net, scoreboard, borders.
-  // mobile objects: powerup, ball, paddle.
+  // mobile objects: powerup, ball, paddles.
 
   // powerup seulement sur le net pour jouabilite
   React.useEffect(() => {
@@ -488,9 +491,6 @@ export function Pong() {
   });
 
   // Scoreboard
-  const [leftScore, setLeftScore] = React.useState(0);
-  const [rightScore, setRightScore] = React.useState(0);
-
   React.useEffect(() => {
     if (rightScore === 3 || leftScore === 3) {
       setIsPaused(true);

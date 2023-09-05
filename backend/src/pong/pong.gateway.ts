@@ -88,10 +88,6 @@ export class PongGateway {
       console.log('🏓   ⚡ 2 clients !! ⚡');
       const gameId = uuid();
       
-      // Choose a host logic : first client in map
-      // const [hostUserId, hostSocketId] = Array.from(this.connectedUsers.entries())[0];
-      // const [clientUserId, clientSocketId] = Array.from(this.connectedUsers.entries())[1];
-
       const player1 = queue.shift();
       const player2 = queue.shift();
       console.log('🏓   player1: ', player1.id);
@@ -128,10 +124,6 @@ export class PongGateway {
   if (queue.length >= 2) {
       console.log('🏓   ⚡ 2 clients !! ⚡');
       const gameId = uuid();
-      
-      // Choose a host logic : first client in map
-      // const [hostUserId, hostSocketId] = Array.from(this.connectedUsers.entries())[0];
-      // const [clientUserId, clientSocketId] = Array.from(this.connectedUsers.entries())[1];
 
       const player1 = queue.shift();
       const player2 = queue.shift();
