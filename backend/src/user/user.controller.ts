@@ -80,21 +80,6 @@ export class UserController {
     return this.userService.updateAvatar(user, Url);
   }
 
-<<<<<<< HEAD
-  @ApiParam({ name: "id", type: Number })
-  @Get("matchHistory/:id")
-  getUserMatchHistory(@Param("id") id: number) {
-    return this.userService.getUserMatchHistory(id);
-  }
-  @Post("updateUsername")
-  updateUsername(
-    @GetUser() user: Utilisateur,
-    @Body() updateData: { newUsername: string }
-  ) {
-    console.log("New Username:", updateData);
-    return this.userService.updateUsername(user, updateData.newUsername);
-  }
-=======
         return this.userService.getUserMatchHistory(id);
     }
     @ApiParam({ name: 'id', type: Number })
@@ -115,5 +100,4 @@ export class UserController {
 
         return this.userService.checkIfUserExist(username);
     }
->>>>>>> main
 }
