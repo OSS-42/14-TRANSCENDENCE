@@ -1,97 +1,93 @@
 import { Button } from "@mui/material";
-import { Box } from "@mui/material";
-import axios from "axios";
-import Cookies from "js-cookie";
-import { useEffect, useState } from "react";
+import { Box } from "@mui/system";
 import { Socket } from "socket.io-client";
+import { addFriendApi, fetchFriendsList } from "../../api/requests";
 import { User } from "../../models/User";
 
- type someProp = {
+const UserId = 2; //On va remplacer cette ligne quand on aura le context
+type ChatFriendsProps = {
   socket: Socket;
+  setUsersList: React.Dispatch<React.SetStateAction<User[]>>;
+  setFriendsList: React.Dispatch<React.SetStateAction<User[]>>;
+  usersList: User[];
+  friendsList: User[];
+  connectedUsers: number[];
+  handleUserClick: (user: User) => void;
 };
-//IL Y A UN PROBLEME DANS CETTE PAGE (sam). ca fonctionne mais erreur dans le console log
 
-function ChatBar({ socket }: someProp) {
-  const [usersList, setUsersList] = useState<User[]>([]);
-  //const [userFriends, setUserFriends] = useState<string[]>([]);
-  const [connectedUsers, setConnectedUsers] = useState<number[]>([]);
-
-  
-  useEffect(() => {
-    
-    socket.on('updateConnectedUsers', (updatedUsers: number[]) => {
-          setConnectedUsers(updatedUsers);
-          console.log("updateduser ::" + updatedUsers)
-        });
-    
-    async function fetchUsersData() {
-      const jwt_token = Cookies.get("jwt_token");
-      try {
-        const response = await axios.get("http://localhost:3001/users/allUsers", {
-          headers: {
-            Authorization: "Bearer " + jwt_token,
-          },
-        });
-        setUsersList(response.data);
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      }
-    }
-    fetchUsersData();
-
-  }, []);
-
+function ChatBar({
+  handleUserClick,
+  friendsList,
+  setFriendsList,
+  usersList,
+  connectedUsers,
+}: ChatFriendsProps) {
   const addFriend = async (friendUsername: string) => {
-    const jwt_token = Cookies.get("jwt_token");
-    try {
-      await axios.get(`http://localhost:3001/users/addFriend/${friendUsername}`, {
-        headers: {
-          Authorization: "Bearer " + jwt_token,
-        },
-      });
-    } catch (error) {
-      console.error("Error adding friend:", error);
-    }
+    await addFriendApi(friendUsername);
+    const updatedFriendsList = await fetchFriendsList();
+    setFriendsList(updatedFriendsList);
   };
 
   return (
     <div className="chat__sidebar">
-      <h2>Open Chat</h2>
-
       <div>
         <h4 className="chat__header">USERS LIST</h4>
         <div className="chat__users">
           <p></p>
-          {usersList.map((user, index) => (
-            <Box component="div"
-              key={index}
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px',
-                padding: '5px',
-                border: '1px solid #ccc',
-                borderRadius: '5px',
-                marginBottom: '5px',
-              }}
-            >
-              <img
-                src={user.avatar}
-                alt={user.username}
-                width="50"
-                height="50"
-                style={{ borderRadius: '50%' }}
-              />
-              <p>{user.username}</p>
-              {connectedUsers.includes(user.id) && <span style={{ color: 'green' }}> en ligne</span>}
-                <Button variant="outlined" size="small" onClick={() => addFriend(user.username)}>Add Friend</Button>
-              
-            </Box>
-          ))}
+          {usersList.map(
+            (user) =>
+              !friendsList.some((friend) => friend.id === user.id) && (
+                <Box
+                  component="div"
+                  key={user.id}
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    padding: "5px",
+                    border: "1px solid #ccc",
+                    borderRadius: "5px",
+                    marginBottom: "5px",
+                  }}
+                >
+                  <img
+                    src={user.avatar}
+                    alt={user.username}
+                    width="50"
+                    height="50"
+                    style={{ borderRadius: "50%" }}
+                    onClick={() => handleUserClick(user)}
+                  />
+                  <div>
+                    <p>{user.username}</p>
+                    {connectedUsers.includes(user.id) && (
+                      <span style={{ color: "green" }}> en ligne</span>
+                    )}
+                  </div>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "flex-end",
+                      flex: "1",
+                    }}
+                  >
+                    {user.id !== UserId &&
+                      !friendsList.some((friend) => friend.id === user.id) && (
+                        <Button
+                          variant="contained"
+                          onClick={() => addFriend(user.username)}
+                        >
+                          Add Friend
+                        </Button>
+                      )}
+                  </div>
+                </Box>
+              )
+          )}
         </div>
       </div>
     </div>
   );
-};
+}
 
 export default ChatBar;
