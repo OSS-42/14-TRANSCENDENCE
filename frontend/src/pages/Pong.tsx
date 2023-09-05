@@ -19,11 +19,6 @@ import Cookies from "js-cookie";
 import socketIO from 'socket.io-client'
 
 //------------------ INFOS QUI TRANSITENT ENTRE SOCKETS ------------
-// type GameStartInfos = {
-//   hostStatus: boolean;
-//   clientName: string;
-//   gameLaunched: boolean;
-// }
 
 type GameParameters = {
   gameId: string,
@@ -47,10 +42,16 @@ type GameParameters = {
 type PlayerJoined = {
   gameId: string;
   hostStatus: boolean,
+  hostName: string,
+  clientName: string,
 }
 
 type WeHaveAWinner = {
   isHostWinner: boolean,
+}
+
+type Connected = {
+  helloWorld: string,
 }
 
 const socket = socketIO('http://localhost:3001/pongGame', {
@@ -78,8 +79,9 @@ export function Pong() {
   const [clientName, setClientName ] = React.useState<string>("");
   const [playerName, setPlayerName] = React.useState<string>("");
 
-  const [gameInfos, setGameInfos] = useState<GameStartInfos>({ hostStatus: false, clientName: "", gameLaunched: false });
+  const [gameInfos, setGameInfos] = useState<PlayerJoined>();
   const [gameParameters, setGameParameters] = useState<GameParameters>();
+  const [connection, setConnection] = useState<Connected>();
   const [waitingForPlayer, setWaitingForPlayer] = React.useState(false);
   const [gameId, setGameId] = React.useState<string>("");
   const [isHostWinner, setIsHostWinner] = React.useState(false);
@@ -87,16 +89,9 @@ export function Pong() {
   // Ecoute parle le socket
   useEffect(() => {
     socket.on("Connected", (data: any) => {
+      console.log('🏓   ', data.helloWorld);
       setIsConnected(true);
     })
-    // socket.on( "gameStartInfos", (data: GameStartInfos) => {
-    //   setGameInfos([gameInfos, data]);
-    //   // setHostStatus(data.hostStatus);
-    //   console.log('🏓   mon status host est : ', hostStatus);
-    // });
-      // socket.on( "gameParameters", (data: GameParameters) => {
-      // setGameParameters([gameParameters, data]) 
-      // });
 
     socket.on('playerJoined', (data: PlayerJoined) => {
       // setGameLaunched(true);
@@ -105,52 +100,51 @@ export function Pong() {
       // setShowButtons(false);
       setHostStatus(data.hostStatus);
       setGameId(data.gameId);
+      setHostname(data.hostName);
+      setClientName(data.clientName);
       handleCountdown();
     });
 
     // les 2 cotes devraient toujours ecouter et emettre, a revoir.
-    setHostStatus(gameInfos.hostStatus); 
-    if (hostStatus) {
-      socket.emit("gameParameters", {
-        gameId,
-        gameLaunched,
-        isPaused,
-        winner,
-        gameMode,
-        leftScore,
-        rightScore,
-        ballPosition,
-        ballVelocity,
-        leftPaddlePositionZ,
-        rightPaddlePositionZ,
-        powerupVisible,
-        powerupPosition,
-        countdown,
-        cameraMode
-      });
-    } else {
-      socket.on("gameParameters", (data: GameParameters) => {
-        // if (gameId != data.gameId) {
-        //   socket.disconnect();
-        //   return;
-        // } 
-        setIsHostWinner(data.isHostWinner);
-        setGameLaunched(data.gameLaunched);
-        setIsPaused(data.isPaused);
-        setWinner(data.winner);
-        setGameMode(data.gameMode);
-        setLeftScore(data.leftScore);
-        setRightScore(data.rightScore);
-        setBallPosition(data.ballPosition);
-        setBallVelocity(data.ballVelocity);
-        setLeftPaddlePositionZ(data.leftPaddlePositionZ);
-        setRightPaddlePositionZ(data.rightPaddlePositionZ);
-        setPowerupVisible(data.powerupVisible);
-        setPowerupPosition(data.powerupPosition);
-        setCountdown(data.countdown);
-        setCameraMode(data.cameraMode);
-      })
-   };
+    // setHostStatus(gameInfos.hostStatus); 
+    socket.emit("gameParameters", {
+      gameId,
+      gameLaunched,
+      isPaused,
+      winner,
+      gameMode,
+      leftScore,
+      rightScore,
+      ballPosition,
+      ballVelocity,
+      leftPaddlePositionZ,
+      rightPaddlePositionZ,
+      powerupVisible,
+      powerupPosition,
+      countdown,
+      cameraMode
+    });
+    socket.on("gameParameters", (data: GameParameters) => {
+      // if (gameId != data.gameId) {
+      //   socket.disconnect();
+      //   return;
+      // } 
+      setIsHostWinner(data.isHostWinner);
+      setGameLaunched(data.gameLaunched);
+      setIsPaused(data.isPaused);
+      setWinner(data.winner);
+      setGameMode(data.gameMode);
+      setLeftScore(data.leftScore);
+      setRightScore(data.rightScore);
+      setBallPosition(data.ballPosition);
+      setBallVelocity(data.ballVelocity);
+      setLeftPaddlePositionZ(data.leftPaddlePositionZ);
+      setRightPaddlePositionZ(data.rightPaddlePositionZ);
+      setPowerupVisible(data.powerupVisible);
+      setPowerupPosition(data.powerupPosition);
+      setCountdown(data.countdown);
+      setCameraMode(data.cameraMode);
+    });
 
     return () => {
       socket.off("Connected");
@@ -158,7 +152,7 @@ export function Pong() {
       socket.off("gameParameters");
       socket.off("playerJoined");
     };
-  }, [socket, gameInfos, gameParameters]);
+  }, [socket, gameInfos, connection, gameParameters]);
 
 //------------------ GAME MODES ------------------------
 
@@ -311,24 +305,22 @@ export function Pong() {
 
 //------------------ GAME UTILS ------------------------
   // not necessary if no game resize
-  function getSpeedFactor(width: number): number {
-    if (width < 300) {
-      return 0.2;
-    } else if (width < 450) {
-      return 0.5;
-    } else if (width < 700) {
-      return 0.8;
-    }
-    return 1;
-  }
+  // function getSpeedFactor(width: number): number {
+  //   if (width < 300) {
+  //     return 0.2;
+  //   } else if (width < 450) {
+  //     return 0.5;
+  //   } else if (width < 700) {
+  //     return 0.8;
+  //   }
+  //   return 1;
+  // }
 
 //------------------ GAME GENERAL BEHAVIOR ------------------------
   // Timer to restart
   const [countdown, setCountdown] = React.useState<number | null>(null);
 
   const handleCountdown = (): void => {
-    console.log('🏓   je suis host ? ', hostStatus);
-    console.log('🏓   gameID: ', gameId);
 
     let currentCountdown = 3;
     setCountdown(currentCountdown);
@@ -393,41 +385,41 @@ export function Pong() {
 //------------------ GAME RESIZING MANAGEMENT ------------------------
     // methode pour conserver les ratio sur l'evenement resize
     // a enlever si pas de resize
-    React.useEffect(() => {
-      // const initialSpeedFactor = getSpeedFactor(dimension.width);
-      // const [ballSpeed, setBallSpeed] = React.useState(INITIAL_BALL_SPEED * initialSpeedFactor);
+    // React.useEffect(() => {
+    //   // const initialSpeedFactor = getSpeedFactor(dimension.width);
+    //   // const [ballSpeed, setBallSpeed] = React.useState(INITIAL_BALL_SPEED * initialSpeedFactor);
       
-      const handleResize: () => void = () => {
-        let newWidth: number = window.innerWidth;
-        let newHeight: number = window.innerWidth * 3 / 4;
+    //   const handleResize: () => void = () => {
+    //     let newWidth: number = window.innerWidth;
+    //     let newHeight: number = window.innerWidth * 3 / 4;
 
-        if (newWidth > 800) {
-          newWidth = 800;
-          newHeight = 600;
-        }
+    //     if (newWidth > 800) {
+    //       newWidth = 800;
+    //       newHeight = 600;
+    //     }
 
-        setDimensions({ width : newWidth, height: newHeight });
+    //     setDimensions({ width : newWidth, height: newHeight });
 
-        const speedFactor = getSpeedFactor(newWidth);
-        const newBallSpeed = INITIAL_BALL_SPEED * speedFactor;
+    //     const speedFactor = getSpeedFactor(newWidth);
+    //     const newBallSpeed = INITIAL_BALL_SPEED * speedFactor;
 
-        const currentVelocityMagnitude = Math.sqrt(Math.pow(ballVelocity.x, 2) + Math.pow(ballVelocity.z, 2));
+    //     const currentVelocityMagnitude = Math.sqrt(Math.pow(ballVelocity.x, 2) + Math.pow(ballVelocity.z, 2));
         
-        // Normalize the current velocity
-        const normalizedVelocityX = ballVelocity.x / currentVelocityMagnitude;
-        const normalizedVelocityZ = ballVelocity.z / currentVelocityMagnitude;
+    //     // Normalize the current velocity
+    //     const normalizedVelocityX = ballVelocity.x / currentVelocityMagnitude;
+    //     const normalizedVelocityZ = ballVelocity.z / currentVelocityMagnitude;
     
-        // Scale the normalized velocity by the new speed
-        const newVelocityX = normalizedVelocityX * newBallSpeed;
-        const newVelocityZ = normalizedVelocityZ * newBallSpeed;
+    //     // Scale the normalized velocity by the new speed
+    //     const newVelocityX = normalizedVelocityX * newBallSpeed;
+    //     const newVelocityZ = normalizedVelocityZ * newBallSpeed;
     
-        setBallVelocity({ x: newVelocityX, z: newVelocityZ });
-        // setBallSpeed(INITIAL_BALL_SPEED * (newWidth / WORLD_WIDTH))
-      }
+    //     setBallVelocity({ x: newVelocityX, z: newVelocityZ });
+    //     // setBallSpeed(INITIAL_BALL_SPEED * (newWidth / WORLD_WIDTH))
+    //   }
 
-      window.addEventListener('resize', handleResize);
-      return () => window.removeEventListener('resize', handleResize);
-    }, [ballSpeed, ballVelocity]);
+    //   window.addEventListener('resize', handleResize);
+    //   return () => window.removeEventListener('resize', handleResize);
+    // }, [ballSpeed, ballVelocity]);
 
     // offsite pour maintenir les paddles a 0.5 unit de leur bordure respective lorsqu'il y a resize
     const distanceFromCenter: number = 0.024 * dimension.width;
