@@ -168,48 +168,55 @@ export function Pong() {
 
   const handleClassicModeIA = (): void => {
     console.log('🏓   classic 1 vs IA');
+    const newHostStatus = true; // a cause async nature de React.
+    const newGM = 1;
+    setHostStatus(newHostStatus);
+    setGameMode(newGM);
+    setNames(playerName, newHostStatus, newGM, setHostname, setClientName);
     setGameLaunched(true);
     setCameraMode("orthographic");
-    setGameMode(1);
-    setHostStatus(true);
     setShowButtons(false);
     handleCountdown();
   };
 
   const handlePowerupModeIA = (): void => {
     console.log('🏓   powerup 1 vs IA');
-    // fetchUsersData(setPlayerName);
+    const newHostStatus = true;
+    const newGM = 2;
+    setHostStatus(newHostStatus);
+    setGameMode(newGM);
+    setNames(playerName, newHostStatus, newGM, setHostname, setClientName);
     setGameLaunched(true);
     setCameraMode("orthographic");
     setPowerupVisible(true);
-    setGameMode(2);
-    setHostStatus(true);
     setShowButtons(false);
     handleCountdown();
   };
 
   const handleClassicModeMulti = (): void => {
     console.log('🏓   classic 1 vs 1');
+    const newGM = 3;
     socket.emit('waitingForPlayerGM3', { playerName });
     setWaitingForPlayer(true);
     setGameLaunched(true);
     setCameraMode("orthographic");
-    setGameMode(3);
+    setGameMode(newGM);
     setShowButtons(false);
-    // handleCountdown();
   };
 
   const handlePowerupModeMulti = (): void => {
     console.log('🏓   powerup 1 vs multi');
+    const newGM = 4;
     socket.emit('waitingForPlayerGM4', { playerName });
     setWaitingForPlayer(true);
     setGameLaunched(true);
     setCameraMode("orthographic");
     setPowerupVisible(true);
-    setGameMode(4);
+    setGameMode(newGM);
     setShowButtons(false);
-    // handleCountdown();
   };
+
+// probleme avec fin de partie.
 
 //------------------ USER NAME - LEFT ------------------------
     
@@ -227,7 +234,6 @@ export function Pong() {
           cancelToken: source.token, // Pass cancel token to axios
         });
         setPlayerName(response.data.username);
-        console.log('🏓   playerName: ', response.data.username);
         
       } catch (error) {
         if (axios.isCancel(error)) {
@@ -236,20 +242,20 @@ export function Pong() {
       }
     }
 
-    // if (gameMode === 1 || gameMode === 2) {
-        //     setHostname(response.data.username);
-        //     setClientName("Computer");
-        // } else {
-        //   if (hostStatus === true) {
-        //     setHostname(response.data.username);
-        //     setClientName(gameInfos.clientName);
-        //   } else {
-        //     setHostname(gameInfos.clientName);
-        //     setClientName(response.data.username);
-        //   }
-        // }
-  
-    
+    function setNames (playerName: string, newHostStatus: boolean, newGM: number, setHostname: Function, setClientName: Function) {
+      if (newGM === 1 || newGM === 2) {
+              setHostname(playerName);
+              setClientName("Computer");
+          } else {
+            if (newHostStatus === true) {
+              setHostname(playerName);
+              setClientName(gameInfos.clientName);
+            } else {
+              setHostname(gameInfos.clientName);
+              setClientName(playerName);
+            }
+          }
+    }
 
 //------------------ GAME VARIABLES ------------------------
   // ratio pour garder les meme proportions lors d'un resizing de la page
@@ -922,7 +928,7 @@ export function Pong() {
             {/* player waiting */}
             {waitingForPlayer ? (
               <div className="winner-message">
-                "waiting for another player"
+                {waitingForPlayer && <span>"Waiting for another player"</span>}
               </div>
             ): null}
           </div>
