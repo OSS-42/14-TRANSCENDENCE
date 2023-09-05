@@ -1,4 +1,4 @@
-import { Box } from "@mui/material";
+import { Alert, Box } from "@mui/material";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { useState } from "react";
@@ -16,13 +16,33 @@ export function NameBox(props) {
     setEditedName(newName);
   }
 
+  function isUserNameValid(username) {
+    for (let i = 0; i < username.length; i++) {
+      const char = username[i];
+      if (!/[a-zA-Z0-9]/.test(char)) {
+        return false;
+      }
+    }
+    if (username.length < 3 || username.length > 12) return false;
+    return true; // Valid username
+  }
+
   async function handleBlur() {
     if (editedName !== props.user) {
+      if (editedName.trim() === "" || isUserNameValid(editedName) === false) {
+        alert(
+          `Username cannot be empty, please enter a name respecting the following conditions:\n
+          - Between 3 to 12 characters
+          - Only letters and numbers (no spaces or special characters)`
+        )
+        setEditedName(props.user);
+        return;
+      }
       const jwt_token = Cookies.get("jwt_token");
       try {
         const response = await axios.post(
           "http://localhost:3001/users/updateUsername",
-          {newUsername: editedName},  
+          { newUsername: editedName },
           {
             headers: {
               Authorization: "Bearer " + jwt_token,
@@ -38,7 +58,7 @@ export function NameBox(props) {
     }
     setIsEditing(false);
   }
-  
+
   return (
     <Box
       onDoubleClick={handleDoubleClick}
