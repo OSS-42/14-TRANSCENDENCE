@@ -1,5 +1,5 @@
 import { Body, Controller, Get, ParseIntPipe, Post, Query, Redirect, Res } from "@nestjs/common";
-import { ApiBearerAuth, ApiProperty, ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiExcludeEndpoint, ApiProperty, ApiTags } from "@nestjs/swagger";
 import { AuthService } from "./auth.service";
 import { Response } from 'express'
 import { AuthDto } from "./dto/auth.dto";
@@ -14,6 +14,7 @@ export class AuthControler {
     async login(){    
     }
     //@Redirect("http://localhost:3000")
+    @ApiExcludeEndpoint() 
     @Get()
     async getCode42(@Query('code') code: string, @Res() res: Response) {
         console.log('Code:', code); 

@@ -15,14 +15,14 @@ const socket = socketIO('http://localhost:3001/chat', {
   query: {
     token: Cookies.get('jwt_token')
   },
-});
+})
 
 // le socket Pong est active dans la page pong uniquement.
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<RootLayout />}>
       <Route path="/" element={<Home />} />
-      <Route path="login" element={<Login />} />
+      <Route path="login"element={<Login />} />
       <Route path="chat" element={<Chat socket={socket} />} />
       <Route path="game" element={<Pong />} /> 
       <Route path="profile" element={<Profile />} />

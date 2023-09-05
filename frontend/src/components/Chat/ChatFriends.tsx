@@ -1,60 +1,42 @@
-import { useState, useEffect } from "react";
+
 import { Socket } from "socket.io-client";
-import axios from "axios";
-import Cookies from "js-cookie";
-import { Box } from "@mui/material";
+import { Box, Button } from "@mui/material";
 import { User } from "../../models/User";
+import { destroyFriend, fetchFriendsList } from "../../api/requests";
 
 
-////ON VA DEVOIR PEUT ETRE UTILISER REDUX AFIN DAVOIR DES STATES GLOBALES
 
 
-type ChatFooterProps = {
-  socket: Socket; // Assurez-vous que ce type correspond au type de socket que vous utilisez
+
+type ChatFriendsProps = {
+  socket: Socket; 
+  connectedUsers: number[]; 
+  friendsList: User[];
+  setFriendsList: React.Dispatch<React.SetStateAction<User[]>>; 
+  handleUserClick: (user: User) => void;
 };
 
 
+//Allez chercher la liste des des utilisateurs connectedUsers a linititon du component.
+//
+const ChatFriends = ({ setFriendsList, connectedUsers, handleUserClick, friendsList }: ChatFriendsProps) => {
+ 
+async function removeFriend(id:number) {
+  await destroyFriend(id)
+  const newFriendList = await fetchFriendsList()
+  setFriendsList(newFriendList);
+} 
 
-const ChatFriends = ({ socket }: ChatFooterProps) => {
-  const [usersList, setUsersList] = useState<User[]>([]);
-  const [connectedUsers, setConnectedUsers] = useState<number[]>([]);
-  
-
-    useEffect(() => {
-      async function fetchUsersData() {
-        socket.on('updateConnectedUsers', (updatedUsers: number[]) => {
-          setConnectedUsers(updatedUsers);
-          console.log("updateduser ::" + updatedUsers)
-        });
-        
-        const jwt_token = Cookies.get('jwt_token');
-        try {
-          const response = await axios.get('http://localhost:3001/users/friendsList', {
-            headers: {
-              Authorization: "Bearer " + jwt_token,
-            },
-          });
-          // setUsersList(response.data)
-          setUsersList(response.data)
-        } catch (error) {
-          console.error('Error fetching user data:', error);
-        }
-      }
-  
-      fetchUsersData();
-    }, []);
   
     return (
       <div className="chat__sidebar">
-        <h2>Open Chat</h2>
-  
         <div>
           <h4 className="chat__header">FRIENDS LIST</h4>
           <div className="chat__users">
             <p></p>
-            {usersList.map((user, index) => (
+            {friendsList.map((user) => (
               <Box
-                key={index}
+                key={user.id}
                 sx={{
                   display: 'flex',
                   alignItems: 'center',
@@ -71,10 +53,17 @@ const ChatFriends = ({ socket }: ChatFooterProps) => {
                   width="50"
                   height="50"
                   style={{ borderRadius: '50%' }}
+                  onClick={() => handleUserClick(user)} 
                 />
-                <p>
-                  {user.username}
-                  {connectedUsers.includes(user.id) && <span style={{ color: 'green' }}> en ligne</span>}</p>
+               
+                <div>
+                  <p> {user.username}</p>
+                  {connectedUsers.includes(user.id) && <span style={{ color: 'green' }}> en ligne</span>}
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', flex: '1' }}></div>
+                  <Button variant="contained" onClick={() => removeFriend(user.id)}>
+                  Remove Friend
+                </Button>
               </Box>
             ))}
           </div>
