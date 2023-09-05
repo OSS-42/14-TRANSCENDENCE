@@ -59,13 +59,15 @@ export function Chat({ socket }: ChatProps) {
 
   return (
     <Box
-      sx={{
+    component = "div"  
+    sx={{
         display: 'flex',
         padding: '10px',
         height: '92.5vh',
       }}
     >
       <Box
+        component = "div"  
         sx={{
           display: 'grid',
           gridTemplateRows: '11fr .5fr',
@@ -77,6 +79,7 @@ export function Chat({ socket }: ChatProps) {
       >
         {/* Chat Box */}
         <Box
+          component = "div"  
           sx={{
             border: '1px solid black',
             borderRadius: '4px',
@@ -91,6 +94,7 @@ export function Chat({ socket }: ChatProps) {
       </Box>
       {/* Lists Box */}
       <Box
+        component = "div"  
         sx={{
           display: 'grid',
           gridTemplateRows: '8fr 4fr',
@@ -101,6 +105,7 @@ export function Chat({ socket }: ChatProps) {
         }}
       >
         <Box
+          component = "div"  
           sx={{
             border: '1px solid black',
             borderRadius: '4px',
