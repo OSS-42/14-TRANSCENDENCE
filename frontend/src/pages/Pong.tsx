@@ -69,13 +69,14 @@ export function Pong() {
   const [gameStart, setGameStart] = React.useState(true);
 
   const [gameMode, setGameMode] = React.useState<0 | 1 | 2 | 3 | 4>(0);
-  // const [isClassicModeMulti, setIsClassicModeMulti] = React.useState(false);
   const [showButtons, setShowButtons] = React.useState(true);
 
 //------------------ CLIENT-SERVER SETTINGS ------------------------
+  const [isConnected, setIsConnected] = React.useState<boolean>(false);
   const [hostStatus, setHostStatus] = React.useState<boolean>(false);
   const [hostname, setHostname] = React.useState<string>("");
   const [clientName, setClientName ] = React.useState<string>("");
+  const [playerName, setPlayerName] = React.useState<string>("");
 
   const [gameInfos, setGameInfos] = useState<GameStartInfos>({ hostStatus: false, clientName: "", gameLaunched: false });
   const [gameParameters, setGameParameters] = useState<GameParameters>();
@@ -85,6 +86,9 @@ export function Pong() {
 
   // Ecoute parle le socket
   useEffect(() => {
+    socket.on("Connected", (data: any) => {
+      setIsConnected(true);
+    })
     // socket.on( "gameStartInfos", (data: GameStartInfos) => {
     //   setGameInfos([gameInfos, data]);
     //   // setHostStatus(data.hostStatus);
@@ -104,6 +108,7 @@ export function Pong() {
       handleCountdown();
     });
 
+    // les 2 cotes devraient toujours ecouter et emettre, a revoir.
     setHostStatus(gameInfos.hostStatus); 
     if (hostStatus) {
       socket.emit("gameParameters", {
@@ -148,6 +153,7 @@ export function Pong() {
    };
 
     return () => {
+      socket.off("Connected");
       socket.off("gameStartInfos");
       socket.off("gameParameters");
       socket.off("playerJoined");
@@ -155,6 +161,11 @@ export function Pong() {
   }, [socket, gameInfos, gameParameters]);
 
 //------------------ GAME MODES ------------------------
+
+  useEffect(() => {
+    fetchUsersData(setPlayerName);
+  }, [isConnected]);
+
   const handleClassicModeIA = (): void => {
     console.log('🏓   classic 1 vs IA');
     setGameLaunched(true);
@@ -167,6 +178,7 @@ export function Pong() {
 
   const handlePowerupModeIA = (): void => {
     console.log('🏓   powerup 1 vs IA');
+    // fetchUsersData(setPlayerName);
     setGameLaunched(true);
     setCameraMode("orthographic");
     setPowerupVisible(true);
@@ -178,7 +190,7 @@ export function Pong() {
 
   const handleClassicModeMulti = (): void => {
     console.log('🏓   classic 1 vs 1');
-    socket.emit('waitingForPlayer', { gameMode: 3 });
+    socket.emit('waitingForPlayerGM3', { playerName });
     setWaitingForPlayer(true);
     setGameLaunched(true);
     setCameraMode("orthographic");
@@ -189,7 +201,7 @@ export function Pong() {
 
   const handlePowerupModeMulti = (): void => {
     console.log('🏓   powerup 1 vs multi');
-    socket.emit('waitingForPlayer', { gameMode: 4 });
+    socket.emit('waitingForPlayerGM4', { playerName });
     setWaitingForPlayer(true);
     setGameLaunched(true);
     setCameraMode("orthographic");
@@ -200,15 +212,13 @@ export function Pong() {
   };
 
 //------------------ USER NAME - LEFT ------------------------
-  // const [username, setUsername] = React.useState(null);
     
-  useEffect(() => {
     const jwt_token = Cookies.get("jwt_token");
   
     // Create a new CancelToken
     const source = axios.CancelToken.source();
   
-    async function fetchUsersData() {
+    async function fetchUsersData( setPlayerName: Function ) {
       try {
         const response = await axios.get("http://localhost:3001/users/me", {
           headers: {
@@ -216,32 +226,30 @@ export function Pong() {
           },
           cancelToken: source.token, // Pass cancel token to axios
         });
-        if (gameMode === 1 || gameMode === 2) {
-            setHostname(response.data.username);
-            setClientName("Computer");
-        } else {
-          if (hostStatus === true) {
-            setHostname(response.data.username);
-            setClientName(gameInfos.clientName);
-          } else {
-            setHostname(gameInfos.clientName);
-            setClientName(response.data.username);
-          }
-        }
+        setPlayerName(response.data.username);
+        console.log('🏓   playerName: ', response.data.username);
+        
       } catch (error) {
         if (axios.isCancel(error)) {
           console.log("Request cancelled");
         }
       }
     }
+
+    // if (gameMode === 1 || gameMode === 2) {
+        //     setHostname(response.data.username);
+        //     setClientName("Computer");
+        // } else {
+        //   if (hostStatus === true) {
+        //     setHostname(response.data.username);
+        //     setClientName(gameInfos.clientName);
+        //   } else {
+        //     setHostname(gameInfos.clientName);
+        //     setClientName(response.data.username);
+        //   }
+        // }
   
-    fetchUsersData();
-  
-    // Cleanup function
-    return () => {
-      source.cancel("Operation canceled by the user.");
-    };
-  }, [gameMode, hostStatus]);
+    
 
 //------------------ GAME VARIABLES ------------------------
   // ratio pour garder les meme proportions lors d'un resizing de la page

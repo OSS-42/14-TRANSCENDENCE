@@ -25,37 +25,16 @@ export class PongGateway {
       if (token) {
         try {
           const decoded = verify(token, this.config.get("JWT_SECRET"));
-          console.log("🏓   voici lidentite du socket")
-          console.log("🏓   ", decoded)
+          console.log("🏓   voici lidentite du socket");
+          console.log("🏓   ", decoded);
           this.connectedUsers.set( Number(decoded.sub), client.id);
 
-          console.log("🏓   Connected Users:", this.connectedUsers)
+          console.log("🏓   Connected Users:", this.connectedUsers);
 
-          // Check if two clients are connected
-          // if (this.connectedUsers.size === 2) {
-          //   console.log('🏓   ⚡ 2 clients !! ⚡');
-          //   // Choose a host logic : first client in map
-          //   const [hostUserId, hostSocketId] = Array.from(this.connectedUsers.entries())[0];
-          //   const [clientUserId, clientSocketId] = Array.from(this.connectedUsers.entries())[1];
-            
-            // // Emit gameStartInfos to host
-            // this.server.to(hostSocketId).emit("gameStartInfos", {
-            //   hostStatus: true,
-            //   clientName: clientUserId.toString(),
-            //   gameLaunched: false,
-            // });
-
-            // // Emit gameStartInfos to client
-            // this.server.to(clientSocketId).emit("gameStartInfos", {
-            //   hostStatus: false,
-            //   clientName: hostUserId.toString(),
-            //   gameLaunched: false,
-            // });
-
-          // }
           const connectedUserIds = Array.from(this.connectedUsers.keys());
-          // console.log('🏓    ConnextedUsers.keys: ', this.connectedUsers.keys());
-          this.server.emit("🏓    updateConnectedUsers", connectedUserIds)
+          this.server.emit("updateConnectedUsers", connectedUserIds);
+          this.server.emit("Connected");
+
         } catch (error) {
           console.log("🏓   Error:", error.message);
           client.disconnect();
@@ -83,8 +62,54 @@ export class PongGateway {
     }
   }
 
-  @SubscribeMessage('waitingForPlayer')
-  handleWaitingForPlayer(client: Socket, payload: any) {
+  @SubscribeMessage('waitingForPlayerGM3')
+  handleWaitingForPlayerGM3(client: Socket, payload: any) {
+    this.matchmaking.push(client);
+  
+    console.log('🏓   player1 username: ', payload.playerName);
+    if (this.matchmaking.length == 2) {
+      console.log('🏓   ⚡ 2 clients !! ⚡');
+      const gameId = uuid();
+      
+      // Choose a host logic : first client in map
+      // const [hostUserId, hostSocketId] = Array.from(this.connectedUsers.entries())[0];
+      // const [clientUserId, clientSocketId] = Array.from(this.connectedUsers.entries())[1];
+      
+      const player1 = this.matchmaking.shift();
+      const player2 = this.matchmaking.shift();
+      console.log('🏓   player1: ', player1.id);
+      console.log('🏓   player1 username: ', payload.playerName);
+      console.log('🏓   player2: ', player2.id);
+      console.log('🏓   player2 username: ', payload.playerName);
+  
+      player1.join(gameId);
+      player2.join(gameId);
+
+       // Emit gameStartInfos to host
+      // this.server.to(player1).emit("gameStartInfos", {
+      //   hostStatus: true,
+      //   // clientName: clientUserId.toString(),
+      //   gameLaunched: false,
+      //   gameId: gameId,
+      // });
+
+      // Emit gameStartInfos to client
+      // this.server.to(player2).emit("gameStartInfos", {
+      //   hostStatus: false,
+      //   // clientName: hostUserId.toString(),
+      //   gameLaunched: false,
+      //   gameId: gameId,
+      // });
+
+      // Emit an event to both clients to indicate that the match is ready to start
+      player1.emit('playerJoined', { gameId: gameId, hostStatus: true });
+      player2.emit('playerJoined', { gameId: gameId, hostStatus: false });
+      console.log("🏓   partie creee: ", gameId);
+    }
+  }
+
+  @SubscribeMessage('waitingForPlayerGM4')
+  handleWaitingForPlayerGM4(client: Socket, payload: any) {
     this.matchmaking.push(client);
   
     if (this.matchmaking.length == 2) {
@@ -98,9 +123,9 @@ export class PongGateway {
       const player1 = this.matchmaking.shift();
       const player2 = this.matchmaking.shift();
       console.log('🏓   player1: ', player1.id);
-      // console.log('🏓   player1 username: ', this.pongService.getUsernameFromUserId(this.connectedUsers.keys(player1.id)));
+      console.log('🏓   player1 username: ', payload.playerName);
       console.log('🏓   player2: ', player2.id);
-      // console.log('🏓   player2 username: ', this.pongService.getUsernameFromUserId(1));
+      console.log('🏓   player2 username: ', payload.playerName);
   
       player1.join(gameId);
       player2.join(gameId);
