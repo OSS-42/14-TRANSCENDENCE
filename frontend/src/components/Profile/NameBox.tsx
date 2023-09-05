@@ -2,6 +2,7 @@ import { Alert, Box } from "@mui/material";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { useState } from "react";
+import { isUserExist } from "../../api/requests";
 
 export function NameBox(props) {
   const [isEditing, setIsEditing] = useState(false);
@@ -29,6 +30,13 @@ export function NameBox(props) {
 
   async function handleBlur() {
     if (editedName !== props.user) {
+	  const Name = await isUserExist(editedName);
+	  if (Name === true)
+	  {
+		alert("Username is already used. Please choose another one!");
+		  setEditedName(props.user);
+		  return;
+	  }
       if (editedName.trim() === "" || isUserNameValid(editedName) === false) {
         alert(
           `Username cannot be empty, please enter a name respecting the following conditions:\n
