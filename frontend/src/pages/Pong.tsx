@@ -190,7 +190,7 @@ export function Pong() {
   const handleClassicModeMulti = (): void => {
     console.log('🏓   classic 1 vs 1');
     const newGM = 3;
-    socket.emit('waitingForPlayerGM3', { playerName });
+    socket.emit('waitingForPlayerGM3', { playerName, newGM });
     setWaitingForPlayer(true);
     setGameLaunched(true);
     setCameraMode("orthographic");

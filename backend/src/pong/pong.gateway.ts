@@ -11,6 +11,7 @@ export class PongGateway {
 
   private connectedUsers: Map<number, string> = new Map();
   private playerNames: Map<string, string> = new Map();
+  private gameMode: Map<string, number> = new Map();
   private matchmaking: Socket[] = [];
   
   @WebSocketServer()
@@ -69,9 +70,11 @@ export class PongGateway {
   handleWaitingForPlayerGM3(client: Socket, payload: any) {
     this.matchmaking.push(client);
     this.playerNames.set(client.id, payload.playerName);
+    this.gameMode.set(client.id, payload.newGM);
+
+    
   
-    console.log('🏓   player1 username: ', payload.playerName);
-    if (this.matchmaking.length == 2) {
+  if (this.matchmaking.length == 2) {
       console.log('🏓   ⚡ 2 clients !! ⚡');
       const gameId = uuid();
       
