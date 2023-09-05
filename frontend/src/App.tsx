@@ -13,7 +13,7 @@ const socket = socketIO("http://localhost:3001/chat", {
   query: {
     token: Cookies.get("jwt_token"),
   },
-});
+})
 
 function App() {
   return (
