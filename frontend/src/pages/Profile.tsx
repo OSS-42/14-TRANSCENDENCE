@@ -41,7 +41,6 @@ export function Profile() {
         <NameBox user={user?.username} setUser={setUser} />
         <AvatarBox user={user} />
         <ChangeAvatarBox setUser={setUser} />
-        <ChangeNameBox />
       </LeftSideGrid>
       <RightSideGrid>
         <AboutBox />
