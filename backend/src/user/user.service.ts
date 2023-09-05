@@ -20,6 +20,18 @@ export class UserService {
         return user?.id || null; 
     }
 
+  //   async getUsernameFromUserId(userId: number): Promise<string | null> {
+  //     const user = await this.prisma.utilisateur.findFirst({
+  //       where: {
+  //         userId
+  //       },
+  //       select: {
+  //         username: true
+  //       }
+  //     });
+  //     return user?.username || null; 
+  // }
+
     async getUserInfo(username: string): Promise<Utilisateur> {
         const user = await this.prisma.utilisateur.findFirst({
             where: {
