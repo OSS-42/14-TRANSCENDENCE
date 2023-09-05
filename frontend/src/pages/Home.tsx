@@ -26,7 +26,6 @@ export function Home() {
             <p>Your avatar link: {user.avatar}</p>
             <p>Your token: {user.jwtToken}</p>
             <p>Your id: {user.id}</p>
-            {/* Display other user details as needed */}
           </>
         ) : (
           <p>Loading user data...</p>

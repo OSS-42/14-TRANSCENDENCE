@@ -1,4 +1,5 @@
 import Cookies from "js-cookie";
+import socketIO from "socket.io-client";
 import {
   useContext,
   useState,
@@ -29,20 +30,22 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
     window.location.href = "http://localhost:3001/auth/42";
   };
 
-  useEffect(() => {
-    let jwt_token = Cookies.get("jwt_token") || "";
-    async function fetchUserData() {
-      try {
-        const response = await axios.get("http://localhost:3001/users/me", {
-          headers: {
-            Authorization: "Bearer " + jwt_token,
-          },
-        });
-        setUser({ ...response.data, jwtToken: jwt_token });
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      }
+  let jwt_token = Cookies.get("jwt_token") || "";
+
+  async function fetchUserData() {
+    try {
+      const response = await axios.get("http://localhost:3001/users/me", {
+        headers: {
+          Authorization: "Bearer " + jwt_token,
+        },
+      });
+      console.log(response.data);
+      setUser({ ...response.data, jwtToken: jwt_token });
+    } catch (error) {
+      console.error("Error fetching user data:", error);
     }
+  }
+  useEffect(() => {
     fetchUserData();
   }, []);
 
