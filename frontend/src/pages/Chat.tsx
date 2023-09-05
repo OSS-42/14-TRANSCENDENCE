@@ -33,10 +33,10 @@ export function Chat({ socket }: ChatProps) {
   });
 
   //QUand la variable messages change, on l<enregistre dans le localStorage
-  // useEffect(() => {
-  //   const messagesJSON = JSON.stringify(messages);
-  //   localStorage.setItem("chatMessages", messagesJSON);
-  // }, [messages]);
+  useEffect(() => {
+    const messagesJSON = JSON.stringify(messages);
+    localStorage.setItem("chatMessages", messagesJSON);
+  }, [messages]);
 
   useEffect(() => {
     const handleMessageResponse = (data: ChatMessage) => {
