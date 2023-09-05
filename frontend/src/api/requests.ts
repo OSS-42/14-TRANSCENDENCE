@@ -120,3 +120,17 @@ export async function destroyFriend(friendId :number): Promise<void> {
       throw error; 
     }
   }
+
+  export async function isUserExist(username:string): Promise<boolean> {
+        try {
+        const response =  await axios.get(`${BASE_URL}/users/userExist/${username}`, {
+            headers: {
+              Authorization: `Bearer ${jwt_token}`,
+            },
+          });
+          return response.data;
+        } catch (error) {
+          console.error('Error adding checking for username', error);
+          throw error; 
+        }
+}

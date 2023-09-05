@@ -212,6 +212,16 @@ export class UserService {
             return blockedUserIds 
           }
       }
-    }
+    
+      async checkIfUserExist(username: string): Promise<boolean> {
+        const user = await this.prisma.utilisateur.findFirst({
+          where: {
+            username: username,
+          },
+        });
+      
+        return !!user;
+      }
+}
   
 

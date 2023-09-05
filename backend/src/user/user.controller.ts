@@ -89,4 +89,10 @@ export class UserController {
 
         return this.userService.destroyFriend(user.id, friendId);
     }
+    @ApiParam({ name: 'username', type: String })
+    @Get('userExist/:username')
+    checkIfUserExist(@Param('username') username:string){
+
+        return this.userService.checkIfUserExist(username);
+    }
 }
