@@ -33,10 +33,18 @@ export function Welcome() {
           Welcome to Pong!
         </Typography>
       </Grid>
-      <Grid xs display="flex" justifyContent="center" alignItems="center">
+      <Grid 
+        xs
+        display="flex"
+        justifyContent="center"
+        alignItems="center">
         <img src="welcome.gif" alt="" />
       </Grid>
-      <Grid xs display="flex" justifyContent="center" alignItems="center">
+      <Grid 
+        xs
+        display="flex" 
+        justifyContent="center" 
+        alignItems="center">
         <Link to="http://localhost:3001/auth/42">
           <Button variant="contained" >LOG IN</Button>
         </Link>
