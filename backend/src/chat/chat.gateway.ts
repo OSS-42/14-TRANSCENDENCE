@@ -234,9 +234,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
           text: payload.message,
           notice : notice
         })
-      else
-      // ---------------------- J'ENVOIS UNE NOTICE A L'UTILSATEUR DE LA COMMANDE (ERREUR)  ----------------------
+        else
+        // ---------------------- J'ENVOIS UNE NOTICE A L'UTILSATEUR DE LA COMMANDE (ERREUR)  ----------------------
         client.emit(event, {
+        userId: userId,
         id: payload.id,
         name: payload.username,
         channel: undefined,
