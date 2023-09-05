@@ -230,7 +230,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
           id: payload.id,
           userId: userId,
           name: payload.username,
-          channel: undefined,
+          channel: null,
           text: payload.message,
           notice : notice
         })
@@ -240,7 +240,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         userId: userId,
         id: payload.id,
         name: payload.username,
-        channel: undefined,
+        channel: null,
         text: payload.message,
         notice : notice
         })
