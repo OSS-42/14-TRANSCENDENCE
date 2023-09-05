@@ -844,7 +844,7 @@ export function Pong() {
               <img src="../src/assets/animated.gif" alt="Starting Screen" />
               <div className="game-buttons" style={{
                 position: 'absolute',
-                top: '70%',
+                top: '75%',
 
                 left: '50%',
                 transform: 'translate(-50%, -50%)'
