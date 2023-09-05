@@ -50,6 +50,7 @@ export class PongGateway {
       }
     }
   }
+  
 //IL faudra faire un bouton pour join queue
   @SubscribeMessage('joinQueue')
   handleJoinQueue(client: Socket) {

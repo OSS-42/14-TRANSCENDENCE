@@ -1,12 +1,15 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ChatRoom } from '@prisma/client';
 import * as argon2 from 'argon2';
+import * as moment from 'moment';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { createMessageDto } from './dto/create.message.dto';
 
 @Injectable()
 export class ChatService {
     constructor(private prisma : PrismaService){}
+    private roomMutedUsers: Map<number, Map<number, moment.Moment>> = new Map();
+   
 
     createMessage(createMessageDto : createMessageDto){
         console.log(createMessageDto)
@@ -68,6 +71,7 @@ export class ChatService {
                 members: { connect: [{ id: ownerId }] }
               },
           });
+          
          return room 
     } 
 
@@ -83,6 +87,7 @@ export class ChatService {
             members: { connect: [{ id: memberId }] } 
             }
         });
+        
         return room;
     }
 
@@ -115,8 +120,23 @@ export class ChatService {
         });
         return room
       }
-    
-
+     
+      async getRoomNamesUserIsMemberOf(userId: number): Promise<string[]> {
+        const user = await this.prisma.utilisateur.findUnique({
+          where: {
+            id: userId,
+          },
+          include: {
+            memberChatRooms: true,
+          },
+        });
+      
+        if (!user) {
+          throw new NotFoundException(`User with ID ${userId} not found`);
+        }
+      
+        return user.memberChatRooms.map((room) => room.name);
+      }
 
     async addModerator(roomId: number, memberId: number):Promise<ChatRoom> {
         const room = await this.prisma.chatRoom.update({
@@ -246,17 +266,7 @@ export class ChatService {
       return user;
     }
 
-    //retourne un user
-    async isOwner(username:string, roomName:string) {
-      const user = await this.prisma.utilisateur.findFirst({
-        where: {
-          username:username,
-        },
-      });
-      return user;
-    }
-    
-    
+      
     //retourne vrai ou faux
     async isUserOwnerOfChatRoom(userId:number, chatRoomId:number): Promise<boolean> {
       const user = await this.prisma.utilisateur.findFirst({
@@ -327,17 +337,81 @@ export class ChatService {
     // Cette fonction retourne une liste de tous les utilisateurs bloqués par cet Utilisteur(UserId).  C'est une liste de IDs. JE PEUX TE RETOURNE UNE LISTE DE USERNAMES aussi si c'est plus simple pour toi.
     //Avec cette fonction, tu pourras savoir si le client doit afficher les messages; s'il y a une correspondance entre le id de l'expéditeur avec un des ids présent dans blockedUsers
     
+    
     async getBlockedUserIds(userId: number): Promise<number[]> {
-      const blockedUsers = await this.prisma.utilisateur.findUnique({
+      const userWithBlockedUsers = await this.prisma.utilisateur.findUnique({
         where: { id: userId },
-        // Sélectionne seulement les IDs des utilisateurs bannis
-        include: { blockedUsers: { select: { blockedUserId: true } } }, 
-      }).blockedUsers();
-  
-      return blockedUsers.map(blockedUser => blockedUser.blockedUserId);
+        include: {
+          blockedUsers: {
+            select: { blockedUserId: true }
+          }
+        }
+      });
+
+      return userWithBlockedUsers.blockedUsers.map(blockedUser => blockedUser.blockedUserId);
     }
 
+  
+      
+ 
+  async changeInvite(roomId:number, invite : boolean){
+    const room = await this.prisma.chatRoom.update({
+      where: {id : roomId},
+          data:{
+                invite : invite
+          }
+
+    })
+    return room
+  }
+  async removePassword(roomId :number){
+    const room = await this.prisma.chatRoom.update({
+      where: {
+        id: roomId
+      },
+        data: {
+          hash: null
+        }
+    });
+    return room
+  }
+ 
+
+  //mute un utilisateur dans un room pour X time. (En minutes)
+  //SI le serveur restart on perd on perd les donnes.
+  // J'utilise une map de map pour garder en memoire qui est mute.
+  //Il 
+  muteUserInRoom(mutedUserId: number, roomId: number, time :number): void {
+    const muteEndTime = moment().add(time, 'minutes');
+    if (!this.roomMutedUsers.has(roomId)) {
+      this.roomMutedUsers.set(roomId, new Map());
+    }
+    this.roomMutedUsers.get(roomId).set(mutedUserId, muteEndTime);
+
+    setTimeout(() => {
+      this.unmuteUserInRoom(mutedUserId, roomId);
+    }, time * 60 * 1000);
+  }
+
+  isUserMutedInRoom(mutedUserId: number, roomId: number): boolean {
+    if (this.roomMutedUsers.has(roomId)) {
+      const mutedUsersMap = this.roomMutedUsers.get(roomId);
+      const muteEndTime = mutedUsersMap.get(mutedUserId);
+      if (muteEndTime && moment().isBefore(muteEndTime)) {
+        return true;
+      }
+    }
+    return false;
+  }
+  //j'ai mis la methode private acr seuleement la classe service l'utilise
+  private unmuteUserInRoom(mutedUserId: number, roomId: number): void {
+    if (this.roomMutedUsers.has(roomId)) {
+      const mutedUsersMap = this.roomMutedUsers.get(roomId);
+      mutedUsersMap.delete(mutedUserId);
+    }
+  }
 
   }
   
-  
+
+ 

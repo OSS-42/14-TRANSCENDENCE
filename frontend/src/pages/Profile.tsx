@@ -8,7 +8,6 @@ import { ContainerGrid } from "../components/Profile/ContainerGrid";
 import { RightSideGrid } from "../components/Profile/RightSideGrid";
 import { LeftSideGrid } from "../components/Profile/LeftSideGrid";
 import { ChangeAvatarBox } from "../components/Profile/ChangeAvatarBox";
-import { ChangeNameBox } from "../components/Profile/ChangeNameBox";
 import { AboutBox } from "../components/Profile/AboutBox";
 import { MatchHistoryBox } from "../components/Profile/MatchHistoryBox";
 import { FriendsListBox } from "../components/Profile/FriendsListBox";

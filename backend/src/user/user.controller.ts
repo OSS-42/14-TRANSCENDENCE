@@ -1,27 +1,9 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Post,
-  Req,
-  UploadedFile,
-  UseGuards,
-  UseInterceptors,
-} from "@nestjs/common";
-import { AuthGuard } from "@nestjs/passport";
-import { FileInterceptor } from "@nestjs/platform-express";
-import {
-  ApiBearerAuth,
-  ApiBody,
-  ApiHeader,
-  ApiOperation,
-  ApiParam,
-  ApiTags,
-} from "@nestjs/swagger";
-import { Utilisateur } from "@prisma/client";
-import { GetUser } from "src/auth/decorator";
-import { JwtGuard } from "src/auth/guard";
+import { Body, Controller, Get, Param, Post, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiBearerAuth, ApiBody, ApiHeader, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import { Utilisateur } from '@prisma/client';
+import { GetUser } from 'src/auth/decorator';
+import { JwtGuard } from 'src/auth/guard';
 import { UserService } from "./user.service";
 import * as fs from "fs";
 
@@ -68,9 +50,24 @@ export class UserController {
     return this.userService.addFriend(user, username);
   }
 
-  @Post("updateAvatar")
-  @UseInterceptors(FileInterceptor("avatar"))
-  updateAvatar(@GetUser() user: Utilisateur, @UploadedFile() avatarFile: any) {
+    @ApiParam({ name: 'id', type: Number })
+    @Get('plus/:id')
+    getUserInfoPlus(@Param('username') id:number){
+
+        return this.userService.getUserInfoPlus(id);
+    }
+
+    @ApiParam({ name: 'username', type: String })
+    @Get('addFriend/:username')
+    addFriend(@Param('username') username:string, @GetUser() user: Utilisateur){
+
+        return this.userService.addFriend(user, username);
+    }
+
+    @Post('updateAvatar')
+    @UseInterceptors(FileInterceptor('avatar')) 
+    updateAvatar(@GetUser() user: Utilisateur, @UploadedFile() avatarFile: any){
+        
     const originalname = avatarFile.originalname;
     const mimetype = avatarFile.mimetype;
     const buffer = avatarFile.buffer;
@@ -83,6 +80,7 @@ export class UserController {
     return this.userService.updateAvatar(user, Url);
   }
 
+<<<<<<< HEAD
   @ApiParam({ name: "id", type: Number })
   @Get("matchHistory/:id")
   getUserMatchHistory(@Param("id") id: number) {
@@ -96,4 +94,26 @@ export class UserController {
     console.log("New Username:", updateData);
     return this.userService.updateUsername(user, updateData.newUsername);
   }
+=======
+        return this.userService.getUserMatchHistory(id);
+    }
+    @ApiParam({ name: 'id', type: Number })
+    @Get('blockedUsers/:id')
+    getBlockedUsers(@Param('id') id:number){
+
+        return this.userService. blockedUserIds(id);
+    }
+    @ApiParam({ name: 'friendId', type: Number })
+    @Get('removeFriend/:friendId')
+    revomeFriend(@Param('friendId') friendId:number, @GetUser() user: Utilisateur){
+
+        return this.userService.destroyFriend(user.id, friendId);
+    }
+    @ApiParam({ name: 'username', type: String })
+    @Get('userExist/:username')
+    checkIfUserExist(@Param('username') username:string){
+
+        return this.userService.checkIfUserExist(username);
+    }
+>>>>>>> main
 }

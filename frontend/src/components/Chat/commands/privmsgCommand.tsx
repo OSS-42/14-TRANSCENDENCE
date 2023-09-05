@@ -17,7 +17,6 @@ const privmsgCommand = ({data, socket, user}: PrivmsgCommandProps) => {
     const [command, target, ...messageArray] = data.split(" ");
     const message = messageArray.join(" ");
     if (command === "#PRIVMSG" && target && message) {
-      console.log("coucou")
       socket.emit("privmsg", {
         username: user?.username,
         id: `${socket.id}${Math.random()}`,

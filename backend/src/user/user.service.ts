@@ -91,10 +91,34 @@ export class UserService {
     if (existingFriendship) {
       throw new ConflictException("Friendship already exists");
     }
+<<<<<<< HEAD
     if (user.username === username) {
       throw new ConflictException(
         "You can't yourself as friend, sorry you are ALONE"
       );
+=======
+    async destroyFriend(userId: number, friendUserId: number): Promise<void> {
+       friendUserId = Number(friendUserId) 
+      const friendship = await this.prisma.friendship.findFirst({
+        where: {
+          AND: [
+            { userId: userId },
+            { friendId: friendUserId },
+          ],
+        },
+      });
+  
+      if (!friendship) {
+        throw new NotFoundException('Friendship not found');
+      }
+  
+      // Supprimer l'amitié
+      await this.prisma.friendship.delete({
+        where: {
+          id: friendship.id,
+        },
+      });
+>>>>>>> main
     }
     // Créer l'enregistrement d'amitié
     console.log(user.username + " and " + username + " are now friends");
@@ -112,9 +136,32 @@ export class UserService {
       },
     });
 
+<<<<<<< HEAD
     if (!friendship) {
       throw new NotFoundException("Friendship not found");
+=======
+    async updateAvatar(user : Utilisateur, image: any) {
+        // const userToChange = await this.prisma.utilisateur.findUnique({
+        //     where: {
+        //     id: user.id, 
+        //     },
+        // });
+        // if (!userToChange) {
+        //     throw new Error("Utilisateur non trouvé"); 
+        // }
+      
+        const updatedUser= await this.prisma.utilisateur.update({
+            where: {
+                id: user.id
+            },
+            data:{
+                avatar:image,
+            }
+        });
+      return updatedUser 
+>>>>>>> main
     }
+  
 
     // Supprimer l'amitié
     await this.prisma.friendship.delete({
@@ -155,61 +202,61 @@ export class UserService {
             winner: true,
             loser: true,
           },
-        },
-        matchHistoryLoser: {
-          include: {
-            winner: true,
-            loser: true,
+        });
+    
+        const matchesWon = user.matchHistoryWinner.map(match => ({
+          date: match.createdAt,
+          winner: match.winner.username,
+          loser: match.loser.username,
+        }));
+    
+        const matchesLost = user.matchHistoryLoser.map(match => ({
+          date: match.createdAt,
+          winner: match.winner.username,
+          loser: match.loser.username,
+        }));
+        console.log ("voici lhistorique", matchesLost, matchesWon)
+        return {
+          matchesWon,
+          matchesLost,
+        };
+      }
+      
+
+      async  blockedUserIds(userId:number) {
+          const id = Number(userId)
+          const blockedUsers = await this.prisma.utilisateur.findUnique({
+            
+            where: { id: id },
+            select: {
+              blockedUsers: {
+                select: {
+                  blockedUserId: true,
+                },
+              },
+            },
+          });
+      
+          if (!blockedUsers) {
+            return [];
+          }
+          else {
+            const blockedUserIds = blockedUsers.blockedUsers.map((ban) => ban.blockedUserId);
+            return blockedUserIds 
+          }
+      }
+    
+      async checkIfUserExist(username: string): Promise<boolean> {
+        const user = await this.prisma.utilisateur.findFirst({
+          where: {
+            username: username,
           },
-        },
-      },
-    });
-
-    const matchesWon = user.matchHistoryWinner.map((match) => ({
-      date: match.createdAt,
-      winner: match.winner.username,
-      loser: match.loser.username,
-    }));
-
-    const matchesLost = user.matchHistoryLoser.map((match) => ({
-      date: match.createdAt,
-      winner: match.winner.username,
-      loser: match.loser.username,
-    }));
-    console.log("voici lhistorique", matchesLost, matchesWon);
-    return {
-      matchesWon,
-      matchesLost,
-    };
-  }
-
-  async updateUsername(user: Utilisateur, username: string) {
-    // const userToChange = await this.prisma.utilisateur.findUnique({
-    //     where: {
-    //     id: user.id,
-    //     },
-    // });
-    // if (!userToChange) {
-    //     throw new Error("Utilisateur non trouvé");
-    // }
-
-    const updatedUser = await this.prisma.utilisateur.update({
-      where: {
-        id: user.id,
-      },
-      data: {
-        username: username,
-      },
-    });
-    return updatedUser;
-  }
+        });
+      
+        return !!user;
+      }
 }
-
-// //Je pense que je nai pas besoin de update les users, cela se fait automatiquement???
-// await this.prisma.utilisateur.update({
-//     where: { id: user.id },
-//     data: { friends: { connect: { id: friendship.id } } }
-// });
+  
 
 // await this.prisma.utilisateur.update({
 //     where: { id: friend.id },
