@@ -107,6 +107,7 @@ export class UserService {
         });
     }
     async destroyFriend(userId: number, friendUserId: number): Promise<void> {
+       friendUserId = Number(friendUserId) 
       const friendship = await this.prisma.friendship.findFirst({
         where: {
           AND: [
@@ -146,8 +147,9 @@ export class UserService {
                 avatar:image,
             }
         });
-        return updatedUser
+      return updatedUser 
     }
+  
 
     async getUserMatchHistory(id: number) {
         id = Number(id)
@@ -186,18 +188,40 @@ export class UserService {
           matchesLost,
         };
       }
-    }
+      
 
+      async  blockedUserIds(userId:number) {
+          const id = Number(userId)
+          const blockedUsers = await this.prisma.utilisateur.findUnique({
+            
+            where: { id: id },
+            select: {
+              blockedUsers: {
+                select: {
+                  blockedUserId: true,
+                },
+              },
+            },
+          });
+      
+          if (!blockedUsers) {
+            return [];
+          }
+          else {
+            const blockedUserIds = blockedUsers.blockedUsers.map((ban) => ban.blockedUserId);
+            return blockedUserIds 
+          }
+      }
     
-        // //Je pense que je nai pas besoin de update les users, cela se fait automatiquement???
-        // await this.prisma.utilisateur.update({
-        //     where: { id: user.id },
-        //     data: { friends: { connect: { id: friendship.id } } }
-        // });
-    
-        // await this.prisma.utilisateur.update({
-        //     where: { id: friend.id },
-        //     data: { friendOf: { connect: { id: friendship.id } } }
-        // });
-
+      async checkIfUserExist(username: string): Promise<boolean> {
+        const user = await this.prisma.utilisateur.findFirst({
+          where: {
+            username: username,
+          },
+        });
+      
+        return !!user;
+      }
+}
+  
 
