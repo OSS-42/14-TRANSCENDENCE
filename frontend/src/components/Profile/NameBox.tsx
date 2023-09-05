@@ -29,7 +29,8 @@ export function NameBox(props) {
   }
 
   function UserNameLength(username: string) {
-    if (username.length < 3 || username.length > 12) return false;
+    if (username.length < 3 || username.length > 12) 
+		return false;
     return true;
   }
 
