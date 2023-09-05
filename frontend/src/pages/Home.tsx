@@ -1,5 +1,5 @@
 import { Box } from "@mui/material";
-import { useAuth } from "../utils/AuthContext";
+import { useAuth } from "../contexts/AuthContext";
 
 // Idea: Welcome page containing a little summary of the project,
 // and any extra thing we'd like to add.

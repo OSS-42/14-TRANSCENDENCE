@@ -1,22 +1,13 @@
 import { Box, Button, Typography } from "@mui/material";
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../utils/AuthContext";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 
 // To do: Connect the button to a function
 // that deals with the 42 API for authentification
 // and proceeds with the redirection to our homepage
 
 export function Welcome() {
-  const navigate = useNavigate();
-  const { user, loginUser } = useAuth();
-
-  useEffect(() => {
-    if (user) {
-      navigate("/");
-    }
-  }, []);
-
   return (
     <Box
       component="div"
@@ -41,12 +32,9 @@ export function Welcome() {
       <Box component="div" sx={{ marginBottom: "5rem" }}>
         <img src="welcome.gif" alt="" />
       </Box>
-      <Button
-        variant="contained"
-        onClick={loginUser}
-      >
-        LOG IN
-      </Button>
+      <Link to="http://localhost:3001/auth/42">
+        <Button variant="contained">LOG IN</Button>
+      </Link>
     </Box>
   );
 }
