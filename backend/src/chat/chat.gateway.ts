@@ -257,11 +257,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         event = 'messageResponse'
       if (event === 'messageResponse')
         this.server.to(socketId).emit(event, {
-        id: payload.id,
-        name: payload.username,
-        channel: undefined,
-        text: payload.message,
-        notice : notice
+          id: payload.id,
+          userId: userId,
+          name: payload.username,
+          channel: null,
+          text: payload.message,
+          notice : notice
         })
         else
         // ---------------------- J'ENVOIS UNE NOTICE A L'UTILSATEUR DE LA COMMANDE (ERREUR)  ----------------------
@@ -269,7 +270,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         userId: userId,
         id: payload.id,
         name: payload.username,
-        channel: undefined,
+        channel: null,
         text: payload.message,
         notice : notice
         })
