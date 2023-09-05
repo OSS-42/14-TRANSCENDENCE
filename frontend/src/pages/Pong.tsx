@@ -89,7 +89,7 @@ export function Pong() {
   // Ecoute parle le socket
   useEffect(() => {
     socket.on("Connected", (data: any) => {
-      console.log('🏓   ', data.helloWorld);
+      console.log('🏓   ', data);
       setIsConnected(true);
     })
 
@@ -201,7 +201,7 @@ export function Pong() {
   const handlePowerupModeMulti = (): void => {
     console.log('🏓   powerup 1 vs multi');
     const newGM = 4;
-    socket.emit('waitingForPlayerGM4', { playerName });
+    socket.emit('waitingForPlayerGM4', { playerName, newGM });
     setWaitingForPlayer(true);
     setGameLaunched(true);
     setCameraMode("orthographic");
