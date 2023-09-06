@@ -19,7 +19,7 @@ import { Response } from "express";
 import { AuthDto } from "./dto/auth.dto";
 
 //Définition des diffrentes routes du module Auth
-@Controller("auth")
+@Controller("api/auth")
 @ApiTags("auth")
 export class AuthControler {
   constructor(private authService: AuthService) {}
@@ -28,7 +28,6 @@ export class AuthControler {
     "https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-c14a5526d27b133c2732f5848ea8a11d76ae8e503f6e495cd3016623aa0c382e&redirect_uri=http%3A%2F%2Flocalhost%3A3001%2Fauth&response_type=code"
   )
   async login() {}
-  //@Redirect("http://localhost:3000")
   @ApiExcludeEndpoint()
   @Get()
   async getCode42(@Query("code") code: string, @Res() res: Response) {
