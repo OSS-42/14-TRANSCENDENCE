@@ -57,21 +57,21 @@ const ChatFooter = ({ socket }: ChatFooterProps) => {
   const handleSendMessage = (e: React.FormEvent) => { //e pour evenement, c'est une convention
     e.preventDefault();
     if (data.trim()) {
-      if (data.startsWith("#JOIN"))
+      if (data.startsWith("/JOIN"))
         joinCommand({ data, socket, user });
-      else if (data.startsWith("#PRIVMSG"))
+      else if (data.startsWith("/PRIVMSG"))
         privmsgCommand({ data, socket, user });
-      else if (data.startsWith("#INVITE"))
+      else if (data.startsWith("/INVITE"))
         inviteCommand({ data, socket, user });
-      else if (data.startsWith("#MUTE"))
+      else if (data.startsWith("/MUTE"))
         muteCommand({ data, socket, user });
-      else if (data.startsWith("#ADMIN"))
+      else if (data.startsWith("/ADMIN"))
         adminCommand({ data, socket, user });
-      else if (data.startsWith("#KICK"))
+      else if (data.startsWith("/KICK"))
         kickCommand({ data, socket, user });
-      else if (data.startsWith("#BAN"))
+      else if (data.startsWith("/BAN"))
         banCommand({ data, socket, user });
-      else if (data.startsWith("#BLOCK"))
+      else if (data.startsWith("/BLOCK"))
         blockCommand({ data, socket, user });
       // else if (data.startsWith("#MODE"))
       //   modeCommand({ data, socket, user });

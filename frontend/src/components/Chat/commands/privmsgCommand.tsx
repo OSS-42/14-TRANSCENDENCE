@@ -16,7 +16,7 @@ interface PrivmsgCommandProps {
 const privmsgCommand = ({data, socket, user}: PrivmsgCommandProps) => {
     const [command, target, ...messageArray] = data.split(" ");
     const message = messageArray.join(" ");
-    if (command === "#PRIVMSG" && target && message) {
+    if (command === "/PRIVMSG" && target && message) {
       socket.emit("privmsg", {
         username: user?.username,
         id: `${socket.id}${Math.random()}`,
@@ -31,7 +31,7 @@ export default privmsgCommand
 /* Verifier les parametres : 
 
 - Si le deuxieme parametre ne commence pas par ":" alors c'est un message privé
-  vers un utilisateur (#PRIVMSG mbertin bla bla bla)
+  vers un utilisateur (/PRIVMSG mbertin bla bla bla)
 - Si le deuxieme parametre commence par ":" alors c'est un message vers un canal
 
 */

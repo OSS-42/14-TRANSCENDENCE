@@ -15,7 +15,7 @@ interface AdminCommandProps {
 
   const adminCommand = ({data, socket, user}: AdminCommandProps) => {
     const [command, target, ...channel] = data.split(" ");
-    if (command === "#ADMIN" && target !== undefined && channel !== undefined) {
+    if (command === "/ADMIN" && target !== undefined && channel !== undefined) {
       // Format du message pour le serveur
       socket.emit("admin", {
         username: user?.username,
