@@ -15,7 +15,7 @@ interface KickCommandProps {
 
   const kickCommand = ({data, socket, user}: KickCommandProps) => {
     const [command, target, ...channel] = data.split(" ");
-    if (command === "/KICK" && target !== undefined && channel !== undefined) {
+    if (command === "/KICK") {
       // Format du message pour le serveur
       socket.emit("kickUser", {
         username: user?.username,

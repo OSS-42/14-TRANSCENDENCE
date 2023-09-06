@@ -15,7 +15,7 @@ interface InviteCommandProps {
 
   const inviteCommand = ({data, socket, user}: InviteCommandProps) => {
     const [command, target, ...channel] = data.split(" ");
-    if (command === "/INVITE" && target !== undefined && channel !== undefined) {
+    if (command === "/INVITE") {
       // Format du message pour le serveur
       socket.emit("inviteRoom", {
         username: user?.username,
