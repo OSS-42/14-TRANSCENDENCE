@@ -5,6 +5,7 @@ import { User } from "../models/User";
 import axios from "axios";
 
 export function Profile() {
+	
   const [user, setUser] = useState<User>();
   const [selectedAvatar, setSelectedAvatar] = useState(null); // This set the selectedAvatar variable to null.
 

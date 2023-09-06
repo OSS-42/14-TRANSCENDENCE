@@ -6,8 +6,8 @@ import {
   useEffect,
 } from "react";
 import axios from "axios";
-import { getCookies } from "../utils";
 import { User } from "../models/User";
+import { bearerAuthorization } from "../utils";
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -26,14 +26,13 @@ export const AuthProvider = ({
   token,
 }: AuthProviderProps): JSX.Element => {
   const [user, setUser] = useState<User>({} as User);
-  console.log(user);
 
   useEffect(() => {
     async function fetchUserData() {
       try {
         const response = await axios.get("http://localhost:3001/users/me", {
           headers: {
-            Authorization: "Bearer " + token,
+            Authorization: bearerAuthorization(token),
           },
         });
         setUser({ ...response.data, jwtToken: token });
