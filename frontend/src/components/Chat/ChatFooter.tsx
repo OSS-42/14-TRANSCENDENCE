@@ -35,24 +35,27 @@ const ChatFooter = ({ socket }: ChatFooterProps) => {
   });
 
   useEffect(() => {
-    async function fetchUsersData() {
-      const jwt_token = Cookies.get("jwt_token");
-      try {
-        const response = await axios.get("http://localhost:3001/users/me", {
-          headers: {
-            Authorization: "Bearer " + jwt_token,
-          },
-        });
-        // setUsersList(response.data)
-        setUser(response.data);
-        console.log(user);
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      }
-    }
-
-    fetchUsersData();
+	async function fetchUsersData() {
+	  const jwt_token = Cookies.get("jwt_token");
+	  try {
+		const response = await axios.get("http://localhost:3001/users/me", {
+		  headers: {
+			Authorization: "Bearer " + jwt_token,
+		  },
+		});
+		setUser(response.data);
+	  } catch (error) {
+		console.error("Error fetching user data:", error);
+	  }
+	}
+  
+	fetchUsersData();
   }, []);
+  
+  // Use another useEffect to log the updated user state
+  useEffect(() => {
+	console.log(user);
+  }, [user]);
 
   const handleSendMessage = (e: React.FormEvent) => { //e pour evenement, c'est une convention
     e.preventDefault();
