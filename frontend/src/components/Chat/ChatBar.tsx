@@ -4,7 +4,7 @@ import { Socket } from "socket.io-client";
 import { addFriendApi, fetchFriendsList } from "../../api/requests";
 import { User } from "../../models/User";
 
-const UserId = 2; //On va remplacer cette ligne quand on aura le context
+const UserId = 1; //On va remplacer cette ligne quand on aura le context
 type ChatFriendsProps = {
   socket: Socket;
   setUsersList: React.Dispatch<React.SetStateAction<User[]>>;
