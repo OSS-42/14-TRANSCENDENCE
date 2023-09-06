@@ -155,6 +155,14 @@ export class PongGateway {
     const gameId = payload.gameId; // Make sure to send gameId from client
     this.server.to(gameId).emit('weHaveAWinner', payload);
     console.log('🏓   is the host the winner: ', payload.isHostWinner);
+    //player1 = host (toujours)
+    // if (payload.isHostWinner) {
+    //   //dans la DB winner = hostName
+    //   //loser = clientName
+    // } else {
+    //   // winner = clientName
+    //   // loser = hostName
+    // }
   }
 
 

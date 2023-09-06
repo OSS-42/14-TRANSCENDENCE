@@ -1,7 +1,7 @@
 import { Box as MaterialBox } from '@mui/material'
 
 // import { useHistory } from 'react-router-dom';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Sphere, Box } from "@react-three/drei";
 import "./Pong.css"
@@ -321,13 +321,21 @@ export function Pong() {
 //------------------ GAME GENERAL BEHAVIOR ------------------------
   // Timer to restart
   const [countdown, setCountdown] = React.useState<number | null>(null);
+  const isGameOver = useRef(false);
 
   const handleCountdown = (): void => {
+    console.log('🏓   handlecountdown() called', isGameOver);
+    if (isGameOver.current) {
+      return;
+    }
 
     let currentCountdown = 3;
     setCountdown(currentCountdown);
+
     const timer = setInterval(() => {
-      if (winner) {
+      console.log('🏓   gameOver?', isGameOver);
+      if (isGameOver.current) {
+        console.log('🏓   je passe par la');
         clearInterval(timer);
         return;
       }
@@ -365,25 +373,43 @@ export function Pong() {
     };
   }, [gameMode]);
 
+  // Scoreboard
   // en cas de victoire, reinitialisation dedu jeu, identification du gagnant et perdant pour envoi a la DB et retour a la page de selection des modes
   React.useEffect(() => {
-    if (winner) {
-      setGameLaunched(false);
-      gameResult();
-      window.location.href = '/game';
-      // history.push('/game')
+    if (rightScore === 3 || leftScore === 3) {
+      isGameOver.current = true;
+      console.log("🏓   Quelqu'un a gagne");
+      setIsPaused(true);
+      if (rightScore === 3) {
+        if (gameMode === 1 || gameMode === 3) {
+          setWinner("Computers wins!");
+          setIsHostWinner(false);
+        } else {
+          setWinner(clientName + " wins !");
+          setIsHostWinner(false);
+        }
+      } else {
+        setWinner(hostname + " wins!");
+        setIsHostWinner(true);
+      }
     }
-  }, [winner, leftScore, rightScore] );
+  }, [leftScore, rightScore] );
 
-  const gameResult = (): void => {
-    if (leftScore === 3) {
-      setIsHostWinner(true);
-    } else {
-      setIsHostWinner(false);
+  React.useEffect(() => {
+    if (winner) {
+      setTimeout(() => {
+        console.log('🏓   B ', winner);
+        console.log('🏓   B ', gameId);
+        setGameLaunched(false);
+        if (gameId) {
+          console.log('🏓   envoi du resultat')
+          socket.emit("weHaveAWinner", { gameId, isHostWinner });
+        }
+        window.location.href = '/game';
+        // history.push('/game')
+      }, 5000);
     }
-    socket.emit("weHaveAWinner", { gameId, isHostWinner });
-    
-  };
+  }, [ winner ]);
 
 //------------------ GAME RESIZING MANAGEMENT ------------------------
     // methode pour conserver les ratio sur l'evenement resize
@@ -491,20 +517,21 @@ export function Pong() {
   });
 
   // Scoreboard
-  React.useEffect(() => {
-    if (rightScore === 3 || leftScore === 3) {
-      setIsPaused(true);
-      if (rightScore === 3) {
-        if (gameMode === 1 || gameMode === 3) {
-          setWinner("Computers wins!");
-        } else {
-          setWinner(clientName + " wins !");
-        }
-      } else {
-        setWinner(hostname + " wins!");
-      }
-    }
-  }, [leftScore, rightScore]);
+  // React.useEffect(() => {
+  //   if (rightScore === 3 || leftScore === 3) {
+  //     console.log("🏓   Quelqu'un a gagne");
+  //     setIsPaused(true);
+  //     if (rightScore === 3) {
+  //       if (gameMode === 1 || gameMode === 3) {
+  //         setWinner("Computers wins!");
+  //       } else {
+  //         setWinner(clientName + " wins !");
+  //       }
+  //     } else {
+  //       setWinner(hostname + " wins!");
+  //     }
+  //   }
+  // }, [leftScore, rightScore]);
 
   const baseCanvasWidth: number = 800;
   const baseFontSize: number = 60;
@@ -568,6 +595,7 @@ export function Pong() {
     setBallVelocity: React.Dispatch<React.SetStateAction<Position>>;
     speedFactor: number;
   }
+
   const Ball: React.FC<BallProps> = ({ ballPosition, setBallPosition, ballVelocity, setBallVelocity }) => {
 
     useFrame(() => {
@@ -650,8 +678,7 @@ export function Pong() {
         newX = 0;
         newZ = 0;
         setBallVelocity({ x: INITIAL_BALL_SPEED, z: INITIAL_BALL_SPEED });
-        
-        // Optional: Pause the game if needed
+
         setIsPaused(true);
         handleCountdown();
       }
