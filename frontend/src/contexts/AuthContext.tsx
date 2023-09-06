@@ -26,13 +26,14 @@ export const AuthProvider = ({
   token,
 }: AuthProviderProps): JSX.Element => {
   const [user, setUser] = useState<User>({} as User);
+  console.log(user);
 
   useEffect(() => {
     async function fetchUserData() {
       try {
         const response = await axios.get("http://localhost:3001/users/me", {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: "Bearer " + token,
           },
         });
         setUser({ ...response.data, jwtToken: token });
@@ -41,7 +42,7 @@ export const AuthProvider = ({
       }
     }
 
-    // fetchUserData();
+    fetchUserData();
   }, [user]);
 
   const logoutUser = () => {};
@@ -50,7 +51,7 @@ export const AuthProvider = ({
     user,
     logoutUser,
   };
-
+  console.log(user);
   return (
     <AuthContext.Provider value={contextData}>{children}</AuthContext.Provider>
   );

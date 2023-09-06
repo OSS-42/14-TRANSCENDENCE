@@ -19,13 +19,15 @@ const Header = () => {
     <div className="header">
       <header>
         <div className="links-wrapper">
-          {user?.username ? (
+          {user ? (
             <nav>
               <NavLink to="chat">Chat</NavLink>
               <NavLink to="game">Pong</NavLink>
               <NavLink to="profile">Profile</NavLink>
             </nav>
-          ) : null}
+          ) : (
+            <></>
+          )}
         </div>
       </header>
     </div>
