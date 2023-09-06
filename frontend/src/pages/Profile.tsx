@@ -12,8 +12,11 @@ import { AboutBox } from "../components/Profile/AboutBox";
 import { MatchHistoryBox } from "../components/Profile/MatchHistoryBox";
 import { FriendsListBox } from "../components/Profile/FriendsListBox";
 import { MatchHistory } from "../components/Profile/MatchHistory";
+import { useAuth } from "../contexts/AuthContext";
 
 export function Profile() {
+	
+	// const { user } = useAuth();
 	
   const [user, setUser] = useState<User>();
 
