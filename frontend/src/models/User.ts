@@ -1,4 +1,5 @@
 interface User {
+  jwtToken: string;
   id: number;
   createdAt: string;
   updatedAt: string;
