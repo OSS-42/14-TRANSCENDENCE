@@ -14,6 +14,7 @@ import { FriendsListBox } from "../components/Profile/FriendsListBox";
 import { MatchHistory } from "../components/Profile/MatchHistory";
 
 export function Profile() {
+	
   const [user, setUser] = useState<User>();
 
   useEffect(() => {

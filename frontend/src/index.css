@@ -1,10 +1,10 @@
 * {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  font-family: 'Montserrat', sans-serif;
+  font-family: "Montserrat", sans-serif;
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
+  box-sizing: border-box;	
 }
 
 :root {
@@ -14,6 +14,10 @@
   --canary: #ffe600ff;
   --bittersweet: #ff5552ff;
   --silver: #adadadff;
+	height: 100vh;
+	width: 100vw;
+	margin: 0;
+  padding: 0;
 }
 
 body {
@@ -31,10 +35,9 @@ body {
 }
 
 .notice {
-  color: #FFD700; /* Jaune doré */
+  color: #ffd700; /* Jaune doré */
   font-weight: bold; /* Texte gras */
 }
-
 
 header nav {
   display: flex;
