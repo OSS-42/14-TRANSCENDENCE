@@ -1,4 +1,4 @@
-import {  Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
 import axios from "axios";
 import { JwtService } from "@nestjs/jwt";
@@ -8,115 +8,104 @@ import { ConfigService } from "@nestjs/config";
 // const clientID= "u-s4t2ud-c14a5526d27b133c2732f5848ea8a11d76ae8e503f6e495cd3016623aa0c382e"
 
 @Injectable({})
-export class AuthService{
-    constructor(
-        private prisma: PrismaService, 
-        private jwt: JwtService,
-        private config: ConfigService,
-    ){}
-   
-    async signToken(userId: number, email:string ): Promise<{access_token:string}> {
-        const payload ={
-            sub: userId,
-            email,
-        };
-        const secret = this.config.get('JWT_SECRET');
-       
-        const token = await this.jwt.signAsync(payload, 
-            {
-                expiresIn: '600m',
-                secret: secret,
-            });
-            return {
-                access_token: token,
-            };
+export class AuthService {
+  constructor(
+    private prisma: PrismaService,
+    private jwt: JwtService,
+    private config: ConfigService
+  ) {}
 
+  async signToken(
+    userId: number,
+    email: string
+  ): Promise<{ access_token: string }> {
+    const payload = {
+      sub: userId,
+      email,
+    };
+    const secret = this.config.get("JWT_SECRET");
+
+    const token = await this.jwt.signAsync(payload, {
+      expiresIn: "600m",
+      secret: secret,
+    });
+    return {
+      access_token: token,
+    };
+  }
+
+  //Fonction qui contacte lapi--42 afin de recuperer lacces token, elle cree  un nouvelle utilisateur egalement
+  async getCode42(code: string) {
+    let token: string;
+    let UserToken: Promise<{ access_token: string }>;
+    const clientID = this.config.get("CLIENT_ID");
+    const clientSecret = this.config.get("CLIENT_SECRET");
+
+    try {
+      const response = await axios.post(
+        `https://api.intra.42.fr/oauth/token`,
+        `client_id=${clientID}&client_secret=${clientSecret}&code=${code}&redirect_uri=http://localhost:3001/auth&grant_type=authorization_code`,
+        {
+          headers: {
+            Accept: "application/json",
+          },
+        }
+      );
+      console.log("Réponse POST:", response.data);
+      token = response.data.access_token;
+    } catch (error) {
+      console.error("Erreur POST:", error);
     }
-    
+    try {
+      const response = await fetch("https://api.intra.42.fr/v2/me", {
+        headers: {
+          Authorization: "Bearer " + token,
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
 
-    //Fonction qui contacte lapi--42 afin de recuperer lacces token, elle cree  un nouvelle utilisateur egalement  
-    async getCode42(code: string){
-        let  token :string;
-        let UserToken :Promise<{access_token:string}>
-        const clientID = this.config.get('CLIENT_ID');
-        const clientSecret = this.config.get('CLIENT_SECRET');
-    
-        try {
-            const response = await axios.post(
-                `https://api.intra.42.fr/oauth/token`,
-                `client_id=${clientID}&client_secret=${clientSecret}&code=${code}&redirect_uri=http://localhost:3001/auth&grant_type=authorization_code`, 
-                {
-                    headers: {
-                        Accept: 'application/json' 
-                    }
-                }
-            );     
-            console.log('Réponse POST:', response.data);
-            token =response.data.access_token
-        } catch (error) {
-            console.error('Erreur POST:', error);
+        //Extraction des donnees vers la base de donnees--> login  Si l'utilisateur n'existe pas.  On va utiliser le email a place
+        const username = data.login;
+        const email = data.email;
+        const avatar = data.image.versions.small;
+        let user = await this.prisma.utilisateur.findUnique({
+          where: { email },
+        });
+        if (!user) {
+          user = await this.prisma.utilisateur.create({
+            data: {
+              username: username,
+              email: email,
+              avatar: avatar,
+            },
+          });
+        } else {
+          console.log("Utilisateur existe deja");
         }
-        try {
-            const response = await fetch("https://api.intra.42.fr/v2/me", {
-                headers: {
-                    'Authorization': 'Bearer ' + token
-                }
-            });
-            if (response.ok) {
-                const data = await response.json();
-
-                //Extraction des donnees vers la base de donnees--> login  Si l'utilisateur n'existe pas.  On va utiliser le email a place
-                const username = data.login
-                const email = data.email
-                const avatar = data.image.versions.small
-                let user = await this.prisma.utilisateur.findUnique({
-                    where: { email },
-                });
-                if (!user){
-                    user = await this.prisma.utilisateur.create({
-                        data: {
-                          username: username,
-                          email: email,
-                          avatar: avatar,
-                        },
-                    });
-                }
-                                 
-                else{
-                    console.log("Utilisateur existe deja");
-                }
-                UserToken = this.signToken(user.id, user.email)
-                const test = await this.prisma.utilisateur.update({
-                    where: { email: "mbertin@student.42quebec.com"},
-                    data: {
-                        username: "Mangor_la_grosse", 
-                        avatar: "https://images.squarespace-cdn.com/content/v1/55125ce9e4b01593abaf0537/1547716294492-SRU557RUPLCI8P62PNOO/fat34.png?format=1500w", 
-                    },
-                }); 
-            } 
-            else {
-                console.error('Erreur lors de la requête:', response.status, response.statusText);
-            }
-        } 
-        catch (error) {
-            console.error('Erreur lors de la récupération des données:', error);
-        }
-    
-       
-        return UserToken;
+        UserToken = this.signToken(user.id, user.email);
+        // const test = await this.prisma.utilisateur.update({
+        //   where: { email: "mbertin@student.42quebec.com" },
+        //   data: {
+        //     username: "Mangor_la_grosse",
+        //     avatar:
+        //       "https://images.squarespace-cdn.com/content/v1/55125ce9e4b01593abaf0537/1547716294492-SRU557RUPLCI8P62PNOO/fat34.png?format=1500w",
+        //   },
+        // });
+      } else {
+        console.error(
+          "Erreur lors de la requête:",
+          response.status,
+          response.statusText
+        );
+      }
+    } catch (error) {
+      console.error("Erreur lors de la récupération des données:", error);
     }
 
-    
+    return UserToken;
+  }
 }
-
-
-
-
-
-
-
-
-
 
 // async signin (dto: AuthDto){
 //         //find the user
@@ -149,10 +138,9 @@ export class AuthService{
 //             }
 //         });
 
-        
 //         //enleve le password
 //         delete user.hash;
-    
+
 //         return user;
 //     }
 //     catch(error){

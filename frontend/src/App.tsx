@@ -1,38 +1,48 @@
-import {
-  Route,
-  createBrowserRouter,
-  createRoutesFromElements,
-  RouterProvider,
-} from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import PrivateRoutes from "./utils/PrivateRoutes";
+import { AuthProvider } from "./contexts/AuthContext";
+import socketIO from "socket.io-client";
 
-import RootLayout from './layouts/RootLayout'
-import socketIO from 'socket.io-client'
-import Cookies from 'js-cookie'
-import { Chat, Home, Login, Pong, Profile, Welcome, Error } from './pages'
-
-//On va surement faire un autre  websocket pour le pong. 
-const socket = socketIO('http://localhost:3001/chat', {
-  query: {
-    token: Cookies.get('jwt_token')
-  },
-})
-
-const router = createBrowserRouter(
-  createRoutesFromElements(
-    <Route path="/" element={<RootLayout />}>
-      <Route path="/" element={<Home />} />
-      <Route path="login"element={<Login />} />
-      <Route path="chat" element={<Chat socket={socket} />} />
-      <Route path="game" element={<Pong socket={socket} />} />
-      <Route path="profile" element={<Profile />} />
-      <Route path="welcome" element={<Welcome />} />
-      <Route path="*" element={<Error />} />
-    </Route>
-  )
-)
+import { getCookies } from "./utils";
+import Header from "./components/Header";
+import { Chat, Home, Pong, Profile, Welcome, Error } from "./pages";
+//On va surement faire un autre  websocket pour le pong.
 
 function App() {
-  return <RouterProvider router={router} />
-}
+  const jwtToken = getCookies("jwt_token");
 
+  const socket = socketIO("http://localhost:3001/chat", {
+    query: {
+      token: jwtToken,
+    },
+  });
+
+  if (!jwtToken) {
+    return (
+      <>
+        <Router>
+          <Welcome />
+        </Router>
+      </>
+    );
+  } else {
+    return (
+      <Router>
+        <AuthProvider token={jwtToken}>
+          <Header />
+          <Routes>
+            <Route element={<PrivateRoutes />}>
+              <Route path="/" element={<Home />} />
+              <Route path="/welcome" element={<Home />} />
+              <Route path="/chat" element={<Chat socket={socket} />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/game" element={<Pong />} />
+              <Route path="*" element={<Error />} />
+            </Route>
+          </Routes>
+        </AuthProvider>
+      </Router>
+    );
+  }
+}
 export default App;
