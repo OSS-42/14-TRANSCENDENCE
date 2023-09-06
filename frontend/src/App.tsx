@@ -18,6 +18,8 @@ function App() {
   });
 
   if (!jwtToken) {
+    console.log("No jwtToken!");
+
     return (
       <>
         <Router>
@@ -25,7 +27,8 @@ function App() {
         </Router>
       </>
     );
-  } else
+  } else {
+    console.log(`Loading with jwtToken: ${jwtToken}`);
     return (
       <Router>
         <AuthProvider token={jwtToken}>
@@ -43,5 +46,6 @@ function App() {
         </AuthProvider>
       </Router>
     );
+  }
 }
 export default App;

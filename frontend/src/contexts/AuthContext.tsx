@@ -6,7 +6,7 @@ import {
   useEffect,
 } from "react";
 import axios from "axios";
-
+import { getCookies } from "../utils";
 import { User } from "../models/User";
 
 interface AuthProviderProps {
@@ -27,7 +27,6 @@ export const AuthProvider = ({
 }: AuthProviderProps): JSX.Element => {
   const [user, setUser] = useState<User>({} as User);
 
-
   useEffect(() => {
     async function fetchUserData() {
       try {
@@ -42,8 +41,8 @@ export const AuthProvider = ({
       }
     }
 
-   fetchUserData();
-  }, []);
+    // fetchUserData();
+  }, [user]);
 
   const logoutUser = () => {};
 
