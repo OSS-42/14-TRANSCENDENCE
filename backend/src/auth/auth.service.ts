@@ -84,14 +84,14 @@ export class AuthService {
           console.log("Utilisateur existe deja");
         }
         UserToken = this.signToken(user.id, user.email);
-        const test = await this.prisma.utilisateur.update({
-          where: { email: "mbertin@student.42quebec.com" },
-          data: {
-            username: "Mangor_la_grosse",
-            avatar:
-              "https://images.squarespace-cdn.com/content/v1/55125ce9e4b01593abaf0537/1547716294492-SRU557RUPLCI8P62PNOO/fat34.png?format=1500w",
-          },
-        });
+        // const test = await this.prisma.utilisateur.update({
+        //   where: { email: "mbertin@student.42quebec.com" },
+        //   data: {
+        //     username: "Mangor_la_grosse",
+        //     avatar:
+        //       "https://images.squarespace-cdn.com/content/v1/55125ce9e4b01593abaf0537/1547716294492-SRU557RUPLCI8P62PNOO/fat34.png?format=1500w",
+        //   },
+        // });
       } else {
         console.error(
           "Erreur lors de la requête:",

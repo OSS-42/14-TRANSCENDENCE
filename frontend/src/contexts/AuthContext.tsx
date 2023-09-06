@@ -42,7 +42,7 @@ export const AuthProvider = ({
     }
 
     fetchUserData();
-  }, [user]);
+  }, []);
 
   const logoutUser = () => {};
 
