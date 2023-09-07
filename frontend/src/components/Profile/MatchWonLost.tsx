@@ -1,8 +1,12 @@
 import { Box, Typography } from "@mui/material";
 
+interface Match {
+  matchesWon: Array<{ date: string; winner: string; loser: string }>;
+  matchesLost: Array<{ date: string; winner: string; loser: string }>;
+}
+
 interface MatchWonLostProps {
-  nbrMatchesWon: number;
-  nbrMatchesLost: number;
+  match: Match;
 }
 
 interface MatchBoxProps {
@@ -49,7 +53,9 @@ function MatchBox({ title, matchCount }: MatchBoxProps) {
   );
 }
 
-export function MatchWonLost({nbrMatchesWon, nbrMatchesLost}: MatchWonLostProps) {
+export function MatchWonLost({ match }: MatchWonLostProps) {
+  const nbrMatchesWon = match.matchesWon.length;
+  const nbrMatchesLost = match.matchesLost.length;
 
   return (
     <div>

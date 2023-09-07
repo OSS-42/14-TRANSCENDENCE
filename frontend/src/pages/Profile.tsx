@@ -70,7 +70,7 @@ export function Profile() {
         <ChangeAvatarButton setUser={setUser} />
       </LeftSideGrid>
       <RightSideGrid>
-        <MatchWonLost nbrMatchesWon={match.matchesWon.length} nbrMatchesLost={match.matchesLost.length}/>
+        <MatchWonLost match={match}/>
         <MatchHistory match={match} />
         <FriendsList />
       </RightSideGrid>
