@@ -16,11 +16,11 @@ export function CenteredText(props) {
   );
 }
 
-interface AboutBoxProps {
+interface MatchWonLostProps {
   user: User;
 }
 
-export function AboutBox({ user }: AboutBoxProps) {
+export function MatchWonLost({ user }: MatchWonLostProps) {
   const [match, setMatch] = useState({
     matchesWon: [],
     matchesLost: [],
@@ -48,10 +48,6 @@ export function AboutBox({ user }: AboutBoxProps) {
       fetchMatch();
     }
   }, [user]); // No need to put match as a dependency here, because user class has a gamewon gamelost variable that will change
-
-//   if (!match.matchesWon || match.matchesWon.length === 0) {
-//     return <p>No match data available.</p>;
-//   }
 
   return (
     <div>
