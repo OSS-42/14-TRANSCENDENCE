@@ -14,6 +14,10 @@ import { MatchHistory } from "../components/Profile/MatchHistory";
 
 export function Profile() {
   const [user, setUser] = useState<User>();
+  const [match, setMatch] = useState({
+    matchesWon: [],
+    matchesLost: [],
+  });
 
   useEffect(() => {
     async function fetchUsersData() {
@@ -33,6 +37,29 @@ export function Profile() {
     fetchUsersData();
   }, []);
 
+  useEffect(() => {
+    if (user) {
+      async function fetchMatch() {
+        const jwt_token = Cookies.get("jwt_token");
+        try {
+          const response = await axios.get(
+            `http://localhost:3001/users/matchHistory/${user.id}`,
+            {
+              headers: {
+                Authorization: "Bearer " + jwt_token,
+              },
+            }
+          );
+          console.log("Match stats inside AboutBox fetching successful");
+          setMatch(response.data);
+        } catch (error) {
+          console.error("Match stats fetching:", error);
+        }
+      }
+      fetchMatch();
+    }
+  }, [user]); // No need to put match as a dependency here, because user class has a gamewon gamelost variable that will change
+
   return (
     <ContainerGrid>
       <LeftSideGrid>
@@ -41,7 +68,7 @@ export function Profile() {
         <ChangeAvatarButton setUser={setUser} />
       </LeftSideGrid>
       <RightSideGrid>
-        <MatchWonLost user={user}/>
+        <MatchWonLost match={match}/>
         <MatchHistory user={user} />
         <FriendsList />
       </RightSideGrid>
