@@ -36,7 +36,6 @@ const ChatBody = ({ messages }: ChatBodyProps) => {
       <div className="message__container">
         {messages.map((message) => (
           <div className="message__chats" key={message.id}>
-            <p>
               {message.notice ? (
                 // Si message.notice n'est pas nulle, affichez son contenu.
                 <span className="notice">{message.notice}</span>
@@ -51,7 +50,6 @@ const ChatBody = ({ messages }: ChatBodyProps) => {
                   </>
                 )
               )}
-            </p>
           </div>
         ))}
       </div>
