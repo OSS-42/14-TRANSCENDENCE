@@ -9,17 +9,13 @@ import {
   Typography,
   Box,
 } from "@mui/material";
-
-interface Match {
-	matchesWon: Array<{ date: string; winner: string; loser: string }>;
-  	matchesLost: Array<{ date: string; winner: string; loser: string }>;
-}
+import { Matches } from "../../models/User";
 
 interface MatchHistoryProps {
-  match: Match;
+  match: Matches;
 }
 
-export function MatchHistory({match}: MatchHistoryProps) {
+export function MatchHistory({ match }: MatchHistoryProps) {
   if (!match.matchesWon || !match.matchesLost) {
     return <p>No match data available.</p>;
   }
@@ -56,7 +52,7 @@ export function MatchHistory({match}: MatchHistoryProps) {
                 <TableCell>{matches.winner}</TableCell>
                 <TableCell>{matches.loser}</TableCell>
               </TableRow>
-            ))}	
+            ))}
             {match.matchesLost.map((matches, index) => (
               <TableRow key={index}>
                 <TableCell>{matches.date}</TableCell>

@@ -1,12 +1,8 @@
 import { Box, Typography } from "@mui/material";
-
-interface Match {
-  matchesWon: Array<{ date: string; winner: string; loser: string }>;
-  matchesLost: Array<{ date: string; winner: string; loser: string }>;
-}
+import { Matches } from "../../models/User";
 
 interface MatchWonLostProps {
-  match: Match;
+  match: Matches;
 }
 
 interface MatchBoxProps {

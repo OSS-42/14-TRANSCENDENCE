@@ -51,4 +51,9 @@ interface Match {
   loserId: number;
 }
 
-export type { User, Friendship, ChatRoom, Match };
+interface Matches {
+  matchesWon: Array<{ date: string; winner: string; loser: string }>;
+  matchesLost: Array<{ date: string; winner: string; loser: string }>;
+}
+
+export type { User, Friendship, ChatRoom, Match, Matches };
