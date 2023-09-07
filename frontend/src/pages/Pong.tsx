@@ -54,7 +54,7 @@ type Connected = {
   helloWorld: string,
 }
 
-const socket = socketIO('http://localhost:3001/pongGame', {
+const socket = socketIO('/pongGame', {
   query: {
     token: Cookies.get('jwt_token')
   },

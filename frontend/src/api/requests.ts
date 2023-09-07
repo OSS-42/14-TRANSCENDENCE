@@ -2,7 +2,7 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 import { User } from '../models/User';
 
-const BASE_URL = 'http://localhost:3001';
+const BASE_URL = '/api';
 const jwt_token = Cookies.get('jwt_token');
 
 export async function fetchUserMe(): Promise<User | undefined> {

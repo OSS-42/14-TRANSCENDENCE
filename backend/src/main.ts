@@ -3,8 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
-import * as multer from 'multer';
-import * as cors from "cors";
+
 
 
 async function bootstrap() {
@@ -35,12 +34,12 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, config);
 
-  SwaggerModule.setup('/', app, document);
+  SwaggerModule.setup('/api', app, document);
   const configService = app.get(ConfigService);
-  app.enableCors({
-    origin: [configService.get('HOST_FORNTEND'), "https://api.intra.42.fr/"],
-    credentials: true,
-  });
+  // app.enableCors({
+  //   origin: [configService.get('HOST_FORNTEND'), "https://api.intra.42.fr/"],
+  //   credentials: true,
+  // });
 
 
   await app.listen(3001);
