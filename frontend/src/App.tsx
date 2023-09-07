@@ -11,7 +11,7 @@ import { Chat, Home, Pong, Profile, Welcome, Error } from "./pages";
 function App() {
   const jwtToken = getCookies("jwt_token");
 
-  const socket = socketIO("http://localhost:3001/chat", {
+  const socket = socketIO("/chat", {
     query: {
       token: jwtToken,
     },

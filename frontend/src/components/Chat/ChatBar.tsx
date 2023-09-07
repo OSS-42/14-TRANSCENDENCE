@@ -2,9 +2,10 @@ import { Button } from "@mui/material";
 import { Box } from "@mui/system";
 import { Socket } from "socket.io-client";
 import { addFriendApi, fetchFriendsList } from "../../api/requests";
+import { useAuth } from "../../contexts/AuthContext";
 import { User } from "../../models/User";
 
-const UserId = 1; //On va remplacer cette ligne quand on aura le context
+ //On va remplacer cette ligne quand on aura le context
 type ChatFriendsProps = {
   socket: Socket;
   setUsersList: React.Dispatch<React.SetStateAction<User[]>>;
@@ -22,6 +23,8 @@ function ChatBar({
   usersList,
   connectedUsers,
 }: ChatFriendsProps) {
+  const { user } = useAuth();
+  const meId = user?.id
   const addFriend = async (friendUsername: string) => {
     await addFriendApi(friendUsername);
     const updatedFriendsList = await fetchFriendsList();
@@ -71,7 +74,7 @@ function ChatBar({
                       flex: "1",
                     }}
                   >
-                    {user.id !== UserId &&
+                    {user.id !== meId &&
                       !friendsList.some((friend) => friend.id === user.id) && (
                         <Button
                           variant="contained"

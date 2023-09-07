@@ -66,7 +66,7 @@ export function NameBox(props) {
       const jwt_token = Cookies.get("jwt_token");
       try {
         const response = await axios.post(
-          "http://localhost:3001/users/updateUsername",
+          "/api/users/updateUsername",
           { newUsername: editedName },
           {
             headers: {

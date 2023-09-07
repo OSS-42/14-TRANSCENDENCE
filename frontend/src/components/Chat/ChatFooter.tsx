@@ -38,7 +38,7 @@ const ChatFooter = ({ socket }: ChatFooterProps) => {
 	async function fetchUsersData() {
 	  const jwt_token = Cookies.get("jwt_token");
 	  try {
-		const response = await axios.get("http://localhost:3001/users/me", {
+		const response = await axios.get("/api/users/me", {
 		  headers: {
 			Authorization: "Bearer " + jwt_token,
 		  },

@@ -17,17 +17,28 @@ import {
 import { AuthService } from "./auth.service";
 import { Response } from "express";
 import { AuthDto } from "./dto/auth.dto";
+import { ConfigService } from "@nestjs/config";
 
 //Définition des diffrentes routes du module Auth
 @Controller("api/auth")
 @ApiTags("auth")
 export class AuthControler {
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService,
+  private config: ConfigService) {}
   @Get("42")
-  @Redirect(
-    "https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-c14a5526d27b133c2732f5848ea8a11d76ae8e503f6e495cd3016623aa0c382e&redirect_uri=http%3A%2F%2Flocalhost%3A3001%2Fauth&response_type=code"
-  )
-  async login() {}
+  async login(@Res() res: Response) {
+    const uri = this.config.get<string>('URI');
+    if (uri) {
+      // Si 'URI' est défini dans la configuration, effectuez la redirection
+      return res.redirect(uri);
+    } else {
+      // Sinon, gérez l'absence de 'URI' comme vous le souhaitez
+      // Par exemple, affichez un message d'erreur ou redirigez ailleurs
+      return res.status(500).json({ message: 'URI not found in configuration' });
+    }
+  }
+
+
   @ApiExcludeEndpoint()
   @Get()
   async getCode42(@Query("code") code: string, @Res() res: Response) {
@@ -37,9 +48,7 @@ export class AuthControler {
     const access_token: string = token_object.access_token;
     res.cookie("jwt_token", access_token, { httpOnly: false, secure: false });
     console.log(token_object);
-
-    // Redirect to the desired URL
-    return res.redirect("http://localhost:3000/");
+    return res.redirect("http://10.11.1.7:8080");
   }
 }
 
