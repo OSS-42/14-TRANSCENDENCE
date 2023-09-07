@@ -16,8 +16,6 @@ services:
     volumes:
       - ./backend:/app/backend:delegated
       - /app/backend/node_modules
-      
-
     ports:
       - "3001:3001"
       - "5555:5555"
@@ -42,5 +40,14 @@ services:
       - .env
     restart: on-failure
 
+  nginx:
+    image: nginx:latest
+    volumes:
+      - ./trans.conf:/etc/nginx/conf.d/trans.conf
+    ports:
+      - "8080:8080"
+    restart: on-failure
+
 volumes:
   postgres_data:
+

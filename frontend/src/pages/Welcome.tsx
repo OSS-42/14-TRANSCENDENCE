@@ -1,8 +1,16 @@
 import { Box, Button, Typography } from "@mui/material";
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
 export function Welcome() {
+
+  const handleLoginClick = () => {
+ 
+    setTimeout(() => {
+      window.location.reload();
+    }, 500); 
+  };
+
 	const { login } = useAuth()
 
 
@@ -30,9 +38,12 @@ export function Welcome() {
       <Box component="div" sx={{ marginBottom: "5rem" }}>
         <img src="welcome.gif" alt="" />
       </Box>
-      <Link to="http://localhost:3001/auth/42">
-        <Button variant="contained" onClick={login}>LOG IN</Button>
-      </Link>
+      {/* Utilisez le gestionnaire d'événements onClick pour gérer le clic */}
+      <NavLink to="/api/auth/42">
+        <Button variant="contained" onClick={handleLoginClick}>
+          LOG IN
+        </Button>
+      </NavLink>
     </Box>
   );
 }

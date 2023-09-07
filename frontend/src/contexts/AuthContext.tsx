@@ -49,7 +49,7 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
     const jwtToken = getCookies("jwt_token");
     if (jwtToken && !isLogged) {
       try {
-        const response = await axios.get("http://localhost:3001/users/me", {
+        const response = await axios.get("/api/users/me", {
           headers: {
             Authorization: bearerAuthorization(jwtToken),
           },
