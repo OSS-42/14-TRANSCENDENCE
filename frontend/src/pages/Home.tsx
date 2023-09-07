@@ -17,11 +17,12 @@ export function Home() {
           margin: "10px",
           padding: "15px",
           height: "92.5vh",
+          overflowWrap: "anywhere",
+          overflow: "auto"
         }}
       >
         {user ? (
           <>
-            <p>Hi, {user.username}!</p>
             <p>Your email: {user.email}</p>
             <p>Your avatar link: {user.avatar}</p>
             <p>Your token: {user.jwtToken}</p>

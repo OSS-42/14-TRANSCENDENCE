@@ -15,7 +15,6 @@ import { MatchHistory } from "../components/Profile/MatchHistory";
 import { useAuth } from "../contexts/AuthContext";
 
 export function Profile() {
-	
   const [user, setUser] = useState<User>();
 
   useEffect(() => {

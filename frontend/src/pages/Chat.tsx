@@ -5,7 +5,6 @@ import ChatBody from "../components/Chat/ChatBody";
 import ChatFooter from "../components/Chat/ChatFooter";
 import { FriendsAndUsers } from "../components/Chat/FriendsAndUsers";
 
-
 // I'll refactor this, but the componenets placement would still be
 // where the simple texts are. As it is, I'm not yet confident the
 // layout is gonna be responsive to the components' size, etc.
@@ -26,10 +25,10 @@ type ChatProps = {
 
 export function Chat({ socket }: ChatProps) {
   //la valeur de base de setMessage est prise dans le localStorage
-  const [messages, setMessages] = useState<ChatMessage[]>(()=>{
-    const localValues= localStorage.getItem("chatMessages")
-    if(localValues ==null) return []
-    return JSON.parse(localValues)
+  const [messages, setMessages] = useState<ChatMessage[]>(() => {
+    const localValues = localStorage.getItem("chatMessages");
+    if (localValues == null) return [];
+    return JSON.parse(localValues);
   });
 
   //QUand la variable messages change, on l<enregistre dans le localStorage
@@ -40,80 +39,81 @@ export function Chat({ socket }: ChatProps) {
 
   useEffect(() => {
     const handleMessageResponse = (data: ChatMessage) => {
-      console.log(data)
-      setMessages(prevMessages => [...prevMessages, data]);
+      console.log(data);
+      setMessages((prevMessages) => [...prevMessages, data]);
     };
 
     const handleNotice = (data: ChatMessage) => {
-      setMessages(prevMessages => [...prevMessages, data]);
+      setMessages((prevMessages) => [...prevMessages, data]);
     };
 
-    socket.on('messageResponse', handleMessageResponse);
-    socket.on('notice', handleNotice);
+    socket.on("messageResponse", handleMessageResponse);
+    socket.on("notice", handleNotice);
 
     return () => {
-      socket.off('messageResponse', handleMessageResponse);
-      socket.off('notice', handleNotice);
+      socket.off("messageResponse", handleMessageResponse);
+      socket.off("notice", handleNotice);
     };
   }, [socket]);
 
   return (
     <Box
-    component = "div"  
-    sx={{
-        display: 'flex',
-        padding: '10px',
-        height: '92.5vh',
+      component="div"
+      sx={{
+        display: "flex",
+        padding: "10px",
+        height: "92.5vh",
       }}
     >
       <Box
-        component = "div"  
+        component="div"
         sx={{
-          display: 'grid',
-          gridTemplateRows: '11fr .5fr',
-          width: '70%',
-          padding: '2rem',
-          border: '1px solid black',
-          gap: '10px',
+          display: "grid",
+          gridTemplateRows: "11fr .5fr",
+          width: "70%",
+          padding: "2rem",
+          border: "1px solid black",
+          gap: "10px",
         }}
       >
         {/* Chat Box */}
         <Box
-          component = "div"  
+          component="div"
           sx={{
-            border: '1px solid black',
-            borderRadius: '4px',
-            padding: '1rem',
-            overflow: 'auto',
+            border: "1px solid black",
+            borderRadius: "4px",
+            padding: "1rem",
+            overflow: "auto",
+            wordWrap: "break-word",
           }}
         >
-          <ChatBody messages={messages} 
-           socket={socket} />
+          <ChatBody messages={messages} socket={socket} />
         </Box>
         <ChatFooter socket={socket} />
       </Box>
       {/* Lists Box */}
       <Box
-        component = "div"  
+        component="div"
         sx={{
-          display: 'grid',
-          gridTemplateRows: '8fr 4fr',
-          width: '30%',
-          padding: '2rem',
-          border: '1px solid black',
-          gap: '10px',
+          display: "grid",
+          gridTemplateRows: "8fr 4fr",
+          width: "30%",
+          padding: "2rem",
+          border: "1px solid black",
+          gap: "10px",
         }}
       >
         <Box
-          component = "div"  
+          component="div"
           sx={{
-            border: '1px solid black',
-            borderRadius: '4px',
-            padding: '1rem',
-            overflow: 'auto',
+            border: "1px solid black",
+            borderRadius: "4px",
+            padding: "1rem",
+            overflow: "auto",
           }}
         >
-          <FriendsAndUsers socket={socket} /> {/* Utilisez le composant combiné */}
+          <FriendsAndUsers socket={socket} />{" "}
+          {/* Utilisez le composant combiné */}
         </Box>
       </Box>
     </Box>
