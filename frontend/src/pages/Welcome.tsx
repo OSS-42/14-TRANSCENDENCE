@@ -3,16 +3,13 @@ import { NavLink } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
 export function Welcome() {
-
   const handleLoginClick = () => {
- 
     setTimeout(() => {
       window.location.reload();
-    }, 500); 
+    }, 500);
   };
 
-	const { login } = useAuth()
-
+  const { login } = useAuth();
 
   return (
     <Box
