@@ -1,6 +1,6 @@
 import { Box, Avatar } from "@mui/material";
 
-export function AvatarBox({user}) {
+export function AvatarImage({user}) {
   return (
       <Box
 	  	component="div"

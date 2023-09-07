@@ -4,7 +4,7 @@ import Cookies from "js-cookie";
 import { useState } from "react";
 import { isUserExist } from "../../api/requests";
 
-export function NameBox(props) {
+export function Name(props) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState("");
 
