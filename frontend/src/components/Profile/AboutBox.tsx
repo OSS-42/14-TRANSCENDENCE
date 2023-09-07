@@ -1,18 +1,58 @@
 import { Box, Typography } from "@mui/material";
+import axios from "axios";
+import Cookies from "js-cookie";
+import { useEffect, useState } from "react";
+import { User } from "../../models/User";
 
-export function CenteredText () {
+export function CenteredText(props) {
   return (
     <div style={{ textAlign: "center" }}>
       <Box p={2}>
         <Typography variant="h1" style={{ color: "black", width: "100%" }}>
-          0
+		   {props.match}
         </Typography>
       </Box>
     </div>
   );
-};
+}
 
-export function AboutBox() {
+interface AboutBoxProps {
+  user: User;
+}
+
+export function AboutBox({ user }: AboutBoxProps) {
+  const [match, setMatch] = useState({
+    matchesWon: [],
+    matchesLost: [],
+  });
+
+  useEffect(() => {
+    if (user) {
+      async function fetchMatch() {
+        const jwt_token = Cookies.get("jwt_token");
+        try {
+          const response = await axios.get(
+            `http://localhost:3001/users/matchHistory/${user.id}`,
+            {
+              headers: {
+                Authorization: "Bearer " + jwt_token,
+              },
+            }
+          );
+          console.log("Match stats inside AboutBox fetching successful")
+          setMatch(response.data);
+        } catch (error) {
+          console.error("Match stats fetching:", error);
+        }
+      }
+      fetchMatch();
+    }
+  }, [user]); // No need to put match as a dependency here, because user class has a gamewon gamelost variable that will change
+
+//   if (!match.matchesWon || match.matchesWon.length === 0) {
+//     return <p>No match data available.</p>;
+//   }
+
   return (
     <div>
       <Box
@@ -31,7 +71,7 @@ export function AboutBox() {
         }}
       >
         MATCH WON
-		<CenteredText/>
+        <CenteredText match={match.matchesWon.length}/>
       </Box>
       <Box
         component="div"
@@ -49,7 +89,7 @@ export function AboutBox() {
         }}
       >
         MATCH LOST
-		<CenteredText/>
+        <CenteredText match={match.matchesLost.length}/>
       </Box>
     </div>
   );

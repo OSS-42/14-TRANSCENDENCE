@@ -42,7 +42,7 @@ export function Profile() {
         <ChangeAvatarBox setUser={setUser} />
       </LeftSideGrid>
       <RightSideGrid>
-        <AboutBox />
+        <AboutBox user={user}/>
         <MatchHistoryBox>
           <MatchHistory user={user} />
         </MatchHistoryBox>
