@@ -18,34 +18,34 @@ interface MatchHistoryProps {
   user: User;
 }
 
-export function MatchHistory({user} : MatchHistoryProps ) {
-  const [match, setMatch] = useState({
-    matchesWon: [],
-    matchesLost: [],
-  });
-  useEffect(() => {
-    if (user) {
-      async function fetchMatch() {
-        const jwt_token = Cookies.get("jwt_token");
-        try {
-          const response = await axios.get(
-            `http://localhost:3001/users/matchHistory/${user.id}`,
-            {
-              headers: {
-                Authorization: "Bearer " + jwt_token,
-              },
-            }
-          );
-          console.log("Match stats fetching successful");
-          console.log(response.data);
-          setMatch(response.data);
-        } catch (error) {
-          console.error("Match stats fetching:", error);
-        }
-      }
-      fetchMatch();
-    }
-  }, [user]);  // No need to put match as a dependency here, because user class has a gamewon gamelost variable that will change
+export function MatchHistory( ) {
+//   const [match, setMatch] = useState({
+//     matchesWon: [],
+//     matchesLost: [],
+//   });
+//   useEffect(() => {
+//     if (user) {
+//       async function fetchMatch() {
+//         const jwt_token = Cookies.get("jwt_token");
+//         try {
+//           const response = await axios.get(
+//             `http://localhost:3001/users/matchHistory/${user.id}`,
+//             {
+//               headers: {
+//                 Authorization: "Bearer " + jwt_token,
+//               },
+//             }
+//           );
+//           console.log("Match stats fetching successful");
+//           console.log(response.data);
+//           setMatch(response.data);
+//         } catch (error) {
+//           console.error("Match stats fetching:", error);
+//         }
+//       }
+//       fetchMatch();
+//     }
+//   }, [user]);  // No need to put match as a dependency here, because user class has a gamewon gamelost variable that will change
 
   if (!match.matchesWon || match.matchesWon.length === 0) {
     return <p>No match data available.</p>;

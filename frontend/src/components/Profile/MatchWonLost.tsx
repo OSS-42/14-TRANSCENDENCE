@@ -3,9 +3,10 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import { useEffect, useState } from "react";
 import { User } from "../../models/User";
+import { Match } from "../../models/User";
 
 // interface MatchWonLostProps {
-//   match:
+//   match: any;
 // }
 
 interface MatchBoxProps {
@@ -52,7 +53,7 @@ function MatchBox({ title, matchCount }: MatchBoxProps) {
   );
 }
 
-export function MatchWonLost({ match }: MatchWonLostProps) {
+export function MatchWonLost(props) {
 //   const [match, setMatch] = useState({
 //     matchesWon: [],
 //     matchesLost: [],
@@ -81,8 +82,8 @@ export function MatchWonLost({ match }: MatchWonLostProps) {
 //     }
 //   }, [user]); // No need to put match as a dependency here, because user class has a gamewon gamelost variable that will change
 
-  const nbrMatchesWon = match.matchesWon.length;
-  const nbrMatchesLost = match.matchesLost.length;
+  const nbrMatchesWon = props.match.matchesWon.length;
+  const nbrMatchesLost = props.match.matchesLost.length;
 
   return (
     <div>
