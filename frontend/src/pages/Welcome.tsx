@@ -1,5 +1,6 @@
 import { Box, Button, Typography } from "@mui/material";
 import { NavLink } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 
 export function Welcome() {
   // Gestionnaire d'événements pour le clic sur le bouton "LOG IN"
@@ -9,6 +10,9 @@ export function Welcome() {
       window.location.reload();
     }, 1000); // 1000 millisecondes = 1 seconde
   };
+
+	const { login } = useAuth()
+
 
   return (
     <Box

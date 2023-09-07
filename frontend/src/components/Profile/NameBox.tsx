@@ -3,6 +3,12 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import { useState } from "react";
 import { isUserExist } from "../../api/requests";
+import { User } from "../../models/User";
+
+// interface NameBoxProps {
+// 	user: User,
+// 	setUser: () => void
+// }
 
 export function NameBox(props) {
   const [isEditing, setIsEditing] = useState(false);
