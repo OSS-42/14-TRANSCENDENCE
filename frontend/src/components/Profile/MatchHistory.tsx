@@ -7,6 +7,7 @@ import {
   TableBody,
   Paper,
   Typography,
+  Box,
 } from "@mui/material";
 import Cookies from "js-cookie";
 import { useEffect, useState } from "react";
@@ -51,6 +52,18 @@ export function MatchHistory({user} : MatchHistoryProps ) {
   }
 
   return (
+	<Box
+	  component="div"
+      sx={{
+        border: "1px solid black",
+        borderRadius: "5px",
+        margin: "20px",
+        fontWeight: "bold",
+        height: "28vh",
+        maxHeight: "370px", // Set a maximum height for scrolling
+        overflow: "auto", // Enable scrolling when content overflows
+      }}
+    >
     <TableContainer component={Paper} sx={{ backgroundColor: "white" }}>
       <Typography variant="h6" sx={{ padding: "16px" }}>
         Match History
@@ -81,5 +94,6 @@ export function MatchHistory({user} : MatchHistoryProps ) {
         </TableBody>
       </Table>
     </TableContainer>
+	</Box>
   );
 }

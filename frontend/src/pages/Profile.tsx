@@ -9,8 +9,7 @@ import { RightSideGrid } from "../components/Profile/RightSideGrid";
 import { LeftSideGrid } from "../components/Profile/LeftSideGrid";
 import { ChangeAvatarButton } from "../components/Profile/ChangeAvatarButton";
 import { MatchWonLost } from "../components/Profile/MatchWonLost";
-import { MatchHistoryBox } from "../components/Profile/MatchHistoryBox";
-import { FriendsListBox } from "../components/Profile/FriendsListBox";
+import { FriendsList } from "../components/Profile/FriendsLists";
 import { MatchHistory } from "../components/Profile/MatchHistory";
 
 export function Profile() {
@@ -43,10 +42,8 @@ export function Profile() {
       </LeftSideGrid>
       <RightSideGrid>
         <MatchWonLost user={user}/>
-        <MatchHistoryBox>
-          <MatchHistory user={user} />
-        </MatchHistoryBox>
-        <FriendsListBox />
+        <MatchHistory user={user} />
+        <FriendsList />
       </RightSideGrid>
     </ContainerGrid>
   );

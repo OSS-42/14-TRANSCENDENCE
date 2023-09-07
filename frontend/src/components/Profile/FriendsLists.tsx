@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
 
-export function FriendsListBox() {
+export function FriendsList() {
   const [friends, setFriends] = useState(["No friends for the moment ..."]); // SetState. Initialize friend to empty array
   const jwt_token = Cookies.get("jwt_token"); // Cookies to identify user.
 
