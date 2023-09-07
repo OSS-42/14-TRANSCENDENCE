@@ -4,20 +4,52 @@ import Cookies from "js-cookie";
 import { useEffect, useState } from "react";
 import { User } from "../../models/User";
 
-export function CenteredText(props) {
+interface MatchWonLostProps {
+  user: User;
+}
+
+interface MatchBoxProps {
+  title: string;
+  matchCount: number;
+}
+
+interface CenteredTextProps {
+  match: number;
+}
+
+function CenteredText({ match }: CenteredTextProps) {
   return (
     <div style={{ textAlign: "center" }}>
       <Box p={2}>
         <Typography variant="h1" style={{ color: "black", width: "100%" }}>
-		   {props.match}
+          {match}
         </Typography>
       </Box>
     </div>
   );
 }
 
-interface MatchWonLostProps {
-  user: User;
+function MatchBox({ title, matchCount }: MatchBoxProps) {
+  return (
+    <Box
+      component="div"
+      display="inline-block"
+      sx={{
+        border: "1px solid black",
+        borderRadius: "5px",
+        margin: "20px",
+        fontWeight: "bold",
+        height: "28vh",
+        width: "45%",
+        maxHeight: "370px",
+        overflow: "auto",
+        textAlign: "center",
+      }}
+    >
+      {title}
+      <CenteredText match={matchCount} />
+    </Box>
+  );
 }
 
 export function MatchWonLost({ user }: MatchWonLostProps) {
@@ -39,7 +71,7 @@ export function MatchWonLost({ user }: MatchWonLostProps) {
               },
             }
           );
-          console.log("Match stats inside AboutBox fetching successful")
+          console.log("Match stats inside AboutBox fetching successful");
           setMatch(response.data);
         } catch (error) {
           console.error("Match stats fetching:", error);
@@ -54,42 +86,8 @@ export function MatchWonLost({ user }: MatchWonLostProps) {
 
   return (
     <div>
-      <Box
-        component="div"
-        display="inline-block"
-        sx={{
-          border: "1px solid black",
-          borderRadius: "5px",
-          margin: "20px",
-          fontWeight: "bold",
-          height: "28vh",
-          width: "45%",
-          maxHeight: "370px", // Set a maximum height for scrolling
-          overflow: "auto", // Enable scrolling when content overflows
-          textAlign: "center",
-        }}
-      >
-        MATCH WON
-        <CenteredText match={nbrMatchesWon}/>
-      </Box>
-      <Box
-        component="div"
-        display="inline-block"
-        sx={{
-          border: "1px solid black",
-          borderRadius: "5px",
-          margin: "20px",
-          fontWeight: "bold",
-          height: "28vh",
-          width: "45%",
-          maxHeight: "370px", // Set a maximum height for scrolling
-          overflow: "auto", // Enable scrolling when content overflows
-          textAlign: "center",
-        }}
-      >
-        MATCH LOST
-        <CenteredText match={nbrMatchesLost}/>
-      </Box>
+      <MatchBox title="MATCH WON" matchCount={nbrMatchesWon} />
+      <MatchBox title="MATCH LOST" matchCount={nbrMatchesLost} />
     </div>
   );
 }
