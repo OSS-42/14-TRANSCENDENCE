@@ -19,7 +19,6 @@ export function FriendsList() {
           }
         );
         console.log("Friends list fetching successful");
-        console.log(response);
         setFriends(response.data);
       } catch (error) {
         console.error("Friends list fetching:", error);

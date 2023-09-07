@@ -1,6 +1,11 @@
 import { Box, Avatar } from "@mui/material";
+import { User } from "../../models/User";
 
-export function AvatarImage({user}) {
+interface AvatarImageProps{
+	user: User;
+}
+
+export function AvatarImage({user} : AvatarImageProps) {
   return (
       <Box
 	  	component="div"

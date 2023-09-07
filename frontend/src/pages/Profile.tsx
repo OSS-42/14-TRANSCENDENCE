@@ -28,8 +28,8 @@ export function Profile() {
             Authorization: "Bearer " + jwt_token,
           },
         });
+		console.log("User fetching successful");
         setUser(response.data);
-        console.log("Here is the updated user: ", user);
       } catch (error) {
         console.error("Error fetching user data:", error);
       }
@@ -50,7 +50,7 @@ export function Profile() {
               },
             }
           );
-          console.log("Match stats inside AboutBox fetching successful");
+          console.log("Match stats fetching successful");
           setMatch(response.data);
         } catch (error) {
           console.error("Match stats fetching:", error);
@@ -59,8 +59,6 @@ export function Profile() {
       fetchMatch();
     }
   }, [user]); // No need to put match as a dependency here, because user class has a gamewon gamelost variable that will change
-
-  console.log(match);
 
   return (
     <ContainerGrid>

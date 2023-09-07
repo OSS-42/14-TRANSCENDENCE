@@ -76,7 +76,6 @@ export function Name(props) {
         );
         console.log("Updating name was successful");
         props.setUser(response.data);
-        console.log(response.data);
       } catch (error) {
         console.error("Error updating user data:", error);
       }
