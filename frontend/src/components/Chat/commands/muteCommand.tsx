@@ -15,7 +15,7 @@ interface MuteCommandProps {
 
   const muteCommand = ({data, socket, user}: MuteCommandProps) => {
     const [command, target, ...channel] = data.split(" ");
-    if (command === "#MUTE" && target !== undefined && channel !== undefined) {
+    if (command === "/MUTE") {
       // Format du message pour le serveur
       socket.emit('mute', {
         username: user?.username,

@@ -16,8 +16,6 @@ import { useAuth } from "../contexts/AuthContext";
 
 export function Profile() {
 	
-	// const { user } = useAuth();
-	
   const [user, setUser] = useState<User>();
 
   useEffect(() => {

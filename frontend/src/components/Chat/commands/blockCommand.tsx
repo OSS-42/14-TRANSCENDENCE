@@ -15,7 +15,7 @@ interface BlockCommandProps {
 
   const blockCommand = ({data, socket, user}: BlockCommandProps) => {
     const [command, ...target] = data.split(" ");
-    if (command === "#BLOCK" && target !== undefined) {
+    if (command === "/BLOCK") {
       // Format du message pour le serveur
       socket.emit("blockUser", {
         username: user?.username,
@@ -26,5 +26,3 @@ interface BlockCommandProps {
     }
 }
 export default blockCommand
-
-// 
