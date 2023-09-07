@@ -1,7 +1,11 @@
 import { Box, Button, Typography } from "@mui/material";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 
 export function Welcome() {
+	const { login } = useAuth()
+
+
   return (
     <Box
       component="div"
@@ -27,7 +31,7 @@ export function Welcome() {
         <img src="welcome.gif" alt="" />
       </Box>
       <Link to="http://localhost:3001/auth/42">
-        <Button variant="contained">LOG IN</Button>
+        <Button variant="contained" onClick={login}>LOG IN</Button>
       </Link>
     </Box>
   );
