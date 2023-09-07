@@ -19,7 +19,7 @@ export class PongGateway {
   server: Server
 
 
-  handleConnection(client: Socket) {
+  handleConnection(client: Socket): void {
     console.log(`🏓   ⚡: ${client.id} user just connected!`);
     const token = client.handshake.query.token as string;
 
@@ -37,8 +37,8 @@ export class PongGateway {
           const connectedUserIds = Array.from(this.connectedUsers.keys());
           this.server.emit("updateConnectedUsers", connectedUserIds);
 
-          const helloWorld = "hello World";
-          this.server.emit("Connected", helloWorld);
+          const isConnected = true;
+          this.server.emit("Connected", isConnected);
 
         } catch (error) {
           console.log("🏓   Error:", error.message);
@@ -59,7 +59,11 @@ export class PongGateway {
         queue.splice(index, 1);
       }
     }
-    console.log(`🏓   🔥: ${client.id} user disconnected`); 
+
+    const isConnected = false;
+    console.log(`🏓   🔥: ${client.id} user disconnected`);
+    this.server.emit('Connected', isConnected ); 
+
     //supprime le le client.id de la map de connectedUser lorsque ce dernier ce déconnecte!
     for (const [userId, socketId] of this.connectedUsers.entries()) {
       if (socketId === client.id) {

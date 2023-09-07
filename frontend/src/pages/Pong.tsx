@@ -22,7 +22,6 @@ import socketIO from 'socket.io-client'
 
 type GameParameters = {
   gameId: string,
-  isHostWinner: boolean,
   gameLaunched: boolean,
   isPaused: boolean,
   winner: boolean,
@@ -51,7 +50,7 @@ type WeHaveAWinner = {
 }
 
 type Connected = {
-  helloWorld: string,
+  isConnected: boolean;
 }
 
 const socket = socketIO('http://localhost:3001/pongGame', {
@@ -119,6 +118,7 @@ export function Pong() {
   const [gameInfos, setGameInfos] = useState<PlayerJoined>();
   const [gameParameters, setGameParameters] = useState<GameParameters>();
   const [connection, setConnection] = useState<Connected>();
+  const [winnerIs, setWinnerIs] = useState<WeHaveAWinner>();
   const [waitingForPlayer, setWaitingForPlayer] = React.useState(false);
   const [gameId, setGameId] = React.useState<string>("");
   const [isHostWinner, setIsHostWinner] = React.useState(false);
@@ -126,14 +126,14 @@ export function Pong() {
   // Ecoute parle le socket
   useEffect(() => {
     socket.on("Connected", (data: any) => {
-      console.log('🏓   ', data);
-      setIsConnected(true);
+      console.log('🏓   Connection established ? ', data.isConnected);
+      setIsConnected(data.isConnected);
+      if (!data.isConnected) {
+        setGameLaunched(false);
+      }
     })
 
     socket.on('playerJoined', (data: PlayerJoined) => {
-      // setGameLaunched(true);
-      // setCameraMode("orthographic");
-      // setShowButtons(false);
       setWaitingForPlayer(false);
       setHostStatus(data.hostStatus);
       setGameId(data.gameId);
@@ -162,11 +162,7 @@ export function Pong() {
       cameraMode
     });
     socket.on("gameParameters", (data: GameParameters) => {
-      // if (gameId != data.gameId) {
-      //   socket.disconnect();
-      //   return;
-      // } 
-      setIsHostWinner(data.isHostWinner);
+      setGameId(data.gameId);
       setGameLaunched(data.gameLaunched);
       setIsPaused(data.isPaused);
       setWinner(data.winner);
@@ -183,23 +179,28 @@ export function Pong() {
       setCameraMode(data.cameraMode);
     });
 
+    socket.on("weHaveAWinner", (data: WeHaveAWinner) => {
+      setIsHostWinner(data.isHostWinner);
+    });
+
     return () => {
       socket.off("Connected");
       socket.off("gameParameters");
       socket.off("playerJoined");
+      socket.off("WeHaveAWinner");
     };
   }, [socket, 
       connection, 
-      leftScore,
-      rightScore,
+      // leftScore,
+      // rightScore,
       ballPosition,
       ballVelocity,
       leftPaddlePositionZ,
       rightPaddlePositionZ,
       powerupVisible,
       powerupPosition,
-      countdown,
-      cameraMode
+      // countdown,
+      // cameraMode
     ]);
 
 //------------------ GAME MODES ------------------------
