@@ -1,6 +1,6 @@
 import { Box, Typography } from "@mui/material";
 
-const CenteredText = () => {
+export function CenteredText () {
   return (
     <div style={{ textAlign: "center" }}>
       <Box p={2}>
@@ -11,8 +11,6 @@ const CenteredText = () => {
     </div>
   );
 };
-
-export default CenteredText;
 
 export function AboutBox() {
   return (
