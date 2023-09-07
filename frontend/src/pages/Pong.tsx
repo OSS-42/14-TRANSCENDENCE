@@ -95,9 +95,9 @@ export function Pong() {
 
     socket.on('playerJoined', (data: PlayerJoined) => {
       // setGameLaunched(true);
-      // setWaitingForPlayer(false);
       // setCameraMode("orthographic");
       // setShowButtons(false);
+      setWaitingForPlayer(false);
       setHostStatus(data.hostStatus);
       setGameId(data.gameId);
       setHostname(data.hostName);
