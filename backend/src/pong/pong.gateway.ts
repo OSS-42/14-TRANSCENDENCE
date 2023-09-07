@@ -12,6 +12,7 @@ export class PongGateway {
   private connectedUsers: Map<number, string> = new Map();
   private playerNames: Map<string, string> = new Map();
   private gameModeQueue: Map<number, Socket[]> = new Map();
+  private gameStates: Map<string, any> = new Map();
   private matchmaking: Socket[] = [];
   
   @WebSocketServer()
@@ -147,6 +148,11 @@ export class PongGateway {
   @SubscribeMessage('gameParameters')
   handleGameParameters(client: Socket, payload: any) {
     const gameId = payload.gameId; // Make sure to send gameId from client
+    // console.log("🏓   Received left paddle position:", payload.leftPaddlePositionZ);
+    // console.log("🏓   Received right paddle position:", payload.rightPaddlePositionZ);
+    
+    this.gameStates.set(gameId, payload);
+
     this.server.to(gameId).emit('gameParameters', payload);
   }
 

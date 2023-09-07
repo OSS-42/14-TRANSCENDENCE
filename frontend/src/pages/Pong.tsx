@@ -72,6 +72,43 @@ export function Pong() {
   const [gameMode, setGameMode] = React.useState<0 | 1 | 2 | 3 | 4>(0);
   const [showButtons, setShowButtons] = React.useState(true);
 
+  //------------------ GAME VARIABLES ------------------------
+  // ratio pour garder les meme proportions lors d'un resizing de la page
+  // attention, a cause du positionnement de la camera, height devient depth et depth devient height.
+
+  // variables avec resizing
+  // const paddleWidth: number = 0.000625 * dimension.width;
+  // const paddleHeight: number = 1;
+  // const paddleDepth: number = 0.008333333333 * dimension.height;
+  // const ballRadius: number = 0.000625 * dimension.width;
+  // const initialSpeedFactor = getSpeedFactor(dimension.width);
+  // const INITIAL_BALL_SPEED: number = 0.3 * initialSpeedFactor;
+  // const netWidth: number = 0.000625 * dimension.width;
+  // const netDepth: number = 0.008333333333 * dimension.height;
+  // const initialSpeedFactor = getSpeedFactor(dimension.width);
+
+  // variables sans resizing
+  const paddleWidth: number = 0.5;
+  const paddleHeight: number = 1;
+  const paddleDepth: number = 5;
+  const ballRadius: number = 0.5;
+  const INITIAL_BALL_SPEED: number = 0.3;
+  const netWidth: number = 0.5;
+  const netDepth: number = 8;
+
+  const [leftPaddlePositionZ, setLeftPaddlePositionZ] = React.useState(0);
+  const [rightPaddlePositionZ, setRightPaddlePositionZ] = React.useState(0);
+  const [ballSpeed, setBallSpeed] = React.useState(INITIAL_BALL_SPEED);
+  const [ballPosition, setBallPosition] = React.useState({ x: 0, y: 0, z: 0.00001 });
+  const [ballVelocity, setBallVelocity] = React.useState({ x: INITIAL_BALL_SPEED, z: INITIAL_BALL_SPEED });
+  const [leftScore, setLeftScore] = React.useState(0);
+  const [rightScore, setRightScore] = React.useState(0);
+  const [winner, setWinner] = React.useState<string | null>(null);
+  const [powerupPosition, setPowerupPosition] = React.useState({ x: 0, y: 0, z: 0 });
+  const [powerupVisible, setPowerupVisible] = React.useState(false);
+  const [countdown, setCountdown] = React.useState<number | null>(null);
+  const isGameOver = useRef(false);
+
 //------------------ CLIENT-SERVER SETTINGS ------------------------
   const [isConnected, setIsConnected] = React.useState<boolean>(false);
   const [hostStatus, setHostStatus] = React.useState<boolean>(false);
@@ -148,11 +185,22 @@ export function Pong() {
 
     return () => {
       socket.off("Connected");
-      socket.off("gameStartInfos");
       socket.off("gameParameters");
       socket.off("playerJoined");
     };
-  }, [socket, gameInfos, connection, gameParameters]);
+  }, [socket, 
+      connection, 
+      leftScore,
+      rightScore,
+      ballPosition,
+      ballVelocity,
+      leftPaddlePositionZ,
+      rightPaddlePositionZ,
+      powerupVisible,
+      powerupPosition,
+      countdown,
+      cameraMode
+    ]);
 
 //------------------ GAME MODES ------------------------
 
@@ -251,41 +299,6 @@ export function Pong() {
           }
     }
 
-//------------------ GAME VARIABLES ------------------------
-  // ratio pour garder les meme proportions lors d'un resizing de la page
-  // attention, a cause du positionnement de la camera, height devient depth et depth devient height.
-
-  // variables avec resizing
-  // const paddleWidth: number = 0.000625 * dimension.width;
-  // const paddleHeight: number = 1;
-  // const paddleDepth: number = 0.008333333333 * dimension.height;
-  // const ballRadius: number = 0.000625 * dimension.width;
-  // const initialSpeedFactor = getSpeedFactor(dimension.width);
-  // const INITIAL_BALL_SPEED: number = 0.3 * initialSpeedFactor;
-  // const netWidth: number = 0.000625 * dimension.width;
-  // const netDepth: number = 0.008333333333 * dimension.height;
-  // const initialSpeedFactor = getSpeedFactor(dimension.width);
-
-  // variables sans resizing
-  const paddleWidth: number = 0.5;
-  const paddleHeight: number = 1;
-  const paddleDepth: number = 5;
-  const ballRadius: number = 0.5;
-  const INITIAL_BALL_SPEED: number = 0.3;
-  const netWidth: number = 0.5;
-  const netDepth: number = 8;
-
-  const [leftPaddlePositionZ, setLeftPaddlePositionZ] = React.useState(0);
-  const [rightPaddlePositionZ, setRightPaddlePositionZ] = React.useState(0);
-  const [ballSpeed, setBallSpeed] = React.useState(INITIAL_BALL_SPEED);
-  const [ballPosition, setBallPosition] = React.useState({ x: 0, y: 0, z: 0.00001 });
-  const [ballVelocity, setBallVelocity] = React.useState({ x: INITIAL_BALL_SPEED, z: INITIAL_BALL_SPEED });
-  const [leftScore, setLeftScore] = React.useState(0);
-  const [rightScore, setRightScore] = React.useState(0);
-  const [winner, setWinner] = React.useState<string | null>(null);
-  const [powerupPosition, setPowerupPosition] = React.useState({ x: 0, y: 0, z: 0 });
-  const [powerupVisible, setPowerupVisible] = React.useState(false);
-
 //------------------ SCENE SETTINGS ------------------------
   // s'assure que le canvas aura comme maximum toujours 800x600
   const [dimension, setDimensions] = React.useState<{ width: number, height: number }>(() => {
@@ -320,8 +333,6 @@ export function Pong() {
 
 //------------------ GAME GENERAL BEHAVIOR ------------------------
   // Timer to restart
-  const [countdown, setCountdown] = React.useState<number | null>(null);
-  const isGameOver = useRef(false);
 
   const handleCountdown = (): void => {
     if (isGameOver.current) {
