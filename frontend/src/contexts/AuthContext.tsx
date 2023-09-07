@@ -9,7 +9,6 @@ import axios from "axios";
 import { User } from "../models/User";
 import Cookies from "js-cookie";
 import { getCookies, bearerAuthorization } from "../utils";
-// import socketIO from "socket.io-client";
 
 interface AuthProviderProps {
   children: ReactNode;
