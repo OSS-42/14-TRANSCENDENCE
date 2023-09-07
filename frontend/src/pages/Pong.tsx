@@ -61,6 +61,11 @@ const socket = socketIO('/pongGame', {
 });
 
 export function Pong() {
+  const socket = socketIO('/pongGame', {
+    query: {
+      token: Cookies.get('jwt_token')
+    },
+  });
 
   //------------------ CONSTANTS NECESSARY AT TOP --------------------
   // const history = useHistory();
