@@ -60,6 +60,8 @@ export function Profile() {
     }
   }, [user]); // No need to put match as a dependency here, because user class has a gamewon gamelost variable that will change
 
+  console.log(match);
+
   return (
     <ContainerGrid>
       <LeftSideGrid>
@@ -68,8 +70,8 @@ export function Profile() {
         <ChangeAvatarButton setUser={setUser} />
       </LeftSideGrid>
       <RightSideGrid>
-        <MatchWonLost match={match}/>
-        <MatchHistory user={user} />
+        <MatchWonLost nbrMatchesWon={match.matchesWon.length} nbrMatchesLost={match.matchesLost.length}/>
+        <MatchHistory match={match} />
         <FriendsList />
       </RightSideGrid>
     </ContainerGrid>
