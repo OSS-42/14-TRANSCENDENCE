@@ -324,7 +324,6 @@ export function Pong() {
   const isGameOver = useRef(false);
 
   const handleCountdown = (): void => {
-    console.log('🏓   handlecountdown() called', isGameOver);
     if (isGameOver.current) {
       return;
     }
@@ -333,14 +332,11 @@ export function Pong() {
     setCountdown(currentCountdown);
 
     const timer = setInterval(() => {
-      console.log('🏓   gameOver?', isGameOver);
       if (isGameOver.current) {
-        console.log('🏓   je passe par la');
         clearInterval(timer);
         return;
       }
 
-      // issue : last countdown after a winner.
       currentCountdown -= 1;
       setCountdown(currentCountdown);
       if (currentCountdown === 0) {
@@ -375,41 +371,37 @@ export function Pong() {
 
   // Scoreboard
   // en cas de victoire, reinitialisation dedu jeu, identification du gagnant et perdant pour envoi a la DB et retour a la page de selection des modes
+
   React.useEffect(() => {
     if (rightScore === 3 || leftScore === 3) {
       isGameOver.current = true;
       console.log("🏓   Quelqu'un a gagne");
       setIsPaused(true);
+  
+      let winnerText = "";
       if (rightScore === 3) {
-        if (gameMode === 1 || gameMode === 3) {
-          setWinner("Computers wins!");
-          setIsHostWinner(false);
-        } else {
-          setWinner(clientName + " wins !");
-          setIsHostWinner(false);
-        }
+        winnerText = (gameMode === 1 || gameMode === 3) ? "Computers wins!" : `${clientName} wins!`;
+        setIsHostWinner(false);
       } else {
-        setWinner(hostname + " wins!");
+        winnerText = `${hostname} wins!`;
         setIsHostWinner(true);
       }
-    }
-  }, [leftScore, rightScore] );
+      setWinner(winnerText);
 
-  React.useEffect(() => {
-    if (winner) {
+      handleCountdown();
+  
       setTimeout(() => {
-        console.log('🏓   B ', winner);
+        console.log('🏓   B ', winnerText);
         console.log('🏓   B ', gameId);
         setGameLaunched(false);
         if (gameId) {
-          console.log('🏓   envoi du resultat')
+          console.log('🏓   envoi du resultat');
           socket.emit("weHaveAWinner", { gameId, isHostWinner });
         }
         window.location.href = '/game';
-        // history.push('/game')
       }, 5000);
     }
-  }, [ winner ]);
+  }, [leftScore, rightScore]);
 
 //------------------ GAME RESIZING MANAGEMENT ------------------------
     // methode pour conserver les ratio sur l'evenement resize
@@ -515,23 +507,6 @@ export function Pong() {
       </Box>
     );
   });
-
-  // Scoreboard
-  // React.useEffect(() => {
-  //   if (rightScore === 3 || leftScore === 3) {
-  //     console.log("🏓   Quelqu'un a gagne");
-  //     setIsPaused(true);
-  //     if (rightScore === 3) {
-  //       if (gameMode === 1 || gameMode === 3) {
-  //         setWinner("Computers wins!");
-  //       } else {
-  //         setWinner(clientName + " wins !");
-  //       }
-  //     } else {
-  //       setWinner(hostname + " wins!");
-  //     }
-  //   }
-  // }, [leftScore, rightScore]);
 
   const baseCanvasWidth: number = 800;
   const baseFontSize: number = 60;
@@ -668,9 +643,23 @@ export function Pong() {
 
         // Update scores
         if (newX - ballRadius <= -WORLD_WIDTH / 2) {
-          setRightScore(prevScore => prevScore + 1);
+          setRightScore(prevScore => {
+            const newScore = prevScore + 1;
+            if (newScore < 3) {
+              setIsPaused(true);
+              handleCountdown();
+            }
+            return newScore;
+          });
         } else if (newX + ballRadius >= WORLD_WIDTH / 2) {
-          setLeftScore(prevScore => prevScore + 1);
+          setLeftScore(prevScore => {
+            const newScore = prevScore + 1;
+            if (newScore < 3) {
+              setIsPaused(true);
+              handleCountdown();
+            }
+            return newScore;
+          });
         }
 
         setCameraMode("orthographic");
@@ -678,9 +667,6 @@ export function Pong() {
         newX = 0;
         newZ = 0;
         setBallVelocity({ x: INITIAL_BALL_SPEED, z: INITIAL_BALL_SPEED });
-
-        setIsPaused(true);
-        handleCountdown();
       }
 
       setBallPosition({
