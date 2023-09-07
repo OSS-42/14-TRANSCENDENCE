@@ -7,50 +7,67 @@ import {
 } from "react";
 import axios from "axios";
 import { User } from "../models/User";
-import { bearerAuthorization } from "../utils";
+import Cookies from "js-cookie";
+import { getCookies, bearerAuthorization } from "../utils";
 
 interface AuthProviderProps {
   children: ReactNode;
-  token: string;
 }
 
 interface AuthContextType {
   user: User | null;
-  logoutUser: () => void;
+  login: () => void;
+  logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-export const AuthProvider = ({
-  children,
-  token,
-}: AuthProviderProps): JSX.Element => {
-  const [user, setUser] = useState<User>({} as User);
+export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
+  const [user, setUser] = useState(null);
+  const [isLogged, setIsLogged] = useState(false);
 
-  useEffect(() => {
-    async function fetchUserData() {
-      try {
-        const response = await axios.get("http://localhost:3001/users/me", {
-          headers: {
-            Authorization: bearerAuthorization(token),
-          },
-        });
-        setUser({ ...response.data, jwtToken: token });
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      }
-    }
-
+  const login = () => {
+    console.log("Logging in");
     fetchUserData();
-  }, []);
+  };
 
-  const logoutUser = () => {};
+  const logout = () => {
+    console.log("Logging out");
+    Cookies.remove("jwt_token");
+    setUser(null);
+    setIsLogged(false);
+    window.location.href = "/welcome";
+  };
 
   const contextData = {
     user,
-    logoutUser,
+    login,
+    logout,
   };
-  console.log(user);
+
+  async function fetchUserData() {
+    const jwtToken = getCookies("jwt_token");
+    if (jwtToken && !isLogged) {
+      try {
+        const response = await axios.get("http://localhost:3001/users/me", {
+          headers: {
+            Authorization: bearerAuthorization(jwtToken),
+          },
+        });
+        setUser({ ...response.data, jwtToken: jwtToken });
+        setIsLogged(true);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    } else if (!jwtToken && isLogged) {
+      logout();
+    }
+  }
+
+  useEffect(() => {
+    fetchUserData();
+  }, []);
+
   return (
     <AuthContext.Provider value={contextData}>{children}</AuthContext.Provider>
   );
