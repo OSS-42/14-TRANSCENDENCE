@@ -3,12 +3,12 @@ import { NavLink } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
 export function Welcome() {
-  // Gestionnaire d'événements pour le clic sur le bouton "LOG IN"
+
   const handleLoginClick = () => {
-    // Attendre 1000 millisecondes (1 seconde) avant de recharger la page
+ 
     setTimeout(() => {
       window.location.reload();
-    }, 1000); // 1000 millisecondes = 1 seconde
+    }, 500); 
   };
 
 	const { login } = useAuth()
