@@ -49,6 +49,9 @@ export function MatchWonLost({ user }: MatchWonLostProps) {
     }
   }, [user]); // No need to put match as a dependency here, because user class has a gamewon gamelost variable that will change
 
+  const nbrMatchesWon = match.matchesWon.length;
+  const nbrMatchesLost = match.matchesLost.length;
+
   return (
     <div>
       <Box
@@ -67,7 +70,7 @@ export function MatchWonLost({ user }: MatchWonLostProps) {
         }}
       >
         MATCH WON
-        <CenteredText match={match.matchesWon.length}/>
+        <CenteredText match={nbrMatchesWon}/>
       </Box>
       <Box
         component="div"
@@ -85,7 +88,7 @@ export function MatchWonLost({ user }: MatchWonLostProps) {
         }}
       >
         MATCH LOST
-        <CenteredText match={match.matchesLost.length}/>
+        <CenteredText match={nbrMatchesLost}/>
       </Box>
     </div>
   );
