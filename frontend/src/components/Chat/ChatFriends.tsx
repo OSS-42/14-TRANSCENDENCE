@@ -36,6 +36,7 @@ async function removeFriend(id:number) {
             <p></p>
             {friendsList.map((user) => (
               <Box
+              component="div"
                 key={user.id}
                 sx={{
                   display: 'flex',
@@ -58,7 +59,7 @@ async function removeFriend(id:number) {
                
                 <div>
                   <p> {user.username}</p>
-                  {connectedUsers.includes(user.id) && <span style={{ color: 'green' }}> en ligne</span>}
+                  {connectedUsers?.includes(user.id) && <span style={{ color: 'green' }}> en ligne</span>}
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'flex-end', flex: '1' }}></div>
                   <Button variant="contained" onClick={() => removeFriend(user.id)}>

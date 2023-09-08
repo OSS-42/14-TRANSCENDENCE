@@ -21,25 +21,28 @@ export function FriendsAndUsers({ socket} :someProp) {
     
    
     useEffect(() => {
-      async function fetchUsersData() {
-        socket.on('updateConnectedUsers', (updatedUsers: number[]) => {
-          setConnectedUsers(updatedUsers);
-          fetchUsersData()
-
-        });
-       
-        const newFriendsList = await fetchFriendsList()
-        setFriendsList(newFriendsList)
-        const newUsersList = await fetchUsersList()
-        setUsersList(newUsersList)
-
+      // Écouter l'événement "updateConnectedUsers" et mettre à jour connectedUsers
+      socket.on("updateConnectedUsers", (updatedUsers: number[]) => {
+        setConnectedUsers(updatedUsers);
+      });
+    
+      async function fetchInitialData() {
+        try {
+          
+          const newFriendsList = await fetchFriendsList();
+          setFriendsList(newFriendsList);
+    
+          const newUsersList = await fetchUsersList();
+          setUsersList(newUsersList);
+        } catch (error) {
+          console.error("Erreur lors de la récupération des données :", error);
+        }
       }
-      fetchUsersData();
-       socket.emit("getConnectedUsers") 
-        return () => {
-    socket.off('updateConnectedUsers');
-  };
-       
+      fetchInitialData();
+      
+      return () => {
+        socket.off("updateConnectedUsers");
+      };
     }, []);
 
     const handleUserClick = (user: User) => {

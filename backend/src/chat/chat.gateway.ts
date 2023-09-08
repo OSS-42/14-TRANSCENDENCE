@@ -11,7 +11,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   // AVec cette map, on peut identifier le client.id à partir d'un Utilisateur ID.
   private connectedUsers: Map<number, string> = new Map(); 
 
-  constructor(private chatService: ChatService, private config: ConfigService) {}
+  constructor(private chatService: ChatService, private config: ConfigService) {
+    setInterval(() => this.emitUpdateConnectedUsers(), 2000);
+  }
   @WebSocketServer()
   server: Server
  
@@ -26,8 +28,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
           console.log("voici lidentite du socket")
           console.log(decoded)
           this.connectedUsers.set( Number(decoded.sub), client.id);
-          const connectedUserIds = Array.from(this.connectedUsers.keys());
-          this.server.emit("updateConnectedUsers", connectedUserIds)
           //FONCTION QUI VERIFIE LES CHANNELS DONT LUTILASATEUR EST MEMBRE ET LES JOIN TOUS
           this.joinRoomsAtConnection(Number(decoded.sub), client)
         } catch (error) {
@@ -38,6 +38,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       }
      
    }
+   // renvoie au client la liste des users connectés
+ 
+    
   //Fonction qui gère les déconnexions au socket
   //dès qu'un client se déconnecte du socket, cette fonction est appelée
   handleDisconnect(client: Socket): void {
@@ -49,8 +52,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         break;
       }
     }
-    const connectedUserIds = Array.from(this.connectedUsers.keys());
-    this.server.emit("updateConnectedUsers", connectedUserIds)
+    // const connectedUserIds = Array.from(this.connectedUsers.keys());
+    // this.server.emit("updateConnectedUsers", connectedUserIds)
   }
 
 //Retourne le clientId du socket, si lutilisateur n<est pas connect/ la fonciton retourne undefined.
@@ -65,6 +68,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     });
 
   }
+
+  private emitUpdateConnectedUsers(): void {
+    const connectedUserIds = Array.from(this.connectedUsers.keys());
+    this.server.emit('updateConnectedUsers', connectedUserIds);
+  }
+
+    
+  
 
   // //-------------------------------------------------------- COMMANDE DU CHAT --------------------------------------------------------
   
@@ -176,6 +187,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   // Utilisation :  /PRIVMSG !NomDuChannel message...
   // Utilisation :  /PRIVMSG NomUtilisateur message ...                    
   @SubscribeMessage('privmsg')
+
   async privateMessage(client: Socket, payload: any) {
     const userId = await this.chatService.getUserIdFromUsername(payload.username)
     let notice : string = null
@@ -561,7 +573,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         notice: targetNotice
       })
     this.server.to(userSocketId).emit('notice', {
-      id: payload.id,
+      id: payload.id, 
       name: payload.username,
       channel: undefined,
       text: null,

@@ -25,6 +25,7 @@ function ChatBar({
 }: ChatFriendsProps) {
   const { user } = useAuth();
   const meId = user?.id
+  
   const addFriend = async (friendUsername: string) => {
     await addFriendApi(friendUsername);
     const updatedFriendsList = await fetchFriendsList();
@@ -63,7 +64,7 @@ function ChatBar({
                   />
                   <div>
                     <p>{user.username}</p>
-                    {connectedUsers.includes(user.id) && (
+                    {connectedUsers?.includes(user.id) && (
                       <span style={{ color: "green" }}> en ligne</span>
                     )}
                   </div>
