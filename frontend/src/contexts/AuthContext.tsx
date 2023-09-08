@@ -15,7 +15,9 @@ interface AuthProviderProps {
 }
 
 interface AuthContextType {
+  loading: boolean;
   user: User | null;
+  isLogged: boolean;
   login: () => void;
   logout: () => void;
 }
@@ -24,10 +26,14 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [isLogged, setIsLogged] = useState(false);
 
   const login = () => {
     console.log("Logging in");
+    setTimeout(() => {
+      window.location.reload();
+    }, 500);
     fetchUserData();
   };
 
@@ -40,7 +46,9 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
   };
 
   const contextData = {
+    loading,
     user,
+    isLogged,
     login,
     logout,
   };
@@ -62,11 +70,12 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
     } else if (!jwtToken && isLogged) {
       logout();
     }
+    setLoading(false);
   }
 
   useEffect(() => {
     fetchUserData();
-  }, []);
+  }, [user, isLogged]);
 
   return (
     <AuthContext.Provider value={contextData}>{children}</AuthContext.Provider>

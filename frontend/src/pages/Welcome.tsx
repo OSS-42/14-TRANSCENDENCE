@@ -3,13 +3,9 @@ import { NavLink } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
 export function Welcome() {
-  const handleLoginClick = () => {
-    setTimeout(() => {
-      window.location.reload();
-    }, 500);
-  };
 
   const { login } = useAuth();
+  console.log("Allo");
 
   return (
     <Box
@@ -35,9 +31,8 @@ export function Welcome() {
       <Box component="div" sx={{ marginBottom: "5rem" }}>
         <img src="welcome.gif" alt="" />
       </Box>
-      {/* Utilisez le gestionnaire d'événements onClick pour gérer le clic */}
       <NavLink to="/api/auth/42">
-        <Button variant="contained" onClick={handleLoginClick}>
+        <Button variant="contained" onClick={login}>
           LOG IN
         </Button>
       </NavLink>
