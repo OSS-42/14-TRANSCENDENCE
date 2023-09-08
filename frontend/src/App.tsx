@@ -17,7 +17,7 @@ function App() {
       </Router>
     );
   } else {
-    const socket = socketIO("http://localhost:3001/chat", {
+    const socket = socketIO("/chat", {
       query: {
         token: user?.jwtToken,
       },

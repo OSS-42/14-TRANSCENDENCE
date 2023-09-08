@@ -19,7 +19,7 @@ const handleAvatarSelected = (event: any) => {
 		const jwt_token = Cookies.get("jwt_token");
 
 		try {
-		const response = await axios.post("http://localhost:3001/users/updateAvatar", formData, {
+		const response = await axios.post("api/users/updateAvatar", formData, {
 			headers: {
 			Authorization: "Bearer " + jwt_token,
 			},

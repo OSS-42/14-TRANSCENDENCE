@@ -28,7 +28,7 @@ export function MatchHistory({user} : MatchHistoryProps ) {
         const jwt_token = Cookies.get("jwt_token");
         try {
           const response = await axios.get(
-            `http://localhost:3001/users/matchHistory/${user.id}`,
+            `/api/users/matchHistory/${user.id}`,
             {
               headers: {
                 Authorization: "Bearer " + jwt_token,
