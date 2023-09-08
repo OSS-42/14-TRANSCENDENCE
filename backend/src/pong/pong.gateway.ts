@@ -5,7 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { PongService } from './pong.service';
 import { v4 as uuid } from 'uuid';
 
-@WebSocketGateway({ cors: true,  namespace: 'pongGame' })
+@WebSocketGateway({ cors: true,  namespace: 'pong' })
 export class PongGateway {
   constructor(private pongService: PongService, private config: ConfigService) {}
 

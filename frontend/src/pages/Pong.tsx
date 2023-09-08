@@ -43,14 +43,14 @@ type Connected = {
   isConnected: boolean;
 }
 
+const socket = socketIO('/pong', {
+  query: {
+    token: Cookies.get('jwt_token')
+  },
+});
 
 export function Pong() {
 
-  const socket = socketIO('http://localhost:3001/pongGame', {
-    query: {
-      token: Cookies.get('jwt_token')
-    },
-  });
 
   //------------------ CONSTANTS NECESSARY AT TOP --------------------
   // const history = useHistory();
@@ -234,7 +234,7 @@ export function Pong() {
   
     async function fetchUsersData( setPlayerName: Function ) {
       try {
-        const response = await axios.get("http://localhost:3001/users/me", {
+        const response = await axios.get("/api/users/me", {
           headers: {
             Authorization: "Bearer " + jwt_token,
           },
