@@ -43,13 +43,14 @@ type Connected = {
   isConnected: boolean;
 }
 
-const socket = socketIO('http://localhost:3001/pongGame', {
-  query: {
-    token: Cookies.get('jwt_token')
-  },
-});
 
 export function Pong() {
+
+  const socket = socketIO('http://localhost:3001/pongGame', {
+    query: {
+      token: Cookies.get('jwt_token')
+    },
+  });
 
   //------------------ CONSTANTS NECESSARY AT TOP --------------------
   // const history = useHistory();
