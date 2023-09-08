@@ -22,20 +22,10 @@ import socketIO from 'socket.io-client'
 
 type GameParameters = {
   gameId: string,
-  gameLaunched: boolean,
-  isPaused: boolean,
-  winner: boolean,
-  gameMode: number,
-  leftScore: number,
-  rightScore: number,
   ballPosition: { x: number, y: number, z: number },
-  ballVelocity: { x: number, y: number, z: number },
   leftPaddlePositionZ: number,
   rightPaddlePositionZ: number,
-  powerupVisible: boolean,
   powerupPosition: { x: number, y: number, z: number },
-  countdown: number,
-  cameraMode: string
 }
 
 type PlayerJoined = {
@@ -146,37 +136,17 @@ export function Pong() {
     // setHostStatus(gameInfos.hostStatus); 
     socket.emit("gameParameters", {
       gameId,
-      gameLaunched,
-      isPaused,
-      winner,
-      gameMode,
-      leftScore,
-      rightScore,
       ballPosition,
-      ballVelocity,
       leftPaddlePositionZ,
       rightPaddlePositionZ,
-      powerupVisible,
       powerupPosition,
-      countdown,
-      cameraMode
     });
     socket.on("gameParameters", (data: GameParameters) => {
       setGameId(data.gameId);
-      setGameLaunched(data.gameLaunched);
-      setIsPaused(data.isPaused);
-      setWinner(data.winner);
-      setGameMode(data.gameMode);
-      setLeftScore(data.leftScore);
-      setRightScore(data.rightScore);
       setBallPosition(data.ballPosition);
-      setBallVelocity(data.ballVelocity);
       setLeftPaddlePositionZ(data.leftPaddlePositionZ);
       setRightPaddlePositionZ(data.rightPaddlePositionZ);
-      setPowerupVisible(data.powerupVisible);
       setPowerupPosition(data.powerupPosition);
-      setCountdown(data.countdown);
-      setCameraMode(data.cameraMode);
     });
 
     socket.on("weHaveAWinner", (data: WeHaveAWinner) => {
@@ -191,16 +161,9 @@ export function Pong() {
     };
   }, [socket, 
       connection, 
-      // leftScore,
-      // rightScore,
       ballPosition,
-      ballVelocity,
       leftPaddlePositionZ,
       rightPaddlePositionZ,
-      powerupVisible,
-      powerupPosition,
-      // countdown,
-      // cameraMode
     ]);
 
 //------------------ GAME MODES ------------------------

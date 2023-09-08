@@ -13,7 +13,6 @@ export class PongGateway {
   private playerNames: Map<string, string> = new Map();
   private gameModeQueue: Map<number, Socket[]> = new Map();
   private gameStates: Map<string, any> = new Map();
-  private matchmaking: Socket[] = [];
   
   @WebSocketServer()
   server: Server
@@ -37,7 +36,7 @@ export class PongGateway {
           const connectedUserIds = Array.from(this.connectedUsers.keys());
           this.server.emit("updateConnectedUsers", connectedUserIds);
 
-          const isConnected = true;
+          const isConnected = { isConnected: true };
           this.server.emit("Connected", isConnected);
 
         } catch (error) {
@@ -152,8 +151,6 @@ export class PongGateway {
   @SubscribeMessage('gameParameters')
   handleGameParameters(client: Socket, payload: any) {
     const gameId = payload.gameId; // Make sure to send gameId from client
-    // console.log("🏓   Received left paddle position:", payload.leftPaddlePositionZ);
-    // console.log("🏓   Received right paddle position:", payload.rightPaddlePositionZ);
     
     this.gameStates.set(gameId, payload);
 
