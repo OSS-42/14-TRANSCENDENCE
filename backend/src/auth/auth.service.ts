@@ -39,11 +39,12 @@ export class AuthService {
     let UserToken: Promise<{ access_token: string }>;
     const clientID = this.config.get("CLIENT_ID");
     const clientSecret = this.config.get("CLIENT_SECRET");
+    const host = this.config.get("HOST");
 
     try {
       const response = await axios.post(
         `https://api.intra.42.fr/oauth/token`,
-        `client_id=${clientID}&client_secret=${clientSecret}&code=${code}&redirect_uri=http://10.11.1.8:8080/api/auth&grant_type=authorization_code`,
+        `client_id=${clientID}&client_secret=${clientSecret}&code=${code}&redirect_uri=${host}/api/auth&grant_type=authorization_code`,
         {
           headers: {
             Accept: "application/json",

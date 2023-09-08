@@ -48,7 +48,8 @@ export class AuthControler {
     const access_token: string = token_object.access_token;
     res.cookie("jwt_token", access_token, { httpOnly: false, secure: false });
     console.log(token_object);
-    return res.redirect("http://10.11.1.8:8080");
+    const host = this.config.get("HOST");
+    return res.redirect(`${host}`);
   }
 }
 

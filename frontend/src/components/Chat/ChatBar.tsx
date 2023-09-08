@@ -5,7 +5,7 @@ import { addFriendApi, fetchFriendsList } from "../../api/requests";
 import { useAuth } from "../../contexts/AuthContext";
 import { User } from "../../models/User";
 
- //On va remplacer cette ligne quand on aura le context
+//On va remplacer cette ligne quand on aura le context
 type ChatFriendsProps = {
   socket: Socket;
   setUsersList: React.Dispatch<React.SetStateAction<User[]>>;
@@ -24,8 +24,8 @@ function ChatBar({
   connectedUsers,
 }: ChatFriendsProps) {
   const { user } = useAuth();
-  const meId = user?.id
-  
+  const meId = user?.id;
+
   const addFriend = async (friendUsername: string) => {
     await addFriendApi(friendUsername);
     const updatedFriendsList = await fetchFriendsList();
