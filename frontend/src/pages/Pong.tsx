@@ -50,7 +50,7 @@ const socket = socketIO('/pong', {
 });
 
 export function Pong() {
-
+  
 
   //------------------ CONSTANTS NECESSARY AT TOP --------------------
   // const history = useHistory();
@@ -114,6 +114,10 @@ export function Pong() {
   const [gameId, setGameId] = React.useState<string>("");
   const [isHostWinner, setIsHostWinner] = React.useState(false);
 
+  const currentTime = performance.now();
+  const updateFrequency = 1000 / 60;
+  const [lastUpdateTime, setLastUpdateTime] = useState(currentTime);
+
   // Ecoute parle le socket
   useEffect(() => {
     socket.on("Connected", (data: any) => {
@@ -133,17 +137,23 @@ export function Pong() {
       handleCountdown();
     });
 
-    // les 2 cotes devraient toujours ecouter et emettre, a revoir.
-    // setHostStatus(gameInfos.hostStatus); 
-    socket.emit("gameParameters", {
-      gameId,
-      ballPosition,
-      leftPaddlePositionZ,
-      rightPaddlePositionZ,
-      powerupPosition,
-    });
+    
+
+    if (currentTime - lastUpdateTime >= updateFrequency) {
+      socket.emit("gameParameters", {
+        gameId,
+        ballPosition,
+        leftPaddlePositionZ,
+        rightPaddlePositionZ,
+        powerupPosition,
+      });
+    }
+
+    setLastUpdateTime(currentTime);
+
     socket.on("gameParameters", (data: GameParameters) => {
       setGameId(data.gameId);
+      console.log('🏓   GAMEID: ', gameId);
       setBallPosition(data.ballPosition);
       setLeftPaddlePositionZ(data.leftPaddlePositionZ);
       setRightPaddlePositionZ(data.rightPaddlePositionZ);
