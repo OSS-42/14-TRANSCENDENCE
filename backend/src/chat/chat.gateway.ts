@@ -107,7 +107,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         client.join(payload.channelName);
         if (payload.param[0] !== undefined && payload.param[0] !== '+i') //Channel avec mdp
           await this.chatService.createPassword(payload.param[0], payload.channelName)
-        notice = `You create and join new room ${payload.channelName}`
+        notice = `You create and join a new room ${payload.channelName}`
       }
   
       // ------------------------ le channel existe ------------------------
@@ -177,6 +177,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   // Utilisation :  /PRIVMSG NomUtilisateur message ...                    
   @SubscribeMessage('privmsg')
   async privateMessage(client: Socket, payload: any) {
+    console.log('coucou')
     const userId = await this.chatService.getUserIdFromUsername(payload.username)
     let notice : string = null
     let event : string = "notice"
@@ -561,6 +562,71 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         notice: targetNotice
       })
     this.server.to(userSocketId).emit('notice', {
+      id: payload.id,
+      name: payload.username,
+      channel: undefined,
+      text: null,
+      notice: userNotice
+    })
+  }  
+
+
+// ---------------------------------------------------------- MODE ----------------------------------------------------------
+  // Passer le channel sur invitation : /MODE nomDuChannel invite
+  // Passer le channel en public : /MODE nomDuChannel public 
+  // Passer le channel en mode protection : /MODE nomDuChannel protected motDePasse
+  // Utilisation :  /MODE nomDuChannel flag
+  @SubscribeMessage('modeRoom')
+  async modeRoom(client: Socket, payload: any) {
+    const userId = await this.chatService.getUserIdFromUsername(payload.username)
+    const userSocketId = await this.getSoketIdFromUserId(userId)
+    let userNotice : string = null
+    
+    // ------------------------ Pas assez de parametre ------------------------
+    if (payload.channelName === undefined ||  payload.param[0] === undefined)
+    userNotice = `/MODE : bad format`
+    else {
+      const roomObject = await this.chatService.isRoomExist(payload.channelName)
+      // ------------------------ Le room est inconnu ------------------------
+      if (roomObject === null)
+      userNotice = `/MODE: The room ${payload.channelName[0]} don't exist`
+      // ------------------------ Le flag est inconnu ------------------------
+      else if (payload.param[0] !== 'invite' && payload.param[0] !== 'public' && payload.param[0] !== 'protected')
+      userNotice = `/MODE: Unknown flag ${payload.param[0]}`
+      // ------------------------ L'utilisateur n'est pas membre de la room ------------------------
+      else if (await this.chatService.isUserMemberOfRoom(userId, roomObject.id) === false)
+      userNotice = `/MODE: The user ${payload.target} is not a member of the room ${payload.channelName[0]}`
+      // ------------------------ L'utilisateur n'a pas les autorisations (n'est pas owner ou admin du channel) ------------------------
+      else if (await this.chatService.isUserOwnerOfChatRoom(userId, roomObject.id) === false 
+      && await this.chatService.isUserModeratorOfChatRoom(userId, roomObject.id) === false)
+      userNotice = `/MODE: You don't have the right to add a admin to the room ${payload.channelName}`
+      // ------------------------ On verifie si il n'y a pas trop de parametres selon le flag ------------------------
+      else if (payload.param[0] !== 'protected' && payload.param[1] !== undefined)
+      userNotice = `/MODE ${payload.param[0]}: bad format, to many argument`
+      else if (payload.param[0] === 'protected' && payload.param[2] !== undefined)
+      userNotice = `/MODE ${payload.param[0]}: bad format, to many argument`
+      // ------------------------ Sinon on vérifie le flag et on applique les changements ------------------------
+      else {
+        if (payload.param[0] === 'invite') {
+          this.chatService.changeInvite(roomObject.id, true)
+          userNotice = `/MODE ${payload.param[0]}: The channel ${payload.channelName} is now private`
+        }
+        else if (payload.param[0] === 'public') {
+          if (await this.chatService.isRoomPrivate(roomObject.name) === true)
+          await this.chatService.changeInvite(roomObject.id, false)
+          if (await this.chatService.isRoomProtected(roomObject.name) === true)
+          await this.chatService.removePassword(roomObject.id)
+          userNotice = `/MODE ${payload.param[0]}: The channel ${payload.channelName} is now public`
+        }
+        else if (payload.param[0] === 'protected') {
+          await this.chatService.createPassword(payload.param[1], roomObject.name)
+          userNotice = `/MODE ${payload.param[0]}: The channel ${payload.channelName} is now protected`
+        }
+      }
+    }
+    console.log(userSocketId)
+    // this.server.to(userSocketId).emit('notice', {
+    client.emit('notice', {
       id: payload.id,
       name: payload.username,
       channel: undefined,

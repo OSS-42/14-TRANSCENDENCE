@@ -113,7 +113,7 @@ export function Chat({ socket }: ChatProps) {
             overflow: 'auto',
           }}
         >
-          <FriendsAndUsers socket={socket} /> {/* Utilisez le composant combiné */}
+          <FriendsAndUsers socket={socket} /> 
         </Box>
       </Box>
     </Box>
