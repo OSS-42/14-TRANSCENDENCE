@@ -354,8 +354,9 @@ export class UserService {
         friend: { connect: { id: friend.id } },
       },
     });
+    return {  };
   }
-  async destroyFriend(userId: number, friendUserId: number): Promise<void> {
+  async destroyFriend(userId: number, friendUserId: number) {
     friendUserId = Number(friendUserId);
     const friendship = await this.prisma.friendship.findFirst({
       where: {
@@ -373,6 +374,7 @@ export class UserService {
         id: friendship.id,
       },
     });
+    return { };
   }
 
   async updateAvatar(user: Utilisateur, image: any) {

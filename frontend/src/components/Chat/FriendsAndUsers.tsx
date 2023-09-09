@@ -19,19 +19,22 @@ export function FriendsAndUsers({ socket }: someProp) {
   const [modalIsOpen, setModalIsOpen] = useState(false);
 
   useEffect(() => {
-    async function fetchUsersData() {
-      socket.on("updateConnectedUsers", (updatedUsers: number[]) => {
-        setConnectedUsers(updatedUsers);
-        fetchUsersData();
-      });
+    socket.on("updateConnectedUsers", (updatedUsers: number[]) => {
+      setConnectedUsers(updatedUsers);
+    });
 
-      const newFriendsList = await fetchFriendsList();
-      setFriendsList(newFriendsList);
-      const newUsersList = await fetchUsersList();
-      setUsersList(newUsersList);
+    async function fetchInitialData() {
+      try {
+        const newFriendsList = await fetchFriendsList();
+        setFriendsList(newFriendsList);
+        const newUsersList = await fetchUsersList();
+        setUsersList(newUsersList);
+      } catch (error) {
+        console.error("Erreur lors de la récupération des données :", error);
+      }
     }
-    fetchUsersData();
-    socket.emit("getConnectedUsers");
+    fetchInitialData();
+
     return () => {
       socket.off("updateConnectedUsers");
     };
