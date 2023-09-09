@@ -48,7 +48,7 @@ export class AuthControler {
     const access_token: string = token_object.access_token;
     res.cookie("jwt_token", access_token, { httpOnly: false, secure: false });
     console.log(token_object);
-    return res.redirect("http://10.11.1.6:8080");
+    return res.redirect("http://192.168.2.77:8080");
   }
 }
 

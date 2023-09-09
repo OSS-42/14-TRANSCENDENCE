@@ -63,19 +63,6 @@ export function Pong() {
   const [showButtons, setShowButtons] = React.useState(true);
 
   //------------------ GAME VARIABLES ------------------------
-  // ratio pour garder les meme proportions lors d'un resizing de la page
-  // attention, a cause du positionnement de la camera, height devient depth et depth devient height.
-
-  // variables avec resizing
-  // const paddleWidth: number = 0.000625 * dimension.width;
-  // const paddleHeight: number = 1;
-  // const paddleDepth: number = 0.008333333333 * dimension.height;
-  // const ballRadius: number = 0.000625 * dimension.width;
-  // const initialSpeedFactor = getSpeedFactor(dimension.width);
-  // const INITIAL_BALL_SPEED: number = 0.3 * initialSpeedFactor;
-  // const netWidth: number = 0.000625 * dimension.width;
-  // const netDepth: number = 0.008333333333 * dimension.height;
-  // const initialSpeedFactor = getSpeedFactor(dimension.width);
 
   // variables sans resizing
   const paddleWidth: number = 0.5;
@@ -115,7 +102,7 @@ export function Pong() {
   const [isHostWinner, setIsHostWinner] = React.useState(false);
 
   const currentTime = performance.now();
-  const updateFrequency = 1000 / 60;
+  const updateFrequency = 1000 / 80;
   const [lastUpdateTime, setLastUpdateTime] = useState(currentTime);
 
   // Ecoute parle le socket
@@ -136,8 +123,6 @@ export function Pong() {
       setClientName(data.clientName);
       handleCountdown();
     });
-
-    
 
     if (currentTime - lastUpdateTime >= updateFrequency) {
       socket.emit("gameParameters", {
@@ -293,19 +278,6 @@ export function Pong() {
   const WORLD_WIDTH: number = dimension.width / CAMERA_ZOOM;
   const WORLD_HEIGHT: number = dimension.height / CAMERA_ZOOM;
 
-//------------------ GAME UTILS ------------------------
-  // not necessary if no game resize
-  // function getSpeedFactor(width: number): number {
-  //   if (width < 300) {
-  //     return 0.2;
-  //   } else if (width < 450) {
-  //     return 0.5;
-  //   } else if (width < 700) {
-  //     return 0.8;
-  //   }
-  //   return 1;
-  // }
-
 //------------------ GAME GENERAL BEHAVIOR ------------------------
   // Timer to restart
 
@@ -388,45 +360,6 @@ export function Pong() {
       }, 5000);
     }
   }, [leftScore, rightScore]);
-
-//------------------ GAME RESIZING MANAGEMENT ------------------------
-    // methode pour conserver les ratio sur l'evenement resize
-    // a enlever si pas de resize
-    // React.useEffect(() => {
-    //   // const initialSpeedFactor = getSpeedFactor(dimension.width);
-    //   // const [ballSpeed, setBallSpeed] = React.useState(INITIAL_BALL_SPEED * initialSpeedFactor);
-      
-    //   const handleResize: () => void = () => {
-    //     let newWidth: number = window.innerWidth;
-    //     let newHeight: number = window.innerWidth * 3 / 4;
-
-    //     if (newWidth > 800) {
-    //       newWidth = 800;
-    //       newHeight = 600;
-    //     }
-
-    //     setDimensions({ width : newWidth, height: newHeight });
-
-    //     const speedFactor = getSpeedFactor(newWidth);
-    //     const newBallSpeed = INITIAL_BALL_SPEED * speedFactor;
-
-    //     const currentVelocityMagnitude = Math.sqrt(Math.pow(ballVelocity.x, 2) + Math.pow(ballVelocity.z, 2));
-        
-    //     // Normalize the current velocity
-    //     const normalizedVelocityX = ballVelocity.x / currentVelocityMagnitude;
-    //     const normalizedVelocityZ = ballVelocity.z / currentVelocityMagnitude;
-    
-    //     // Scale the normalized velocity by the new speed
-    //     const newVelocityX = normalizedVelocityX * newBallSpeed;
-    //     const newVelocityZ = normalizedVelocityZ * newBallSpeed;
-    
-    //     setBallVelocity({ x: newVelocityX, z: newVelocityZ });
-    //     // setBallSpeed(INITIAL_BALL_SPEED * (newWidth / WORLD_WIDTH))
-    //   }
-
-    //   window.addEventListener('resize', handleResize);
-    //   return () => window.removeEventListener('resize', handleResize);
-    // }, [ballSpeed, ballVelocity]);
 
     // offsite pour maintenir les paddles a 0.5 unit de leur bordure respective lorsqu'il y a resize
     const distanceFromCenter: number = 0.024 * dimension.width;
@@ -807,9 +740,6 @@ export function Pong() {
       </Box>
     )
   }
-
-
-
 
 //------------------ GAME SCENE RENDERER ------------------------
   return (
