@@ -535,9 +535,9 @@ export function Pong() {
 
       if (hitSectionLeft || hitSectionRight) {
         const hitPaddlePosition = hitSectionLeft ? leftPaddlePosition : rightPaddlePosition;
-        if (hitSectionLeft && (gameMode === 2 || gameMode === 4)) {
+        if (hostStatus && (gameMode === 2 || gameMode === 4)) {
           playUserHitSound();
-        } else if (hitSectionRight && (gameMode === 2 || gameMode === 4)) { //attention si 1 vs 1, laissez le son utilisateur
+        } else if (gameMode === 2 || gameMode === 4) { //attention si 1 vs 1, laissez le son utilisateur
           playCompHitSound();
         }
 
@@ -555,7 +555,7 @@ export function Pong() {
       }
 
       if (newX - ballRadius <= -WORLD_WIDTH / 2 || newX + ballRadius >= WORLD_WIDTH / 2) {
-        if (gameMode === 2|| gameMode === 4) {
+        if (gameMode === 2 || gameMode === 4) {
           pausePowerupSound();
           playGoalSound();
         }
@@ -682,10 +682,12 @@ export function Pong() {
 
   const RightPaddle: React.FC<RightPaddleProps> = ({ rightPaddlePositionZ, setRightPaddlePositionZ }) => {
 
+    // The lerp function helps you find a point that is a certain percentage t along the way from a to b.
+    const lerp = (a: number, b: number, t: number): number => a + t * (b - a);
+    let lerpFactor = 0.3; 
+    
     if (gameMode === 1 || gameMode === 2) { // si computer
       const RIGHT_PADDLE_SPEED: number = 0.8;
-
-      const lerp = (a: number, b: number, t: number): number => a + t * (b - a);
 
       useFrame(() => {
         const direction: number = Math.sign(ballPosition.z - rightPaddlePositionZ);
@@ -711,16 +713,18 @@ export function Pong() {
         
       useFrame(() => {
         let newPosition;
-        if (hostStatus) {
+        if (!hostStatus) {
           if (cameraMode === "perspective") {
             newPosition = mouse.x * (WORLD_WIDTH / 2);
           } else {
             newPosition = -mouse.y * (WORLD_HEIGHT / 2);
           }
         } else {
-          newPosition = leftPaddlePositionZ;
+          newPosition = rightPaddlePositionZ;
         }
         
+        newPosition = lerp(rightPaddlePositionZ, newPosition, lerpFactor);
+
         const paddleTopEdge = newPosition + paddleDepth / 2;
         const paddleBottomEdge = newPosition - paddleDepth / 2;
         
