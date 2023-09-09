@@ -582,6 +582,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const userSocketId = await this.getSoketIdFromUserId(userId)
     let userNotice : string = null
     
+    console.log('Dans MODE')
     // ------------------------ Pas assez de parametre ------------------------
     if (payload.channelName === undefined ||  payload.param[0] === undefined)
     userNotice = `/MODE : bad format`
@@ -591,7 +592,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       if (roomObject === null)
       userNotice = `/MODE: The room ${payload.channelName[0]} don't exist`
       // ------------------------ Le flag est inconnu ------------------------
-      else if (payload.param[0] !== 'invite' && payload.param[0] !== 'public' && payload.param[0] !== 'protected')
+      else if (payload.param[0] !== 'private' && payload.param[0] !== 'public' && payload.param[0] !== 'protected')
       userNotice = `/MODE: Unknown flag ${payload.param[0]}`
       // ------------------------ L'utilisateur n'est pas membre de la room ------------------------
       else if (await this.chatService.isUserMemberOfRoom(userId, roomObject.id) === false)
@@ -605,17 +606,23 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       userNotice = `/MODE ${payload.param[0]}: bad format, to many argument`
       else if (payload.param[0] === 'protected' && payload.param[2] !== undefined)
       userNotice = `/MODE ${payload.param[0]}: bad format, to many argument`
+      else if (payload.param[0] === 'protected' && payload.param[1] === undefined)
+      userNotice = `/MODE ${payload.param[0]}: bad format, password is missing`
       // ------------------------ Sinon on vérifie le flag et on applique les changements ------------------------
       else {
-        if (payload.param[0] === 'invite') {
+        if (payload.param[0] === 'private') {
           this.chatService.changeInvite(roomObject.id, true)
           userNotice = `/MODE ${payload.param[0]}: The channel ${payload.channelName} is now private`
         }
         else if (payload.param[0] === 'public') {
+          console.log(await this.chatService.isRoomProtected(roomObject.name) === true)
           if (await this.chatService.isRoomPrivate(roomObject.name) === true)
           await this.chatService.changeInvite(roomObject.id, false)
           if (await this.chatService.isRoomProtected(roomObject.name) === true)
-          await this.chatService.removePassword(roomObject.id)
+          {
+            console.log('dans isRoomProtected')
+            await this.chatService.removePassword(roomObject.id)
+          }
           userNotice = `/MODE ${payload.param[0]}: The channel ${payload.channelName} is now public`
         }
         else if (payload.param[0] === 'protected') {
@@ -624,8 +631,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }
       }
     }
-    console.log(userSocketId)
-    // this.server.to(userSocketId).emit('notice', {
     client.emit('notice', {
       id: payload.id,
       name: payload.username,
