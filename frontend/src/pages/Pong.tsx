@@ -102,7 +102,7 @@ export function Pong() {
   const [isHostWinner, setIsHostWinner] = React.useState(false);
 
   const currentTime = performance.now();
-  const updateFrequency = 1000 / 80;
+  const updateFrequency = 1000 / 60;
   const [lastUpdateTime, setLastUpdateTime] = useState(currentTime);
 
   // Ecoute parle le socket
@@ -138,7 +138,7 @@ export function Pong() {
 
     socket.on("gameParameters", (data: GameParameters) => {
       setGameId(data.gameId);
-      console.log('🏓   GAMEID: ', gameId);
+      // console.log('🏓   GAMEID: ', gameId);
       setBallPosition(data.ballPosition);
       setLeftPaddlePositionZ(data.leftPaddlePositionZ);
       setRightPaddlePositionZ(data.rightPaddlePositionZ);
@@ -630,6 +630,10 @@ export function Pong() {
 
   // fixation de la position gauche du paddle
   const leftPaddleXPosition: number = -distanceFromCenter;
+
+  // The lerp function helps you find a point that is a certain percentage t along the way from a to b.
+  const lerp = (a: number, b: number, t: number): number => a + t * (b - a);
+    let lerpFactor = 0.3; 
       
   // mouvement du left (user1) paddle a la souris.
   interface LeftPaddleProps {
@@ -651,7 +655,9 @@ export function Pong() {
       } else {
         newPosition = leftPaddlePositionZ;
       }
-        
+
+      newPosition = lerp(leftPaddlePositionZ, newPosition, lerpFactor);
+
       const paddleTopEdge = newPosition + paddleDepth / 2;
       const paddleBottomEdge = newPosition - paddleDepth / 2;
       
@@ -682,10 +688,6 @@ export function Pong() {
 
   const RightPaddle: React.FC<RightPaddleProps> = ({ rightPaddlePositionZ, setRightPaddlePositionZ }) => {
 
-    // The lerp function helps you find a point that is a certain percentage t along the way from a to b.
-    const lerp = (a: number, b: number, t: number): number => a + t * (b - a);
-    let lerpFactor = 0.3; 
-    
     if (gameMode === 1 || gameMode === 2) { // si computer
       const RIGHT_PADDLE_SPEED: number = 0.8;
 
