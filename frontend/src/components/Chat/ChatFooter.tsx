@@ -12,6 +12,7 @@ import kickCommand from "./commands/kickCommand";
 import banCommand from "./commands/banCommand";
 import blockCommand from "./commands/blockCommand";
 import modeCommand from "./commands/modeCommand";
+import unblockCommand from "./commands/unblockCommand";
 
 type ChatFooterProps = {
   socket: Socket; // Assurez-vous que ce type correspond au type de socket que vous utilisez
@@ -77,6 +78,8 @@ const ChatFooter = ({ socket }: ChatFooterProps) => {
         banCommand({ data, socket, user });
       else if (data.startsWith("/BLOCK"))
         blockCommand({ data, socket, user });
+      else if (data.startsWith("/UNBLOCK"))
+        unblockCommand({ data, socket, user });
       else if (data.startsWith("/MODE"))
         modeCommand({ data, socket, user });
       else

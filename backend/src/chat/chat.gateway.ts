@@ -178,6 +178,36 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     notice : notice
     })
   }
+
+  // ---------------------------------------------------------- UNBLOCK ----------------------------------------------------------
+  // Utilisation :  /UNBLOCK nomCible 
+  @SubscribeMessage('unblockUser')
+  async unblockUser(client: Socket, payload: any) {
+    const userId = await this.chatService.getUserIdFromUsername(payload.username)
+    const blockedUserIds = await this.chatService.getBlockedUserIds(userId)
+    let notice : string = null
+    // ------------------------ Trop de parametre ------------------------
+    if (payload.target[0] === undefined ||  payload.target[1] !== undefined)
+      notice = '/UNBLOCK : bad format'
+    else {
+      const targetId : number = await this.chatService.getUserIdFromUsername(payload.target[0])
+      if (targetId === null)
+        notice = `/UNBLOCK: The user ${payload.target} doesn't exist`
+      else if (blockedUserIds.find((id) => id === targetId)  == undefined)
+        notice = `/UNBLOCK: The user ${payload.target} is not block`
+      else {
+        notice = `/UNBLOCK : You unblock ${payload.target}`
+        this.chatService.unblockUser(targetId, userId)
+      }      
+    }
+    client.emit('notice', {
+    id: payload.id,
+    name: payload.username,
+    channel: payload.channelName,
+    text: undefined,
+    notice : notice
+    })
+  }
   
   
 
