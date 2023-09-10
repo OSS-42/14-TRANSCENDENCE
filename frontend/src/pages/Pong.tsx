@@ -43,6 +43,10 @@ type Connected = {
   isConnected: boolean;
 }
 
+type OppDisconnected = {
+  message: string,
+}
+
 const socket = socketIO('/pong', {
   query: {
     token: Cookies.get('jwt_token')
@@ -100,6 +104,7 @@ export function Pong() {
   const [waitingForPlayer, setWaitingForPlayer] = React.useState(false);
   const [gameId, setGameId] = React.useState<string>("");
   const [isHostWinner, setIsHostWinner] = React.useState(false);
+  const [oppDisconnected, setOppDisconnected] = React.useState<OppDisconnected>(false);
 
   const currentTime = performance.now();
   const updateFrequency = 1000 / 60;
@@ -107,12 +112,17 @@ export function Pong() {
 
   // Ecoute parle le socket
   useEffect(() => {
-    socket.on("Connected", (data: any) => {
+    socket.on("connected", (data: any) => {
       console.log('🏓   Connection established ? ', data.isConnected);
       setIsConnected(data.isConnected);
       if (!data.isConnected) {
         setGameLaunched(false);
       }
+    })
+
+    socket.on("opponentDisconnected", (data: any) => {
+      console.log(data);
+      setOppDisconnected(true);
     })
 
     socket.on('playerJoined', (data: PlayerJoined) => {
@@ -151,10 +161,11 @@ export function Pong() {
     });
 
     return () => {
-      socket.off("Connected");
+      socket.off("connected");
       socket.off("gameParameters");
       socket.off("playerJoined");
-      socket.off("WeHaveAWinner");
+      socket.off("weHaveAWinner");
+      socket.off("oppDisconnected");
     };
   }, [socket, 
       connection, 
@@ -283,7 +294,7 @@ export function Pong() {
   // Timer to restart
 
   const handleCountdown = (): void => {
-    if (isGameOver.current) {
+    if (isGameOver.current || oppDisconnected) {
       return;
     }
 
@@ -330,6 +341,17 @@ export function Pong() {
 
   // Scoreboard
   // en cas de victoire, reinitialisation dedu jeu, identification du gagnant et perdant pour envoi a la DB et retour a la page de selection des modes
+
+  React.useEffect(() => {
+    if (oppDisconnected) {
+      setIsPaused(true);
+      handleCountdown();
+
+      setTimeout(() => {
+        window.location.href = '/game';
+      }, 5000);
+    }
+  }, [oppDisconnected]);
 
   React.useEffect(() => {
     if (rightScore === 3 || leftScore === 3) {
@@ -770,13 +792,7 @@ export function Pong() {
             <div className="starting-screen">
               {/* <img src="../src/assets/arcade_2k.png" alt="Starting Screen" /> */}
               <img src="../src/assets/animated.gif" alt="Starting Screen" />
-              <div className="game-buttons" style={{
-                position: 'absolute',
-                top: '75%',
-
-                left: '50%',
-                transform: 'translate(-50%, -50%)'
-              }}>
+              <div className="game-buttons">
                 <button onClick={handleClassicModeIA}>Classic 1 vs IA</button>
                 <button onClick={handlePowerupModeIA}>Powerup 1 vs IA</button>
                 <button onClick={handleClassicModeMulti}>Classic 1 vs 1</button>
@@ -857,6 +873,13 @@ export function Pong() {
             {waitingForPlayer ? (
               <div className="winner-message">
                 {waitingForPlayer && <span>"Waiting for another player"</span>}
+              </div>
+            ): null}
+
+            {/* Opponnent disconnected */}
+            {oppDisconnected ? (
+              <div className="disconnect-message">
+                {oppDisconnected && <span>"Your Opponnent has Raged Quit. End of Game"</span>}
               </div>
             ): null}
           </div>

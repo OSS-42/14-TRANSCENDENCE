@@ -31,7 +31,7 @@ export class PongGateway {
           console.log("🏓   ", decoded);
 
           const isConnected = { isConnected: true };
-          client.emit("Connected", isConnected);
+          client.emit("connected", isConnected);
 
         } catch (error) {
           console.log("🏓   Error:", error.message);
@@ -138,6 +138,13 @@ export class PongGateway {
 
       const player1 = queue.shift();
       const player2 = queue.shift();
+
+      const clientsMap = new Map();
+      clientsMap.set(player1.id, player1);
+      clientsMap.set(player2.id, player2);
+
+      this.gameIds.set(clientsMap, gameId);
+      
       console.log('🏓   player1: ', player1.id);
       console.log('🏓   player1 username: ', this.playerNames.get(player1.id));
       const hostName = this.playerNames.get(player1.id);
