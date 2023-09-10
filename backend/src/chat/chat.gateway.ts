@@ -83,7 +83,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async handleMessage(client: Socket, payload: any){ //voir pour changer any
     const userId = await this.chatService.getUserIdFromUsername(payload.name)
     this.server.emit('messageResponse', {
-      id: payload.id,
       userId: userId,
       name: payload.name,
       channel: 'General',
@@ -141,7 +140,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       }
     } 
     client.emit('notice', {
-      id: payload.id,
       name: payload.username,
       channel: payload.channelName,
       text: undefined,
@@ -171,7 +169,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       }      
     }
     client.emit('notice', {
-    id: payload.id,
     name: payload.username,
     channel: payload.channelName,
     text: undefined,
@@ -201,11 +198,64 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       }      
     }
     client.emit('notice', {
-    id: payload.id,
     name: payload.username,
     channel: payload.channelName,
     text: undefined,
     notice : notice
+    })
+  }
+
+  // ---------------------------------------------------------- HELP ----------------------------------------------------------
+  // Utilisation :  /HELP 
+  @SubscribeMessage('help')
+  async help(client: Socket, payload: any) {
+    const userId = await this.chatService.getUserIdFromUsername(payload.username)
+    let notice : string = undefined
+    let help : string = undefined
+    // ------------------------ Trop de parametre ------------------------
+    if (payload.param[0] !== undefined)
+      notice = '/HELP: Too many argument'
+    else {
+    help = `
+    <br>Here are some tips on how to use the chat commands:<br>
+<br>JOIN :<br>
+&nbsp;- To join or create a room with a password: /JOIN #roomName password<br>
+&nbsp;- To join or create a public room with a password: /JOIN #roomName password<br>
+&nbsp;- To create a private room: /JOIN #roomName +i<br>
+<br>BLOCK :<br>
+&nbsp;- To block a user: /BLOCK username<br>
+<br>UNBLOCK :<br>
+&nbsp;- To unblock a user: /UNBLOCK username<br>
+<br>HELP :<br>
+&nbsp;- To get a list of available commands: /HELP<br>
+<br>PRIVMSG :<br>
+&nbsp;- To send a message to a channel: /PRIVMSG #channelName message...<br>
+&nbsp;- To send a private message to a user: /PRIVMSG username message...<br>
+<br>INVITE :<br>
+&nbsp;- To invite a user to a channel: /INVITE username #channelName<br>
+<br>MUTE :<br>
+&nbsp;- To mute a user in a channel: /MUTE username #channelName<br>
+<br>KICK :<br>
+&nbsp;- To kick a user from a channel: /KICK username #channelName<br>
+<br>BAN :<br>
+&nbsp;- To ban a user from a channel: /BAN username #channelName<br>
+<br>ADMIN :<br>
+&nbsp;- To grant admin privileges to a user in a channel: /ADMIN username #channelName<br>
+<br>MODE :<br>
+&nbsp;- To change channel modes:<br>
+&nbsp;&nbsp;- Set channel to invitation-only: /MODE #channelName invite<br>
+&nbsp;&nbsp;- Set channel to public: /MODE #channelName public<br>
+&nbsp;&nbsp;- Set channel to protected mode with a password: /MODE #channelName protected password<br><br>
+`;
+
+
+    }      
+    client.emit('notice', {
+    name: payload.username,
+    channel: payload.channelName,
+    text: undefined,
+    notice : notice,
+    help : help
     })
   }
   
@@ -229,7 +279,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     {
       notice = "/PRIVMSG: bad format"
       client.emit(event, {
-        id: payload.id,
         userId: userId,
         name: payload.username,
         channel: payload.target,
@@ -255,7 +304,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         // ---------------------- J'ENVOIS LE MESSAGE AU CHANNEL ----------------------
         if (event === "messageResponse")
           this.server.to(payload.target).emit(event, {
-            id: payload.id,
             userId: userId,
             name: payload.username,
             channel: payload.target,
@@ -265,7 +313,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         // ---------------------- J'ENVOIS UNE NOTICE A L'UTILSATEUR DE LA COMMANDE (ERREUR)  ----------------------
         else 
           client.emit(event, {
-            id: payload.id,
             userId: userId,
             name: payload.username,
             channel: payload.target,
@@ -288,7 +335,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         // ---------------------- J'ENVOIS LE MESSAGE A LA CIBLE ----------------------
         if (event === 'messageResponse')
           this.server.to(socketId).emit(event, {
-            id: payload.id,
             userId: userId,
             name: payload.username,
             channel: undefined,
@@ -299,7 +345,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
           // ---------------------- J'ENVOIS UNE NOTICE A L'UTILSATEUR DE LA COMMANDE (ERREUR)  ----------------------
           client.emit(event, {
           userId: userId,
-          id: payload.id,
           name: payload.username,
           channel: undefined,
           text: payload.message,
@@ -352,8 +397,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
     // ------------------------ Le channel n'existe pas ------------------------
     if (targetSocketId !== null &&  targetNotice !== null) {
-      this.server.to(targetSocketId).emit('notice', {
-        id: payload.id,
+      this.server.to(targetSocketId).emit
+      ('notice', {
         name: payload.username,
         channel: undefined,
         text: null,
@@ -361,7 +406,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       })
     }
     this.server.to(userSocketId).emit('notice', {
-      id: payload.id,
       name: payload.username,
       channel: undefined,
       text: null,
@@ -417,14 +461,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     // ------------------------ Le channel n'existe pas ------------------------
     if (targetSocketId !== null && targetNotice !== null)
       this.server.to(targetSocketId).emit('notice', {
-        id: payload.id,
         name: payload.username,
         channel: undefined,
         text: null,
         notice: targetNotice
       })
     this.server.to(userSocketId).emit('notice', {
-      id: payload.id,
       name: payload.username,
       channel: undefined,
       text: null,
@@ -476,14 +518,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     } 
     if (targetSocketId !== null &&  targetNotice !== null)
       this.server.to(targetSocketId).emit('notice', {
-        id: payload.id,
         name: payload.username,
         channel: undefined,
         text: null,
         notice: targetNotice
       })
     this.server.to(userSocketId).emit('notice', {
-      id: payload.id,
       name: payload.username,
       channel: undefined,
       text: null,
@@ -535,14 +575,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     // ------------------------ Le channel n'existe pas ------------------------
     if (targetSocketId !== null && targetNotice !== null)
       this.server.to(targetSocketId).emit('notice', {
-        id: payload.id,
         name: payload.username,
         channel: undefined,
         text: null,
         notice: targetNotice
       })
     this.server.to(userSocketId).emit('notice', {
-      id: payload.id,
       name: payload.username,
       channel: undefined,
       text: null,
@@ -597,14 +635,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     // ------------------------ Le channel n'existe pas ------------------------
     if (targetSocketId !== null && targetNotice !== null)
       this.server.to(targetSocketId).emit('notice', { //probleme ici 
-        id: payload.id,
         name: payload.username,
         channel: undefined,
         text: null,
         notice: targetNotice
       })
     this.server.to(userSocketId).emit('notice', {
-      id: payload.id, 
       name: payload.username,
       channel: undefined,
       text: null,
@@ -614,10 +650,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 
 // ---------------------------------------------------------- MODE ----------------------------------------------------------
+// Utilisation :  /MODE nomDuChannel flag
   // Passer le channel sur invitation : /MODE nomDuChannel invite
   // Passer le channel en public : /MODE nomDuChannel public 
   // Passer le channel en mode protection : /MODE nomDuChannel protected motDePasse
-  // Utilisation :  /MODE nomDuChannel flag
   @SubscribeMessage('modeRoom')
   async modeRoom(client: Socket, payload: any) {
     const userId = await this.chatService.getUserIdFromUsername(payload.username)
@@ -674,7 +710,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       }
     }
     client.emit('notice', {
-      id: payload.id,
       name: payload.username,
       channel: undefined,
       text: null,

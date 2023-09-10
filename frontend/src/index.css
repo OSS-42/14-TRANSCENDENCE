@@ -25,18 +25,25 @@ body {
 }
 
 .nameSender {
-  color: green;
+  color: rgb(103, 222, 18);
   font-weight: bold; /* Texte gras */
 }
 
 .channelSender {
-  color: blue;
+  color: #026c96;
   font-weight: bold; /* Texte gras */
 }
 
 .notice {
-  color: #ffd700; /* Jaune doré */
+  color: #eae712; /* Jaune doré */
   font-weight: bold; /* Texte gras */
+}
+
+.help {
+  color: #66cccc; 
+  font-weight: bold; /* Texte gras */
+  tab-size: 4;
+  font-size: 14px; /* Taille de police de 14 pixels */
 }
 
 header nav {

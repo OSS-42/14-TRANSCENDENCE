@@ -13,6 +13,7 @@ import banCommand from "./commands/banCommand";
 import blockCommand from "./commands/blockCommand";
 import modeCommand from "./commands/modeCommand";
 import unblockCommand from "./commands/unblockCommand";
+import helpCommand from "./commands/helpCommand";
 
 type ChatFooterProps = {
   socket: Socket; // Assurez-vous que ce type correspond au type de socket que vous utilisez
@@ -82,6 +83,10 @@ const ChatFooter = ({ socket }: ChatFooterProps) => {
         unblockCommand({ data, socket, user });
       else if (data.startsWith("/MODE"))
         modeCommand({ data, socket, user });
+      else if (data.startsWith("/HELP"))
+        helpCommand({ data, socket, user });
+      // else if (data.startsWith("/LIST"))
+      //   modeCommand({ data, socket, user });
       else
         defaultCommand({ data, socket, user });
     }
