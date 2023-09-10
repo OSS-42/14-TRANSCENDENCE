@@ -13,7 +13,7 @@ const root = ReactDOM.createRoot(
 );
 
 root.render(
-  <React.StrictMode>
+ // <React.StrictMode>
     <ThemeProvider theme={theme}>
       <AuthProvider>
         <App />

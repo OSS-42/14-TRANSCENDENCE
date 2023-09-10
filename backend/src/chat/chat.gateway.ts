@@ -3,7 +3,7 @@ import { Server, Socket } from 'socket.io';
 import { ChatService } from './chat.service';
 import { verify } from 'jsonwebtoken';
 import { ConfigService } from '@nestjs/config';
-import { ConnectedUsersService } from './connectedUsers.service';
+import { ConnectedUsersService } from '../connectedUsers/connectedUsers.service';
 
 
 @WebSocketGateway({ cors: true,  namespace: 'chat' })
@@ -12,7 +12,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   // AVec cette map, on peut identifier le client.id à partir d'un Utilisateur ID.
   //private connectedUsers: Map<number, string> = new Map(); 
 
-  constructor(private chatService: ChatService, private config: ConfigService,private readonly connectedUsersService: ConnectedUsersService) {
+  constructor(private chatService: ChatService, private config: ConfigService, private readonly connectedUsersService: ConnectedUsersService) {
     setInterval(() => this.emitUpdateConnectedUsers(), 2000);
   }
   @WebSocketServer()

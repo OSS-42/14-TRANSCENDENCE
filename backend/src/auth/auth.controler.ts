@@ -43,12 +43,19 @@ export class AuthControler {
   @Get()
   async getCode42(@Query("code") code: string, @Res() res: Response) {
     console.log("Code:", code);
+   
     //ici je vais rediriger la reponse vers le frontend
     const token_object = await this.authService.getCode42(code);
+     const host = this.config.get("HOST");
+     //ON va avoir besoin d<une PAGE deja log qui ne se connecte pas au sockets.
+    if (token_object.access_token === "poulet")
+      return  res.redirect(`http://fsdfsfds${host}/sdhajhdjsa`);
     const access_token: string = token_object.access_token;
+    
+   
     res.cookie("jwt_token", access_token, { httpOnly: false, secure: false });
     console.log(token_object);
-    const host = this.config.get("HOST");
+    
     return res.redirect(`${host}`);
   }
 }

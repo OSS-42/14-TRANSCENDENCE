@@ -3,6 +3,7 @@ import { PrismaService } from "src/prisma/prisma.service";
 import axios from "axios";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
+import { ConnectedUsersService } from 'src/connectedUsers/connectedUsers.service';
 
 
 
@@ -11,7 +12,8 @@ export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwt: JwtService,
-    private config: ConfigService
+    private config: ConfigService,
+    private readonly connectedUsersService: ConnectedUsersService
   ) {}
 
   async signToken(
@@ -36,7 +38,7 @@ export class AuthService {
   //Fonction qui contacte lapi--42 afin de recuperer lacces token, elle cree  un nouvelle utilisateur egalement
   async getCode42(code: string) {
     let token: string;
-    let UserToken: Promise<{ access_token: string }>;
+    let UserToken: Promise<{ access_token: string }> = Promise.resolve({ access_token: '' })
     const clientID = this.config.get("CLIENT_ID");
     const clientSecret = this.config.get("CLIENT_SECRET");
     const host = this.config.get("HOST");
@@ -82,6 +84,12 @@ export class AuthService {
           });
         } else {
           console.log("Utilisateur existe deja");
+        }
+        console.log(this.connectedUsersService.connectedUsers)
+        if (this.connectedUsersService.connectedUsers.has(user.id)) {
+          (await UserToken).access_token = "poulet"
+
+          return (UserToken)
         }
         UserToken = this.signToken(user.id, user.email);
         // const test = await this.prisma.utilisateur.update({
