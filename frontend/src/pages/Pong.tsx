@@ -121,6 +121,7 @@ export function Pong() {
       setGameId(data.gameId);
       setHostname(data.hostName);
       setClientName(data.clientName);
+      console.log('🏓   GAMEID: ', data.gameId);
       handleCountdown();
     });
 
@@ -338,7 +339,7 @@ export function Pong() {
   
       let winnerText = "";
       if (rightScore === 3) {
-        winnerText = (gameMode === 1 || gameMode === 3) ? "Computers wins!" : `${clientName} wins!`;
+        winnerText = (gameMode === 1 || gameMode === 2) ? "Computers wins!" : `${clientName} wins!`;
         setIsHostWinner(false);
       } else {
         winnerText = `${hostname} wins!`;
@@ -717,7 +718,7 @@ export function Pong() {
         let newPosition;
         if (!hostStatus) {
           if (cameraMode === "perspective") {
-            newPosition = mouse.x * (WORLD_WIDTH / 2);
+            newPosition = -mouse.x * (WORLD_WIDTH / 2);
           } else {
             newPosition = -mouse.y * (WORLD_HEIGHT / 2);
           }
@@ -790,7 +791,7 @@ export function Pong() {
             {/* Camera Controller */}
             <ControlledCameras
               mode={cameraMode}
-              perspectivePosition={[-50, 10, 0]}
+              perspectivePosition={ hostStatus ? [-50, 10, 0] : [50, 10, 0] }
               perspectiveTarget={[0, 0, 0]}
               orthographicPosition={[0, 10, 0]}
               orthographicTarget={[0, 0, 0]}

@@ -9,10 +9,10 @@ import { v4 as uuid } from 'uuid';
 export class PongGateway {
   constructor(private pongService: PongService, private config: ConfigService) {}
 
-  private connectedUsers: Map<number, string> = new Map();
   private playerNames: Map<string, string> = new Map();
   private gameModeQueue: Map<number, Socket[]> = new Map();
   private gameStates: Map<string, any> = new Map();
+  private gameIds: Map<any, string> = new Map();
   
   @WebSocketServer()
   server: Server
@@ -29,15 +29,9 @@ export class PongGateway {
           const decoded = verify(token, this.config.get("JWT_SECRET"));
           console.log("🏓   voici lidentite du socket");
           console.log("🏓   ", decoded);
-          this.connectedUsers.set( Number(decoded.sub), client.id);
-
-          console.log("🏓   Connected Users:", this.connectedUsers);
-
-          const connectedUserIds = Array.from(this.connectedUsers.keys());
-          this.server.emit("updateConnectedUsers", connectedUserIds);
 
           const isConnected = { isConnected: true };
-          this.server.emit("Connected", isConnected);
+          client.emit("Connected", isConnected);
 
         } catch (error) {
           console.log("🏓   Error:", error.message);
@@ -50,27 +44,33 @@ export class PongGateway {
   }
 
   handleDisconnect(client: Socket) {
+
+    let gameIdToTerminate: string;
+    let clientsMapToTerminate: any;
     
-    // Remove the client from any gameModeQueues they might be in
-    for (const [gameMode, queue] of this.gameModeQueue) {
-      const index = queue.indexOf(client);
-      if (index !== -1) {
-        queue.splice(index, 1);
+    // Identify the game ID to terminate when disconnect or end of game.
+    for (const [clientsMap, gameId] of this.gameIds.entries()) {
+      if (clientsMap.has(client.id)) {
+        gameIdToTerminate = gameId;
+        clientsMapToTerminate = clientsMap;
+        break;
+      }
+    }
+
+    if (gameIdToTerminate && clientsMapToTerminate) {
+      //Notify remaining player
+      for (const [playerId, playerSocket] of clientsMapToTerminate.entries()) {
+        if (playerId !== client.id) {
+          console.log(`🏓   ⚡: ${client.id} user just connected!`);
+          playerSocket.emit('opponentDisconnected', { message: 'Your opponent has Disconnected. End of Game.' });
+        }
       }
     }
 
     const isConnected = false;
     console.log(`🏓   🔥: ${client.id} user disconnected`);
-    this.server.emit('Connected', isConnected ); 
+    client.emit('Connected', isConnected ); 
 
-    //supprime le le client.id de la map de connectedUser lorsque ce dernier ce déconnecte!
-    for (const [userId, socketId] of this.connectedUsers.entries()) {
-      if (socketId === client.id) {
-        this.connectedUsers.delete(userId);
-        console.log("🏓   Connected Users:", this.connectedUsers)
-        break;
-      }
-    }
   }
 
   @SubscribeMessage('waitingForPlayerGM3')
@@ -89,11 +89,18 @@ export class PongGateway {
     this.playerNames.set(client.id, payload.playerName);    
   
   if (queue.length >= 2) {
-      console.log('🏓   ⚡ 2 clients !! ⚡');
+      console.log('🏓   ⚡ 2 clients for GM 3!! ⚡');
       const gameId = uuid();
-      
+
       const player1 = queue.shift();
       const player2 = queue.shift();
+
+      const clientsMap = new Map();
+      clientsMap.set(player1.id, player1);
+      clientsMap.set(player2.id, player2);
+
+      this.gameIds.set(clientsMap, gameId);
+
       console.log('🏓   player1: ', player1.id);
       console.log('🏓   player1 username: ', this.playerNames.get(player1.id));
       const hostName = this.playerNames.get(player1.id);
@@ -126,7 +133,7 @@ export class PongGateway {
     this.playerNames.set(client.id, payload.playerName);    
   
   if (queue.length >= 2) {
-      console.log('🏓   ⚡ 2 clients !! ⚡');
+      console.log('🏓   ⚡ 2 clients for GM 4!! ⚡');
       const gameId = uuid();
 
       const player1 = queue.shift();
