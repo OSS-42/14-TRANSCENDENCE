@@ -2,11 +2,11 @@ import {
   Body,
   Controller,
   Get,
-  ParseIntPipe,
+  UseGuards,
   Post,
   Query,
-  Redirect,
   Res,
+  Req,
 } from "@nestjs/common";
 import {
   ApiBearerAuth,
@@ -16,7 +16,7 @@ import {
 } from "@nestjs/swagger";
 import { AuthService } from "./auth.service";
 import { Response } from "express";
-import { AuthDto } from "./dto/auth.dto";
+import { JwtGuard } from "src/auth/guard";
 import { ConfigService } from "@nestjs/config";
 
 //Définition des diffrentes routes du module Auth
@@ -43,32 +43,56 @@ export class AuthControler {
   @Get()
   async getCode42(@Query("code") code: string, @Res() res: Response) {
     console.log("Code:", code);
+   
     //ici je vais rediriger la reponse vers le frontend
     const token_object = await this.authService.getCode42(code);
+     const host = this.config.get("HOST");
+     //ON va avoir besoin d<une PAGE deja log qui ne se connecte pas au sockets.
+    if (token_object.access_token === "poulet")
+      return  res.redirect(`http://fsdfsfds${host}/sdhajhdjsa`);
     const access_token: string = token_object.access_token;
+    
+   
     res.cookie("jwt_token", access_token, { httpOnly: false, secure: false });
     console.log(token_object);
-    const host = this.config.get("HOST");
+    
     return res.redirect(`${host}`);
+  }
+
+//---routes pour le 2FA----//
+
+
+//C<est une route post, mais il n'y a pas de body pour l<instant
+  @UseGuards(JwtGuard) 
+  @Post('enable2FA')
+  async enable2FA(@Req() req) {
+    const userId = req.user.id; 
+    const { otpauthUrl } = await this.authService.enable2FA(userId);
+    return { otpauthUrl };
+  }
+
+  //C<est une route post, mais il n'y a pas de body pour l<instant
+  @UseGuards(JwtGuard) 
+  @Post('disable2FA')
+  async disable2FA(@Req() req) {
+    const userId = req.user.id;
+    await this.authService.disable2FA(userId);
+  
+    return { message: '2FA has been disabled.' };
+  }
+
+  
+  @UseGuards(JwtGuard) 
+  @Post('verify2FA')
+  async verify2FA(@Req() req, @Body() body: { token: string }) {
+    const userId = req.user.id; 
+    const verified = await this.authService.verify2FA(userId, body.token);
+
+    if (verified) {
+      return { message: '2FA code is valid.' };
+    } else {
+      return { message: 'Invalid 2FA code.' };
+    }
   }
 }
 
-//    //@ApiBearerAuth()
-//    @Post('signup')
-//     signup(
-//         @Body() dto: AuthDto
-//         ) {
-//         console.log({
-//             dto,
-//         });
-//         return this.authService.signup(dto);
-//     }
-
-//     @Post('singin')
-//     singin(@Body() dto: AuthDto){
-//         console.log({
-//             dto,
-//         });
-//         return this.authService.signin(dto);
-//     }
-// }

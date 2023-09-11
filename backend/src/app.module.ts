@@ -8,6 +8,7 @@ import { PongModule } from './pong/pong.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { MulterModule } from '@nestjs/platform-express';
+import { ConnectedUsersModule } from './connectedUsers/connectedUsers.module';
 
 
 
@@ -26,6 +27,7 @@ import { MulterModule } from '@nestjs/platform-express';
   UserModule,
   PrismaModule,
   ChatModule,
-  PongModule],
+  PongModule,
+  ConnectedUsersModule],
 })
 export class AppModule {}
