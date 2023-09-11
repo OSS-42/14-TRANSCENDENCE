@@ -12,7 +12,6 @@ import { FriendsAndUsers } from "../components/Chat/FriendsAndUsers";
 // I'm still not sure how everything interacts, but I'll find out soon enough.
 // Il y une facon de garder l'historique du chat on refresh, avec le local storage. EZCLAP voir le video discord
 type ChatMessage = {
-  id: number; // un identifiant unique pour chaque message
   userId: number;
   name: string;
   channel: string;
@@ -24,8 +23,15 @@ type ChatProps = {
   socket: Socket;
 };
 
+
 export function Chat({ socket }: ChatProps) {
   //la valeur de base de setMessage est prise dans le localStorage
+  
+  const handleMessageResponse = (data: ChatMessage) => {
+    console.log(data)
+    setMessages(prevMessages => [...prevMessages, data]);
+  };
+  
   const [messages, setMessages] = useState<ChatMessage[]>(()=>{
     const localValues= localStorage.getItem("chatMessages")
     if(localValues ==null) return []
@@ -39,21 +45,13 @@ export function Chat({ socket }: ChatProps) {
   }, [messages]);
 
   useEffect(() => {
-    const handleMessageResponse = (data: ChatMessage) => {
-      console.log(data)
-      setMessages(prevMessages => [...prevMessages, data]);
-    };
-
-    const handleNotice = (data: ChatMessage) => {
-      setMessages(prevMessages => [...prevMessages, data]);
-    };
 
     socket.on('messageResponse', handleMessageResponse);
-    socket.on('notice', handleNotice);
+    socket.on('notice', handleMessageResponse);
 
     return () => {
       socket.off('messageResponse', handleMessageResponse);
-      socket.off('notice', handleNotice);
+      socket.off('notice', handleMessageResponse);
     };
   }, [socket]);
 
@@ -113,7 +111,7 @@ export function Chat({ socket }: ChatProps) {
             overflow: 'auto',
           }}
         >
-          <FriendsAndUsers socket={socket} /> {/* Utilisez le composant combiné */}
+          <FriendsAndUsers socket={socket} /> 
         </Box>
       </Box>
     </Box>

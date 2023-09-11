@@ -7,23 +7,22 @@ interface User {
     mail: string;
 }
 
-interface KickCommandProps {
+interface HelpCommandProps {
     data: string;
     socket: Socket;
     user : User;
   }
 
-  const kickCommand = ({data, socket, user}: KickCommandProps) => {
-    const [command, target, ...channel] = data.split(" ");
-    if (command === "/KICK") {
+  const helpCommand = ({data, socket, user}: HelpCommandProps) => {
+    const [command, ...param] = data.split(" ");
+    if (command === "/HELP") {
       // Format du message pour le serveur
-      socket.emit("kickUser", {
+      socket.emit("help", {
         username: user?.username,
-        channelName: channel,
-        target: target
+        param: param
       });
     }
 }
-export default kickCommand
+export default helpCommand
 
 // 

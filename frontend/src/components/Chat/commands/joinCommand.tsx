@@ -19,8 +19,6 @@ interface JoinCommandProps {
       // Format du message pour le serveur
       socket.emit("joinRoom", {
         username: user?.username,
-        id: `${socket.id}${Math.random()}`,
-        socketID: socket.id,
         channelName: channelName,
         param : param
       });
