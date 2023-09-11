@@ -14,22 +14,23 @@ export function Welcome() {
       flexDirection="column"
       justifyContent="center"
       alignItems="center"
-      style={{ height: "100vh", background: "#66cccc" }}
+      style={{ height: "100vh", background: "#000" }}
     >
-      <Typography
+      {/* <Typography
         sx={{
+					marginBottom: "5rem",
           textAlign: "center",
           textShadow:
             "0px 2px 5px rgba(0, 0, 0, 0.25), -2px -2px 4px rgba(0, 0, 0, 0.25)",
         }}
-        style={{ color: "#fffff6" }}
+        style={{ color: "#f7de9f" }}
         variant="h1"
         justifyContent="center"
       >
         Welcome to Pong!
-      </Typography>
+      </Typography> */}
       <Box component="div" sx={{ marginBottom: "5rem" }}>
-        <img src="welcome.gif" alt="" />
+        <img width="100%" src="arcade.png" alt="" />
       </Box>
       <NavLink to="/api/auth/42">
         <Button variant="contained" onClick={login}>

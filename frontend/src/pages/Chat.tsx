@@ -60,6 +60,7 @@ export function Chat({ socket }: ChatProps) {
     <Box
       component="div"
       sx={{
+        color: "#c6c5c8",
         display: "flex",
         padding: "10px",
         height: "92.5vh",
@@ -68,11 +69,12 @@ export function Chat({ socket }: ChatProps) {
       <Box
         component="div"
         sx={{
+          backgroundColor: "#1c1823",
           display: "grid",
           gridTemplateRows: "11fr .5fr",
           width: "70%",
           padding: "2rem",
-          border: "1px solid black",
+          borderRadius: "5px 0 0 5px",
           gap: "10px",
         }}
       >
@@ -80,7 +82,7 @@ export function Chat({ socket }: ChatProps) {
         <Box
           component="div"
           sx={{
-            border: "1px solid black",
+            border: "1px solid #f9d271",
             borderRadius: "4px",
             padding: "1rem",
             overflow: "auto",
@@ -95,18 +97,19 @@ export function Chat({ socket }: ChatProps) {
       <Box
         component="div"
         sx={{
+          backgroundColor: "#1c1823",
           display: "grid",
           gridTemplateRows: "8fr 4fr",
           width: "30%",
           padding: "2rem",
-          border: "1px solid black",
+          borderRadius: "0 5px 5px 0",
           gap: "10px",
         }}
       >
         <Box
           component="div"
           sx={{
-            border: "1px solid black",
+            border: "1px solid #f9d271",
             borderRadius: "4px",
             padding: "1rem",
             overflow: "auto",

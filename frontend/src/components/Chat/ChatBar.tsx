@@ -49,8 +49,6 @@ function ChatBar({
                     alignItems: "center",
                     gap: "10px",
                     padding: "5px",
-                    border: "1px solid #ccc",
-                    borderRadius: "5px",
                     marginBottom: "5px",
                   }}
                 >
@@ -65,7 +63,7 @@ function ChatBar({
                   <div>
                     <p>{user.username}</p>
                     {connectedUsers?.includes(user.id) && (
-                      <span style={{ color: "green" }}> en ligne</span>
+                      <span style={{ color: "#65bf76" }}> en ligne</span>
                     )}
                   </div>
                   <div

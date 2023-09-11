@@ -1,32 +1,31 @@
 import { createTheme } from '@mui/material/styles'
-import { colors } from './colors'
 
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#005678',
+      main: '#fdb863',
     },
     secondary: {
-      main: '#ff2a6d',
+      main: '#A95D6B',
     },
     background: {
-      default: '#f9fcff',
-      paper: '#e4f7fb',
+      default: '#a95d6b',
+      paper: '#c6c5c8',
     },
     text: {
-      primary: '#01012b',
+      primary: '#c9c9c5',
     },
     error: {
-      main: '#bd0b12',
+      main: '#FDB863',
     },
     warning: {
-      main: '#f7c948',
+      main: '#f9d271',
     },
     info: {
-      main: '#05d9e8',
+      main: '#fdb863',
     },
     success: {
-      main: '#05d9e8',
+      main: '#a95d6b',
     },
   },
   shape: {

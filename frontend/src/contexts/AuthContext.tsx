@@ -9,6 +9,7 @@ import axios from "axios";
 import { User } from "../models/User";
 import Cookies from "js-cookie";
 import { getCookies, bearerAuthorization } from "../utils";
+import { useNavigate } from "react-router-dom";
 
 interface AuthProviderProps {
   children: ReactNode;

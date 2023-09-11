@@ -29,9 +29,9 @@ function App() {
       <Router>
         <Header />
         <Routes>
-          <Route path="/welcome" element={<Welcome />} />
           <Route element={<PrivateRoutes user={user} />}>
             <Route path="/" element={<Home />} />
+            <Route path="/welcome" element={<Welcome />} />
             <Route path="/chat" element={<Chat socket={socket} />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/game" element={<Pong />} />

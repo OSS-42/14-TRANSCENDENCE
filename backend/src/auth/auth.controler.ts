@@ -49,7 +49,7 @@ export class AuthControler {
      const host = this.config.get("HOST");
      //ON va avoir besoin d<une PAGE deja log qui ne se connecte pas au sockets.
     if (token_object.access_token === "poulet")
-      return  res.redirect(`http://fsdfsfds${host}/sdhajhdjsa`);
+      return  res.redirect(`${host}`);
     const access_token: string = token_object.access_token;
     
    

@@ -5,16 +5,17 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-
 }
 
 :root {
   /* CSS HEX */
-  --white-smoke: #f3f3f3ff;
-  --white: #fefefeff;
-  --canary: #ffe600ff;
-  --bittersweet: #ff5552ff;
-  --silver: #adadadff;
+  --black-currant: #1c1823;
+  --mauve: #67425b;
+  --burnt-rose: #a95d6b;
+  --mandarine: #e0836a;
+  --soleil: #fdb863;
+  --canary: #f9d271;
+  --greyish: #c9c9c5;
   height: 100vh;
   width: 100vw;
   margin: 0;
@@ -22,36 +23,44 @@
 }
 
 body {
-  background-color: #fffff6;
+  background-color: #000;
 }
 
 .nameSender {
-  color: green;
+  color: var(--burnt-rose);
   font-weight: bold; /* Texte gras */
 }
 
 .channelSender {
-  color: blue;
+  color: var(--mandarine);
   font-weight: bold; /* Texte gras */
 }
 
 .notice {
-  color: #ffd700; /* Jaune doré */
+  color: var(--canary); /* Jaune doré */
   font-weight: bold; /* Texte gras */
+}
+
+.chat__header {
+  color: var(--mandarine);
+}
+
+.chat__users {
+  margin-bottom: 25px;
 }
 
 header nav {
   display: flex;
   justify-content: space-evenly;
   max-width: 100vw;
-  background-color: #66cccc;
+  background-color: var(--black-currant);
   font-size: 20px;
   font-weight: 600;
 }
 
 header nav a {
   padding: 5px;
-  color: #026c96;
+  color: var(--burnt-rose);
   text-decoration: none;
   cursor: pointer;
   border-radius: 5px 5px 0 0;
@@ -60,12 +69,7 @@ header nav a {
 
 a:hover,
 a:focus {
-  color: #00364b;
-}
-
-header nav a.active {
-  background-color: #fffff6;
-  color: #00364b;
+  color: var(--mandarine);
 }
 
 p {

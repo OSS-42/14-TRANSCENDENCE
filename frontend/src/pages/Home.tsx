@@ -12,7 +12,7 @@ export function Home() {
       <Box
         component="div"
         sx={{
-          background: "#e4f7fb",
+          background: "#c6c5c8",
           borderRadius: "5px",
           margin: "10px",
           padding: "15px",
