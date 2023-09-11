@@ -109,15 +109,18 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     notice = '/JOIN : bad format, the channel name must begin with a #'
     // ------------------------ Creation d'un channel ------------------------
     else {
-      const room = await this.chatService.isRoomExist(payload.channelName) 
-      if (room === null){
+      const room = await this.chatService.isRoomExist(payload.channelName)
+      console.log(payload.param)
+      if (room === null && payload.param[0] === " ")
+        notice = `/JOIN: The channel password should contain alphanumeric characters`
+      else if (room === null){
         let invite : boolean = false;
         if (payload.param[0] === '+i')
-          invite = true;
+        invite = true;
         await this.chatService.createRoom(payload.channelName, userId, payload.param, invite)// voir avec sam pour le param invit
         client.join(payload.channelName);
-        if (payload.param[0] !== undefined && payload.param[0] !== '+i') //Channel avec mdp
-          await this.chatService.createPassword(payload.param[0], payload.channelName)
+        if (payload.param[0] !== undefined && payload.param[0] !== '+i')//Channel avec mdp
+        await this.chatService.createPassword(payload.param[0], payload.channelName)
         notice = `You create and join a new room ${payload.channelName}`
       }
   
@@ -125,6 +128,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       else { 
         if (await this.chatService.isUserMemberOfRoom(userId, room.id) === true)//Si l'utilisateur est deja membre du channel ERREUR : la fonction attend l'id de l'utilisateur
           notice = `/JOIN: You already are a member of the room ${payload.channelName}`
+        else if ( payload.param[0] === '+i') //Si l'utilisateur est banni du channel
+          notice = `/JOIN: The room ${payload.channelName} already exist`
         else if ( await this.chatService.isBanFromRoom(payload.username, payload.channelName) === true) //Si l'utilisateur est banni du channel
           notice = `/JOIN: You are ban from the room ${payload.channelName}`
         else if ( await this.chatService.isRoomProtected(payload.channelName) === true 
@@ -513,7 +518,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       // ------------------------ Sinon on mute la cible ------------------------
       else {
         targetNotice = `You are kick of the channel ${payload.channelName}`
-        userNotice = `/KICK: The user ${payload.target} is now kick of the room ${payload.channelName[0]}`
+        userNotice = `/KICK: The user ${payload.target} is now kicked of the room ${payload.channelName[0]}`
         await this.chatService.removeMember(roomObject.id, targetId)
       }
     } 
@@ -690,21 +695,21 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       // ------------------------ Sinon on vérifie le flag et on applique les changements ------------------------
       else {
         if (payload.param[0] === 'private') {
+          if (await this.chatService.isRoomProtected(roomObject.name) === true)
+            await this.chatService.removePassword(roomObject.id)
           this.chatService.changeInvite(roomObject.id, true)
           userNotice = `/MODE ${payload.param[0]}: The channel ${payload.channelName} is now private`
         }
         else if (payload.param[0] === 'public') {
-          console.log(await this.chatService.isRoomProtected(roomObject.name) === true)
           if (await this.chatService.isRoomPrivate(roomObject.name) === true)
-          await this.chatService.changeInvite(roomObject.id, false)
+            await this.chatService.changeInvite(roomObject.id, false)
           if (await this.chatService.isRoomProtected(roomObject.name) === true)
-          {
-            console.log('dans isRoomProtected')
             await this.chatService.removePassword(roomObject.id)
-          }
           userNotice = `/MODE ${payload.param[0]}: The channel ${payload.channelName} is now public`
         }
         else if (payload.param[0] === 'protected') {
+          if (await this.chatService.isRoomPrivate(roomObject.name) === true)
+            await this.chatService.changeInvite(roomObject.id, false)
           await this.chatService.createPassword(payload.param[1], roomObject.name)
           userNotice = `/MODE ${payload.param[0]}: The channel ${payload.channelName} is now protected`
         }
