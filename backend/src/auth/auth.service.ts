@@ -3,6 +3,8 @@ import { PrismaService } from "src/prisma/prisma.service";
 import axios from "axios";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
+import { ConnectedUsersService } from 'src/connectedUsers/connectedUsers.service';
+import * as speakeasy from 'speakeasy';
 
 
 
@@ -11,7 +13,8 @@ export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwt: JwtService,
-    private config: ConfigService
+    private config: ConfigService,
+    private readonly connectedUsersService: ConnectedUsersService
   ) {}
 
   async signToken(
@@ -36,14 +39,15 @@ export class AuthService {
   //Fonction qui contacte lapi--42 afin de recuperer lacces token, elle cree  un nouvelle utilisateur egalement
   async getCode42(code: string) {
     let token: string;
-    let UserToken: Promise<{ access_token: string }>;
+    let UserToken: Promise<{ access_token: string }> = Promise.resolve({ access_token: '' })
     const clientID = this.config.get("CLIENT_ID");
     const clientSecret = this.config.get("CLIENT_SECRET");
+    const host = this.config.get("HOST");
 
     try {
       const response = await axios.post(
         `https://api.intra.42.fr/oauth/token`,
-        `client_id=${clientID}&client_secret=${clientSecret}&code=${code}&redirect_uri=http://10.11.1.7:8080/api/auth&grant_type=authorization_code`,
+        `client_id=${clientID}&client_secret=${clientSecret}&code=${code}&redirect_uri=${host}/api/auth&grant_type=authorization_code`,
         {
           headers: {
             Accept: "application/json",
@@ -82,6 +86,12 @@ export class AuthService {
         } else {
           console.log("Utilisateur existe deja");
         }
+        console.log(this.connectedUsersService.connectedUsers)
+        if (this.connectedUsersService.connectedUsers.has(user.id)) {
+          (await UserToken).access_token = "poulet"
+
+          return (UserToken)
+        }
         UserToken = this.signToken(user.id, user.email);
         // const test = await this.prisma.utilisateur.update({
         //   where: { email: "mbertin@student.42quebec.com" },
@@ -104,52 +114,50 @@ export class AuthService {
 
     return UserToken;
   }
+
+
+//---services pour le 2FA----//
+
+
+async enable2FA(userId: number): Promise<{ otpauthUrl: string, secret: string }> {
+  const secret = speakeasy.generateSecret({ length: 20 });
+
+  
+  await this.prisma.utilisateur.update({
+    where: { id: userId },
+    data: { twoFactorSecret: secret.base32 },
+  });
+
+  const otpauthUrl = speakeasy.otpauthURL({
+    secret: secret.ascii,
+    label: 'Balls of Fury', 
+    issuer: 'Angry chicken', 
+  });
+  return { otpauthUrl, secret: secret.base32 };
 }
 
-// async signin (dto: AuthDto){
-//         //find the user
-//         //if user dosent exist throw
-//         //...
-//         const user = await this.prisma.user.findUnique({
-//             where: {
-//                 email: dto.email,
-//             },
-//         });
-//         if(!user){
-//             throw new ForbiddenException('credentieals incorrect',)
-//         };
-//         const pwMatches = await argon.verify(
-//             user.hash,
-//             dto.password
-//         );
-//         if(!pwMatches)
-//             throw new ForbiddenException('credentieals incorrect',);
+// Méthode pour vérifier le code 2FA
 
-//         return  this.signToken(user.id, user.email);
-//     }
-//    async signup(dto: AuthDto){
-//         const hash =  await argon.hash(dto.password);
-//         try{
-//         const user = await this.prisma.user.create({
-//             data: {
-//                 email: dto.email,
-//                 hash: hash,
-//             }
-//         });
 
-//         //enleve le password
-//         delete user.hash;
 
-//         return user;
-//     }
-//     catch(error){
-//         if(error instanceof PrismaClientKnownRequestError){
-//             if(error.code === 'P2002'){
-//                 throw new ForbiddenException('Credentials taken')
-//             }
-//         }
-//         else {
-//             throw error
-//         }
-//     }
-//    }
+async verify2FA(userId: number, token: string): Promise<boolean> {
+  const user = await this.prisma.utilisateur.findUnique({
+    where: { id: userId },
+  });
+
+  const verified = speakeasy.totp.verify({
+    secret: user.twoFactorSecret,
+    encoding: 'base32',
+    token: token,
+  });
+  return verified;
+}
+
+
+async disable2FA(userId: number): Promise<void> {
+  await this.prisma.utilisateur.update({
+    where: { id: userId },
+    data: { twoFactorSecret: null },
+  });
+  }
+}

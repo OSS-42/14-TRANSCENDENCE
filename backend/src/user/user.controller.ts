@@ -14,9 +14,6 @@ import {
 import { FileInterceptor } from "@nestjs/platform-express";
 import {
   ApiBearerAuth,
-  ApiBody,
-  ApiHeader,
-  ApiOperation,
   ApiParam,
   ApiTags,
 } from "@nestjs/swagger";
@@ -93,6 +90,8 @@ export class UserController {
   getBlockedUsers(@Param("id") id: number) {
     return this.userService.blockedUserIds(id);
   }
+
+  
   @ApiParam({ name: "friendId", type: Number })
   @Get("removeFriend/:friendId")
   revomeFriend(
@@ -101,11 +100,15 @@ export class UserController {
   ) {
     return this.userService.destroyFriend(user.id, friendId);
   }
+
+
   @ApiParam({ name: "username", type: String })
   @Get("userExist/:username")
   checkIfUserExist(@Param("username") username: string) {
     return this.userService.checkIfUserExist(username);
   }
+
+
   @Post("updateUsername")
   updateUsername(
     @GetUser() user: Utilisateur,
