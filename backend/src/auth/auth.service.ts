@@ -43,7 +43,7 @@ export class AuthService {
     try {
       const response = await axios.post(
         `https://api.intra.42.fr/oauth/token`,
-        `client_id=${clientID}&client_secret=${clientSecret}&code=${code}&redirect_uri=http://10.11.1.6:8080/api/auth&grant_type=authorization_code`,
+        `client_id=${clientID}&client_secret=${clientSecret}&code=${code}&redirect_uri=http://10.13.4.1:8080/api/auth&grant_type=authorization_code`,
         {
           headers: {
             Accept: "application/json",
