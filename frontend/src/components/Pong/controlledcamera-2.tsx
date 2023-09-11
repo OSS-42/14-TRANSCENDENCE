@@ -143,7 +143,7 @@ export const ControlledCameras = forwardRef<
     },
     ref
   ) => {
-    console.log("CONTROLS");
+    // console.log("CONTROLS");
     const set = useThree((state) => state.set);
     const gl = useThree((state) => state.gl);
     const invalidate = useThree((state) => state.invalidate);

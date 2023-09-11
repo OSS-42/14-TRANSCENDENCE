@@ -25,6 +25,8 @@ model Utilisateur {
   friends  Friendship[] @relation("UserToFriendship")
   friendOf  Friendship[]  @relation("FriendToFriendship")
 
+  // isTwoFactorEnabled Boolean  @default(false) //no secret will be stored as it will be SMS or e-mail based, not through an app (no TOTP).
+
   
   ownedChatRooms  ChatRoom[]   @relation("ChatRoomOwner")
   memberChatRooms ChatRoom[]   @relation("ChatRoomMembers")
