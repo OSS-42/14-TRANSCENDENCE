@@ -11,67 +11,55 @@ import { ChangeAvatarButton } from "../components/Profile/ChangeAvatarButton";
 import { MatchWonLost } from "../components/Profile/MatchWonLost";
 import { FriendsList } from "../components/Profile/FriendsLists";
 import { MatchHistory } from "../components/Profile/MatchHistory";
+import { useAuth } from "../contexts/AuthContext";
+import { fetchUserMe } from "../api/requests";
 
 export function Profile() {
-	
-  const [user, setUser] = useState<User>();
-  const [match, setMatch] = useState({
-    matchesWon: [],
-    matchesLost: [],
-  });
+  const { user } = useAuth();
+  const [username, setUsername] = useState(user?.username);
+    // const [match, setMatch] = useState({
+  //   matchesWon: [],
+  //   matchesLost: [],
+  // });
 
-  useEffect(() => {
-    async function fetchUsersData() {
-      const jwt_token = Cookies.get("jwt_token");
-      try {
-        const response = await axios.get("/api/users/me", {
-          headers: {
-            Authorization: "Bearer " + jwt_token,
-          },
-        });
-		console.log("User fetching successful");
-        setUser(response.data);
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      }
-    }
-    fetchUsersData();
-  }, []);
+  const updateUsername = (newUsername) => {
+    setUsername(newUsername);
+  };
 
-  useEffect(() => {
-    if (user) {
-      async function fetchMatch() {
-        const jwt_token = Cookies.get("jwt_token");
-        try {
-          const response = await axios.get(
-            `http://localhost:3001/users/matchHistory/${user.id}`,
-            {
-              headers: {
-                Authorization: "Bearer " + jwt_token,
-              },
-            }
-          );
-          console.log("Match stats fetching successful");
-          setMatch(response.data);
-        } catch (error) {
-          console.error("Match stats fetching:", error);
-        }
-      }
-      fetchMatch();
-    }
-  }, [user]); // No need to put match as a dependency here, because user class has a gamewon gamelost variable that will change
+  // useEffect(() => {
+  //   if (user) {
+  //     async function fetchMatch() {
+  //       const jwt_token = Cookies.get("jwt_token");
+  //       try {
+  //         const response = await axios.get(
+  //           `http://localhost:3001/users/matchHistory/${user.id}`,
+  //           {
+  //             headers: {
+  //               Authorization: "Bearer " + jwt_token,
+  //             },
+  //           }
+  //         );
+  //         console.log("Match stats fetching successful");
+  //         setMatch(response.data);
+  //       } catch (error) {
+  //         console.error("Match stats fetching:", error);
+  //       }
+  //     }
+  //     fetchMatch();
+  //   }
+  // }, [user]); // No need to put match as a dependency here, because user class has a gamewon gamelost variable that will change
 
   return (
     <ContainerGrid>
       <LeftSideGrid>
-        <Name user={user?.username} setUser={setUser} />
-        <AvatarImage user={user} />
-        <ChangeAvatarButton setUser={setUser} />
+        <Name username={username} updateUsername={updateUsername} />
+        {/* <AvatarImage user={user} />
+        <ChangeAvatarButton setUser={setUser} /> */}
       </LeftSideGrid>
       <RightSideGrid>
-        <MatchWonLost match={match}/>
+        {/* <MatchWonLost match={match}/>
         <MatchHistory match={match} />
-        <FriendsList />
+        <FriendsList /> */}
       </RightSideGrid>
     </ContainerGrid>
   );

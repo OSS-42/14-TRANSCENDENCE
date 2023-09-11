@@ -3,6 +3,7 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import { useState } from "react";
 import { isUserExist } from "../../api/requests";
+import { updateUsername } from "../../api/requests";
 
 export function Name(props) {
   const [isEditing, setIsEditing] = useState(false);
@@ -63,22 +64,8 @@ export function Name(props) {
         setEditedName(props.user);
         return;
       }
-      const jwt_token = Cookies.get("jwt_token");
-      try {
-        const response = await axios.post(
-          "http://localhost:3001/users/updateUsername",
-          { newUsername: editedName },
-          {
-            headers: {
-              Authorization: "Bearer " + jwt_token,
-            },
-          }
-        );
-        console.log("Updating name was successful");
-        props.setUser(response.data);
-      } catch (error) {
-        console.error("Error updating user data:", error);
-      }
+      const newUser = await updateUsername(editedName);
+      props.updateUsername(newUser.username);
     }
     setIsEditing(false);
   }
@@ -106,7 +93,7 @@ export function Name(props) {
           autoFocus
         />
       ) : (
-        props.user
+        props.username
       )}
     </Box>
   );
