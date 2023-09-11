@@ -658,7 +658,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('modeRoom')
   async modeRoom(client: Socket, payload: any) {
     const userId = await this.chatService.getUserIdFromUsername(payload.username)
-    const userSocketId = await this.getSoketIdFromUserId(userId)
+    const userSocketId = await this.connectedUsersService.getSocketId(userId)
     let userNotice : string = null
     
     console.log('Dans MODE')
