@@ -2,11 +2,11 @@ import {
   Body,
   Controller,
   Get,
-  ParseIntPipe,
+  UseGuards,
   Post,
   Query,
-  Redirect,
   Res,
+  Req,
 } from "@nestjs/common";
 import {
   ApiBearerAuth,
@@ -16,7 +16,7 @@ import {
 } from "@nestjs/swagger";
 import { AuthService } from "./auth.service";
 import { Response } from "express";
-import { AuthDto } from "./dto/auth.dto";
+import { JwtGuard } from "src/auth/guard";
 import { ConfigService } from "@nestjs/config";
 
 //Définition des diffrentes routes du module Auth
@@ -58,24 +58,41 @@ export class AuthControler {
     
     return res.redirect(`${host}`);
   }
+
+//---routes pour le 2FA----//
+
+
+//C<est une route post, mais il n'y a pas de body pour l<instant
+  @UseGuards(JwtGuard) 
+  @Post('enable2FA')
+  async enable2FA(@Req() req) {
+    const userId = req.user.id; 
+    const { otpauthUrl } = await this.authService.enable2FA(userId);
+    return { otpauthUrl };
+  }
+
+  //C<est une route post, mais il n'y a pas de body pour l<instant
+  @UseGuards(JwtGuard) 
+  @Post('disable2FA')
+  async disable2FA(@Req() req) {
+    const userId = req.user.id;
+    await this.authService.disable2FA(userId);
+  
+    return { message: '2FA has been disabled.' };
+  }
+
+  
+  @UseGuards(JwtGuard) 
+  @Post('verify2FA')
+  async verify2FA(@Req() req, @Body() body: { token: string }) {
+    const userId = req.user.id; 
+    const verified = await this.authService.verify2FA(userId, body.token);
+
+    if (verified) {
+      return { message: '2FA code is valid.' };
+    } else {
+      return { message: 'Invalid 2FA code.' };
+    }
+  }
 }
 
-//    //@ApiBearerAuth()
-//    @Post('signup')
-//     signup(
-//         @Body() dto: AuthDto
-//         ) {
-//         console.log({
-//             dto,
-//         });
-//         return this.authService.signup(dto);
-//     }
-
-//     @Post('singin')
-//     singin(@Body() dto: AuthDto){
-//         console.log({
-//             dto,
-//         });
-//         return this.authService.signin(dto);
-//     }
-// }

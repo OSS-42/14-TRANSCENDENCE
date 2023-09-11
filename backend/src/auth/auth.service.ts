@@ -4,6 +4,7 @@ import axios from "axios";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import { ConnectedUsersService } from 'src/connectedUsers/connectedUsers.service';
+import * as speakeasy from 'speakeasy';
 
 
 
@@ -113,52 +114,50 @@ export class AuthService {
 
     return UserToken;
   }
+
+
+//---services pour le 2FA----//
+
+
+async enable2FA(userId: number): Promise<{ otpauthUrl: string, secret: string }> {
+  const secret = speakeasy.generateSecret({ length: 20 });
+
+  
+  await this.prisma.utilisateur.update({
+    where: { id: userId },
+    data: { twoFactorSecret: secret.base32 },
+  });
+
+  const otpauthUrl = speakeasy.otpauthURL({
+    secret: secret.ascii,
+    label: 'Balls of Fury', 
+    issuer: 'Angry chicken', 
+  });
+  return { otpauthUrl, secret: secret.base32 };
 }
 
-// async signin (dto: AuthDto){
-//         //find the user
-//         //if user dosent exist throw
-//         //...
-//         const user = await this.prisma.user.findUnique({
-//             where: {
-//                 email: dto.email,
-//             },
-//         });
-//         if(!user){
-//             throw new ForbiddenException('credentieals incorrect',)
-//         };
-//         const pwMatches = await argon.verify(
-//             user.hash,
-//             dto.password
-//         );
-//         if(!pwMatches)
-//             throw new ForbiddenException('credentieals incorrect',);
+// Méthode pour vérifier le code 2FA
 
-//         return  this.signToken(user.id, user.email);
-//     }
-//    async signup(dto: AuthDto){
-//         const hash =  await argon.hash(dto.password);
-//         try{
-//         const user = await this.prisma.user.create({
-//             data: {
-//                 email: dto.email,
-//                 hash: hash,
-//             }
-//         });
 
-//         //enleve le password
-//         delete user.hash;
 
-//         return user;
-//     }
-//     catch(error){
-//         if(error instanceof PrismaClientKnownRequestError){
-//             if(error.code === 'P2002'){
-//                 throw new ForbiddenException('Credentials taken')
-//             }
-//         }
-//         else {
-//             throw error
-//         }
-//     }
-//    }
+async verify2FA(userId: number, token: string): Promise<boolean> {
+  const user = await this.prisma.utilisateur.findUnique({
+    where: { id: userId },
+  });
+
+  const verified = speakeasy.totp.verify({
+    secret: user.twoFactorSecret,
+    encoding: 'base32',
+    token: token,
+  });
+  return verified;
+}
+
+
+async disable2FA(userId: number): Promise<void> {
+  await this.prisma.utilisateur.update({
+    where: { id: userId },
+    data: { twoFactorSecret: null },
+  });
+  }
+}
