@@ -7,23 +7,21 @@ interface User {
     mail: string;
 }
 
-interface KickCommandProps {
+interface UnblockCommandProps {
     data: string;
     socket: Socket;
     user : User;
   }
 
-  const kickCommand = ({data, socket, user}: KickCommandProps) => {
-    const [command, target, ...channel] = data.split(" ");
-    if (command === "/KICK") {
+  const unblockCommand = ({data, socket, user}: UnblockCommandProps) => {
+    const [command, ...target] = data.split(" ");
+    if (command === "/UNBLOCK") {
       // Format du message pour le serveur
-      socket.emit("kickUser", {
+      socket.emit("unblockUser", {
         username: user?.username,
-        channelName: channel,
+        socketID: socket.id,
         target: target
       });
     }
 }
-export default kickCommand
-
-// 
+export default unblockCommand

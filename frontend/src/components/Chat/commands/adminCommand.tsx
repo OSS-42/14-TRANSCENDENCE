@@ -19,8 +19,6 @@ interface AdminCommandProps {
       // Format du message pour le serveur
       socket.emit("admin", {
         username: user?.username,
-        id: `${socket.id}${Math.random()}`,
-        socketID: socket.id,
         channelName: channel,
         target: target
       });
