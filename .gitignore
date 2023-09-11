@@ -3,7 +3,7 @@
 /node_modules
 .env
 /uploads
-/backend/.end
+/backend/.env
 /frontend/package-lock.json
 /backend/package-lock.json
 
