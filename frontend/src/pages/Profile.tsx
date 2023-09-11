@@ -12,54 +12,42 @@ import { MatchWonLost } from "../components/Profile/MatchWonLost";
 import { FriendsList } from "../components/Profile/FriendsLists";
 import { MatchHistory } from "../components/Profile/MatchHistory";
 import { useAuth } from "../contexts/AuthContext";
-import { fetchUserMe } from "../api/requests";
+import { fetchMatchHistory, fetchUserMe } from "../api/requests";
+import { matchRoutes } from "react-router-dom";
 
 export function Profile() {
   const { user } = useAuth();
   const [username, setUsername] = useState(user?.username);
-    // const [match, setMatch] = useState({
-  //   matchesWon: [],
-  //   matchesLost: [],
-  // });
+  const [match, setMatch] = useState({
+    matchesWon: [],
+    matchesLost: [],
+  });
 
   const updateUsername = (newUsername) => {
     setUsername(newUsername);
   };
 
-  // useEffect(() => {
-  //   if (user) {
-  //     async function fetchMatch() {
-  //       const jwt_token = Cookies.get("jwt_token");
-  //       try {
-  //         const response = await axios.get(
-  //           `http://localhost:3001/users/matchHistory/${user.id}`,
-  //           {
-  //             headers: {
-  //               Authorization: "Bearer " + jwt_token,
-  //             },
-  //           }
-  //         );
-  //         console.log("Match stats fetching successful");
-  //         setMatch(response.data);
-  //       } catch (error) {
-  //         console.error("Match stats fetching:", error);
-  //       }
-  //     }
-  //     fetchMatch();
-  //   }
-  // }, [user]); // No need to put match as a dependency here, because user class has a gamewon gamelost variable that will change
+  async function getMatchHistory(){
+    const matches = await fetchMatchHistory(user.id);
+    setMatch(matches);
+  }
+
+  useEffect(() => {
+    getMatchHistory();
+  }, [user]);
+
 
   return (
     <ContainerGrid>
       <LeftSideGrid>
         <Name username={username} updateUsername={updateUsername} />
-        {/* <AvatarImage user={user} />
-        <ChangeAvatarButton setUser={setUser} /> */}
+        <AvatarImage user={user} />
+        {/* <ChangeAvatarButton setUser={setUser} /> */}
       </LeftSideGrid>
       <RightSideGrid>
-        {/* <MatchWonLost match={match}/>
+        <MatchWonLost match={match}/>
         <MatchHistory match={match} />
-        <FriendsList /> */}
+        <FriendsList />
       </RightSideGrid>
     </ContainerGrid>
   );
