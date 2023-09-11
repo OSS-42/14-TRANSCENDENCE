@@ -3,7 +3,7 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import { useState } from "react";
 import { isUserExist } from "../../api/requests";
-import { updateUsername } from "../../api/requests";
+import { updateUser } from "../../api/requests";
 
 export function Name(props) {
   const [isEditing, setIsEditing] = useState(false);
@@ -64,8 +64,8 @@ export function Name(props) {
         setEditedName(props.user);
         return;
       }
-      const newUser = await updateUsername(editedName);
-      props.updateUsername(newUser.username);
+      const newUser = await updateUser(editedName);
+      props.updateUserData(newUser);
     }
     setIsEditing(false);
   }
@@ -93,7 +93,7 @@ export function Name(props) {
           autoFocus
         />
       ) : (
-        props.username
+        props.user
       )}
     </Box>
   );

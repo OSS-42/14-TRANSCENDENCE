@@ -17,14 +17,14 @@ import { matchRoutes } from "react-router-dom";
 
 export function Profile() {
   const { user } = useAuth();
-  const [username, setUsername] = useState(user?.username);
+  const [userData, setUserData] = useState(user);
   const [match, setMatch] = useState({
     matchesWon: [],
     matchesLost: [],
   });
 
-  const updateUsername = (newUsername) => {
-    setUsername(newUsername);
+  const updateUserData = (newUser) => {
+    setUserData(newUser);
   };
 
   async function getMatchHistory(){
@@ -36,13 +36,12 @@ export function Profile() {
     getMatchHistory();
   }, [user]);
 
-
   return (
     <ContainerGrid>
       <LeftSideGrid>
-        <Name username={username} updateUsername={updateUsername} />
-        <AvatarImage user={user} />
-        {/* <ChangeAvatarButton setUser={setUser} /> */}
+        <Name user={userData?.username} updateUserData={updateUserData} />
+        <AvatarImage user={userData} />
+        <ChangeAvatarButton setUser={setUserData} />
       </LeftSideGrid>
       <RightSideGrid>
         <MatchWonLost match={match}/>

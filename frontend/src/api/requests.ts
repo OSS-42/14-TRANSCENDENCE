@@ -136,7 +136,7 @@ export async function isUserExist(username: string): Promise<boolean> {
   }
 }
 
-export async function updateUsername(editedName: string): Promise<void> {
+export async function updateUser(editedName: string): Promise<void> {
   try {
     const response = await axios.post(
       `${BASE_URL}/users/updateUsername`,
