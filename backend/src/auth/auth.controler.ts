@@ -17,6 +17,7 @@ import {
 import { AuthService } from "./auth.service";
 import { Response } from "express";
 import { AuthDto } from "./dto/auth.dto";
+import { ConfigService } from "@nestjs/config";
 
 //Définition des diffrentes routes du module Auth
 @Controller("auth")

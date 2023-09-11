@@ -128,7 +128,7 @@ import { JwtGuard } from "src/auth/guard";
 import { UserService } from "./user.service";
 import * as fs from "fs";
 
-@Controller("users")
+@Controller("api/users")
 @ApiTags("users")
 @ApiBearerAuth()
 @UseGuards(JwtGuard)
@@ -180,7 +180,11 @@ export class UserController {
     let imagePath = `./uploads/${originalname}`;
     fs.writeFileSync(imagePath, buffer);
     imagePath = imagePath.substring(1);
+<<<<<<< HEAD
     const Url = "http://localhost:3001" + imagePath;
+=======
+    const Url = "/api" + imagePath;
+>>>>>>> main
     console.log(imagePath);
     return this.userService.updateAvatar(user, Url);
   }

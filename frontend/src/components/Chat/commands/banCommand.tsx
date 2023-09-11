@@ -15,7 +15,7 @@ interface BanCommandProps {
 
   const banCommand = ({data, socket, user}: BanCommandProps) => {
     const [command, target, ...channel] = data.split(" ");
-    if (command === "#BAN" && target !== undefined && channel !== undefined) {
+    if (command === "/BAN") {
       // Format du message pour le serveur
       socket.emit("banUser", {
         username: user?.username,

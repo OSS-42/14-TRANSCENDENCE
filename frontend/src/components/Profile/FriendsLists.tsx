@@ -11,7 +11,7 @@ export function FriendsList() {
     const fetchFriends = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:3001/users/friendsList",
+          "api/users/friendsList",
           {
             headers: {
               Authorization: "Bearer " + jwt_token,
