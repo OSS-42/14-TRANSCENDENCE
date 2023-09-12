@@ -53,7 +53,6 @@ export function Chat({ socket }: ChatProps) {
     <Box
       component="div"
       color="#c9c9c5"
-      fontSize=".85rem"
       sx={{
         display: "flex",
         padding: "10px",
@@ -65,7 +64,6 @@ export function Chat({ socket }: ChatProps) {
         sx={{
           display: "grid",
           backgroundColor: "#090609",
-          gridTemplateRows: "11fr .5fr",
           width: "70%",
           padding: "2rem",
           gap: "10px",
@@ -92,7 +90,6 @@ export function Chat({ socket }: ChatProps) {
           display: "grid",
 
           backgroundColor: "#090609",
-          gridTemplateRows: "8fr 4fr",
           width: "30%",
           padding: "2rem",
           gap: "10px",

@@ -70,22 +70,15 @@ const ChatFooter = ({ socket }: ChatFooterProps) => {
         privmsgCommand({ data, socket, user });
       else if (data.startsWith("/INVITE"))
         inviteCommand({ data, socket, user });
-      else if (data.startsWith("/MUTE"))
-        muteCommand({ data, socket, user });
-      else if (data.startsWith("/ADMIN"))
-        adminCommand({ data, socket, user });
-      else if (data.startsWith("/KICK"))
-        kickCommand({ data, socket, user });
-      else if (data.startsWith("/BAN"))
-        banCommand({ data, socket, user });
-      else if (data.startsWith("/BLOCK"))
-        blockCommand({ data, socket, user });
+      else if (data.startsWith("/MUTE")) muteCommand({ data, socket, user });
+      else if (data.startsWith("/ADMIN")) adminCommand({ data, socket, user });
+      else if (data.startsWith("/KICK")) kickCommand({ data, socket, user });
+      else if (data.startsWith("/BAN")) banCommand({ data, socket, user });
+      else if (data.startsWith("/BLOCK")) blockCommand({ data, socket, user });
       else if (data.startsWith("/UNBLOCK"))
         unblockCommand({ data, socket, user });
-      else if (data.startsWith("/MODE"))
-        modeCommand({ data, socket, user });
-      else if (data.startsWith("/HELP"))
-        helpCommand({ data, socket, user });
+      else if (data.startsWith("/MODE")) modeCommand({ data, socket, user });
+      else if (data.startsWith("/HELP")) helpCommand({ data, socket, user });
       // else if (data.startsWith("/LIST"))
       //   modeCommand({ data, socket, user });
       else defaultCommand({ data, socket, user });
@@ -99,7 +92,12 @@ const ChatFooter = ({ socket }: ChatFooterProps) => {
         className="chat__footer"
         display="flex"
         component="div"
-        sx={{ justifyContent: "center" }}
+        sx={{
+					// scrollbarColor: "transparent",
+          border: "1px solid #ffb63d",
+          borderRadius: "4px",
+          justifyContent: "center",
+        }}
       >
         <TextField
           type="text"
@@ -110,7 +108,8 @@ const ChatFooter = ({ socket }: ChatFooterProps) => {
           onChange={(e) => setData(e.target.value)}
         />
         <Button
-          sx={{ justifyContent: "unset" }}
+          color="secondary"
+          sx={{ justifyContent: "unset", borderRadius: "0" }}
           type="submit"
           variant="contained"
           className="sendBtn"

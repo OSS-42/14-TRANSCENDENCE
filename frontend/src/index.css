@@ -45,7 +45,7 @@ body {
 
 .message__container {
   margin-bottom: 1px;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   line-height: 1.5rem;
 }
 
@@ -89,6 +89,14 @@ h1 {
   margin: 15px;
   tab-size: 8;
   line-height: 1.2rem;
+  font-size: 0.7rem;
+}
+
+.help b {
+  color: #a95d6b;
+}
+.help b span {
+  color: #d9eef3;
 }
 
 .nameSender {
