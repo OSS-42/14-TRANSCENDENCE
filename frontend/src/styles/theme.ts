@@ -1,31 +1,37 @@
 import { createTheme } from '@mui/material/styles'
 
 const theme = createTheme({
+  typography: {
+    fontFamily: 'Montserrat, Press Start 2P, sans-serif',
+  },
   palette: {
     primary: {
-      main: '#fdb863',
+      main: '#120d23',
+      contrastText: '#fdf6ff',
     },
     secondary: {
-      main: '#A95D6B',
+      main: '#ffb63d',
     },
     background: {
-      default: '#a95d6b',
-      paper: '#c6c5c8',
+      default: '#090609',
+      paper: '#3d3242',
     },
     text: {
-      primary: '#c9c9c5',
+      primary: '#f9f3ff',
+      secondary: '#c96069',
+      disabled: '#8c808c',
     },
     error: {
-      main: '#FDB863',
-    },
-    warning: {
-      main: '#f9d271',
+      main: '#d41724',
     },
     info: {
-      main: '#fdb863',
+      main: '#d9eef3',
     },
     success: {
-      main: '#a95d6b',
+      main: '#909e66',
+    },
+    warning: {
+      main: '#ffb63d',
     },
   },
   shape: {

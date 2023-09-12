@@ -1,7 +1,9 @@
 * {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  font-family: "Montserrat", sans-serif;
+
+  font-family: 'Montserrat', sans-serif;
+  font-family: 'Press Start 2P', cursive;
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -16,14 +18,59 @@
   --soleil: #fdb863;
   --canary: #f9d271;
   --greyish: #c9c9c5;
-  height: 100vh;
-  width: 100vw;
-  margin: 0;
-  padding: 0;
 }
 
 body {
+  width: -webkit-fill-available;
+  height: -webkit-fill-available;
   background-color: #000;
+}
+
+#welcome-page {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center; /* Use 'center' instead of 'space-evenly' */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* Centering using negative translation */
+}
+
+h1 {
+  font-family: Press Start 2P;
+  margin-top: 3rem;
+  margin-bottom: 1rem;
+  text-align: center;
+  text-shadow: 0px 2px 5px rgba(0, 0, 0, 0.25),
+    -2px -2px 4px rgba(0, 0, 0, 0.25);
+  color: #f7e8c4;
+}
+
+#arcade {
+  margin-top: 3rem;
+  border-radius: 50%;
+  display: inline-block;
+  position: relative;
+  width: 50vw;
+}
+
+#arcade img {
+  border-radius: 50%;
+  display: block;
+  border: 1px solid #000000;
+}
+#arcade:after {
+  content: '';
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  box-shadow: inset 10px 24px 40px 0px black, inset -10px -24px 40px 0px black,
+    inset 20px -10px 40px 0px black, inset -20px 10px 40px 0px black;
 }
 
 .nameSender {
