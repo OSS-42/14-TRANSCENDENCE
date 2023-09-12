@@ -128,7 +128,6 @@ export class PongGateway {
     // Add to corresponding queue
     const queue = this.gameModeQueue.get(payload.newGM);
     queue.push(client);
-    // this.matchmaking.push(client);
 
     this.playerNames.set(client.id, payload.playerName);    
   
@@ -168,7 +167,7 @@ export class PongGateway {
     
     this.gameStates.set(gameId, payload);
 
-    this.server.to(gameId).emit('gameParameters', payload);
+    this.server.to(gameId).emit('movesUpdate', payload);
   }
 
   @SubscribeMessage('weHaveAWinner')

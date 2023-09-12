@@ -14,6 +14,9 @@ import { ControlledCameras } from "../components/Pong/controlledcamera-2"; // As
 import axios from "axios";
 import Cookies from "js-cookie";
 
+// for use instead of fetch.
+import { useAuth } from "../contexts/AuthContext";
+
 // import for websocket
 // import { Socket } from "socket.io-client";
 import socketIO from 'socket.io-client'
@@ -47,17 +50,34 @@ type OppDisconnected = {
   message: string,
 }
 
-const socket = socketIO('/pong', {
-  query: {
-    token: Cookies.get('jwt_token')
-  },
-});
 
 export function Pong() {
-  
+  const { user } = useAuth();
+
+  // const socket = socketIO('/pong', {
+  //   query: {
+  //     token: Cookies.get('jwt_token')
+  //   },
+  // });
+
+  const [socket, setSocket] = useState(null);
+
+  useEffect(() => {
+    const newSocket = socketIO('/pong', {
+      query: {
+        token: Cookies.get('jwt_token'),
+      },
+    });
+    setSocket(newSocket);
+
+    return () => {
+      newSocket.close();
+    };
+  }, []);
 
   //------------------ CONSTANTS NECESSARY AT TOP --------------------
   // const history = useHistory();
+  
   const [gameLaunched, setGameLaunched] = React.useState(false);
   const [cameraMode, setCameraMode] = React.useState<"perspective" | "orthographic">("orthographic");
   const [isPaused, setIsPaused] = React.useState(true);
@@ -106,79 +126,118 @@ export function Pong() {
   const [isHostWinner, setIsHostWinner] = React.useState(false);
   const [oppDisconnected, setOppDisconnected] = React.useState<OppDisconnected>(false);
 
-  const currentTime = performance.now();
+  const [currentTime, setCurrentTime] = useState(performance.now());
   const updateFrequency = 1000 / 60;
   const [lastUpdateTime, setLastUpdateTime] = useState(currentTime);
 
+  const jwt_token = Cookies.get("jwt_token");  
+  const source = axios.CancelToken.source(); // Create a new CancelToken
+
   // Ecoute parle le socket
   useEffect(() => {
-    socket.on("connected", (data: any) => {
-      console.log('🏓   Connection established ? ', data.isConnected);
-      setIsConnected(data.isConnected);
-      if (!data.isConnected) {
-        setGameLaunched(false);
-      }
-    })
-
-    socket.on("opponentDisconnected", (data: any) => {
-      console.log(data);
-      setOppDisconnected(true);
-    })
-
-    socket.on('playerJoined', (data: PlayerJoined) => {
-      setWaitingForPlayer(false);
-      setHostStatus(data.hostStatus);
-      setGameId(data.gameId);
-      setHostname(data.hostName);
-      setClientName(data.clientName);
-      console.log('🏓   GAMEID: ', data.gameId);
-      handleCountdown();
-    });
-
-    if (currentTime - lastUpdateTime >= updateFrequency) {
-      socket.emit("gameParameters", {
-        gameId,
-        ballPosition,
-        leftPaddlePositionZ,
-        rightPaddlePositionZ,
-        powerupPosition,
+    if (socket) {
+      socket.on("connected", (data: any) => {
+        console.log('🏓   Connection established ? ', data.isConnected);
+        setIsConnected(data.isConnected);
+        // fetchUsersData(setPlayerName);
+        console.log('🏓   username is ', user.username);
+        setPlayerName(user.username);
+        if (!data.isConnected) {
+          setGameLaunched(false);
+        }
+      })
+    
+      socket.on('playerJoined', (data: PlayerJoined) => {
+        setWaitingForPlayer(false);
+        setGameId(data.gameId);
+        setHostStatus(data.hostStatus);
+        setHostname(data.hostName);
+        setClientName(data.clientName);
+        console.log('🏓   GAMEID: ', data.gameId);
+        handleCountdown();
       });
+    
+      socket.on("weHaveAWinner", (data: WeHaveAWinner) => {
+        setIsHostWinner(data.isHostWinner);
+      });
+    
+      socket.on("opponentDisconnected", (data: any) => {
+        console.log(data);
+        setOppDisconnected(true);
+      })
+    } else {
+      return () => {};  // No-op function when socket is null
     }
 
-    setLastUpdateTime(currentTime);
-
-    socket.on("gameParameters", (data: GameParameters) => {
-      setGameId(data.gameId);
-      // console.log('🏓   GAMEID: ', gameId);
-      setBallPosition(data.ballPosition);
-      setLeftPaddlePositionZ(data.leftPaddlePositionZ);
-      setRightPaddlePositionZ(data.rightPaddlePositionZ);
-      setPowerupPosition(data.powerupPosition);
-    });
-
-    socket.on("weHaveAWinner", (data: WeHaveAWinner) => {
-      setIsHostWinner(data.isHostWinner);
-    });
-
     return () => {
-      socket.off("connected");
-      socket.off("gameParameters");
-      socket.off("playerJoined");
-      socket.off("weHaveAWinner");
-      socket.off("oppDisconnected");
+      if (socket) {
+        socket.off("connected");
+        socket.off("playerJoined");
+        socket.off("weHaveAWinner");
+        socket.off("oppDisconnected");
+      }
     };
-  }, [socket, 
-      connection, 
-      ballPosition,
-      leftPaddlePositionZ,
-      rightPaddlePositionZ,
-    ]);
+  }, [socket]);
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setCurrentTime(performance.now());
+    }, updateFrequency);
+  
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (socket) {
+      const timer = setInterval(() => {
+        const currentTime = performance.now();
+        
+        if (currentTime - lastUpdateTime >= updateFrequency) {
+          socket.emit("gameParameters", {
+            gameId,
+            ballPosition,
+            leftPaddlePositionZ,
+            rightPaddlePositionZ,
+            powerupPosition,
+          });
+    
+          setLastUpdateTime(currentTime);
+        }
+      }, updateFrequency);
+        
+      socket.on("movesUpdate", (data: GameParameters) => {
+        setGameId(data.gameId);
+        // console.log('🏓   GAMEID: ', gameId);
+        setBallPosition(data.ballPosition);
+        setLeftPaddlePositionZ(data.leftPaddlePositionZ);
+        setRightPaddlePositionZ(data.rightPaddlePositionZ);
+        setPowerupPosition(data.powerupPosition);
+      });
+
+      return () => {
+        if (socket) {
+          clearInterval(timer);
+          socket.off("gameParameters");
+          socket.off("movesUpdates");
+        }
+      };
+    } else {
+      return () => {};  // No-op function when socket is null
+    }
+  },
+    [socket,
+    leftPaddlePositionZ,
+    rightPaddlePositionZ,
+    powerupPosition,]
+  );
 
 //------------------ GAME MODES ------------------------
 
-  useEffect(() => {
-    fetchUsersData(setPlayerName);
-  }, [isConnected]);
+  // useEffect(() => {
+  //   fetchUsersData(setPlayerName);
+  // }, [isConnected]);
 
   const handleClassicModeIA = (): void => {
     console.log('🏓   classic 1 vs IA');
@@ -230,46 +289,41 @@ export function Pong() {
     setShowButtons(false);
   };
 
-// probleme avec fin de partie.
-
 //------------------ USER NAME - LEFT ------------------------
-    
-    const jwt_token = Cookies.get("jwt_token");
-  
-    // Create a new CancelToken
-    const source = axios.CancelToken.source();
-  
-    async function fetchUsersData( setPlayerName: Function ) {
-      try {
-        const response = await axios.get("/api/users/me", {
-          headers: {
-            Authorization: "Bearer " + jwt_token,
-          },
-          cancelToken: source.token, // Pass cancel token to axios
-        });
-        setPlayerName(response.data.username);
+  // async function fetchUsersData( setPlayerName: Function ) {
+  //   try {
+  //     console.log('🏓   hello #1');
+  //     const response = await axios.get("/api/users/me", {
         
-      } catch (error) {
-        if (axios.isCancel(error)) {
-          console.log("Request cancelled");
-        }
-      }
-    }
+  //       headers: {
+  //         Authorization: "Bearer " + jwt_token,
+  //       },
+  //       cancelToken: source.token, // Pass cancel token to axios
+  //     });
+  //     console.log('🏓   hello #2');
+  //     setPlayerName(response.data.username);
+      
+  //   } catch (error) {
+  //     if (axios.isCancel(error)) {
+  //       console.log("🏓   Request cancelled");
+  //     }
+  //   }
+  // }
 
-    function setNames (playerName: string, newHostStatus: boolean, newGM: number, setHostname: Function, setClientName: Function) {
-      if (newGM === 1 || newGM === 2) {
-              setHostname(playerName);
-              setClientName("Computer");
+  function setNames (playerName: string, newHostStatus: boolean, newGM: number, setHostname: Function, setClientName: Function) {
+    if (newGM === 1 || newGM === 2) {
+            setHostname(playerName);
+            setClientName("Computer");
+        } else {
+          if (newHostStatus === true) {
+            setHostname(playerName);
+            setClientName(gameInfos.clientName);
           } else {
-            if (newHostStatus === true) {
-              setHostname(playerName);
-              setClientName(gameInfos.clientName);
-            } else {
-              setHostname(gameInfos.clientName);
-              setClientName(playerName);
-            }
+            setHostname(gameInfos.clientName);
+            setClientName(playerName);
           }
-    }
+        }
+  }
 
 //------------------ SCENE SETTINGS ------------------------
   // s'assure que le canvas aura comme maximum toujours 800x600
