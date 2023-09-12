@@ -237,11 +237,6 @@ export function Pong() {
   );
 
 //------------------ GAME MODES ------------------------
-
-  // useEffect(() => {
-  //   fetchUsersData(setPlayerName);
-  // }, [isConnected]);
-
   const handleClassicModeIA = (): void => {
     console.log('🏓   classic 1 vs IA');
     const newHostStatus = true; // a cause async nature de React.
@@ -292,27 +287,7 @@ export function Pong() {
     setShowButtons(false);
   };
 
-//------------------ USER NAME - LEFT ------------------------
-  // async function fetchUsersData( setPlayerName: Function ) {
-  //   try {
-  //     console.log('🏓   hello #1');
-  //     const response = await axios.get("/api/users/me", {
-        
-  //       headers: {
-  //         Authorization: "Bearer " + jwt_token,
-  //       },
-  //       cancelToken: source.token, // Pass cancel token to axios
-  //     });
-  //     console.log('🏓   hello #2');
-  //     setPlayerName(response.data.username);
-      
-  //   } catch (error) {
-  //     if (axios.isCancel(error)) {
-  //       console.log("🏓   Request cancelled");
-  //     }
-  //   }
-  // }
-
+//------------------ USER NAMES ------------------------
   function setNames (playerName: string, newHostStatus: boolean, newGM: number, setHostname: Function, setClientName: Function) {
     if (newGM === 1 || newGM === 2) {
             setHostname(playerName);

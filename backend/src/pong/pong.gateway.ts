@@ -196,11 +196,6 @@ export class PongGateway {
     }
 
     if (clientsMapToTerminate) {
-      // Notify both players about the end of the game
-      for (const [playerId, playerSocket] of clientsMapToTerminate.entries()) {
-        playerSocket.emit('endOfGame', { message: 'Game has ended.' });
-      }
-
       // Remove game from gameIds map
       this.gameIds.delete(clientsMapToTerminate);
     }
