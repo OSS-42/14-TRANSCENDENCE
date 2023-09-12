@@ -43,13 +43,15 @@ const Header = () => {
                 value={activeTab}
                 onChange={(_, newValue) => handleTabChange(newValue)} // Pass newValue to handleTabChange
                 aria-label="navigation tabs"
+                textColor="secondary"
+                indicatorColor="secondary"
               >
-                <Tab sx={{ color: "#c9c9c5" }} label="Chat" />
-                <Tab sx={{ color: "#c9c9c5" }} label="Pong" />
-                <Tab sx={{ color: "#c9c9c5" }} label="Profile" />
+                <Tab sx={{ color: "#d9eef3" }} label="Chat" />
+                <Tab sx={{ color: "#d9eef3" }} label="Pong" />
+                <Tab sx={{ color: "#d9eef3" }} label="Profile" />
               </Tabs>
               <IconButton
-                sx={{ color: "#f9d271" }}
+                color="info"
                 aria-label="delete"
                 onClick={handleLogout}
               >

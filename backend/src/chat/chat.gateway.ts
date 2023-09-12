@@ -219,34 +219,34 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     else {
     help = `
     <br>Here are some tips on how to use the chat commands:<br>
-<br>JOIN :<br>
-&nbsp;- To join or create a room with a password: /JOIN #roomName password<br>
-&nbsp;- To join or create a public room with a password: /JOIN #roomName password<br>
-&nbsp;- To create a private room: /JOIN #roomName +i<br>
-<br>BLOCK :<br>
-&nbsp;- To block a user: /BLOCK username<br>
-<br>UNBLOCK :<br>
-&nbsp;- To unblock a user: /UNBLOCK username<br>
-<br>HELP :<br>
-&nbsp;- To get a list of available commands: /HELP<br>
-<br>PRIVMSG :<br>
-&nbsp;- To send a message to a channel: /PRIVMSG #channelName message...<br>
-&nbsp;- To send a private message to a user: /PRIVMSG username message...<br>
-<br>INVITE :<br>
-&nbsp;- To invite a user to a channel: /INVITE username #channelName<br>
-<br>MUTE :<br>
-&nbsp;- To mute a user in a channel: /MUTE username #channelName<br>
-<br>KICK :<br>
-&nbsp;- To kick a user from a channel: /KICK username #channelName<br>
-<br>BAN :<br>
-&nbsp;- To ban a user from a channel: /BAN username #channelName<br>
-<br>ADMIN :<br>
-&nbsp;- To grant admin privileges to a user in a channel: /ADMIN username #channelName<br>
-<br>MODE :<br>
-&nbsp;- To change channel modes:<br>
-&nbsp;&nbsp;- Set channel to invitation-only: /MODE #channelName invite<br>
-&nbsp;&nbsp;- Set channel to public: /MODE #channelName public<br>
-&nbsp;&nbsp;- Set channel to protected mode with a password: /MODE #channelName protected password<br><br>
+<br><strong>JOIN</strong><br>
+&emsp;To join or create a room with a password:<br/>&emsp;&emsp;/JOIN #roomName password<br>
+&emsp;To join or create a public room with a password:<br/>&emsp;&emsp;/JOIN #roomName password<br>
+&emsp;To create a private room:<br/>&emsp;&emsp;/JOIN #roomName +i<br>
+<br><b>BLOCK</b><br>
+&emsp;To block a user:<br/>&emsp;&emsp;/BLOCK username<br>
+<br><b>UNBLOCK</b><br>
+&emsp;To unblock a user:<br/>&emsp;&emsp;/UNBLOCK username<br>
+<br><b>HELP</b><br>
+&emsp;To get a list of available commands:<br/>&emsp;&emsp;/HELP<br>
+<br><b>PRIVMSG</b><br>
+&emsp;To send a message to a channel:<br/>&emsp;&emsp;/PRIVMSG #channelName message...<br>
+&emsp;To send a private message to a user:<br/>&emsp;&emsp;/PRIVMSG username message...<br>
+<br><b>INVITE</b><br>
+&emsp;To invite a user to a channel:<br/>&emsp;&emsp;/INVITE username #channelName<br>
+<br><b>MUTE</b><br>
+&emsp;To mute a user in a channel:<br/>&emsp;&emsp;/MUTE username #channelName<br>
+<br><b>KICK</b>><br>
+&emsp;To kick a user from a channel:<br/>&emsp;&emsp;/KICK username #channelName<br>
+<br><b>BAN</b><br>
+&emsp;To ban a user from a channel:<br/>&emsp;&emsp;/BAN username #channelName<br>
+<br><b>ADMIN</b><br>
+&emsp;To grant admin privileges to a user in a channel:<br/>&emsp;&emsp;/ADMIN username #channelName<br>
+<br><b>MODE</b><br>
+&emsp;To change channel modes:<br>
+&emsp;Invitation-only: &emsp;&emsp;/MODE #channelName invite<br>
+&emsp;Public mode: &emsp;&emsp;&emsp;/MODE #channelName public<br>
+&emsp;Protected mode: &emsp;&emsp;/MODE #channelName protected password<br><br>
 `;
 
 
