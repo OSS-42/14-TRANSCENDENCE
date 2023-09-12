@@ -19,7 +19,6 @@ interface BlockCommandProps {
       // Format du message pour le serveur
       socket.emit("blockUser", {
         username: user?.username,
-        id: `${socket.id}${Math.random()}`,
         socketID: socket.id,
         target: target
       });

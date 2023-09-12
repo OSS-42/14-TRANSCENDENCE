@@ -19,8 +19,6 @@ const privmsgCommand = ({data, socket, user}: PrivmsgCommandProps) => {
     if (command === "/PRIVMSG") {
       socket.emit("privmsg", {
         username: user?.username,
-        id: `${socket.id}${Math.random()}`,
-        socketID: socket.id,
         target: target,
         message: message,
       });

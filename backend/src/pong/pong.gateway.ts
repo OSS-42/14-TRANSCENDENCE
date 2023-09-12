@@ -5,19 +5,20 @@ import { ConfigService } from '@nestjs/config';
 import { PongService } from './pong.service';
 import { v4 as uuid } from 'uuid';
 
-@WebSocketGateway({ cors: true,  namespace: 'pongGame' })
+@WebSocketGateway({ cors: true,  namespace: 'pong' })
 export class PongGateway {
   constructor(private pongService: PongService, private config: ConfigService) {}
 
-  private connectedUsers: Map<number, string> = new Map();
   private playerNames: Map<string, string> = new Map();
-  private matchmaking: Socket[] = [];
+  private gameModeQueue: Map<number, Socket[]> = new Map();
+  private gameStates: Map<string, any> = new Map();
+  private gameIds: Map<any, string> = new Map();
   
   @WebSocketServer()
   server: Server
 
 
-  handleConnection(client: Socket) {
+  handleConnection(client: Socket): void {
     console.log(`🏓   ⚡: ${client.id} user just connected!`);
     const token = client.handshake.query.token as string;
 
@@ -28,15 +29,9 @@ export class PongGateway {
           const decoded = verify(token, this.config.get("JWT_SECRET"));
           console.log("🏓   voici lidentite du socket");
           console.log("🏓   ", decoded);
-          this.connectedUsers.set( Number(decoded.sub), client.id);
 
-          console.log("🏓   Connected Users:", this.connectedUsers);
-
-          const connectedUserIds = Array.from(this.connectedUsers.keys());
-          this.server.emit("updateConnectedUsers", connectedUserIds);
-
-          const helloWorld = "hello World";
-          this.server.emit("Connected", helloWorld);
+          const isConnected = { isConnected: true };
+          client.emit("connected", isConnected);
 
         } catch (error) {
           console.log("🏓   Error:", error.message);
@@ -49,38 +44,63 @@ export class PongGateway {
   }
 
   handleDisconnect(client: Socket) {
+
+    let gameIdToTerminate: string;
+    let clientsMapToTerminate: any;
     
-    const index = this.matchmaking.indexOf(client);
-    if (index !== -1) {
-      this.matchmaking.splice(index, 1);
-    }
-    console.log(`🏓   🔥: ${client.id} user disconnected`); 
-    //supprime le le client.id de la map de connectedUser lorsque ce dernier ce déconnecte!
-    for (const [userId, socketId] of this.connectedUsers.entries()) {
-      if (socketId === client.id) {
-        this.connectedUsers.delete(userId);
-        console.log("🏓   Connected Users:", this.connectedUsers)
+    // Identify the game ID to terminate when disconnect or end of game.
+    for (const [clientsMap, gameId] of this.gameIds.entries()) {
+      if (clientsMap.has(client.id)) {
+        gameIdToTerminate = gameId;
+        clientsMapToTerminate = clientsMap;
         break;
       }
     }
+
+    if (gameIdToTerminate && clientsMapToTerminate) {
+      //Notify remaining player
+      for (const [playerId, playerSocket] of clientsMapToTerminate.entries()) {
+        if (playerId !== client.id) {
+          console.log(`🏓   ⚡: ${client.id} user just connected!`);
+          playerSocket.emit('opponentDisconnected', { message: 'Your opponent has Disconnected. End of Game.' });
+        }
+      }
+    }
+
+    const isConnected = false;
+    console.log(`🏓   🔥: ${client.id} user disconnected`);
+    client.emit('Connected', isConnected ); 
+
   }
 
   @SubscribeMessage('waitingForPlayerGM3')
   handleWaitingForPlayerGM3(client: Socket, payload: any) {
-    this.matchmaking.push(client);
-    this.playerNames.set(client.id, payload.playerName);
-  
-    console.log('🏓   player1 username: ', payload.playerName);
-    if (this.matchmaking.length == 2) {
-      console.log('🏓   ⚡ 2 clients !! ⚡');
-      const gameId = uuid();
-      
-      // Choose a host logic : first client in map
-      // const [hostUserId, hostSocketId] = Array.from(this.connectedUsers.entries())[0];
-      // const [clientUserId, clientSocketId] = Array.from(this.connectedUsers.entries())[1];
 
-      const player1 = this.matchmaking.shift();
-      const player2 = this.matchmaking.shift();
+    // Initializing the queue if not existing
+    if (!this.gameModeQueue.has(payload.newGM)) {
+      this.gameModeQueue.set(payload.newGM, []);
+    }
+
+    // Add to corresponding queue
+    const queue = this.gameModeQueue.get(payload.newGM);
+    queue.push(client);
+    // this.matchmaking.push(client);
+
+    this.playerNames.set(client.id, payload.playerName);    
+  
+  if (queue.length >= 2) {
+      console.log('🏓   ⚡ 2 clients for GM 3!! ⚡');
+      const gameId = uuid();
+
+      const player1 = queue.shift();
+      const player2 = queue.shift();
+
+      const clientsMap = new Map();
+      clientsMap.set(player1.id, player1);
+      clientsMap.set(player2.id, player2);
+
+      this.gameIds.set(clientsMap, gameId);
+
       console.log('🏓   player1: ', player1.id);
       console.log('🏓   player1 username: ', this.playerNames.get(player1.id));
       const hostName = this.playerNames.get(player1.id);
@@ -94,24 +114,37 @@ export class PongGateway {
       // Emit an event to both clients to indicate that the match is ready to start
       player1.emit('playerJoined', { gameId: gameId, hostStatus: true, hostName: hostName, clientName: clientName });
       player2.emit('playerJoined', { gameId: gameId, hostStatus: false, hostName: hostName, clientName: clientName });
-      console.log("🏓   partie creee: ", gameId);
+      console.log(`🏓   Game ${gameId} started between ${hostName} and ${clientName}`);
     }
   }
 
   @SubscribeMessage('waitingForPlayerGM4')
   handleWaitingForPlayerGM4(client: Socket, payload: any) {
-    this.matchmaking.push(client);
+    // Initializing the queue if not existing
+    if (!this.gameModeQueue.has(payload.newGM)) {
+      this.gameModeQueue.set(payload.newGM, []);
+    }
+
+    // Add to corresponding queue
+    const queue = this.gameModeQueue.get(payload.newGM);
+    queue.push(client);
+    // this.matchmaking.push(client);
+
+    this.playerNames.set(client.id, payload.playerName);    
   
-    if (this.matchmaking.length == 2) {
-      console.log('🏓   ⚡ 2 clients !! ⚡');
+  if (queue.length >= 2) {
+      console.log('🏓   ⚡ 2 clients for GM 4!! ⚡');
       const gameId = uuid();
+
+      const player1 = queue.shift();
+      const player2 = queue.shift();
+
+      const clientsMap = new Map();
+      clientsMap.set(player1.id, player1);
+      clientsMap.set(player2.id, player2);
+
+      this.gameIds.set(clientsMap, gameId);
       
-      // Choose a host logic : first client in map
-      // const [hostUserId, hostSocketId] = Array.from(this.connectedUsers.entries())[0];
-      // const [clientUserId, clientSocketId] = Array.from(this.connectedUsers.entries())[1];
-      
-      const player1 = this.matchmaking.shift();
-      const player2 = this.matchmaking.shift();
       console.log('🏓   player1: ', player1.id);
       console.log('🏓   player1 username: ', this.playerNames.get(player1.id));
       const hostName = this.playerNames.get(player1.id);
@@ -122,32 +155,19 @@ export class PongGateway {
       player1.join(gameId);
       player2.join(gameId);
 
-       // Emit gameStartInfos to host
-      // this.server.to(player1).emit("gameStartInfos", {
-      //   hostStatus: true,
-      //   // clientName: clientUserId.toString(),
-      //   gameLaunched: false,
-      //   gameId: gameId,
-      // });
-
-      // Emit gameStartInfos to client
-      // this.server.to(player2).emit("gameStartInfos", {
-      //   hostStatus: false,
-      //   // clientName: hostUserId.toString(),
-      //   gameLaunched: false,
-      //   gameId: gameId,
-      // });
-
       // Emit an event to both clients to indicate that the match is ready to start
       player1.emit('playerJoined', { gameId: gameId, hostStatus: true, hostName: hostName, clientName: clientName });
       player2.emit('playerJoined', { gameId: gameId, hostStatus: false, hostName: hostName, clientName: clientName });
-      console.log("🏓   partie creee: ", gameId);
+      console.log(`🏓   Game ${gameId} started between ${hostName} and ${clientName}`);
     }
   }
 
   @SubscribeMessage('gameParameters')
   handleGameParameters(client: Socket, payload: any) {
     const gameId = payload.gameId; // Make sure to send gameId from client
+    
+    this.gameStates.set(gameId, payload);
+
     this.server.to(gameId).emit('gameParameters', payload);
   }
 
@@ -156,6 +176,14 @@ export class PongGateway {
     const gameId = payload.gameId; // Make sure to send gameId from client
     this.server.to(gameId).emit('weHaveAWinner', payload);
     console.log('🏓   is the host the winner: ', payload.isHostWinner);
+    //player1 = host (toujours)
+    // if (payload.isHostWinner) {
+    //   //dans la DB winner = hostName
+    //   //loser = clientName
+    // } else {
+    //   // winner = clientName
+    //   // loser = hostName
+    // }
   }
 
 

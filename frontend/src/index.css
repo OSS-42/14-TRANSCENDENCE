@@ -92,6 +92,8 @@ h1 {
 .notice {
   color: var(--canary); /* Jaune doré */
   font-weight: bold; /* Texte gras */
+  tab-size: 4;
+  font-size: 14px; /* Taille de police de 14 pixels */
 }
 
 .chat__header {

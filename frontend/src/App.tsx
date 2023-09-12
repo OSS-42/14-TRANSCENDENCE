@@ -20,8 +20,8 @@ function App() {
       </Router>
     )
   } else {
-    const socket = socketIO('/chat', {
-      query: {
+    const socket = socketIO("/chat", {
+      query: { 
         token: user?.jwtToken,
       },
     })
