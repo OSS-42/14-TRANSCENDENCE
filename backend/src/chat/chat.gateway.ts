@@ -369,7 +369,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async inviteRoom(client: Socket, payload: any) {
     const userId = await this.chatService.getUserIdFromUsername(payload.username)
     const userSocketId = await this.connectedUsersService.getSocketId(userId)
-    let targetSocketId = null
+    const targetId = await this.chatService.getUserIdFromUsername(payload.target)
+    const targetSocketId = await this.connectedUsersService.getSocketId(targetId)
     let roomObject = null
     let userNotice : string = null
     let targetNotice : string = null
@@ -377,8 +378,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (payload.target === undefined || payload.channelName[0] === undefined || payload.channelName[1] !== undefined)
     userNotice = `/INVITE : bad format`
     else {
-      const targetId = await this.chatService.getUserIdFromUsername(payload.target)
-      const targetSocketId = await this.connectedUsersService.getSocketId(targetId)
       roomObject = await this.chatService.isRoomExist(payload.channelName[0])
       if (roomObject === null)
         userNotice = `/INVITE: The room ${payload.channelName[0]} don't exist`
@@ -402,7 +401,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       }
     }
     // ------------------------ Le channel n'existe pas ------------------------
-    if (targetSocketId !== null &&  targetNotice !== null) {
+    console.log(targetSocketId)
+    if (targetSocketId !== null) {
       this.server.to(targetSocketId).emit
       ('notice', {
         name: payload.username,
