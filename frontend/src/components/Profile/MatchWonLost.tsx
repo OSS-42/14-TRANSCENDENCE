@@ -43,7 +43,7 @@ function MatchBox({ title, matchCount }: MatchBoxProps) {
           textAlign: "center",
         }}
       >
-        <Typography variant="h6">{title}</Typography>
+        <Typography variant="h6" sx={{fontWeight: "bold"}}>{title}</Typography>
         <CenteredText match={matchCount} />
       </Box>
     </Grid>

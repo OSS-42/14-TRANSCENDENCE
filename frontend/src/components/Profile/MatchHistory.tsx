@@ -29,40 +29,50 @@ export function MatchHistory({ match }: MatchHistoryProps) {
         margin: "20px",
         fontWeight: "bold",
         height: "28vh",
-        maxHeight: "370px", // Set a maximum height for scrolling
-        overflow: "auto", // Enable scrolling when content overflows
+        maxHeight: "370px",
+        overflow: "auto",
+
       }}
     >
-      <TableContainer component={Paper} sx={{ backgroundColor: "white" }}>
-        <Typography variant="h6" sx={{ padding: "16px" }}>
-          Match History
-        </Typography>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Date</TableCell>
-              <TableCell>Winner</TableCell>
-              <TableCell>Loser</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {match.matchesWon.map((matches, index) => (
-              <TableRow key={index}>
-                <TableCell>{matches.date}</TableCell>
-                <TableCell>{matches.winner}</TableCell>
-                <TableCell>{matches.loser}</TableCell>
+      <Typography variant="h6" sx={{fontWeight: "bold"}}>MATCH HISTORY</Typography>
+      {match.matchesWon.length > 0 || match.matchesLost.length > 0 ? (
+        <TableContainer component={Paper} sx={{ backgroundColor: "transparent" }}>
+          <Typography variant="h6" sx={{ padding: "16px" }}>
+            Match History
+          </Typography>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Date</TableCell>
+                <TableCell>Winner</TableCell>
+                <TableCell>Loser</TableCell>
               </TableRow>
-            ))}
-            {match.matchesLost.map((matches, index) => (
-              <TableRow key={index}>
-                <TableCell>{matches.date}</TableCell>
-                <TableCell>{matches.winner}</TableCell>
-                <TableCell>{matches.loser}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            </TableHead>
+            <TableBody>
+              {match.matchesWon.map((matches, index) => (
+                <TableRow key={index}>
+                  <TableCell>{matches.date}</TableCell>
+                  <TableCell>{matches.winner}</TableCell>
+                  <TableCell>{matches.loser}</TableCell>
+                </TableRow>
+              ))}
+              {match.matchesLost.map((matches, index) => (
+                <TableRow key={index}>
+                  <TableCell>{matches.date}</TableCell>
+                  <TableCell>{matches.winner}</TableCell>
+                  <TableCell>{matches.loser}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      ) : (
+        <div>
+          <Typography variant="h6" sx={{ padding: "16px", fontWeight: "bold" }}>
+            No games have been played yet ...
+          </Typography>
+        </div>
+      )}
     </Box>
   );
 }

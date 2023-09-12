@@ -13,7 +13,6 @@ import { FriendsList } from "../components/Profile/FriendsLists";
 import { MatchHistory } from "../components/Profile/MatchHistory";
 import { useAuth } from "../contexts/AuthContext";
 import { fetchMatchHistory, fetchUserMe } from "../api/requests";
-import { matchRoutes } from "react-router-dom";
 
 export function Profile() {
   const { user } = useAuth();
