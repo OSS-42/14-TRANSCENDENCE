@@ -37,7 +37,7 @@ function MatchBox({ title, matchCount }: MatchBoxProps) {
         margin: "20px",
         fontWeight: "bold",
         height: "28vh",
-        width: "45%",
+        width: "44.5%",
         maxHeight: "370px",
         overflow: "auto",
         textAlign: "center",
