@@ -37,9 +37,6 @@ export function MatchHistory({ match }: MatchHistoryProps) {
       <Typography variant="h6" sx={{fontWeight: "bold"}}>MATCH HISTORY</Typography>
       {match.matchesWon.length > 0 || match.matchesLost.length > 0 ? (
         <TableContainer component={Paper} sx={{ backgroundColor: "transparent" }}>
-          <Typography variant="h6" sx={{ padding: "16px" }}>
-            Match History
-          </Typography>
           <Table>
             <TableHead>
               <TableRow>
