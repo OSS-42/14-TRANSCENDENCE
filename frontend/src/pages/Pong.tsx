@@ -39,7 +39,10 @@ type PlayerJoined = {
 }
 
 type WeHaveAWinner = {
+  gameId: string,
   isHostWinner: boolean,
+  hostname: string,
+  clientName: string,
 }
 
 type Connected = {
@@ -431,7 +434,7 @@ export function Pong() {
         setGameLaunched(false);
         if (gameId) {
           console.log('🏓   envoi du resultat');
-          socket.emit("weHaveAWinner", { gameId, isHostWinner });
+          socket.emit("weHaveAWinner", { gameId, isHostWinner, hostname, clientName });
         }
         window.location.href = '/game';
       }, 5000);

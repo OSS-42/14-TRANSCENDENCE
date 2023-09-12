@@ -17,7 +17,6 @@ export class PongGateway {
   @WebSocketServer()
   server: Server
 
-
   handleConnection(client: Socket): void {
     console.log(`🏓   ⚡: ${client.id} user just connected!`);
     const token = client.handshake.query.token as string;
@@ -173,16 +172,38 @@ export class PongGateway {
   @SubscribeMessage('weHaveAWinner')
   handleWinner(client: Socket, payload: any) {
     const gameId = payload.gameId; // Make sure to send gameId from client
+    const hostname = payload.hostname;
+    const clientName = payload.clientName;
+    
     this.server.to(gameId).emit('weHaveAWinner', payload);
-    console.log('🏓   is the host the winner: ', payload.isHostWinner);
+    console.log('🏓   in ${gameId}, the winner is  ', payload.isHostWinner);
     //player1 = host (toujours)
-    // if (payload.isHostWinner) {
-    //   //dans la DB winner = hostName
-    //   //loser = clientName
-    // } else {
-    //   // winner = clientName
-    //   // loser = hostName
-    // }
+    if (payload.isHostWinner) {
+      this.server.emit('endOfGame', { gameId: gameId, winner: hostname, loser: clientName });
+    } else {
+      this.server.emit('endOfGame', { gameId: gameId, winner: clientName, loser: hostname });
+    }
+
+    // cleaning the gameId from the list of gameIds:
+    let clientsMapToTerminate: any;
+  
+    // Identify the game ID to terminate when the game ends.
+    for (const [clientsMap, existingGameId] of this.gameIds.entries()) {
+      if (existingGameId === gameId) {
+        clientsMapToTerminate = clientsMap;
+        break;
+      }
+    }
+
+    if (clientsMapToTerminate) {
+      // Notify both players about the end of the game
+      for (const [playerId, playerSocket] of clientsMapToTerminate.entries()) {
+        playerSocket.emit('endOfGame', { message: 'Game has ended.' });
+      }
+
+      // Remove game from gameIds map
+      this.gameIds.delete(clientsMapToTerminate);
+    }
   }
 
 
