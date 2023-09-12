@@ -12,7 +12,7 @@ export function LeftSideGrid({children}){
         sx={{
           border: "1px solid black",
           borderRadius: "5px",
-          margin: "20px",
+          // margin: "20px"
         }}
       >{children}</Grid>
 	);

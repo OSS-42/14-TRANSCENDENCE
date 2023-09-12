@@ -1,4 +1,4 @@
-import { Box, Typography } from "@mui/material";
+import { Box, Grid, Typography } from "@mui/material";
 import { Matches } from "../../models/User";
 
 interface MatchWonLostProps {
@@ -17,7 +17,7 @@ interface CenteredTextProps {
 function CenteredText({ match }: CenteredTextProps) {
   return (
     <div style={{ textAlign: "center" }}>
-      <Box p={2}>
+      <Box>
         <Typography variant="h1" style={{ color: "black", width: "100%" }}>
           {match}
         </Typography>
@@ -28,24 +28,25 @@ function CenteredText({ match }: CenteredTextProps) {
 
 function MatchBox({ title, matchCount }: MatchBoxProps) {
   return (
-    <Box
-      component="div"
-      display="inline-block"
-      sx={{
-        border: "1px solid black",
-        borderRadius: "5px",
-        margin: "20px",
-        fontWeight: "bold",
-        height: "28vh",
-        width: "44.5%",
-        maxHeight: "370px",
-        overflow: "auto",
-        textAlign: "center",
-      }}
-    >
-      {title}
-      <CenteredText match={matchCount} />
-    </Box>
+    <Grid item xs={12} sm={6}>
+      <Box
+        component="div"
+        sx={{
+          border: "1px solid black",
+          borderRadius: "5px",
+          margin: "20px",
+          marginBottom: "5px",
+          fontWeight: "bold",
+          height: "21vh",
+          maxHeight: "370px",
+          overflow: "auto",
+          textAlign: "center",
+        }}
+      >
+        <Typography variant="h6">{title}</Typography>
+        <CenteredText match={matchCount} />
+      </Box>
+    </Grid>
   );
 }
 
@@ -54,9 +55,44 @@ export function MatchWonLost({ match }: MatchWonLostProps) {
   const nbrMatchesLost = match.matchesLost.length;
 
   return (
-    <div>
+    <Grid container spacing={2}>
       <MatchBox title="MATCH WON" matchCount={nbrMatchesWon} />
       <MatchBox title="MATCH LOST" matchCount={nbrMatchesLost} />
-    </div>
+    </Grid>
   );
 }
+
+// function MatchBox({ title, matchCount }: MatchBoxProps) {
+//   return (
+//     <Box
+//       component="div"
+//       display="inline-block"
+//       sx={{
+//         border: "1px solid black",
+//         borderRadius: "5px",
+//         margin: "20px",
+//         fontWeight: "bold",
+//         height: "28vh",
+//         width: "44.5%",
+//         maxHeight: "370px",
+//         overflow: "auto",
+//         textAlign: "center",
+//       }}
+//     >
+//       {title}
+//       <CenteredText match={matchCount} />
+//     </Box>
+//   );
+// }
+
+// export function MatchWonLost({ match }: MatchWonLostProps) {
+//   const nbrMatchesWon = match.matchesWon.length;
+//   const nbrMatchesLost = match.matchesLost.length;
+
+//   return (
+//     <div>
+//       <MatchBox title="MATCH WON" matchCount={nbrMatchesWon} />
+//       <MatchBox title="MATCH LOST" matchCount={nbrMatchesLost} />
+//     </div>
+//   );
+// }
