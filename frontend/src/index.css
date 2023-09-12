@@ -29,7 +29,7 @@
 body {
   width: -webkit-fill-available;
   height: -webkit-fill-available;
-  background-color: var(--blackish);
+  background-color: black;
 }
 
 #welcome-page {
