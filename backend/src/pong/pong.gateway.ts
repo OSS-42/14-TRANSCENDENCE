@@ -56,6 +56,14 @@ export class PongGateway {
       }
     }
 
+    // Remove client from all game mode queues
+    this.gameModeQueue.forEach((queue, gameMode) => {
+      const index = queue.findIndex((queuedClient) => queuedClient.id === client.id);
+      if (index !== -1) {
+        queue.splice(index, 1);
+      }
+    });
+
     if (gameIdToTerminate && clientsMapToTerminate) {
       //Notify remaining player
       for (const [playerId, playerSocket] of clientsMapToTerminate.entries()) {

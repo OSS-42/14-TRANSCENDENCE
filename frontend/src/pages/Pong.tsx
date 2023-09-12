@@ -1,6 +1,5 @@
 import { Box as MaterialBox } from '@mui/material'
 
-// import { useHistory } from 'react-router-dom';
 import React, { useEffect, useState, useRef } from 'react';
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Sphere, Box } from "@react-three/drei";
@@ -10,15 +9,13 @@ import * as THREE from 'three';
 // import { ControlledCameras } from "./controlledcamera";
 import { ControlledCameras } from "../components/Pong/controlledcamera-2"; // Assuming it's exported from a file named ControlledCameras.tsx
 
-// import for DB
-import axios from "axios";
+// import for Cookies data use
 import Cookies from "js-cookie";
 
 // for use instead of fetch.
 import { useAuth } from "../contexts/AuthContext";
 
 // import for websocket
-// import { Socket } from "socket.io-client";
 import socketIO from 'socket.io-client'
 
 //------------------ INFOS QUI TRANSITENT ENTRE SOCKETS ------------
@@ -53,16 +50,9 @@ type OppDisconnected = {
   message: string,
 }
 
-
 export function Pong() {
-  const { user } = useAuth();
 
-  // const socket = socketIO('/pong', {
-  //   query: {
-  //     token: Cookies.get('jwt_token')
-  //   },
-  // });
-
+  //------------------ SOCKET CONNECTION --------------------
   const [socket, setSocket] = useState(null);
 
   useEffect(() => {
@@ -79,8 +69,9 @@ export function Pong() {
   }, []);
 
   //------------------ CONSTANTS NECESSARY AT TOP --------------------
-  // const history = useHistory();
   
+  const { user } = useAuth();
+
   const [gameLaunched, setGameLaunched] = React.useState(false);
   const [cameraMode, setCameraMode] = React.useState<"perspective" | "orthographic">("orthographic");
   const [isPaused, setIsPaused] = React.useState(true);
@@ -133,9 +124,6 @@ export function Pong() {
   const updateFrequency = 1000 / 60;
   const [lastUpdateTime, setLastUpdateTime] = useState(currentTime);
 
-  const jwt_token = Cookies.get("jwt_token");  
-  const source = axios.CancelToken.source(); // Create a new CancelToken
-
   // Ecoute parle le socket
   useEffect(() => {
     if (socket) {
@@ -146,6 +134,7 @@ export function Pong() {
         console.log('🏓   username is ', user.username);
         setPlayerName(user.username);
         if (!data.isConnected) {
+          console.log('🏓   Connection established ? ', data.isConnected);
           setGameLaunched(false);
         }
       })
