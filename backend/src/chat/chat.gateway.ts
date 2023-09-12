@@ -514,7 +514,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         userNotice = `/KICK: You don't have the right to kick a user of the room ${payload.channelName}`
       // ------------------------ La cible est owner du chat ------------------------
       else if (await this.chatService.isUserOwnerOfChatRoom(targetId, roomObject.id) === true)
-        userNotice = `/KICK: The target is the owner of the room ${payload.channelName}`
+        userNotice = `/KICK: Error: the target is the owner of the room ${payload.channelName}`
       // ------------------------ Sinon on mute la cible ------------------------
       else {
         targetNotice = `You are kick of the channel ${payload.channelName}`
