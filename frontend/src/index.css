@@ -11,19 +11,25 @@
 
 :root {
   /* CSS HEX */
-  --black-currant: #1c1823;
-  --mauve: #67425b;
-  --burnt-rose: #a95d6b;
+  --blackish: #090609;
+  --eggplant: #120d23;
+  --mauve: #3d3242;
+  --nude: #a95d6b;
+  --burnt-rose: #c96069;
+  --danger: #d41724;
+  --blush: #fdf6ff;
   --mandarine: #e0836a;
-  --soleil: #fdb863;
-  --canary: #f9d271;
-  --greyish: #c9c9c5;
+  --canary: #ffb63d;
+  --grey: #8c808c;
+  --pale-grey: #c9c9c5;
+  --blue-sky: #d9eef3;
+  --moss: #909e66;
 }
 
 body {
   width: -webkit-fill-available;
   height: -webkit-fill-available;
-  background-color: #000;
+  background-color: var(--blackish);
 }
 
 #welcome-page {
