@@ -385,7 +385,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       else if (await this.chatService.isUserMemberOfRoom(userId, roomObject.id) === false)
         userNotice = `/INVITE: You need to be a member of the room ${payload.channelName[0]} to send a invite`
       // ------------------------ L'utilisateur est ban de la room ------------------------
-      else if (await this.chatService.isBanFromRoom(payload.username, payload.channelName[0]) === true)
+      else if (await this.chatService.isBanFromRoom(payload.target, payload.channelName[0]) === true)
         userNotice = `/INVITE: The user ${[payload.target]} is ban of the room ${payload.channelName[0]}`
       // ------------------------ La cible n'existe pas ------------------------
       else if (targetId === null)
