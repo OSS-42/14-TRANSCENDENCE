@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
 import { User } from "../../models/User";
+import { Box } from "@mui/material";
 import ChatBar from "./ChatBar";
 import ChatFriends from "./ChatFriends";
 import ReactModal from "react-modal";
@@ -22,7 +23,12 @@ export function FriendsAndUsers({ socket }: someProp) {
     socket.on("updateConnectedUsers", (updatedUsers: number[]) => {
       setConnectedUsers(updatedUsers);
     });
-
+  
+    // Ajoutez cet écouteur pour gérer l'événement UpdateUserList
+    socket.on("updateUserList", () => {
+      fetchInitialData();
+    });
+  
     async function fetchInitialData() {
       try {
         const newFriendsList = await fetchFriendsList();
@@ -34,9 +40,10 @@ export function FriendsAndUsers({ socket }: someProp) {
       }
     }
     fetchInitialData();
-
+  
     return () => {
       socket.off("updateConnectedUsers");
+      socket.off("UpdateUserList"); // Assurez-vous de supprimer l'écouteur lorsque le composant se démonte
     };
   }, []);
 
@@ -60,7 +67,7 @@ export function FriendsAndUsers({ socket }: someProp) {
         connectedUsers={connectedUsers}
         handleUserClick={handleUserClick}
       />
-
+      <Box mb={3} />
       <ChatBar
         setUsersList={setUsersList}
         setFriendsList={setFriendsList}

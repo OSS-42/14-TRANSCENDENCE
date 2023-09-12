@@ -31,6 +31,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
           this.connectedUsersService.set( Number(decoded.sub), client.id);
           //FONCTION QUI VERIFIE LES CHANNELS DONT LUTILASATEUR EST MEMBRE ET LES JOIN TOUS
           this.joinRoomsAtConnection(Number(decoded.sub), client)
+          this.server.emit("updateUserList")
         } catch (error) {
           client.disconnect();
         }

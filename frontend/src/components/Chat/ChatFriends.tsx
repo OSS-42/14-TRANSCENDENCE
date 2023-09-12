@@ -43,6 +43,9 @@ const ChatFriends = ({
                 border: "1px solid #ccc",
                 borderRadius: "5px",
                 marginBottom: "5px",
+                backgroundColor: connectedUsers?.includes(user.id)
+                  ? "white"
+                  : "#f0f0f0",
               }}
             >
               <img
