@@ -80,6 +80,7 @@ export function Name(props) {
         margin: "20px",
         fontWeight: "bold",
         fontSize: "20px",
+        width: "50%",
         height: "5vh",
         padding: "20px",
       }}
