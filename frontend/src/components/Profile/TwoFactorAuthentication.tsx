@@ -33,12 +33,14 @@ export function TwoFactorAuthentication() {
   }
 
   async function handleSubmit() {
+    console.log("Verification code is: ",verificationCode);
+    console.log(typeof verificationCode);
     try {
       // Make an API call to validate the verification code
       const response = await axios.post(
         `${BASE_URL}/auth/verify2FA`,
         {
-          code: verificationCode,
+          token: verificationCode,
         },
         {
           headers: {
