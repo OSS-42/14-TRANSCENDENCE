@@ -18,7 +18,7 @@ export class PongGateway {
   server: Server
 
   handleConnection(client: Socket): void {
-    console.log(`🏓   ⚡: ${client.id} user just connected!`);
+    console.log(`🏓   ${new Date().toISOString()} - ⚡: ${client.id} user just connected!`);
     const token = client.handshake.query.token as string;
 
     console.log("🏓   Received Token:", token);
@@ -76,7 +76,7 @@ export class PongGateway {
 
     const isConnected = false;
     console.log(`🏓   🔥: ${client.id} user disconnected`);
-    client.emit('Connected', isConnected ); 
+    client.emit('connected', isConnected ); 
 
   }
 
@@ -186,11 +186,15 @@ export class PongGateway {
     this.server.to(gameId).emit('weHaveAWinner', payload);
     console.log('🏓   in ${gameId}, the winner is  ', payload.isHostWinner);
     //player1 = host (toujours)
-    if (payload.isHostWinner) {
-      this.server.emit('endOfGame', { gameId: gameId, winner: hostname, loser: clientName });
-    } else {
-      this.server.emit('endOfGame', { gameId: gameId, winner: clientName, loser: hostname });
-    }
+    // if (payload.isHostWinner) {
+    //   const winnerId = 1;
+    //   const loserId = 2;
+    // } else {
+    //   const winnerId = 1;
+    //   const loserId = 2;
+    // }
+
+    // this.pongService.updateHistory(winnerId, loserId);
 
     // cleaning the gameId from the list of gameIds:
     let clientsMapToTerminate: any;

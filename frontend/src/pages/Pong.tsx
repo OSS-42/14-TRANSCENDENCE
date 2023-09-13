@@ -81,7 +81,6 @@ export function Pong() {
   const [showButtons, setShowButtons] = React.useState(true);
 
   //------------------ GAME VARIABLES ------------------------
-
   // variables sans resizing
   const paddleWidth: number = 0.5;
   const paddleHeight: number = 1;
@@ -124,7 +123,7 @@ export function Pong() {
   const updateFrequency = 1000 / 60;
   const [lastUpdateTime, setLastUpdateTime] = useState(currentTime);
 
-  // Ecoute parle le socket
+  // Ecoute parler le socket
   useEffect(() => {
     if (socket) {
       socket.on("connected", (data: any) => {
@@ -148,7 +147,7 @@ export function Pong() {
         console.log('🏓   GAMEID: ', data.gameId);
         handleCountdown();
       });
-    
+
       socket.on("weHaveAWinner", (data: WeHaveAWinner) => {
         setIsHostWinner(data.isHostWinner);
       });
@@ -157,6 +156,7 @@ export function Pong() {
         console.log(data);
         setOppDisconnected(true);
       })
+
     } else {
       return () => {};  // No-op function when socket is null
     }
