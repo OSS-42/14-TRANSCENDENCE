@@ -4,6 +4,7 @@ import { ChatService } from './chat.service';
 import { verify } from 'jsonwebtoken';
 import { ConfigService } from '@nestjs/config';
 import { ConnectedUsersService } from '../connectedUsers/connectedUsers.service';
+import { empty } from '@prisma/client/runtime/library';
 
 
 @WebSocketGateway({ cors: true,  namespace: 'chat' })
@@ -262,6 +263,32 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     text: undefined,
     notice : notice,
     help : help
+    })
+  }
+  
+  // ---------------------------------------------------------- LIST ----------------------------------------------------------
+  // Utilisation :  /LIST 
+  @SubscribeMessage('list')
+  async listChannel(client: Socket, payload: any) {
+    const userId = await this.chatService.getUserIdFromUsername(payload.username)
+    const channelList = await this.chatService.getRoomNamesUserIsMemberOf(userId)
+    let notice : string = undefined
+    let help : string = null
+    // ------------------------ Trop de parametre ------------------------
+    if (payload.param[0] !== undefined && payload.param[0] !== "")
+      notice = '/LIST: Too many argument'
+    else if (channelList.length === 0)
+      notice = '/LIST: You are not inside any channel'
+    else {
+      const formattedList = channelList.map(channel => `- ${channel}<br>`).join('');
+      help = `<br>Here is the list of channels you are part of :<br>${formattedList}<br>`;
+    }
+    client.emit('notice', {
+    name: payload.username,
+    channel: payload.channelName,
+    text: undefined,
+    notice: notice,
+    help : help,
     })
   }
   
