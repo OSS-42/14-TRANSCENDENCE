@@ -4,6 +4,7 @@ import { ChatService } from './chat.service';
 import { verify } from 'jsonwebtoken';
 import { ConfigService } from '@nestjs/config';
 import { ConnectedUsersService } from '../connectedUsers/connectedUsers.service';
+import { empty } from '@prisma/client/runtime/library';
 
 
 @WebSocketGateway({ cors: true,  namespace: 'chat' })
@@ -119,7 +120,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         invite = true;
         await this.chatService.createRoom(payload.channelName, userId, payload.param, invite)// voir avec sam pour le param invit
         client.join(payload.channelName);
-        if (payload.param[0] !== undefined && payload.param[0] !== '+i')//Channel avec mdp
+        if (payload.param[0] !== undefined && payload.param[0] !== '+i' && payload.param[0] !== "")//Channel avec mdp
         await this.chatService.createPassword(payload.param[0], payload.channelName)
         notice = `You create and join a new room ${payload.channelName}`
       }
@@ -222,37 +223,37 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (payload.param[0] !== undefined)
       notice = '/HELP: Too many argument'
     else {
-    help = `
-    <br>Here are some tips on how to use the chat commands:<br>
-<br>JOIN :<br>
-&nbsp;- To join or create a room with a password: /JOIN #roomName password<br>
-&nbsp;- To join or create a public room with a password: /JOIN #roomName password<br>
-&nbsp;- To create a private room: /JOIN #roomName +i<br>
-<br>BLOCK :<br>
-&nbsp;- To block a user: /BLOCK username<br>
-<br>UNBLOCK :<br>
-&nbsp;- To unblock a user: /UNBLOCK username<br>
-<br>HELP :<br>
-&nbsp;- To get a list of available commands: /HELP<br>
-<br>PRIVMSG :<br>
-&nbsp;- To send a message to a channel: /PRIVMSG #channelName message...<br>
-&nbsp;- To send a private message to a user: /PRIVMSG username message...<br>
-<br>INVITE :<br>
-&nbsp;- To invite a user to a channel: /INVITE username #channelName<br>
-<br>MUTE :<br>
-&nbsp;- To mute a user in a channel: /MUTE username #channelName<br>
-<br>KICK :<br>
-&nbsp;- To kick a user from a channel: /KICK username #channelName<br>
-<br>BAN :<br>
-&nbsp;- To ban a user from a channel: /BAN username #channelName<br>
-<br>ADMIN :<br>
-&nbsp;- To grant admin privileges to a user in a channel: /ADMIN username #channelName<br>
-<br>MODE :<br>
-&nbsp;- To change channel modes:<br>
-&nbsp;&nbsp;- Set channel to invitation-only: /MODE #channelName invite<br>
-&nbsp;&nbsp;- Set channel to public: /MODE #channelName public<br>
-&nbsp;&nbsp;- Set channel to protected mode with a password: /MODE #channelName protected password<br><br>
-`;
+      help = `
+      <br>Here are some tips on how to use the chat commands:<br>
+      <br>HELP :<br>
+      &nbsp;- To get a list of available commands: /HELP<br>
+      <br>JOIN :<br>
+      &nbsp;- To join or create a room with a password: /JOIN #roomName password<br>
+      &nbsp;- To join or create a public room: /JOIN #roomName<br>
+      &nbsp;- To create a private room: /JOIN #roomName +i<br>
+      <br>BLOCK :<br>
+      &nbsp;- To block a user: /BLOCK username<br>
+      <br>UNBLOCK :<br>
+      &nbsp;- To unblock a user: /UNBLOCK username<br>
+      <br>PRIVMSG :<br>
+      &nbsp;- To send a message to a channel: /PRIVMSG #channelName message...<br>
+      &nbsp;- To send a private message to a user: /PRIVMSG username message...<br>
+      <br>INVITE :<br>
+      &nbsp;- To invite a user to a channel: /INVITE username #channelName<br>
+      <br>MUTE :<br>
+      &nbsp;- To mute a user in a channel: /MUTE username #channelName<br>
+      <br>KICK :<br>
+      &nbsp;- To kick a user from a channel: /KICK username #channelName<br>
+      <br>BAN :<br>
+      &nbsp;- To ban a user from a channel: /BAN username #channelName<br>
+      <br>ADMIN :<br>
+      &nbsp;- To grant admin privileges to a user in a channel: /ADMIN username #channelName<br>
+      <br>MODE :<br>
+      &nbsp;- To change channel modes:<br>
+      &nbsp;&nbsp;- Set channel to invitation-only: /MODE #channelName private<br>
+      &nbsp;&nbsp;- Set channel to public: /MODE #channelName public<br>
+      &nbsp;&nbsp;- Set channel to protected mode with a password: /MODE #channelName protected password<br><br>
+      `;
 
 
     }      
@@ -262,6 +263,32 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     text: undefined,
     notice : notice,
     help : help
+    })
+  }
+  
+  // ---------------------------------------------------------- LIST ----------------------------------------------------------
+  // Utilisation :  /LIST 
+  @SubscribeMessage('list')
+  async listChannel(client: Socket, payload: any) {
+    const userId = await this.chatService.getUserIdFromUsername(payload.username)
+    const channelList = await this.chatService.getRoomNamesUserIsMemberOf(userId)
+    let notice : string = undefined
+    let help : string = null
+    // ------------------------ Trop de parametre ------------------------
+    if (payload.param[0] !== undefined && payload.param[0] !== "")
+      notice = '/LIST: Too many argument'
+    else if (channelList.length === 0)
+      notice = '/LIST: You are not inside any channel'
+    else {
+      const formattedList = channelList.map(channel => `- ${channel}<br>`).join('');
+      help = `<br>Here is the list of channels you are part of :<br>${formattedList}<br>`;
+    }
+    client.emit('notice', {
+    name: payload.username,
+    channel: payload.channelName,
+    text: undefined,
+    notice: notice,
+    help : help,
     })
   }
   
@@ -275,13 +302,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('privmsg')
 
   async privateMessage(client: Socket, payload: any) {
-    console.log('coucou')
     const userId = await this.chatService.getUserIdFromUsername(payload.username)
     let notice : string = null
     let event : string = "notice"
     
     // --------------------------------------------- LE MESSAGE S'ADRESSE A UN CHANNEL ---------------------------------------------
-    if (payload.target === undefined || payload.message === undefined)
+    if (payload.target === undefined || payload.message === null)
     {
       notice = "/PRIVMSG: bad format"
       client.emit(event, {
@@ -666,7 +692,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const userSocketId = await this.connectedUsersService.getSocketId(userId)
     let userNotice : string = null
     
-    console.log('Dans MODE')
     // ------------------------ Pas assez de parametre ------------------------
     if (payload.channelName === undefined ||  payload.param[0] === undefined)
     userNotice = `/MODE : bad format`
@@ -690,7 +715,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       userNotice = `/MODE ${payload.param[0]}: bad format, to many argument`
       else if (payload.param[0] === 'protected' && payload.param[2] !== undefined)
       userNotice = `/MODE ${payload.param[0]}: bad format, to many argument`
-      else if (payload.param[0] === 'protected' && payload.param[1] === undefined)
+      else if (payload.param[0] === 'protected' && (payload.param[1] === undefined || payload.param[1] === ""))
       userNotice = `/MODE ${payload.param[0]}: bad format, password is missing`
       // ------------------------ Sinon on vérifie le flag et on applique les changements ------------------------
       else {
