@@ -5,23 +5,13 @@ import { ConfigService } from '@nestjs/config';
 import { PongService } from './pong.service';
 import { v4 as uuid } from 'uuid';
 
-interface GameState {
-  ballPosition: { x: number, y: number, z: number };
-  leftPaddlePositionZ: { z: number };
-  rightPaddlePositionZ: { z: number };
-  powerupPosition?: { x: number, y: number, z: number }; 
-}
-
 @WebSocketGateway({ cors: true,  namespace: 'pong' })
 export class PongGateway {
   constructor(private pongService: PongService, private config: ConfigService) {}
-  
-  // initiatlize this when a new game session starts
-  private gameStates: Map<string, GameState> = new Map();
 
   private playerNames: Map<string, string> = new Map();
   private gameModeQueue: Map<number, Socket[]> = new Map();
-  // private gameStates: Map<string, any> = new Map();
+  private gameStates: Map<string, any> = new Map();
   private gameIds: Map<any, string> = new Map();
   
   @WebSocketServer()
@@ -109,16 +99,6 @@ export class PongGateway {
       console.log('🏓   ⚡ 2 clients for GM 3!! ⚡');
       const gameId = uuid();
 
-      // Initialize game state for new game
-      const initialGameState: GameState = {
-        ballPosition: { x: 0, y: 0, z: 0.00001 },
-        leftPaddlePositionZ: { z: 0 },
-        rightPaddlePositionZ: { z: 0 },
-        powerupPosition: { x: 0, y: 0, z: 0}
-      };
-
-      this.gameStates.set(gameId, initialGameState);
-
       const player1 = queue.shift();
       const player2 = queue.shift();
 
@@ -162,16 +142,6 @@ export class PongGateway {
       console.log('🏓   ⚡ 2 clients for GM 4!! ⚡');
       const gameId = uuid();
 
-      // Initialize game state for new game
-      const initialGameState: GameState = {
-        ballPosition: { x: 0, y: 0, z: 0.00001 },
-        leftPaddlePositionZ: { z: 0 },
-        rightPaddlePositionZ: { z: 0 },
-        powerupPosition: { x: 0, y: 0, z: 0}
-      };
-
-      this.gameStates.set(gameId, initialGameState);
-
       const player1 = queue.shift();
       const player2 = queue.shift();
 
@@ -198,49 +168,14 @@ export class PongGateway {
     }
   }
 
-  @SubscribeMessage('clientAction')
-  handleClientAction(client: Socket, payload: any) {
-    const gameId = payload.gameId;
-    const action = payload.action; //ex : { type: 'MOVE_PADDLE', payload: { direction: 'UP' } }
-
-    let gameState = this.gameStates.get(gameId);
-
-    if (!gameState) {
-      console.log(`🏓   No gameState found for gameId: ${gameId}. Initializing.`);
-      gameState = {
-        ballPosition: { x: 0, y: 0, z: 0 },
-        leftPaddlePositionZ: { z: 0 },
-        rightPaddlePositionZ: { z: 0 },
-        powerupPosition: { x: 0, y: 0, z: 0 }
-      };
-      this.gameStates.set(gameId, gameState);
-    }
-
-    if (action.type === 'UPDATE_PADDLE_POSITION') {
-      if (action.payload.paddle === 'left') {
-        gameState.leftPaddlePositionZ = action.payload.position;
-      } else if (action.payload.paddle === 'right') {
-        gameState.rightPaddlePositionZ = action.payload.position;
-      }
-    }
-
-    if (action.type === 'UPDATE_POWERUP_POSITION') {
-      gameState.powerupPosition = action.payload.position;
-    }
-
-    console.log(`🏓🏓   Received clientAction from ${client.id} for game ${gameId} made a move`, payload);
-    // send updated gameState to all clients
-    this.server.to(gameId).emit('gameStateUpdate', gameState);
-  }
-
-  // @SubscribeMessage('gameParameters')
-  // handleGameParameters(client: Socket, payload: any) {
-  //   const gameId = payload.gameId; // Make sure to send gameId from client
+  @SubscribeMessage('gameParameters')
+  handleGameParameters(client: Socket, payload: any) {
+    const gameId = payload.gameId; // Make sure to send gameId from client
     
-  //   this.gameStates.set(gameId, payload);
+    this.gameStates.set(gameId, payload);
 
-  //   this.server.to(gameId).emit('movesUpdate', payload);
-  // }
+    this.server.to(gameId).emit('movesUpdate', payload);
+  }
 
   @SubscribeMessage('weHaveAWinner')
   handleWinner(client: Socket, payload: any) {

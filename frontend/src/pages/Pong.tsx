@@ -129,6 +129,7 @@ export function Pong() {
       socket.on("connected", (data: any) => {
         console.log('🏓   Connection established ? ', data.isConnected);
         setIsConnected(data.isConnected);
+        // fetchUsersData(setPlayerName);
         console.log('🏓   username is ', user.username);
         setPlayerName(user.username);
         if (!data.isConnected) {
@@ -143,8 +144,8 @@ export function Pong() {
         setHostStatus(data.hostStatus);
         setHostname(data.hostName);
         setClientName(data.clientName);
-        console.log('🏓   GAMEID - PayerJoined: ', data.gameId);
-        handleCountdown(data.gameId);
+        console.log('🏓   GAMEID: ', data.gameId);
+        handleCountdown();
       });
 
       socket.on("weHaveAWinner", (data: WeHaveAWinner) => {
@@ -182,48 +183,36 @@ export function Pong() {
 
   useEffect(() => {
     if (socket) {
-      // const timer = setInterval(() => {
-      //   const currentTime = performance.now();
+      const timer = setInterval(() => {
+        const currentTime = performance.now();
         
-      //   if (currentTime - lastUpdateTime >= updateFrequency) {
-      //     socket.emit("gameParameters", {
-      //       gameId,
-      //       ballPosition,
-      //       leftPaddlePositionZ,
-      //       rightPaddlePositionZ,
-      //       powerupPosition,
-      //     });
+        if (currentTime - lastUpdateTime >= updateFrequency) {
+          socket.emit("gameParameters", {
+            gameId,
+            ballPosition,
+            leftPaddlePositionZ,
+            rightPaddlePositionZ,
+            powerupPosition,
+          });
     
-      //     setLastUpdateTime(currentTime);
-      //   }
-      // }, updateFrequency);
+          setLastUpdateTime(currentTime);
+        }
+      }, updateFrequency);
         
-      socket.on("gameStateUpdate", (data: GameParameters) => {
-        console.log(`🏓   Received gameStateUpdate: ${JSON.stringify(data)}`);
+      socket.on("movesUpdate", (data: GameParameters) => {
         setGameId(data.gameId);
+        // console.log('🏓   GAMEID: ', gameId);
         setBallPosition(data.ballPosition);
         setLeftPaddlePositionZ(data.leftPaddlePositionZ);
         setRightPaddlePositionZ(data.rightPaddlePositionZ);
-        if (data.powerupPosition) {
-          setPowerupPosition(data.powerupPosition);
-        }
+        setPowerupPosition(data.powerupPosition);
       });
-
-      // socket.on("movesUpdate", (data: GameParameters) => {
-      //   setGameId(data.gameId);
-      //   // console.log('🏓   GAMEID: ', gameId);
-      //   setBallPosition(data.ballPosition);
-      //   setLeftPaddlePositionZ(data.leftPaddlePositionZ);
-      //   setRightPaddlePositionZ(data.rightPaddlePositionZ);
-      //   setPowerupPosition(data.powerupPosition);
-      // });
 
       return () => {
         if (socket) {
-          // clearInterval(timer);
-          socket.off('gameStateUpdate');
-          // socket.off("gameParameters");
-          // socket.off("movesUpdates");
+          clearInterval(timer);
+          socket.off("gameParameters");
+          socket.off("movesUpdates");
         }
       };
     } else {
@@ -231,10 +220,9 @@ export function Pong() {
     }
   },
     [socket,
-    // leftPaddlePositionZ,
-    // rightPaddlePositionZ,
-    // powerupPosition,
-  ]
+    leftPaddlePositionZ,
+    rightPaddlePositionZ,
+    powerupPosition,]
   );
 
 //------------------ GAME MODES ------------------------
@@ -326,8 +314,7 @@ export function Pong() {
 //------------------ GAME GENERAL BEHAVIOR ------------------------
   // Timer to restart
 
-  const handleCountdown = (gameId: string): void => {
-    console.log('🏓   GAMEID - handleCountdown: ', gameId);
+  const handleCountdown = (): void => {
     if (isGameOver.current || oppDisconnected) {
       return;
     }
@@ -429,15 +416,6 @@ export function Pong() {
   React.useEffect(() => {
     const randomZ = (Math.random() * (WORLD_HEIGHT - 2)) - (WORLD_HEIGHT / 2 - 1);
     setPowerupPosition({ x: 0, y: 0, z: randomZ });
-
-    if (gameMode === 4) {
-      socket.emit("clientAction", {
-        gameId, action: {
-          type: "UPDATE_POWERUP_POSITION",
-          payload: { position: { x:0, y:0, z: randomZ } }
-        }
-      });
-    }
   }, []);
 
   const Powerup: React.FC<{}> = () => {
@@ -458,16 +436,6 @@ export function Pong() {
   
     setPowerupPosition({ x: 0, y: 0, z: randomZ });
     setPowerupVisible(true);
-
-    if (gameMode === 4) {
-      socket.emit("clientAction", {
-        gameId: gameId,
-        action: {
-          type: "UPDATE_POWERUP_POSITION",
-          payload: { position: { x:0, y:0, z: randomZ } }
-        }
-      });
-    }
   };
 
   const createTextTexture: () => THREE.CanvasTexture = () => {
@@ -734,18 +702,6 @@ export function Pong() {
 
       newPosition = lerp(leftPaddlePositionZ, newPosition, lerpFactor);
 
-      if (gameId) {
-        socket.emit('clientAction', {
-          gameId: gameId,
-          action: {
-            type: 'UPDATE_PADDLE_POSITION',
-            payload: { paddle: 'left', position: newPosition }
-          }
-        });
-      } else {
-        console.log("🏓   gameId is not set");
-      }
-
       const paddleTopEdge = newPosition + paddleDepth / 2;
       const paddleBottomEdge = newPosition - paddleDepth / 2;
       
@@ -814,18 +770,6 @@ export function Pong() {
         }
         
         newPosition = lerp(rightPaddlePositionZ, newPosition, lerpFactor);
-
-        if (gameId) {
-          socket.emit('clientAction', {
-            gameId: gameId,
-            action: {
-              type: 'UPDATE_PADDLE_POSITION',
-              payload: { paddle: 'right', position: newPosition }
-            }
-          });
-        } else {
-          console.log("🏓   gameId is not set");
-        }
 
         const paddleTopEdge = newPosition + paddleDepth / 2;
         const paddleBottomEdge = newPosition - paddleDepth / 2;
