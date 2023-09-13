@@ -1,6 +1,7 @@
 import { Box, Button, Typography } from '@mui/material'
 import { NavLink } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import "Welcome.module.css"
 
 export function Welcome() {
   const { login } = useAuth()
