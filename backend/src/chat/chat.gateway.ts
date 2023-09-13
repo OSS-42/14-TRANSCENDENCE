@@ -119,7 +119,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         invite = true;
         await this.chatService.createRoom(payload.channelName, userId, payload.param, invite)// voir avec sam pour le param invit
         client.join(payload.channelName);
-        if (payload.param[0] !== undefined && payload.param[0] !== '+i')//Channel avec mdp
+        if (payload.param[0] !== undefined && payload.param[0] !== '+i' && payload.param[0] !== "")//Channel avec mdp
         await this.chatService.createPassword(payload.param[0], payload.channelName)
         notice = `You create and join a new room ${payload.channelName}`
       }
@@ -275,13 +275,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('privmsg')
 
   async privateMessage(client: Socket, payload: any) {
-    console.log('coucou')
     const userId = await this.chatService.getUserIdFromUsername(payload.username)
     let notice : string = null
     let event : string = "notice"
     
     // --------------------------------------------- LE MESSAGE S'ADRESSE A UN CHANNEL ---------------------------------------------
-    if (payload.target === undefined || payload.message === undefined)
+    if (payload.target === undefined || payload.message === null)
     {
       notice = "/PRIVMSG: bad format"
       client.emit(event, {
@@ -666,7 +665,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const userSocketId = await this.connectedUsersService.getSocketId(userId)
     let userNotice : string = null
     
-    console.log('Dans MODE')
     // ------------------------ Pas assez de parametre ------------------------
     if (payload.channelName === undefined ||  payload.param[0] === undefined)
     userNotice = `/MODE : bad format`
@@ -690,7 +688,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       userNotice = `/MODE ${payload.param[0]}: bad format, to many argument`
       else if (payload.param[0] === 'protected' && payload.param[2] !== undefined)
       userNotice = `/MODE ${payload.param[0]}: bad format, to many argument`
-      else if (payload.param[0] === 'protected' && payload.param[1] === undefined)
+      else if (payload.param[0] === 'protected' && (payload.param[1] === undefined || payload.param[1] === ""))
       userNotice = `/MODE ${payload.param[0]}: bad format, password is missing`
       // ------------------------ Sinon on vérifie le flag et on applique les changements ------------------------
       else {
