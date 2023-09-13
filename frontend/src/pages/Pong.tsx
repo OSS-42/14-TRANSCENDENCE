@@ -143,8 +143,8 @@ export function Pong() {
         setHostStatus(data.hostStatus);
         setHostname(data.hostName);
         setClientName(data.clientName);
-        console.log('🏓   GAMEID: ', data.gameId);
-        handleCountdown();
+        console.log('🏓   GAMEID - PayerJoined: ', data.gameId);
+        handleCountdown(data.gameId);
       });
 
       socket.on("weHaveAWinner", (data: WeHaveAWinner) => {
@@ -326,7 +326,8 @@ export function Pong() {
 //------------------ GAME GENERAL BEHAVIOR ------------------------
   // Timer to restart
 
-  const handleCountdown = (): void => {
+  const handleCountdown = (gameId: string): void => {
+    console.log('🏓   GAMEID - handleCountdown: ', gameId);
     if (isGameOver.current || oppDisconnected) {
       return;
     }
