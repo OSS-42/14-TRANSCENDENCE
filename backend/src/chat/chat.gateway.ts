@@ -227,6 +227,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       <br>Here are some tips on how to use the chat commands:<br>
       <br>HELP :<br>
       &nbsp;- To get a list of available commands: /HELP<br>
+      <br>LIST :<br>
+      &nbsp;- To get a list of channels you're part of: /LIST<br>
       <br>JOIN :<br>
       &nbsp;- To join or create a room with a password: /JOIN #roomName password<br>
       &nbsp;- To join or create a public room: /JOIN #roomName<br>
@@ -254,8 +256,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       &nbsp;&nbsp;- Set channel to public: /MODE #channelName public<br>
       &nbsp;&nbsp;- Set channel to protected mode with a password: /MODE #channelName protected password<br><br>
       `;
-
-
     }      
     client.emit('notice', {
     name: payload.username,
