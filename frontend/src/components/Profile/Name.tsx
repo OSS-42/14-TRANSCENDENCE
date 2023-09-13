@@ -82,7 +82,7 @@ export function Name(props) {
         fontSize: "20px",
         width: "50%",
         height: "5vh",
-        padding: "20px",
+        padding: "10px",
       }}
     >
       {isEditing ? (

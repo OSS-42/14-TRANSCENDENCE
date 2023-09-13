@@ -20,6 +20,12 @@ export function MatchHistory({ match }: MatchHistoryProps) {
     return <p>No match data available.</p>;
   }
 
+  function formatDate(dateString){
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    const date = new Date(dateString);
+    return date.toLocaleDateString(undefined, options);
+  }
+
   return (
     <Box
       component="div"
@@ -48,14 +54,14 @@ export function MatchHistory({ match }: MatchHistoryProps) {
             <TableBody>
               {match.matchesWon.map((matches, index) => (
                 <TableRow key={index}>
-                  <TableCell>{matches.date}</TableCell>
+                  <TableCell>{formatDate(matches.date)}</TableCell>
                   <TableCell>{matches.winner}</TableCell>
                   <TableCell>{matches.loser}</TableCell>
                 </TableRow>
               ))}
               {match.matchesLost.map((matches, index) => (
                 <TableRow key={index}>
-                  <TableCell>{matches.date}</TableCell>
+                  <TableCell>{formatDate(matches.date)}</TableCell>
                   <TableCell>{matches.winner}</TableCell>
                   <TableCell>{matches.loser}</TableCell>
                 </TableRow>
