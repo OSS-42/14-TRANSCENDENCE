@@ -18,12 +18,15 @@ model Utilisateur {
   username String
   avatar String?
   email    String @unique
+  twoFactorSecret String?
 
   blockedBy Banissement[] @relation("UserToBanishment")
   blockedUsers Banissement[] @relation("BanningUser")
 
   friends  Friendship[] @relation("UserToFriendship")
   friendOf  Friendship[]  @relation("FriendToFriendship")
+
+  // isTwoFactorEnabled Boolean  @default(false) //no secret will be stored as it will be SMS or e-mail based, not through an app (no TOTP).
 
   
   ownedChatRooms  ChatRoom[]   @relation("ChatRoomOwner")

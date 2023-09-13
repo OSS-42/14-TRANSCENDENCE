@@ -167,6 +167,7 @@ export class ChatService {
       });
       return room;
   }
+
   async removeBan(roomId: number, bannedId: number):Promise<ChatRoom> {
     const room = await this.prisma.chatRoom.update({
     where: { id: roomId }, 
@@ -410,6 +411,8 @@ export class ChatService {
       mutedUsersMap.delete(mutedUserId);
     }
   }
+     
+       
 
   }
   

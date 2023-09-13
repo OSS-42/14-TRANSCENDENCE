@@ -18,7 +18,7 @@ function App() {
     );
   } else {
     const socket = socketIO("/chat", {
-      query: {
+      query: { 
         token: user?.jwtToken,
       },
     });
