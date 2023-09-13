@@ -42,7 +42,9 @@ function ChatBar({
         <h4 className="chat__header">CONNECTED USERS</h4>
         <div className="chat__users">
           <p></p>
-          {onlineUsers.map((user) => (
+          {onlineUsers
+          .filter((user) => !friendsList.some((friend) => friend.id === user.id)) 
+          .map((user) => (
             <Box
               component="div"
               key={user.id}
