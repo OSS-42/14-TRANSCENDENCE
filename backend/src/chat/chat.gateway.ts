@@ -459,7 +459,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         userNotice = `/MUTE: The target is already mute in the room ${payload.channelName}`
       // ------------------------ Sinon on mute la cible ------------------------
       else {
-        targetNotice = `You are muted in the channel ${payload.channelName}`
+        targetNotice = `You are muted for 30s in the channel ${payload.channelName}`
         userNotice = `/MUTE: The user ${payload.target} is now mute in the room ${payload.channelName[0]}`
         await this.chatService.muteUserInRoom(targetId, roomObject.id, 0.5)
       }
