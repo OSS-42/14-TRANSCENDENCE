@@ -6,8 +6,8 @@ import { JwtStrategy } from "./strategy";
 import { ConnectedUsersModule } from "src/connectedUsers/connectedUsers.module";
 
 @Module({
-    imports: [JwtModule.register({}), ConnectedUsersModule],
-    controllers : [AuthControler],
-    providers : [AuthService, JwtStrategy, ConnectedUsersModule],
+  imports: [JwtModule.register({}), ConnectedUsersModule],
+  controllers: [AuthControler],
+  providers: [AuthService, JwtStrategy, ConnectedUsersModule],
 })
-export class  AuthModule{}
+export class AuthModule {}
