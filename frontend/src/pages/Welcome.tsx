@@ -8,18 +8,15 @@ export function Welcome() {
   return (
     <Box component="div" id="welcome-page" style={{ background: '#000' }}>
       <Typography
+        className="glitch"
         sx={{
           textAlign: 'center',
-          color: '#fde5c5',
-          fontSize: '1.2rem',
           '@media (min-width:600px)': {
-            fontSize: '1.5rem',
+            fontSize: '5rem',
           },
         }}
       >
-        Welcome
-        <br />
-        to PONG!
+        PONG
       </Typography>
       <Box component="div" id="arcade" sx={{ marginBottom: '5rem' }}>
         <img width="100%" src="arcade.png" alt="" />

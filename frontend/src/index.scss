@@ -1,0 +1,221 @@
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  font-family: 'Montserrat', sans-serif;
+  font-family: 'Press Start 2P', cursive;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  /* CSS HEX */
+  --blackish: #090609;
+  --eggplant: #120d23;
+  --mauve: #3d3242;
+  --nude: #a95d6b;
+  --burnt-rose: #c96069;
+  --danger: #d41724;
+  --blush: #fdf6ff;
+  --mandarine: #e0836a;
+  --canary: #ffb63d;
+  --grey: #8c808c;
+  --pale-grey: #c9c9c5;
+  --blue-sky: #d9eef3;
+  --moss: #909e66;
+}
+
+#root {
+  background: #000;
+  height: 100vh;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-size: cover;
+  background-position: center;
+}
+
+body {
+  width: -webkit-fill-available;
+  height: -webkit-fill-available;
+  background-color: black;
+}
+
+#welcome-page {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center; /* Use 'center' instead of 'space-evenly' */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* Centering using negative translation */
+  font-size: clamp(40px, 10vw, 100px);
+  letter-spacing: 10px;
+}
+
+.message__container {
+  margin-bottom: 1px;
+  font-size: 0.8rem;
+  line-height: 1.5rem;
+}
+
+// h1 {
+//   font-family: Press Start 2P;
+//   margin-top: 3rem;
+//   margin-bottom: 1rem;
+//   text-align: center;
+//   text-shadow: 0px 2px 5px rgba(0, 0, 0, 0.25),
+//     -2px -2px 4px rgba(0, 0, 0, 0.25);
+//   color: #f7e8c4;
+// }
+
+#arcade {
+  margin-top: 3rem;
+  border-radius: 50%;
+  display: inline-block;
+  position: relative;
+  width: 50vw;
+
+  &:after {
+    content: '';
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    box-shadow: inset 10px 24px 40px 0px black, inset -10px -24px 40px 0px black,
+      inset 20px -10px 40px 0px black, inset -20px 10px 40px 0px black;
+  }
+  img {
+    border-radius: 50%;
+    display: block;
+    border: 1px solid #000000;
+  }
+}
+
+.help {
+  margin: 15px;
+  tab-size: 8;
+  line-height: 1.2rem;
+  font-size: 0.7rem;
+  > b {
+    color: #a95d6b;
+  }
+  > span {
+    color: #d9eef3;
+  }
+}
+
+// .help b {
+//   color: #a95d6b;
+// }
+// .help b span {
+//   color: #d9eef3;
+// }
+
+.nameSender {
+  color: var(--burnt-rose);
+  font-weight: bold; /* Texte gras */
+}
+
+.channelSender {
+  color: var(--mandarine);
+  font-weight: bold; /* Texte gras */
+}
+
+.notice {
+  color: var(--canary); /* Jaune doré */
+  font-weight: bold; /* Texte gras */
+  tab-size: 4;
+  font-size: 14px; /* Taille de police de 14 pixels */
+}
+
+.chat__header {
+  color: var(--mandarine);
+}
+
+.chat__users {
+  margin-bottom: 25px;
+}
+
+header nav {
+  display: flex;
+  justify-content: space-evenly;
+  max-width: 100vw;
+}
+
+p {
+  text-overflow: ellipsis;
+}
+
+@mixin glitchCopy {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.glitch {
+  position: relative;
+  color: #fff;
+  font-size: 4em;
+  letter-spacing: 0.5em;
+  animation: glitch-skew 2s infinite linear alternate-reverse;
+
+  &::before {
+    @include glitchCopy;
+    left: 2px;
+    text-shadow: -2px 0 #ff00c1;
+    clip: rect(44px, 450px, 56px, 0);
+    animation: glitch-anim 5s infinite linear alternate-reverse;
+  }
+
+  &::after {
+    @include glitchCopy;
+    left: -2px;
+    text-shadow: -2px 0 #ff00c1, 2px 2px #ff00c1;
+    clip: rect(44px, 450px, 56px, 0);
+    animation: glitch-anim2 5s infinite linear alternate-reverse;
+  }
+}
+
+@keyframes glitch-anim {
+  $steps: 20;
+  @for $i from 0 to $steps {
+    #{percentage($i*(1/$steps))} {
+      clip: rect(random(100) + px, 9999px, random(100) + px, 0);
+      transform: skew((random(100) / 100) + deg);
+    }
+  }
+}
+
+@keyframes glitch-anim2 {
+  $steps: 20;
+  @for $i from 0 to $steps {
+    #{percentage($i*(1/$steps))} {
+      clip: rect(random(100) + px, 9999px, random(100) + px, 0);
+      transform: skew((random(100) / 100) + deg);
+    }
+  }
+}
+
+@keyframes glitch-skew {
+  $steps: 10;
+  @for $i from 0 to $steps {
+    #{percentage($i*(1/$steps))} {
+      transform: skew((random(10) - 5) + deg);
+    }
+  }
+}
