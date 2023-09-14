@@ -7,10 +7,11 @@ export function ContainerGrid({children}) {
         sx={{
           border: "1px solid black",
           borderRadius: "5px",
-          height: "95vh",
-          width: "95vw",
-          margin: "10px",
+          minHeight: "auto",
+          height: "94vh",
+          width: "99vw",
           boxSizing: "border-box",
+          padding: "20px"
         }}
       >{children}</Grid>
   );
