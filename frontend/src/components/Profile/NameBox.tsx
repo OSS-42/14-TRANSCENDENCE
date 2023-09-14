@@ -1,9 +1,9 @@
-import { Alert, Box } from "@mui/material";
-import axios from "axios";
-import Cookies from "js-cookie";
-import { useState } from "react";
-import { isUserExist } from "../../api/requests";
-import { User } from "../../models/User";
+import { Alert, Box } from '@mui/material'
+import axios from 'axios'
+import Cookies from 'js-cookie'
+import { useState } from 'react'
+import { isUserExist } from '../../api/requests'
+import { User } from '../../models/User'
 
 // interface NameBoxProps {
 // 	user: User,
@@ -11,83 +11,80 @@ import { User } from "../../models/User";
 // }
 
 export function NameBox(props) {
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedName, setEditedName] = useState("");
+  const [isEditing, setIsEditing] = useState(false)
+  const [editedName, setEditedName] = useState('')
 
   function handleDoubleClick() {
-    setIsEditing(true);
+    setIsEditing(true)
   }
 
   function handleChange(event) {
-    const newName = event.target.value;
-    setEditedName(newName);
+    const newName = event.target.value
+    setEditedName(newName)
   }
 
   function UserNameCharacters(username: string) {
     for (let i = 0; i < username.length; i++) {
-      const char = username[i];
-      console.log("Printing:", username[i]);
+      const char = username[i]
+      console.log('Printing:', username[i])
       if (!/[a-zA-Z0-9]/.test(char)) {
-        return false;
+        return false
       }
     }
-    return true;
+    return true
   }
 
   function UserNameLength(username: string) {
-    if (username.length < 3 || username.length > 12) 
-		return false;
-    return true;
+    if (username.length < 3 || username.length > 12) return false
+    return true
   }
 
   async function handleBlur() {
     if (editedName !== props.user) {
-      if (editedName.trim() === "") {
-        alert("You cannot have an empty name. Please enter name");
-        setEditedName(props.user);
-        return;
+      if (editedName.trim() === '') {
+        alert('You cannot have an empty name. Please enter name')
+        setEditedName(props.user)
+        return
       }
       if (UserNameCharacters(editedName) === false) {
         alert(
-          "Invalid Username! You username must ONLY contain letters or numbers. No special characters are authorized "
-        );
-        setEditedName(props.user);
-        return;
+          'Invalid Username! You username must ONLY contain letters or numbers. No special characters are authorized '
+        )
+        setEditedName(props.user)
+        return
       }
       if (UserNameLength(editedName) === false) {
         alert(
-          "Invalid Username! Username must contained between 3 to 12 characters."
-        );
-        setEditedName(props.user);
-        return;
+          'Invalid Username! Username must contained between 3 to 12 characters.'
+        )
+        setEditedName(props.user)
+        return
       }
-      const Name = await isUserExist(editedName);
+      const Name = await isUserExist(editedName)
       if (Name === true) {
-		alert(
-			"Invalid Username! Another user already has this username"
-		  );
-        setEditedName(props.user);
-        return;
+        alert('Invalid Username! Another user already has this username')
+        setEditedName(props.user)
+        return
       }
-      const jwt_token = Cookies.get("jwt_token");
+      const jwt_token = Cookies.get('jwt_token')
       try {
         const response = await axios.post(
-          "/api/users/updateUsername",
+          '/api/users/updateUsername',
           { newUsername: editedName },
           {
             headers: {
-              Authorization: "Bearer " + jwt_token,
+              Authorization: 'Bearer ' + jwt_token,
             },
           }
-        );
-        console.log("Updating name was successful");
-        props.setUser(response.data);
-        console.log(response.data);
+        )
+        console.log('Updating name was successful')
+        props.setUser(response.data)
+        console.log(response.data)
       } catch (error) {
-        console.error("Error updating user data:", error);
+        console.error('Error updating user data:', error)
       }
     }
-    setIsEditing(false);
+    setIsEditing(false)
   }
 
   return (
@@ -95,13 +92,13 @@ export function NameBox(props) {
       onDoubleClick={handleDoubleClick}
       component="div"
       sx={{
-        border: "1px solid black",
-        borderRadius: "5px",
-        margin: "20px",
-        fontWeight: "bold",
-        fontSize: "20px",
-        height: "5vh",
-        padding: "20px",
+        // border: "1px solid red",
+        borderRadius: '5px',
+        margin: '20px',
+        fontWeight: 'bold',
+        fontSize: '20px',
+        height: '5vh',
+        padding: '20px',
       }}
     >
       {isEditing ? (
@@ -116,5 +113,5 @@ export function NameBox(props) {
         props.user
       )}
     </Box>
-  );
+  )
 }

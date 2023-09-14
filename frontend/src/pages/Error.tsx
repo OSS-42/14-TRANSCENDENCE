@@ -5,6 +5,7 @@ import { Box } from '@mui/material'
 export function Error() {
   return (
     <Box
+      component="div"
       sx={{
         background: '#e4f7fb',
         borderRadius: '5px',

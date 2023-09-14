@@ -68,8 +68,8 @@ const ChatBody = ({ messages }: ChatBodyProps) => {
             )}
           </div>
         ))}
+        <div id="msg" ref={scroll}></div>
       </div>
-      <div ref={scroll}></div>
     </>
   )
 }

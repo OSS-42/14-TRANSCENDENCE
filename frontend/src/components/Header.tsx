@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import IconButton from '@mui/material/IconButton'
 import LogoutIcon from '@mui/icons-material/Logout'
 import { useAuth } from '../contexts/AuthContext'
@@ -10,6 +10,13 @@ const Header = () => {
   const navigate = useNavigate() // Use useNavigate instead of history
   const [activeTab, setActiveTab] = useState(0)
 
+  useEffect(() => {
+    const savedActiveTab = localStorage.getItem('activeTab')
+    if (savedActiveTab) {
+      setActiveTab(parseInt(savedActiveTab))
+    }
+  }, [])
+
   const handleLogout = () => {
     logout()
     // Navigate to the desired route after logout
@@ -18,7 +25,7 @@ const Header = () => {
 
   const handleTabChange = (newValue: number) => {
     setActiveTab(newValue)
-    console.log(newValue)
+    localStorage.setItem('activeTab', newValue.toString())
     switch (newValue) {
       case 0:
         navigate('/') // Use navigate to go to the desired route

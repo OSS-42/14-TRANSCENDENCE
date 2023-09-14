@@ -16,14 +16,14 @@ interface CenteredTextProps {
 
 function CenteredText({ match }: CenteredTextProps) {
   return (
-    <div style={{ textAlign: "center" }}>
-      <Box>
-        <Typography variant="h1" style={{ color: "black", width: "100%" }}>
+    <div style={{ textAlign: 'center' }}>
+      <Box component="div" display="flex" flexDirection="column">
+        <Typography variant="h1" style={{ color: '#ffb63d', width: '100%' }}>
           {match}
         </Typography>
       </Box>
     </div>
-  );
+  )
 }
 
 function MatchBox({ title, matchCount }: MatchBoxProps) {
@@ -32,22 +32,25 @@ function MatchBox({ title, matchCount }: MatchBoxProps) {
       <Box
         component="div"
         sx={{
-          border: "1px solid black",
-          borderRadius: "5px",
-          margin: "20px",
-          marginBottom: "5px",
-          fontWeight: "bold",
-          height: "21vh",
-          maxHeight: "370px",
-          overflow: "auto",
-          textAlign: "center",
+          border: '1px solid #ffb63d;',
+					padding: '1rem',
+          borderRadius: '5px',
+          margin: '20px',
+          marginBottom: '5px',
+          fontWeight: 'bold',
+          height: '21vh',
+          maxHeight: '370px',
+          overflow: 'auto',
+          textAlign: 'center',
         }}
       >
-        <Typography variant="h6" sx={{fontWeight: "bold"}}>{title}</Typography>
+        <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+          {title}
+        </Typography>
         <CenteredText match={matchCount} />
       </Box>
     </Grid>
-  );
+  )
 }
 
 export function MatchWonLost({ match }: MatchWonLostProps) {

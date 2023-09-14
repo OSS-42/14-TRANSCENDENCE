@@ -6,13 +6,17 @@ export function Welcome() {
   const { login } = useAuth()
 
   return (
-    <Box component="div" id="welcome-page" style={{ background: '#000' }}>
+    <Box
+      component="div"
+      id="welcome-page"
+      style={{ height: '50vh', background: '#000' }}
+    >
       <Typography
         className="glitch"
         sx={{
           textAlign: 'center',
           '@media (min-width:600px)': {
-            fontSize: '5rem',
+            fontSize: '4rem',
           },
         }}
       >

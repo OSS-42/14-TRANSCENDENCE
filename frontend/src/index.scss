@@ -38,9 +38,16 @@
   line-height: 1.5rem;
 }
 
+body {
+  background: #000;
+  min-width: 600px;
+  margin: 0 auto;
+}
+
 #welcome-page {
   position: absolute;
   display: flex;
+  height: 100vh;
   flex-direction: column;
   align-items: center;
   top: 50%;
@@ -92,7 +99,7 @@ p {
   font-size: 0.8rem;
   line-height: 1.5rem;
   height: 80vh;
-	overflow-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .help {
@@ -195,12 +202,20 @@ p {
     }
   }
 }
-::-webkit-scrollbar {
+#chatbox::-webkit-scrollbar {
   width: 5px; /* Set the width of the scrollbar */
 }
 
 /* Define the styles for the scrollbar thumb (the draggable part) */
-::-webkit-scrollbar-thumb {
+#chatbox::-webkit-scrollbar-thumb {
   background-color: #ffb63d; /* Set the color of the scrollbar thumb */
   border-radius: 5px; /* Round the corners of the thumb */
+}
+
+@media screen and (max-width: 600px) {
+  body {
+    width: 600px; /* Set the minimum width for the website */
+    margin: 0 auto; /* Center the content horizontally */
+  }
+  /* You can also adjust other styles for smaller screens here */
 }

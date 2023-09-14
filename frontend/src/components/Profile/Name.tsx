@@ -75,7 +75,7 @@ export function Name(props) {
       onDoubleClick={handleDoubleClick}
       component="div"
       sx={{
-        border: "1px solid black",
+        // border: "1px solid red",
         borderRadius: "5px",
         margin: "20px",
         fontWeight: "bold",

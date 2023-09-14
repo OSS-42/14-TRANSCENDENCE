@@ -10,7 +10,6 @@ export function AvatarImage({user} : AvatarImageProps) {
       <Box
 	  	component="div"
         sx={{
-          border: "1px solid black",
           borderRadius: "5px",
           margin: "20px",
           fontWeight: "bold",
@@ -28,7 +27,7 @@ export function AvatarImage({user} : AvatarImageProps) {
             width: "100%", // Allow width to adjust
             height: "100%", // Fill the available height
             maxWidth: "100%",
-            objectFit: "cover"
+            objectFit: "cover",
           }}
         />
       </Box>

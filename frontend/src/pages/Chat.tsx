@@ -51,7 +51,7 @@ export function Chat({ socket }: ChatProps) {
   return (
     <Box
       component="div"
-      color="#c9c9c5"
+      color="#d4d4cf"
       sx={{
         display: 'flex',
         height: '95%',
@@ -71,6 +71,7 @@ export function Chat({ socket }: ChatProps) {
       >
         {/* Chat Box */}
         <Box
+          id="chatbox"
           component="div"
           sx={{
             border: '1px solid #ffb63d',
@@ -88,11 +89,11 @@ export function Chat({ socket }: ChatProps) {
         component="div"
         sx={{
           display: 'grid',
-
+          fontSize: '.8rem',
           backgroundColor: '#090609',
-          width: '30%',
-          padding: '2rem 2rem 2rem 0',
           borderRadius: '0 5px 5px 0',
+          width: '35%',
+          padding: '2rem 2rem 2rem 0',
         }}
       >
         <Box

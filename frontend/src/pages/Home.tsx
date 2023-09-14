@@ -18,7 +18,7 @@ export function Home() {
           background: '#c9c9c5',
           borderRadius: '5px',
           padding: '15px',
-          height: '95%',
+          height: '94.75%',
           width: '98.5%',
           textAlign: 'center',
           paddingBottom: '5rem',

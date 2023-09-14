@@ -5,7 +5,8 @@ export function ContainerGrid({children}) {
       <Grid
         container
         sx={{
-          border: "1px solid black",
+					// border: '1px solid red',
+          backgroundColor:'#090609',
           borderRadius: "5px",
           minHeight: "auto",
           height: "94vh",

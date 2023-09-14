@@ -30,19 +30,24 @@ export function MatchHistory({ match }: MatchHistoryProps) {
     <Box
       component="div"
       sx={{
-        border: "1px solid black",
-        borderRadius: "5px",
-        margin: "20px",
-        fontWeight: "bold",
-        height: "28vh",
-        maxHeight: "370px",
-        overflow: "auto",
-
+        border: '1px solid #ffb63d;',
+				padding: '1rem',
+        borderRadius: '5px',
+        margin: '20px',
+        fontWeight: 'bold',
+        height: '28vh',
+        maxHeight: '370px',
+        overflow: 'auto',
       }}
     >
-      <Typography variant="h6" sx={{fontWeight: "bold"}}>MATCH HISTORY</Typography>
+      <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+        MATCH HISTORY
+      </Typography>
       {match.matchesWon.length > 0 || match.matchesLost.length > 0 ? (
-        <TableContainer component={Paper} sx={{ backgroundColor: "transparent" }}>
+        <TableContainer
+          component={Paper}
+          sx={{ backgroundColor: 'transparent' }}
+        >
           <Table>
             <TableHead>
               <TableRow>
@@ -71,11 +76,11 @@ export function MatchHistory({ match }: MatchHistoryProps) {
         </TableContainer>
       ) : (
         <div>
-          <Typography variant="h6" sx={{ padding: "16px", fontWeight: "bold" }}>
+          <Typography variant="h6" sx={{ padding: '16px', fontWeight: 'bold' }}>
             No games have been played yet ...
           </Typography>
         </div>
       )}
     </Box>
-  );
+  )
 }
