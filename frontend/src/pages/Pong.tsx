@@ -123,13 +123,14 @@ export function Pong() {
   const updateFrequency = 1000 / 60;
   const [lastUpdateTime, setLastUpdateTime] = useState(currentTime);
 
+  const [initialSetupComplete, setInitialSetupComplete] = useState(false);
+
   // Ecoute parler le socket
   useEffect(() => {
     if (socket) {
       socket.on("connected", (data: any) => {
         console.log('🏓   Connection established ? ', data.isConnected);
         setIsConnected(data.isConnected);
-        // fetchUsersData(setPlayerName);
         console.log('🏓   username is ', user.username);
         setPlayerName(user.username);
         if (!data.isConnected) {
@@ -157,6 +158,10 @@ export function Pong() {
         setOppDisconnected(true);
       })
 
+      if (isConnected && gameId) {
+        setInitialSetupComplete(true);
+      }
+
     } else {
       return () => {};  // No-op function when socket is null
     }
@@ -169,60 +174,59 @@ export function Pong() {
         socket.off("oppDisconnected");
       }
     };
-  }, [socket]);
+  }, [socket, isConnected, gameId]);
 
   useEffect(() => {
-    const intervalId = setInterval(() => {
-      setCurrentTime(performance.now());
-    }, updateFrequency);
-  
-    return () => {
-      clearInterval(intervalId);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (socket) {
-      const timer = setInterval(() => {
-        const currentTime = performance.now();
+    if (socket && initialSetupComplete) {
+          // debugger;
+          if (hostStatus) {
+            console.log('🏓🏓   host');
+            socket.emit("hostGameParameters", {
+              gameId,
+              ballPosition,
+              leftPaddlePositionZ,
+              rightPaddlePositionZ,
+              powerupPosition,
+            });
+          } else {
+            console.log('🏓🏓   pas host');
+            socket.emit("clientGameParameters", {
+              gameId,
+              rightPaddlePositionZ,
+            });
+          }
         
-        if (currentTime - lastUpdateTime >= updateFrequency) {
-          socket.emit("gameParameters", {
-            gameId,
-            ballPosition,
-            leftPaddlePositionZ,
-            rightPaddlePositionZ,
-            powerupPosition,
-          });
-    
-          setLastUpdateTime(currentTime);
-        }
-      }, updateFrequency);
-        
-      socket.on("movesUpdate", (data: GameParameters) => {
-        setGameId(data.gameId);
-        // console.log('🏓   GAMEID: ', gameId);
-        setBallPosition(data.ballPosition);
-        setLeftPaddlePositionZ(data.leftPaddlePositionZ);
-        setRightPaddlePositionZ(data.rightPaddlePositionZ);
-        setPowerupPosition(data.powerupPosition);
-      });
+      if (!hostStatus) {
+        socket.on("hostMovesUpdate", (data: GameParameters) => {
+          // setGameId(data.gameId);
+          // console.log('🏓   GAMEID: ', gameId);
+          setBallPosition(data.ballPosition);
+          setLeftPaddlePositionZ(data.leftPaddlePositionZ);
+          setRightPaddlePositionZ(data.rightPaddlePositionZ);
+          setPowerupPosition(data.powerupPosition);
+        });
+      } else {
+        socket.on("clientMovesUpdate", (data: any) => {
+          setRightPaddlePositionZ(data.rightPaddlePositionZ);
+        })
+      }
 
       return () => {
         if (socket) {
-          clearInterval(timer);
           socket.off("gameParameters");
-          socket.off("movesUpdates");
+          socket.off("hostMovesUpdate");
+          socket.off("clientMovesUpdate");
         }
       };
     } else {
       return () => {};  // No-op function when socket is null
     }
-  },
-    [socket,
+  }, [socket,
+    initialSetupComplete,
+    hostStatus,
     leftPaddlePositionZ,
     rightPaddlePositionZ,
-    powerupPosition,]
+    powerupPosition]
   );
 
 //------------------ GAME MODES ------------------------
@@ -790,6 +794,9 @@ export function Pong() {
       </Box>
     )
   }
+
+  //------------------ CONTEXT LOSS MANAGEMENT ------------------------
+  // code a determiner.
 
 //------------------ GAME SCENE RENDERER ------------------------
   return (

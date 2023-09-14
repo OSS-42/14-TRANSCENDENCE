@@ -168,13 +168,22 @@ export class PongGateway {
     }
   }
 
-  @SubscribeMessage('gameParameters')
+  @SubscribeMessage('hostGameParameters')
   handleGameParameters(client: Socket, payload: any) {
     const gameId = payload.gameId; // Make sure to send gameId from client
     
     this.gameStates.set(gameId, payload);
 
-    this.server.to(gameId).emit('movesUpdate', payload);
+    this.server.to(gameId).emit('hostMovesUpdate', payload);
+  }
+
+  @SubscribeMessage('clientGameParameters')
+  handleGameParametersClient(client: Socket, payload: any) {
+    const gameId = payload.gameId; // Make sure to send gameId from client
+    
+    this.gameStates.set(gameId, payload);
+
+    this.server.to(gameId).emit('clientMovesUpdate', payload);
   }
 
   @SubscribeMessage('weHaveAWinner')
