@@ -91,6 +91,8 @@ p {
   margin-bottom: 1px;
   font-size: 0.8rem;
   line-height: 1.5rem;
+  height: 80vh;
+	overflow-wrap: break-word;
 }
 
 .help {
@@ -192,4 +194,13 @@ p {
       transform: skew((random(10) - 5) + deg);
     }
   }
+}
+::-webkit-scrollbar {
+  width: 5px; /* Set the width of the scrollbar */
+}
+
+/* Define the styles for the scrollbar thumb (the draggable part) */
+::-webkit-scrollbar-thumb {
+  background-color: #ffb63d; /* Set the color of the scrollbar thumb */
+  border-radius: 5px; /* Round the corners of the thumb */
 }
