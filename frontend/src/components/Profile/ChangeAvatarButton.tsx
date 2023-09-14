@@ -2,7 +2,7 @@ import { Box, Button } from "@mui/material";
 import axios from "axios";
 import Cookies from "js-cookie";
 
-export function ChangeAvatarBox({setUser}){
+export function ChangeAvatarButton({setUser}){
 
 const handleAvatarSelected = (event: any) => {
     const selectedFile = event.target.files[0];
