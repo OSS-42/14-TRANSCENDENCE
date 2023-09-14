@@ -17,9 +17,8 @@ export class PongGateway {
   @WebSocketServer()
   server: Server
 
-
   handleConnection(client: Socket): void {
-    console.log(`🏓   ⚡: ${client.id} user just connected!`);
+    console.log(`🏓   ${new Date().toISOString()} - ⚡: ${client.id} user just connected!`);
     const token = client.handshake.query.token as string;
 
     console.log("🏓   Received Token:", token);
@@ -57,6 +56,14 @@ export class PongGateway {
       }
     }
 
+    // Remove client from all game mode queues
+    this.gameModeQueue.forEach((queue, gameMode) => {
+      const index = queue.findIndex((queuedClient) => queuedClient.id === client.id);
+      if (index !== -1) {
+        queue.splice(index, 1);
+      }
+    });
+
     if (gameIdToTerminate && clientsMapToTerminate) {
       //Notify remaining player
       for (const [playerId, playerSocket] of clientsMapToTerminate.entries()) {
@@ -69,7 +76,7 @@ export class PongGateway {
 
     const isConnected = false;
     console.log(`🏓   🔥: ${client.id} user disconnected`);
-    client.emit('Connected', isConnected ); 
+    client.emit('connected', isConnected ); 
 
   }
 
@@ -128,7 +135,6 @@ export class PongGateway {
     // Add to corresponding queue
     const queue = this.gameModeQueue.get(payload.newGM);
     queue.push(client);
-    // this.matchmaking.push(client);
 
     this.playerNames.set(client.id, payload.playerName);    
   
@@ -162,28 +168,58 @@ export class PongGateway {
     }
   }
 
-  @SubscribeMessage('gameParameters')
+  @SubscribeMessage('hostGameParameters')
   handleGameParameters(client: Socket, payload: any) {
     const gameId = payload.gameId; // Make sure to send gameId from client
     
     this.gameStates.set(gameId, payload);
 
-    this.server.to(gameId).emit('gameParameters', payload);
+    this.server.to(gameId).emit('hostMovesUpdate', payload);
+  }
+
+  @SubscribeMessage('clientGameParameters')
+  handleGameParametersClient(client: Socket, payload: any) {
+    const gameId = payload.gameId; // Make sure to send gameId from client
+    
+    this.gameStates.set(gameId, payload);
+
+    this.server.to(gameId).emit('clientMovesUpdate', payload);
   }
 
   @SubscribeMessage('weHaveAWinner')
   handleWinner(client: Socket, payload: any) {
     const gameId = payload.gameId; // Make sure to send gameId from client
+    const hostname = payload.hostname;
+    const clientName = payload.clientName;
+    
     this.server.to(gameId).emit('weHaveAWinner', payload);
-    console.log('🏓   is the host the winner: ', payload.isHostWinner);
+    console.log('🏓   in ${gameId}, the winner is  ', payload.isHostWinner);
     //player1 = host (toujours)
     // if (payload.isHostWinner) {
-    //   //dans la DB winner = hostName
-    //   //loser = clientName
+    //   const winnerId = 1;
+    //   const loserId = 2;
     // } else {
-    //   // winner = clientName
-    //   // loser = hostName
+    //   const winnerId = 1;
+    //   const loserId = 2;
     // }
+
+    // this.pongService.updateHistory(winnerId, loserId);
+
+    // cleaning the gameId from the list of gameIds:
+    let clientsMapToTerminate: any;
+  
+    // Identify the game ID to terminate when the game ends.
+    for (const [clientsMap, existingGameId] of this.gameIds.entries()) {
+      if (existingGameId === gameId) {
+        clientsMapToTerminate = clientsMap;
+        break;
+      }
+    }
+
+    if (clientsMapToTerminate) {
+      // Remove game from gameIds map
+      this.gameIds.delete(clientsMapToTerminate);
+    }
   }
 
 
