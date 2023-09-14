@@ -6,6 +6,7 @@ CREATE TABLE "Utilisateur" (
     "username" TEXT NOT NULL,
     "avatar" TEXT,
     "email" TEXT NOT NULL,
+    "twoFactorSecret" TEXT,
 
     CONSTRAINT "Utilisateur_pkey" PRIMARY KEY ("id")
 );

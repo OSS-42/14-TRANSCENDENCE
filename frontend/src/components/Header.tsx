@@ -1,40 +1,44 @@
-import { useState } from "react";
-import IconButton from "@mui/material/IconButton";
-import LogoutIcon from "@mui/icons-material/Logout";
-import { useAuth } from "../contexts/AuthContext";
-import { Tab, Tabs } from "@mui/material";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { useState } from 'react'
+import IconButton from '@mui/material/IconButton'
+import LogoutIcon from '@mui/icons-material/Logout'
+import { useAuth } from '../contexts/AuthContext'
+import { Tab, Tabs } from '@mui/material'
+import { useNavigate } from 'react-router-dom' // Import useNavigate
 
 const Header = () => {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate(); // Use useNavigate instead of history
-  const [activeTab, setActiveTab] = useState(0);
+  const { user, logout } = useAuth()
+  const navigate = useNavigate() // Use useNavigate instead of history
+  const [activeTab, setActiveTab] = useState(0)
 
   const handleLogout = () => {
-    logout();
+    logout()
     // Navigate to the desired route after logout
-    navigate("/"); // Replace '/' with the route you want to navigate to after logout
-  };
+    navigate('/') // Replace '/' with the route you want to navigate to after logout
+  }
 
   const handleTabChange = (newValue: number) => {
-    setActiveTab(newValue);
+    setActiveTab(newValue)
+    console.log(newValue)
     switch (newValue) {
       case 0:
-        navigate("/chat"); // Use navigate to go to the desired route
-        break;
+        navigate('/') // Use navigate to go to the desired route
+        break
       case 1:
-        navigate("/game");
-        break;
+        navigate('/chat') // Use navigate to go to the desired route
+        break
       case 2:
-        navigate("/profile");
-        break;
+        navigate('/game')
+        break
+      case 3:
+        navigate('/profile')
+        break
       default:
-        break;
+        break
     }
-  };
+  }
 
   return (
-    <div className="header">
+    <div id="navbar" className="header">
       <header>
         <div className="links-wrapper">
           {user ? (
@@ -46,17 +50,18 @@ const Header = () => {
                 textColor="secondary"
                 indicatorColor="secondary"
               >
-                <Tab sx={{ color: "#d9eef3" }} label="Chat" />
-                <Tab sx={{ color: "#d9eef3" }} label="Pong" />
-                <Tab sx={{ color: "#d9eef3" }} label="Profile" />
+                <Tab sx={{ color: '#d9eef3' }} label="Home" />
+                <Tab sx={{ color: '#d9eef3' }} label="Chat" />
+                <Tab sx={{ color: '#d9eef3' }} label="Pong" />
+                <Tab sx={{ color: '#d9eef3' }} label="Profile" />
+                <IconButton
+                  color="info"
+                  aria-label="delete"
+                  onClick={handleLogout}
+                >
+                  <LogoutIcon />
+                </IconButton>
               </Tabs>
-              <IconButton
-                color="info"
-                aria-label="delete"
-                onClick={handleLogout}
-              >
-                <LogoutIcon />
-              </IconButton>
             </nav>
           ) : (
             <></>
@@ -64,7 +69,7 @@ const Header = () => {
         </div>
       </header>
     </div>
-  );
-};
+  )
+}
 
-export default Header;
+export default Header
