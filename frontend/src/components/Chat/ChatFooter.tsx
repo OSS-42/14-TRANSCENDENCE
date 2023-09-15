@@ -93,7 +93,7 @@ const ChatFooter = ({ socket }: ChatFooterProps) => {
         display="flex"
         component="div"
         sx={{
-					// scrollbarColor: "transparent",
+          // scrollbarColor: "transparent",
           border: "1px solid #ffb63d",
           borderRadius: "4px",
           justifyContent: "center",
@@ -103,7 +103,7 @@ const ChatFooter = ({ socket }: ChatFooterProps) => {
           type="text"
           placeholder="Write message"
           className="message"
-          fullWidth
+          fullWidth={true}
           value={data}
           onChange={(e) => setData(e.target.value)}
         />
