@@ -8,6 +8,8 @@ export function ContainerGrid({children}) {
           border: "1px solid black",
           borderRadius: "5px",
           minHeight: "auto",
+          // height: "94vh",
+          // width: "99vw",
           height: "auto",
           width: "auto",
           boxSizing: "border-box",
