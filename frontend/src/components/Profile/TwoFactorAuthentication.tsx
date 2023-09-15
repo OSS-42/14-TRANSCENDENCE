@@ -9,10 +9,10 @@ const BASE_URL = "/api";
 export function TwoFactorAuthentication() {
   const [otpURL, setOtpURL] = useState("");
   const [isQRCodeVisible, setQRCodeVisible] = useState(false);
-  const [verificationCode, setVerificationCode] = useState("");
+  const [isActivated, setIsActivated] = useState("");
   const jwt_token = Cookies.get("jwt_token");
 
-  async function fetchUserVerification() {
+  async function activate2FA() {
     try {
       const response = await axios.post(
         `${BASE_URL}/auth/enable2FA`,
@@ -32,33 +32,36 @@ export function TwoFactorAuthentication() {
     }
   }
 
-  async function handleSubmit() {
-    console.log("Verification code is: ",verificationCode);
-    console.log(typeof verificationCode);
+  async function deactivate2FA() {
     try {
-      // Make an API call to validate the verification code
       const response = await axios.post(
-        `${BASE_URL}/auth/verify2FA`,
-        {
-          token: verificationCode,
-        },
+        `${BASE_URL}/auth/disable2FA`,
+        {},
         {
           headers: {
             Authorization: `Bearer ${jwt_token}`,
           },
         }
       );
-
-      // Handle the response as needed
-      console.log("Verification response:", response.data);
-
-      // Close the modal
+      alert(response.data.message);
+      setOtpURL("");
       setQRCodeVisible(false);
     } catch (error) {
-      console.error("Error verifying 2FA code", error);
-      // Handle errors here
+      console.error("Error disabling user 2FA", error);
+      throw error;
     }
   }
+
+  function handle2FA() {
+    if (isActivated) {
+      setIsActivated(false);
+      deactivate2FA();
+    } else {
+      activate2FA();
+      setIsActivated(true);
+    }
+  }
+
 
   return (
     <Box
@@ -78,9 +81,9 @@ export function TwoFactorAuthentication() {
           variant="contained"
           size="large"
           component="span"
-          onClick={fetchUserVerification}
+          onClick={handle2FA}
         >
-          Activate 2FA
+          {isActivated ? "Deactivate 2FA" : "Activate 2FA"}
         </Button>
         <Modal open={isQRCodeVisible} onClose={() => setQRCodeVisible(false)}>
           <Box
@@ -101,16 +104,6 @@ export function TwoFactorAuthentication() {
             <Typography>
               Scan the QR code with your authenticator app.
             </Typography>
-            <Typography>Enter the verification code from the app:</Typography>
-            <TextField
-              variant="outlined"
-              fullWidth
-              value={verificationCode}
-              onChange={(e) => setVerificationCode(e.target.value)}
-            />
-            <Button variant="contained" color="primary" onClick={handleSubmit}>
-              Verify
-            </Button>
           </Box>
         </Modal>
       </label>
