@@ -9,9 +9,8 @@ export function RightSideGrid({children}) {
       md={12}
       lg={8}
       sx={{
-        backgroundColor: '#090609',
-				// border: '1px solid red',
-        borderRadius: '5px',
+        border: "1px solid black",
+        borderRadius: "5px",
         // margin: "20px"
       }}
     >
