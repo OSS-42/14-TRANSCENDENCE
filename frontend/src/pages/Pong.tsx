@@ -1,21 +1,21 @@
 import { Box as MaterialBox } from '@mui/material'
 
-// import { useHistory } from 'react-router-dom';
-import React, { useEffect, useState, useRef } from 'react'
-import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { Sphere, Box } from '@react-three/drei'
-import './Pong.css'
-import * as THREE from 'three'
+import React, { useEffect, useState, useRef } from 'react';
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { Sphere, Box } from "@react-three/drei";
+import "./Pong.css"
+import * as THREE from 'three';
 
 // import { ControlledCameras } from "./controlledcamera";
 import { ControlledCameras } from '../components/Pong/controlledcamera-2' // Assuming it's exported from a file named ControlledCameras.tsx
 
-// import for DB
-import axios from 'axios'
-import Cookies from 'js-cookie'
+// import for Cookies data use
+import Cookies from "js-cookie";
+
+// for use instead of fetch.
+import { useAuth } from "../contexts/AuthContext";
 
 // import for websocket
-// import { Socket } from "socket.io-client";
 import socketIO from 'socket.io-client'
 
 //------------------ INFOS QUI TRANSITENT ENTRE SOCKETS ------------
@@ -36,7 +36,10 @@ type PlayerJoined = {
 }
 
 type WeHaveAWinner = {
-  isHostWinner: boolean
+  gameId: string,
+  isHostWinner: boolean,
+  hostname: string,
+  clientName: string,
 }
 
 type Connected = {
@@ -47,152 +50,186 @@ type OppDisconnected = {
   message: string
 }
 
-const socket = socketIO('/pong', {
-  query: {
-    token: Cookies.get('jwt_token'),
-  },
-})
-
 export function Pong() {
+
+  //------------------ SOCKET CONNECTION --------------------
+  const [socket, setSocket] = useState(null);
+
+  useEffect(() => {
+    const newSocket = socketIO('/pong', {
+      query: {
+        token: Cookies.get('jwt_token'),
+      },
+    });
+    setSocket(newSocket);
+
+    return () => {
+      newSocket.close();
+    };
+  }, []);
+
   //------------------ CONSTANTS NECESSARY AT TOP --------------------
-  // const history = useHistory();
-  const [gameLaunched, setGameLaunched] = React.useState(false)
-  const [cameraMode, setCameraMode] = React.useState<
-    'perspective' | 'orthographic'
-  >('orthographic')
-  const [isPaused, setIsPaused] = React.useState(true)
-  const [gameStart, setGameStart] = React.useState(true)
+  
+  const { user } = useAuth();
+
+  const [gameLaunched, setGameLaunched] = React.useState(false);
+  const [cameraMode, setCameraMode] = React.useState<"perspective" | "orthographic">("orthographic");
+  const [isPaused, setIsPaused] = React.useState(true);
+  const [gameStart, setGameStart] = React.useState(true);
 
   const [gameMode, setGameMode] = React.useState<0 | 1 | 2 | 3 | 4>(0)
   const [showButtons, setShowButtons] = React.useState(true)
 
   //------------------ GAME VARIABLES ------------------------
-
   // variables sans resizing
-  const paddleWidth: number = 0.5
-  const paddleHeight: number = 1
-  const paddleDepth: number = 5
-  const ballRadius: number = 0.5
-  const INITIAL_BALL_SPEED: number = 0.3
-  const netWidth: number = 0.5
-  const netDepth: number = 8
+  const paddleWidth: number = 0.5;
+  const paddleHeight: number = 1;
+  const paddleDepth: number = 5;
+  const ballRadius: number = 0.5;
+  const INITIAL_BALL_SPEED: number = 0.3;
+  const netWidth: number = 0.5;
+  const netDepth: number = 8;
 
-  const [leftPaddlePositionZ, setLeftPaddlePositionZ] = React.useState(0)
-  const [rightPaddlePositionZ, setRightPaddlePositionZ] = React.useState(0)
-  const [ballSpeed, setBallSpeed] = React.useState(INITIAL_BALL_SPEED)
-  const [ballPosition, setBallPosition] = React.useState({
-    x: 0,
-    y: 0,
-    z: 0.00001,
-  })
-  const [ballVelocity, setBallVelocity] = React.useState({
-    x: INITIAL_BALL_SPEED,
-    z: INITIAL_BALL_SPEED,
-  })
-  const [leftScore, setLeftScore] = React.useState(0)
-  const [rightScore, setRightScore] = React.useState(0)
-  const [winner, setWinner] = React.useState<string | null>(null)
-  const [powerupPosition, setPowerupPosition] = React.useState({
-    x: 0,
-    y: 0,
-    z: 0,
-  })
-  const [powerupVisible, setPowerupVisible] = React.useState(false)
-  const [countdown, setCountdown] = React.useState<number | null>(null)
-  const isGameOver = useRef(false)
+  const [leftPaddlePositionZ, setLeftPaddlePositionZ] = React.useState(0);
+  const [rightPaddlePositionZ, setRightPaddlePositionZ] = React.useState(0);
+  const [ballSpeed, setBallSpeed] = React.useState(INITIAL_BALL_SPEED);
+  const [ballPosition, setBallPosition] = React.useState({ x: 0, y: 0, z: 0.00001 });
+  const [ballVelocity, setBallVelocity] = React.useState({ x: INITIAL_BALL_SPEED, z: INITIAL_BALL_SPEED });
+  const [leftScore, setLeftScore] = React.useState(0);
+  const [rightScore, setRightScore] = React.useState(0);
+  const [winner, setWinner] = React.useState<string | null>(null);
+  const [powerupPosition, setPowerupPosition] = React.useState({ x: 0, y: 0, z: 0 });
+  const [powerupVisible, setPowerupVisible] = React.useState(false);
+  const [countdown, setCountdown] = React.useState<number | null>(null);
+  const isGameOver = useRef(false);
 
-  //------------------ CLIENT-SERVER SETTINGS ------------------------
-  const [isConnected, setIsConnected] = React.useState<boolean>(false)
-  const [hostStatus, setHostStatus] = React.useState<boolean>(false)
-  const [hostname, setHostname] = React.useState<string>('')
-  const [clientName, setClientName] = React.useState<string>('')
-  const [playerName, setPlayerName] = React.useState<string>('')
+//------------------ CLIENT-SERVER SETTINGS ------------------------
+  const [isConnected, setIsConnected] = React.useState<boolean>(false);
+  const [hostStatus, setHostStatus] = React.useState<boolean>(false);
+  const [hostname, setHostname] = React.useState<string>("");
+  const [clientName, setClientName ] = React.useState<string>("");
+  const [playerName, setPlayerName] = React.useState<string>("");
 
-  const [gameInfos, setGameInfos] = useState<PlayerJoined>()
-  const [gameParameters, setGameParameters] = useState<GameParameters>()
-  const [connection, setConnection] = useState<Connected>()
-  const [winnerIs, setWinnerIs] = useState<WeHaveAWinner>()
-  const [waitingForPlayer, setWaitingForPlayer] = React.useState(false)
-  const [gameId, setGameId] = React.useState<string>('')
-  const [isHostWinner, setIsHostWinner] = React.useState(false)
-  const [oppDisconnected, setOppDisconnected] =
-    React.useState<OppDisconnected>(false)
+  const [gameInfos, setGameInfos] = useState<PlayerJoined>();
+  const [gameParameters, setGameParameters] = useState<GameParameters>();
+  const [connection, setConnection] = useState<Connected>();
+  const [winnerIs, setWinnerIs] = useState<WeHaveAWinner>();
+  const [waitingForPlayer, setWaitingForPlayer] = React.useState(false);
+  const [gameId, setGameId] = React.useState<string>("");
+  const [isHostWinner, setIsHostWinner] = React.useState(false);
+  const [oppDisconnected, setOppDisconnected] = React.useState<OppDisconnected>(false);
 
-  const currentTime = performance.now()
-  const updateFrequency = 1000 / 60
-  const [lastUpdateTime, setLastUpdateTime] = useState(currentTime)
+  const [currentTime, setCurrentTime] = useState(performance.now());
+  const updateFrequency = 1000 / 60;
+  const [lastUpdateTime, setLastUpdateTime] = useState(currentTime);
 
-  // Ecoute parle le socket
+  const [initialSetupComplete, setInitialSetupComplete] = useState(false);
+
+  // Ecoute parler le socket
   useEffect(() => {
-    socket.on('connected', (data: any) => {
-      console.log('🏓   Connection established ? ', data.isConnected)
-      setIsConnected(data.isConnected)
-      if (!data.isConnected) {
-        setGameLaunched(false)
-      }
-    })
-
-    socket.on('opponentDisconnected', (data: any) => {
-      console.log(data)
-      setOppDisconnected(true)
-    })
-
-    socket.on('playerJoined', (data: PlayerJoined) => {
-      setWaitingForPlayer(false)
-      setHostStatus(data.hostStatus)
-      setGameId(data.gameId)
-      setHostname(data.hostName)
-      setClientName(data.clientName)
-      console.log('🏓   GAMEID: ', data.gameId)
-      handleCountdown()
-    })
-
-    if (currentTime - lastUpdateTime >= updateFrequency) {
-      socket.emit('gameParameters', {
-        gameId,
-        ballPosition,
-        leftPaddlePositionZ,
-        rightPaddlePositionZ,
-        powerupPosition,
+    if (socket) {
+      socket.on("connected", (data: any) => {
+        console.log('🏓   Connection established ? ', data.isConnected);
+        setIsConnected(data.isConnected);
+        console.log('🏓   username is ', user.username);
+        setPlayerName(user.username);
+        if (!data.isConnected) {
+          console.log('🏓   Connection established ? ', data.isConnected);
+          setGameLaunched(false);
+        }
       })
+    
+      socket.on('playerJoined', (data: PlayerJoined) => {
+        setWaitingForPlayer(false);
+        setGameId(data.gameId);
+        setHostStatus(data.hostStatus);
+        setHostname(data.hostName);
+        setClientName(data.clientName);
+        console.log('🏓   GAMEID: ', data.gameId);
+        handleCountdown();
+      });
+
+      socket.on("weHaveAWinner", (data: WeHaveAWinner) => {
+        setIsHostWinner(data.isHostWinner);
+      });
+    
+      socket.on("opponentDisconnected", (data: any) => {
+        console.log(data);
+        setOppDisconnected(true);
+      })
+
+      if (isConnected && gameId) {
+        setInitialSetupComplete(true);
+      }
+
+    } else {
+      return () => {};  // No-op function when socket is null
     }
-
-    setLastUpdateTime(currentTime)
-
-    socket.on('gameParameters', (data: GameParameters) => {
-      setGameId(data.gameId)
-      // console.log('🏓   GAMEID: ', gameId);
-      setBallPosition(data.ballPosition)
-      setLeftPaddlePositionZ(data.leftPaddlePositionZ)
-      setRightPaddlePositionZ(data.rightPaddlePositionZ)
-      setPowerupPosition(data.powerupPosition)
-    })
-
-    socket.on('weHaveAWinner', (data: WeHaveAWinner) => {
-      setIsHostWinner(data.isHostWinner)
-    })
 
     return () => {
-      socket.off('connected')
-      socket.off('gameParameters')
-      socket.off('playerJoined')
-      socket.off('weHaveAWinner')
-      socket.off('oppDisconnected')
-    }
-  }, [
-    socket,
-    connection,
-    ballPosition,
-    leftPaddlePositionZ,
-    rightPaddlePositionZ,
-  ])
-
-  //------------------ GAME MODES ------------------------
+      if (socket) {
+        socket.off("connected");
+        socket.off("playerJoined");
+        socket.off("weHaveAWinner");
+        socket.off("oppDisconnected");
+      }
+    };
+  }, [socket, isConnected, gameId]);
 
   useEffect(() => {
-    fetchUsersData(setPlayerName)
-  }, [isConnected])
+    if (socket && initialSetupComplete) {
+          // debugger;
+          if (hostStatus) {
+            console.log('🏓🏓   host');
+            socket.emit("hostGameParameters", {
+              gameId,
+              ballPosition,
+              leftPaddlePositionZ,
+              rightPaddlePositionZ,
+              powerupPosition,
+            });
+          } else {
+            console.log('🏓🏓   pas host');
+            socket.emit("clientGameParameters", {
+              gameId,
+              rightPaddlePositionZ,
+            });
+          }
+        
+      if (!hostStatus) {
+        socket.on("hostMovesUpdate", (data: GameParameters) => {
+          // setGameId(data.gameId);
+          // console.log('🏓   GAMEID: ', gameId);
+          setBallPosition(data.ballPosition);
+          setLeftPaddlePositionZ(data.leftPaddlePositionZ);
+          setRightPaddlePositionZ(data.rightPaddlePositionZ);
+          setPowerupPosition(data.powerupPosition);
+        });
+      } else {
+        socket.on("clientMovesUpdate", (data: any) => {
+          setRightPaddlePositionZ(data.rightPaddlePositionZ);
+        })
+      }
 
+      return () => {
+        if (socket) {
+          socket.off("gameParameters");
+          socket.off("hostMovesUpdate");
+          socket.off("clientMovesUpdate");
+        }
+      };
+    } else {
+      return () => {};  // No-op function when socket is null
+    }
+  }, [socket,
+    initialSetupComplete,
+    hostStatus,
+    leftPaddlePositionZ,
+    rightPaddlePositionZ,
+    powerupPosition]
+  );
+
+//------------------ GAME MODES ------------------------
   const handleClassicModeIA = (): void => {
     console.log('🏓   classic 1 vs IA')
     const newHostStatus = true // a cause async nature de React.
@@ -232,61 +269,31 @@ export function Pong() {
   }
 
   const handlePowerupModeMulti = (): void => {
-    console.log('🏓   powerup 1 vs multi')
-    const newGM = 4
-    socket.emit('waitingForPlayerGM4', { playerName, newGM })
-    setWaitingForPlayer(true)
-    setGameLaunched(true)
-    setCameraMode('orthographic')
-    setPowerupVisible(true)
-    setGameMode(newGM)
-    setShowButtons(false)
-  }
+    console.log('🏓   powerup 1 vs multi');
+    const newGM = 4;
+    socket.emit('waitingForPlayerGM4', { playerName, newGM });
+    setWaitingForPlayer(true);
+    setGameLaunched(true);
+    setCameraMode("orthographic");
+    setPowerupVisible(true);
+    setGameMode(newGM);
+    setShowButtons(false);
+  };
 
-  // probleme avec fin de partie.
-
-  //------------------ USER NAME - LEFT ------------------------
-
-  const jwt_token = Cookies.get('jwt_token')
-
-  // Create a new CancelToken
-  const source = axios.CancelToken.source()
-
-  async function fetchUsersData(setPlayerName: Function) {
-    try {
-      const response = await axios.get('/api/users/me', {
-        headers: {
-          Authorization: 'Bearer ' + jwt_token,
-        },
-        cancelToken: source.token, // Pass cancel token to axios
-      })
-      setPlayerName(response.data.username)
-    } catch (error) {
-      if (axios.isCancel(error)) {
-        console.log('Request cancelled')
-      }
-    }
-  }
-
-  function setNames(
-    playerName: string,
-    newHostStatus: boolean,
-    newGM: number,
-    setHostname: Function,
-    setClientName: Function
-  ) {
+//------------------ USER NAMES ------------------------
+  function setNames (playerName: string, newHostStatus: boolean, newGM: number, setHostname: Function, setClientName: Function) {
     if (newGM === 1 || newGM === 2) {
-      setHostname(playerName)
-      setClientName('Computer')
-    } else {
-      if (newHostStatus === true) {
-        setHostname(playerName)
-        setClientName(gameInfos.clientName)
-      } else {
-        setHostname(gameInfos.clientName)
-        setClientName(playerName)
-      }
-    }
+            setHostname(playerName);
+            setClientName("Computer");
+        } else {
+          if (newHostStatus === true) {
+            setHostname(playerName);
+            setClientName(gameInfos.clientName);
+          } else {
+            setHostname(gameInfos.clientName);
+            setClientName(playerName);
+          }
+        }
   }
 
   //------------------ SCENE SETTINGS ------------------------
@@ -402,8 +409,8 @@ export function Pong() {
         console.log('🏓   B ', gameId)
         setGameLaunched(false)
         if (gameId) {
-          console.log('🏓   envoi du resultat')
-          socket.emit('weHaveAWinner', { gameId, isHostWinner })
+          console.log('🏓   envoi du resultat');
+          socket.emit("weHaveAWinner", { gameId, isHostWinner, hostname, clientName });
         }
         window.location.href = '/game'
       }, 5000)
@@ -863,7 +870,10 @@ export function Pong() {
     )
   }
 
-  //------------------ GAME SCENE RENDERER ------------------------
+  //------------------ CONTEXT LOSS MANAGEMENT ------------------------
+  // code a determiner.
+
+//------------------ GAME SCENE RENDERER ------------------------
   return (
     <MaterialBox
       component="div"
