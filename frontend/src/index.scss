@@ -225,12 +225,13 @@ p {
 }
 #chatbox::-webkit-scrollbar {
   width: 5px; /* Set the width of the scrollbar */
+  height: 5px; /* Set the width of the scrollbar */
 }
 
 /* Define the styles for the scrollbar thumb (the draggable part) */
 #chatbox::-webkit-scrollbar-thumb {
   background-color: #ffb63d; /* Set the color of the scrollbar thumb */
-  border-radius: 5px; /* Round the corners of the thumb */
+  border-radius: 0px; /* Round the corners of the thumb */
 }
 
 @media screen and (max-width: 600px) {

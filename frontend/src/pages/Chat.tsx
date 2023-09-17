@@ -67,10 +67,9 @@ export function Chat({ socket }: ChatProps) {
         sx={{
           display: 'grid',
           backgroundColor: '#090609',
-          width: '70%',
-          padding: '2rem',
-          gap: '.5rem',
-          borderRadius: '5px 0 0 5px',
+          width: '60%',
+          padding: '2rem .75rem 2rem 2rem',
+          // gap: '.5rem',
         }}
       >
         {/* Chat Box */}
@@ -79,7 +78,8 @@ export function Chat({ socket }: ChatProps) {
           component="div"
           sx={{
             border: '1px solid #ffb63d',
-            borderRadius: '5px',
+						borderWidth: '1px 1px 0px 1px',
+            borderRadius: '5px 5px 0 0',
             padding: '1rem',
             overflow: 'auto',
           }}
@@ -90,16 +90,18 @@ export function Chat({ socket }: ChatProps) {
       </Box>
       {/* Lists Box */}
       <Box
+        id="chatbox"
         component="div"
         sx={{
           display: 'grid',
           backgroundColor: '#090609',
           borderRadius: '0 5px 5px 0',
-          width: '35%',
+          width: '40%',
           padding: '2rem 2rem 2rem 0',
         }}
       >
         <Box
+          id="chatbox"
           component="div"
           sx={{
             borderRadius: '5px',

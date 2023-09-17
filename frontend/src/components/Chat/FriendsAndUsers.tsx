@@ -41,8 +41,6 @@ export function FriendsAndUsers({ socket }: someProp) {
   }, [])
 
   const handleUserClick = (user: User) => {
-    console.log(`Getting here with: ${user.username}`)
-
     setSelectedUser(user)
     setModalIsOpen(true)
   }

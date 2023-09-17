@@ -2,6 +2,7 @@ import { Socket } from 'socket.io-client'
 import { Box, Button } from '@mui/material'
 import { User } from '../../models/User'
 import { destroyFriend, fetchFriendsList } from '../../api/requests'
+import PersonRemoveIcon from '@mui/icons-material/PersonRemove'
 
 type ChatFriendsProps = {
   socket: Socket
@@ -67,9 +68,11 @@ const ChatFriends = ({
                   flex: '1',
                 }}
               ></div>
-              <Button variant="contained" onClick={() => removeFriend(user.id)}>
-                Remove Friend
-              </Button>
+              <Button
+                variant="contained"
+                startIcon={<PersonRemoveIcon />}
+                onClick={() => removeFriend(user.id)}
+              />
             </Box>
           ))}
         </div>
