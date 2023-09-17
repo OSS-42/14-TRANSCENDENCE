@@ -27,7 +27,7 @@ export function Chat({ socket }: ChatProps) {
   }
 
   const [messages, setMessages] = useState<ChatMessage[]>(() => {
-    const localValues = localStorage.getItem('chatMessages')
+    const localValues = sessionStorage.getItem('chatMessages')
     if (localValues == null) return []
     return JSON.parse(localValues)
   })
@@ -35,7 +35,7 @@ export function Chat({ socket }: ChatProps) {
   //QUand la variable messages change, on l<enregistre dans le localStorage
   useEffect(() => {
     const messagesJSON = JSON.stringify(messages)
-    localStorage.setItem('chatMessages', messagesJSON)
+    sessionStorage.setItem('chatMessages', messagesJSON)
   }, [messages])
 
   useEffect(() => {
