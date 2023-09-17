@@ -6,15 +6,17 @@ import App from './App'
 import theme from './styles/theme'
 import { ThemeProvider } from '@mui/material/styles'
 import { AuthProvider } from './contexts/AuthContext'
-
+import { RoutesProvider } from './contexts/RoutesContext'
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
 
 root.render(
   //<React.StrictMode>
   <ThemeProvider theme={theme}>
-    <AuthProvider>
-      <App />
-    </AuthProvider>
+    <RoutesProvider>
+      <AuthProvider>
+        <App />
+      </AuthProvider>
+    </RoutesProvider>
   </ThemeProvider>
   //</React.StrictMode>
 )

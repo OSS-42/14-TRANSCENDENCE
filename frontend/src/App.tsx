@@ -3,66 +3,72 @@ import {
   Routes,
   Route,
   Navigate,
-} from "react-router-dom";
+} from 'react-router-dom'
 // import PrivateRoutes from "./utils/PrivateRoutes";
-import { useAuth } from "./contexts/AuthContext";
-import socketIO, { Socket } from "socket.io-client";
+import { useAuth } from './contexts/AuthContext'
+import socketIO, { Socket } from 'socket.io-client'
 
-import Header from "./components/Header";
-import { Chat, Home, Pong, Profile, Welcome, Error, Oops } from "./pages";
-import { useEffect, useState } from "react";
-import { DefaultEventsMap } from "@socket.io/component-emitter";
+import Header from './components/Header'
+import { Chat, Home, Pong, Profile, Welcome, Error, Oops } from './pages'
+import { useEffect, useState } from 'react'
 
 function App() {
-  const { user, loading } = useAuth();
-  const [chatSocket, setChatSocket] = useState<Socket<
-    DefaultEventsMap,
-    DefaultEventsMap
-  > | null>(null);
+  const { user, loading } = useAuth()
+  const [chatSocket, setChatSocket] = useState<Socket | null>(null)
+  const [chatSocketInitialized, setChatSocketInitialized] = useState(false)
 
   useEffect(() => {
-    if (user) {
-      const newSocket = socketIO("/chat", {
+    if (user && !chatSocket) {
+      const newSocket = socketIO('/chat', {
         query: {
           token: user.jwtToken,
         },
-      });
-      setChatSocket(newSocket);
-
-      // Clean up the socket connection when unmounting or if the user logs out.
+      })
+      newSocket.on('connect', () => {
+        setChatSocket(newSocket)
+        setChatSocketInitialized(true)
+      })
       return () => {
-        newSocket.disconnect();
-      };
+        newSocket.disconnect()
+      }
     }
-    return undefined;
-  }, [user]);
+  }, [user, chatSocket])
 
-  if (loading) {
-    return <></>;
+  if (loading || !chatSocketInitialized) {
+    return <div>Loading...</div>
   }
 
   return (
     <Router>
       {user ? <Header /> : null}
       <Routes>
-        <Route path="/welcome" element={<Welcome />} />
-        <Route path="/oops" element={<Oops />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/game" element={<Pong />} />
+        <Route
+          path="/welcome"
+          element={user ? <Navigate to="/" /> : <Welcome />}
+        />
+        <Route
+          path="/"
+          element={user ? <Home /> : <Navigate to="/welcome" />}
+        />
+        <Route
+          path="/chat"
+          element={
+            user && chatSocket ? (
+              <Chat socket={chatSocket} />
+            ) : (
+              <Navigate to="/" />
+            )
+          }
+        />
+        <Route path="/game" element={user ? <Pong /> : <Navigate to="/" />} />
+        <Route
+          path="/profile"
+          element={user ? <Profile /> : <Navigate to="/" />}
+        />
         <Route path="*" element={<Error />} />
-
-        {/* Place the Home route here to ensure it's always rendered */}
-        <Route path="/" element={<Home />} />
-
-        {user && chatSocket !== null && (
-          <Route path="/chat" element={<Chat socket={chatSocket} />} />
-        )}
       </Routes>
-
-      {/* Redirect to Welcome if user is not authenticated */}
-      {!user && <Navigate to="/welcome" />}
     </Router>
-  );
+  )
 }
 
-export default App;
+export default App

@@ -1,48 +1,43 @@
-import { useEffect, useState } from "react";
-import IconButton from "@mui/material/IconButton";
-import LogoutIcon from "@mui/icons-material/Logout";
-import { useAuth } from "../contexts/AuthContext";
-import { Tab, Tabs } from "@mui/material";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { useEffect, useState } from 'react'
+import IconButton from '@mui/material/IconButton'
+import LogoutIcon from '@mui/icons-material/Logout'
+import { useAuth } from '../contexts/AuthContext'
+import { Tab, Tabs } from '@mui/material'
+import { useRoutes } from '../contexts/RoutesContext'
 
 const Header = () => {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate(); // Use useNavigate instead of history
-  const [activeTab, setActiveTab] = useState(0);
+  const { user, logout } = useAuth()
+  const [activeTab, setActiveTab] = useState(0)
+  const { navigateTo } = useRoutes()
 
   useEffect(() => {
-    const savedActiveTab = localStorage.getItem("activeTab");
+    const savedActiveTab = localStorage.getItem('activeTab')
     if (savedActiveTab) {
-      setActiveTab(parseInt(savedActiveTab));
+      setActiveTab(parseInt(savedActiveTab))
     }
-  }, []);
+  }, [])
 
-  const handleLogout = () => {
-    logout();
-    // Navigate to the desired route after logout
-    navigate("/"); // Replace '/' with the route you want to navigate to after logout
-  };
 
   const handleTabChange = (newValue: number) => {
-    setActiveTab(newValue);
-    localStorage.setItem("activeTab", newValue.toString());
+    setActiveTab(newValue)
+    localStorage.setItem('activeTab', newValue.toString())
     switch (newValue) {
       case 0:
-        navigate("/"); // Use navigate to go to the desired route
-        break;
+        navigateTo('/') // Use navigate to go to the desired route
+        break
       case 1:
-        navigate("/chat"); // Use navigate to go to the desired route
-        break;
+        navigateTo('/chat') // Use navigate to go to the desired route
+        break
       case 2:
-        navigate("/game");
-        break;
+        navigateTo('/game')
+        break
       case 3:
-        navigate("/profile");
-        break;
+        navigateTo('/profile')
+        break
       default:
-        break;
+        break
     }
-  };
+  }
 
   return (
     <div id="navbar" className="header">
@@ -52,20 +47,17 @@ const Header = () => {
             <nav>
               <Tabs
                 value={activeTab}
-                onChange={(_, newValue) => handleTabChange(newValue)} // Pass newValue to handleTabChange
+                // onChange={(_, newValue) => handleTabChange(newValue)}
                 aria-label="navigation tabs"
-                // textColor="secondary"
-                indicatorColor="secondary"
-                sx={{ textColor: "#d9eef3" }}
               >
-                <Tab sx={{ color: "#d9eef3" }} label="Home" />
-                <Tab sx={{ color: "#d9eef3" }} label="Chat" />
-                <Tab sx={{ color: "#d9eef3" }} label="Pong" />
-                <Tab sx={{ color: "#d9eef3" }} label="Profile" />
+                <Tab label="Home" />
+                <Tab label="Chat" />
+                <Tab label="Pong" />
+                <Tab label="Profile" />
                 <IconButton
                   color="info"
-                  aria-label="delete"
-                  onClick={handleLogout}
+                  aria-label="logout"
+                  onClick={logout}
                 >
                   <LogoutIcon />
                 </IconButton>
@@ -77,7 +69,7 @@ const Header = () => {
         </div>
       </header>
     </div>
-  );
-};
+  )
+}
 
-export default Header;
+export default Header

@@ -15,7 +15,7 @@ type ChatMessage = {
 }
 
 type ChatProps = {
-  socket: Socket
+  socket?: Socket
 }
 
 export function Chat({ socket }: ChatProps) {
@@ -48,6 +48,9 @@ export function Chat({ socket }: ChatProps) {
     }
   }, [socket])
 
+  if (!socket) {
+    return <div>Loading...</div> // or any other loading indicator or error message
+  }
   return (
     <Box
       component="div"
