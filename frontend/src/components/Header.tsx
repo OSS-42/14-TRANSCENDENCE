@@ -12,14 +12,12 @@ const Header = () => {
   useEffect(() => {
     const savedActiveTab = localStorage.getItem('activeTab')
     if (savedActiveTab) {
-      setActiveTab(parseInt(savedActiveTab))
-      console.log(`New active tab: ${savedActiveTab}`)
+      if (parseInt(savedActiveTab) == 4) setActiveTab(0)
+      else setActiveTab(parseInt(savedActiveTab))
     }
   }, [])
 
   const handleTabChange = (newValue: number) => {
-    console.log(`Getting here with ${newValue}`)
-
     setActiveTab(newValue)
     localStorage.setItem('activeTab', newValue.toString())
     switch (newValue) {
@@ -57,9 +55,6 @@ const Header = () => {
         <Tab label="Pong" />
         <Tab label="Profile" />
         <Tab icon={<LogoutIcon />} />
-        {/* <IconButton color="info" aria-label="logout" onClick={logout}>
-          <LogoutIcon />
-        </IconButton> */}
       </Tabs>
     </Box>
   )

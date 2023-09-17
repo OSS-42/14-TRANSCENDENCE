@@ -5,13 +5,6 @@ import { useAuth } from '../contexts/AuthContext'
 export function Welcome() {
   const { user, login } = useAuth()
 
-  const handleLoginClick = () => {
-    // setTimeout(() => {
-    //   window.location.reload()
-    // }, 1500)
-    login()
-  }
-
   if (!user) {
     return (
       <Box
@@ -39,7 +32,7 @@ export function Welcome() {
           variant="contained"
           onClick={login}
         >
-          LOG IN
+          LOGIN
         </Button>
       </Box>
     )
