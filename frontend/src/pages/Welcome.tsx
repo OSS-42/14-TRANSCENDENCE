@@ -10,29 +10,21 @@ export function Welcome() {
       <Box
         component="div"
         id="welcome-page"
-        style={{ height: '50vh', background: '#000' }}
+        sx={{
+          padding: '2rem',
+        }}
       >
-        <Typography
-          className="glitch"
-          sx={{
-            textAlign: 'center',
-            '@media (min-width:600px)': {
-              fontSize: '4rem',
-            },
-          }}
-        >
-          PONG
-        </Typography>
+        <Typography className="glitch">PONG</Typography>
         <Box component="div" id="arcade" sx={{ marginBottom: '5rem' }}>
           <img width="100%" src="arcade.png" alt="" />
         </Box>
         <Button
           href="/api/auth/42"
-          size="small"
+          size="medium"
           variant="contained"
           onClick={login}
         >
-          LOGIN
+          LOG IN
         </Button>
       </Box>
     )

@@ -35,7 +35,7 @@ const Header = () => {
       const value = parseInt(savedActiveTab)
       if (value == 4) setActiveTab(0)
       else setActiveTab(value)
-    }
+    } else setActiveTab(0)
   }, [])
 
   const handleTabChange = (newValue: number) => {
