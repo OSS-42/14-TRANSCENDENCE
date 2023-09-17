@@ -42,8 +42,8 @@ const ChatBody = ({ messages }: ChatBodyProps) => {
   return (
     <>
       <div className="message__container">
-        {messages.map((message) => (
-          <div>
+        {messages.map((message, index) => (
+          <div key={index}>
             {message.notice ? (
               // Si message.notice n'est pas nulle, affichez son contenu HTML.
               <span
@@ -54,17 +54,25 @@ const ChatBody = ({ messages }: ChatBodyProps) => {
               !banList?.includes(message.userId) && (
                 <>
                   {message.channel !== undefined && (
-                    <span className="channelSender">{message.channel}</span>
+                    <span
+                      key={`channelSender-${index}`}
+                      className="channelSender"
+                    >
+                      {message.channel}
+                    </span>
                   )}{' '}
-                  <span className="nameSender">{message.name}</span>:{' '}
-                  {message.text}
+                  <span key={`nameSender-${index}`} className="nameSender">
+                    {message.name}
+                  </span>
+                  : {message.text}
                 </>
               )
             ) : (
               <div
+                key={`help-${index}`}
                 className="help"
-                dangerouslySetInnerHTML={{ __html: message.help }} //Fonction de React pour rendre le HTML contenu dans la chaîne de texte.
-              ></div>
+                dangerouslySetInnerHTML={{ __html: message.help }}
+              />
             )}
           </div>
         ))}

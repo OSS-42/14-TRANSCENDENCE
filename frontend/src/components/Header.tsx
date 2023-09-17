@@ -12,8 +12,9 @@ const Header = () => {
   useEffect(() => {
     const savedActiveTab = localStorage.getItem('activeTab')
     if (savedActiveTab) {
-      if (parseInt(savedActiveTab) == 4) setActiveTab(0)
-      else setActiveTab(parseInt(savedActiveTab))
+      const value = parseInt(savedActiveTab)
+      if (value == 4) setActiveTab(0)
+      else setActiveTab(value)
     }
   }, [])
 
