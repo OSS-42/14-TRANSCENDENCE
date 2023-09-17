@@ -52,6 +52,7 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
     Cookies.remove(JWT_TOKEN_COOKIE)
     setUser(null)
     setIsLogged(false)
+		setLoading(false)
     redirectToWelcome()
   }
 

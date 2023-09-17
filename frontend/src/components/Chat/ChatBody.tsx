@@ -54,25 +54,17 @@ const ChatBody = ({ messages }: ChatBodyProps) => {
               !banList?.includes(message.userId) && (
                 <>
                   {message.channel !== undefined && (
-                    <span
-                      key={`channelSender-${index}`}
-                      className="channelSender"
-                    >
-                      {message.channel}
-                    </span>
+                    <span className="channelSender">{message.channel}</span>
                   )}{' '}
-                  <span key={`nameSender-${index}`} className="nameSender">
-                    {message.name}
-                  </span>
-                  : {message.text}
+                  <span className="nameSender">{message.name}</span>:{' '}
+                  {message.text}
                 </>
               )
             ) : (
               <div
-                key={`help-${index}`}
                 className="help"
-                dangerouslySetInnerHTML={{ __html: message.help }}
-              />
+                dangerouslySetInnerHTML={{ __html: message.help }} //Fonction de React pour rendre le HTML contenu dans la chaîne de texte.
+              ></div>
             )}
           </div>
         ))}

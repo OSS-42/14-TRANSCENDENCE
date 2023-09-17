@@ -10,6 +10,26 @@ const Header = () => {
   const { navigateTo } = useRoutes()
 
   useEffect(() => {
+    const currentPath = window.location.pathname
+    switch (currentPath) {
+      case '/':
+        setActiveTab(0)
+        break
+      case '/chat':
+        setActiveTab(1)
+        break
+      case '/game':
+        setActiveTab(2)
+        break
+      case '/profile':
+        setActiveTab(3)
+        break
+      default:
+        setActiveTab(0)
+    }
+  })
+
+  useEffect(() => {
     const savedActiveTab = localStorage.getItem('activeTab')
     if (savedActiveTab) {
       const value = parseInt(savedActiveTab)

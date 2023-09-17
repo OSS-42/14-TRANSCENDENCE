@@ -18,6 +18,9 @@ function App() {
   const [chatSocketInitialized, setChatSocketInitialized] = useState(false)
 
   useEffect(() => {
+    if (!user) return
+    console.log('Getting here')
+
     const newSocket = socketIO('/chat', {
       query: {
         token: user?.jwtToken,
@@ -26,16 +29,16 @@ function App() {
     newSocket.on('connect', () => {
       setChatSocketInitialized(true)
       setChatSocket(newSocket)
+      console.log('Connection made')
     })
     return () => {
       newSocket.disconnect()
     }
-  }, [])
+  }, [user])
 
-  if (loading || !chatSocket) {
-    console.log(loading, chatSocketInitialized)
-
-    return <div>Loading...</div>
+  if (loading) {
+    console.log('Loading...')
+    return <></>
   }
 
   return (
