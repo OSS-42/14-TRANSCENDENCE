@@ -1,11 +1,11 @@
-import { Box, Button, Dialog, DialogContent, Typography } from "@mui/material";
-import { User } from "../../models/User";
-import { MatchHistory } from "../Profile/MatchHistory";
+import { Box, Button, Dialog, DialogContent, Typography } from '@mui/material'
+import { User } from '../../models/User'
+import { MatchHistory } from '../Profile/MatchHistory'
 
 type UserDetailsProps = {
-  selectedUser: User;
-  closeUserDetails: () => void;
-};
+  selectedUser: User
+  closeUserDetails: () => void
+}
 
 function UserDetails({ selectedUser, closeUserDetails }: UserDetailsProps) {
   return (
@@ -15,21 +15,25 @@ function UserDetails({ selectedUser, closeUserDetails }: UserDetailsProps) {
           component="div"
           display="flex"
           flexDirection="column"
-          justifyContent="flex-start"
+          justifyContent="center"
+          alignItems="center"
         >
-          <Typography variant="h5" gutterBottom>
-            User details
+          <Typography variant="h5" color="#090609" gutterBottom>
+            User Details
           </Typography>
+          {/* <a href="linktouserprofile"> */}
           <img
+            className="round-img"
             src={selectedUser?.avatar}
             alt={selectedUser?.username}
-            width="250"
-            height="250"
+            width="250rem"
+            height="250rem"
           />
-          <Typography variant="h4">{selectedUser?.username}</Typography>
+          {/* </a> */}
+          <Typography variant="h6">{selectedUser?.username}</Typography>
           <Box component="div" mt={2}>
             {/* Render the MatchHistory component here */}
-            <MatchHistory user={selectedUser}></MatchHistory>
+            {/* <MatchHistory user={selectedUser}></MatchHistory> */}
           </Box>
           <Box component="div" mt={2}>
             <Button variant="contained" onClick={closeUserDetails}>
@@ -38,13 +42,13 @@ function UserDetails({ selectedUser, closeUserDetails }: UserDetailsProps) {
           </Box>
           <Box component="div" mt={2}>
             <Button variant="contained" onClick={closeUserDetails}>
-              Fermer
+              Close
             </Button>
           </Box>
         </Box>
       </DialogContent>
     </Dialog>
-  );
+  )
 }
 
-export default UserDetails;
+export default UserDetails

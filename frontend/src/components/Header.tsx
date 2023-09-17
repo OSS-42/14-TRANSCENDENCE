@@ -63,7 +63,19 @@ const Header = () => {
   }
 
   return (
-    <Box component="div" id="navbar" className="header" sx={{ width: '100%' }}>
+    <Box
+      component="div"
+      id="navbar"
+      className="header"
+      sx={{
+        position: 'fixed',
+        top: '0',
+        left: '0',
+        backgroundColor: 'black',
+        width: '100%',
+        zIndex: '999',
+      }}
+    >
       <Tabs
         value={activeTab}
         onChange={(_, newValue) => handleTabChange(newValue)}

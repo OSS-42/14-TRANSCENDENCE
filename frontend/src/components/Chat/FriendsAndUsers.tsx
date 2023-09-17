@@ -1,55 +1,57 @@
-import { useEffect, useState } from "react";
-import { Socket } from "socket.io-client";
-import { User } from "../../models/User";
-import ChatBar from "./ChatBar";
-import ChatFriends from "./ChatFriends";
-import ReactModal from "react-modal";
-import UserDetails from "./UserDetails";
-import { fetchFriendsList, fetchUsersList } from "../../api/requests";
+import { useEffect, useState } from 'react'
+import { Socket } from 'socket.io-client'
+import { User } from '../../models/User'
+import ChatBar from './ChatBar'
+import ChatFriends from './ChatFriends'
+import ReactModal from 'react-modal'
+import UserDetails from './UserDetails'
+import { fetchFriendsList, fetchUsersList } from '../../api/requests'
 
 type someProp = {
-  socket: Socket;
-};
+  socket: Socket
+}
 
 export function FriendsAndUsers({ socket }: someProp) {
-  const [usersList, setUsersList] = useState<User[]>([]);
-  const [friendsList, setFriendsList] = useState<User[]>([]);
-  const [connectedUsers, setConnectedUsers] = useState<number[]>([]);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [usersList, setUsersList] = useState<User[]>([])
+  const [friendsList, setFriendsList] = useState<User[]>([])
+  const [connectedUsers, setConnectedUsers] = useState<number[]>([])
+  const [selectedUser, setSelectedUser] = useState<User | null>(null)
+  const [modalIsOpen, setModalIsOpen] = useState(false)
 
   useEffect(() => {
-    socket.on("updateConnectedUsers", (updatedUsers: number[]) => {
-      setConnectedUsers(updatedUsers);
-    });
+    socket.on('updateConnectedUsers', (updatedUsers: number[]) => {
+      setConnectedUsers(updatedUsers)
+    })
 
     async function fetchInitialData() {
       try {
-        const newFriendsList = await fetchFriendsList();
-        setFriendsList(newFriendsList);
-        const newUsersList = await fetchUsersList();
-        setUsersList(newUsersList);
+        const newFriendsList = await fetchFriendsList()
+        setFriendsList(newFriendsList)
+        const newUsersList = await fetchUsersList()
+        setUsersList(newUsersList)
       } catch (error) {
-        console.error("Erreur lors de la récupération des données :", error);
+        console.error('Erreur lors de la récupération des données :', error)
       }
     }
-    fetchInitialData();
+    fetchInitialData()
 
     return () => {
-      socket.off("updateConnectedUsers");
-    };
-  }, []);
+      socket.off('updateConnectedUsers')
+    }
+  }, [])
 
   const handleUserClick = (user: User) => {
-    setSelectedUser(user);
-    setModalIsOpen(true);
-  };
+    console.log(`Getting here with: ${user.username}`)
+
+    setSelectedUser(user)
+    setModalIsOpen(true)
+  }
 
   // Fonction pour fermer les informations détaillées de l'utilisateur
   const closeUserDetails = () => {
-    setModalIsOpen(false);
-    setSelectedUser(null);
-  };
+    setModalIsOpen(false)
+    setSelectedUser(null)
+  }
 
   return (
     <>
@@ -86,5 +88,5 @@ export function FriendsAndUsers({ socket }: someProp) {
         )}
       </ReactModal>
     </>
-  );
+  )
 }

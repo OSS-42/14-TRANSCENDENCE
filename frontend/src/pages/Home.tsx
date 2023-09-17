@@ -12,18 +12,19 @@ export function Home() {
       <Box
         component="div"
         sx={{
+          marginTop: '3rem',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-evenly',
           background: '#c9c9c5',
           borderRadius: '5px',
-          padding: '15px',
-          height: '94.75%',
-          width: '98.5%',
+          padding: '2.5rem',
           textAlign: 'center',
-          paddingBottom: '5rem',
           lineHeight: '2rem',
-          fontSize: '1.5rem',
+          fontSize: '.8rem',
+          '@media (min-width:600px)': {
+            fontSize: '1rem',
+          },
         }}
       >
         {user ? (
@@ -36,6 +37,7 @@ export function Home() {
             </div>
             <div className="sign">
               <p>
+                <br />
                 Ana
                 <br />
                 Cesar

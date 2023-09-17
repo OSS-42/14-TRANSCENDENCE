@@ -27,7 +27,7 @@
 
 #root {
   background: #000;
-	max-height: fit-content;
+  max-height: fit-content;
   height: 100vh;
   width: 100vw;
   position: relative;
@@ -50,7 +50,7 @@ body {
   height: 100%;
   flex-direction: column;
   align-items: center;
-	justify-content: space-evenly;
+  justify-content: space-between;
   .glitch {
     font-size: clamp(3rem, 7vw, 5rem);
   }
@@ -82,10 +82,14 @@ body {
   }
 }
 
+img.round-img {
+  border-radius: 50%;
+}
+
 #navbar {
   display: flex;
   justify-content: space-evenly;
-  width: 100vw;
+  width: 100%;
 }
 
 p {
@@ -95,22 +99,30 @@ p {
 /*---------- CHAT CSS ----------*/
 .message__container {
   margin-bottom: 1px;
-  font-size: 0.8rem;
   line-height: 1.5rem;
+  letter-spacing: 0.1rem;
   height: 80vh;
   overflow-wrap: break-word;
+  font-size: 0.5rem;
+  @media (min-width: 600px) {
+    font-size: 0.8rem;
+  }
 }
 
 .help {
   margin: 15px;
   tab-size: 8;
   line-height: 1.2rem;
-  font-size: 0.7rem;
+  letter-spacing: 0.1rem;
   > b {
     color: #a95d6b;
   }
   > span {
     color: #d9eef3;
+  }
+  font-size: 0.5rem;
+  @media (min-width: 600px) {
+    font-size: 0.7rem;
   }
 }
 
@@ -128,15 +140,25 @@ p {
   color: var(--canary); /* Jaune doré */
   font-weight: bold; /* Texte gras */
   tab-size: 4;
-  font-size: 14px; /* Taille de police de 14 pixels */
+  // font-size: 14px; /* Taille de police de 14 pixels */
 }
 
 .chat__header {
   color: var(--mandarine);
+  letter-spacing: 0.05rem;
+  font-size: 0.5rem;
+  @media (min-width: 600px) {
+    font-size: 0.7rem;
+  }
 }
 
 .chat__users {
   margin-bottom: 25px;
+  letter-spacing: 0.05rem;
+  font-size: 0.5rem;
+  @media (min-width: 600px) {
+    font-size: 0.7rem;
+  }
 }
 
 /*---------- WELCOME CSS ----------*/

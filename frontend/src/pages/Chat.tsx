@@ -56,8 +56,9 @@ export function Chat({ socket }: ChatProps) {
       component="div"
       color="#d4d4cf"
       sx={{
+        marginTop: '3rem',
         display: 'flex',
-        height: '95%',
+        height: '91%',
         width: '98.5%',
       }}
     >
@@ -92,7 +93,6 @@ export function Chat({ socket }: ChatProps) {
         component="div"
         sx={{
           display: 'grid',
-          fontSize: '.8rem',
           backgroundColor: '#090609',
           borderRadius: '0 5px 5px 0',
           width: '35%',
