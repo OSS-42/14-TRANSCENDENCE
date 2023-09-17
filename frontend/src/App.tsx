@@ -18,28 +18,28 @@ function App() {
   const [chatSocketInitialized, setChatSocketInitialized] = useState(false)
 
   useEffect(() => {
-    if (user && !chatSocket) {
-      const newSocket = socketIO('/chat', {
-        query: {
-          token: user.jwtToken,
-        },
-      })
-      newSocket.on('connect', () => {
-        setChatSocket(newSocket)
-        setChatSocketInitialized(true)
-      })
-      return () => {
-        newSocket.disconnect()
-      }
+    const newSocket = socketIO('/chat', {
+      query: {
+        token: user?.jwtToken,
+      },
+    })
+    newSocket.on('connect', () => {
+      setChatSocketInitialized(true)
+      setChatSocket(newSocket)
+    })
+    return () => {
+      newSocket.disconnect()
     }
-  }, [user, chatSocket])
+  }, [])
 
-  if (loading || !chatSocketInitialized) {
+  if (loading || !chatSocket) {
+    console.log(loading, chatSocketInitialized)
+
     return <div>Loading...</div>
   }
 
   return (
-    <Router>
+    <>
       {user ? <Header /> : null}
       <Routes>
         <Route
@@ -67,7 +67,7 @@ function App() {
         />
         <Route path="*" element={<Error />} />
       </Routes>
-    </Router>
+    </>
   )
 }
 

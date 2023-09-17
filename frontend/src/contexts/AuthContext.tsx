@@ -40,18 +40,13 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
     console.log('Logging in')
 
     try {
-      setTimeout(() => {
-        window.location.reload()
-      }, 500)
       await fetchUserData()
       redirectToHome()
     } catch (error) {
-      // Handle any errors that occur during the login process
-      // console.error('Error during login:', error)
-      // showError('An error occurred during login. Please try again later.')
       redirectToWelcome()
     }
   }
+
   const logout = () => {
     console.log('Logging out')
     Cookies.remove(JWT_TOKEN_COOKIE)

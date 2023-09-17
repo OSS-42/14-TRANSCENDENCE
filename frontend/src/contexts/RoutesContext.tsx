@@ -1,4 +1,4 @@
-import React, { createContext, ReactNode, useContext } from 'react'
+import { createContext, ReactNode, useContext } from 'react'
 
 import { useNavigate } from "react-router-dom";
 
@@ -13,10 +13,11 @@ interface RoutesProviderProps {
 }
 
 export function RoutesProvider({ children }: RoutesProviderProps) {
+  const navigate = useNavigate() 
+
   const navigateTo = (path: string) => {
-    const navigate = useNavigate();
     console.log('Navigating to:', path)
-		navigate(path)
+    navigate(path) 
   }
 
   return (
