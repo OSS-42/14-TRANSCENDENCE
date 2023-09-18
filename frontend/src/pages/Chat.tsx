@@ -83,7 +83,6 @@ export function Chat({ socket }: ChatProps) {
             border: "1px solid #ffb63d",
             borderWidth: "1px 1px 0px 1px",
             borderRadius: "5px 5px 0 0",
-            padding: "1rem",
             overflow: "auto",
           }}
         >
@@ -96,6 +95,7 @@ export function Chat({ socket }: ChatProps) {
         component="div"
         sx={{
           minHeight: "90%",
+					minWidth: "30%",
           margin: "1rem 1rem 1rem 0",
           borderRadius: "5px",
           padding: "1rem",

@@ -42,7 +42,7 @@ export function FriendsList() {
         FRIENDS
       </Typography>
       {friends.length === 0 ? (
-        <Typography variant="h6" sx={{padding: "16px", fontWeight: "bold"}}>
+        <Typography variant="h6" sx={{ padding: "16px", fontWeight: "bold" }}>
           You currently have no friends...
         </Typography>
       ) : (
@@ -56,7 +56,7 @@ export function FriendsList() {
                 alignItems: "center",
                 gap: "10px",
                 padding: "5px",
-                border: "1px solid #ccc",
+                // border: "1px solid #ccc",
                 borderRadius: "5px",
                 marginBottom: "5px",
               }}
@@ -71,7 +71,7 @@ export function FriendsList() {
               <p>
                 {friend.username}
                 {/* {connectedUsers.includes(user.id) && (
-                  <span style={{ color: "green" }}> en ligne</span>
+                  <span style={{ color: "#65bf76" }}>online</span>
                 )} */}
               </p>
             </Box>
