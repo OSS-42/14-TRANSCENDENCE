@@ -13,6 +13,7 @@ export function AvatarImage({user} : AvatarImageProps) {
           borderRadius: "5px",
           margin: "20px",
           fontWeight: "bold",
+          height: "35%",
           // height: "30vh",
           width: "50%",
           display: "flex",
@@ -27,7 +28,7 @@ export function AvatarImage({user} : AvatarImageProps) {
             width: "100%", // Allow width to adjust
             height: "100%", // Fill the available height
             maxWidth: "100%",
-            objectFit: "cover"
+            objectFit: "cover",
           }}
         />
       </Box>
