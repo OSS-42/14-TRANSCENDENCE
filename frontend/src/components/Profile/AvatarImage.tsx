@@ -15,6 +15,7 @@ export function AvatarImage({user} : AvatarImageProps) {
           margin: "20px",
           fontWeight: "bold",
           height: "35%",
+          // height: "30vh",
           width: "50%",
           display: "flex",
           alignItems: "center",
@@ -28,7 +29,11 @@ export function AvatarImage({user} : AvatarImageProps) {
             width: "100%", // Allow width to adjust
             height: "100%", // Fill the available height
             maxWidth: "100%",
+<<<<<<< HEAD:frontend/src/components/Profile/AvatarImage.tsx
             objectFit: "cover",
+=======
+            objectFit: "cover"
+>>>>>>> main:frontend/src/components/Profile/AvatarBox.tsx
           }}
         />
       </Box>
