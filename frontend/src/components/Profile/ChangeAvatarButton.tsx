@@ -28,6 +28,8 @@ const handleAvatarSelected = (event: any) => {
 		console.log("Avatar updated successfully");
 		setUser(response.data);
 		} catch (error) {
+		if (error.message === "Request failed with status code 413")
+			alert("Image is too large. Please choose a smaller image");
 		console.error("Error updating avatar:", error);
 		}
 	};
