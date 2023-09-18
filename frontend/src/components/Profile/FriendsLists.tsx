@@ -29,11 +29,11 @@ export function FriendsList() {
     <Box
       component="div"
       sx={{
-        border: "1px solid black",
+        border: "1px solid #3d3242",
         borderRadius: "5px",
-        margin: "20px",
         fontWeight: "bold",
         height: "28vh",
+				padding: '1rem',
         maxHeight: "370px", // Set a maximum height for scrolling
         overflow: "auto", // Enable scrolling when content overflows
       }}
@@ -42,7 +42,7 @@ export function FriendsList() {
         FRIENDS
       </Typography>
       {friends.length === 0 ? (
-        <Typography variant="h6" sx={{padding: "16px", fontWeight: "bold"}}>
+        <Typography variant="h6" sx={{ padding: "16px", fontWeight: "bold" }}>
           You currently have no friends...
         </Typography>
       ) : (
@@ -56,7 +56,6 @@ export function FriendsList() {
                 alignItems: "center",
                 gap: "10px",
                 padding: "5px",
-                border: "1px solid #ccc",
                 borderRadius: "5px",
                 marginBottom: "5px",
               }}
@@ -71,7 +70,7 @@ export function FriendsList() {
               <p>
                 {friend.username}
                 {/* {connectedUsers.includes(user.id) && (
-                  <span style={{ color: "green" }}> en ligne</span>
+                  <span style={{ color: "#65bf76" }}>online</span>
                 )} */}
               </p>
             </Box>

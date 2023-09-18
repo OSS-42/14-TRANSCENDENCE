@@ -1,6 +1,7 @@
 import { Box, Button } from "@mui/material";
 import axios from "axios";
 import Cookies from "js-cookie";
+import { updateAvatarApi } from "../../api/requests";
 
 export function ChangeAvatarButton({setUser}){
 
@@ -26,23 +27,31 @@ const handleAvatarSelected = (event: any) => {
 		});
 		console.log("Avatar updated successfully");
 		setUser(response.data);
-		console.log(response);
 		} catch (error) {
+		if (error.message === "Request failed with status code 413")
+			alert("Image is too large. Please choose a smaller image");
 		console.error("Error updating avatar:", error);
 		}
 	};
+
+  // const handleAvatarUpdate = async (avatarFile: File) => {
+	// 	const formData = new FormData();
+	// 	console.log(avatarFile);
+	// 	formData.append("avatar", avatarFile);
+  //   updateAvatarApi(formData);
+	// };
 
   return (
     <Box
 	  component="div"
       sx={{
-        border: "1px solid black",
         borderRadius: "5px",
         margin: "20px",
         width: "50%",
         display: "flex",
         justifyContent: "center", // Center horizontally
         alignItems: "center", // Center vertically
+				
       }}
     >
       <input

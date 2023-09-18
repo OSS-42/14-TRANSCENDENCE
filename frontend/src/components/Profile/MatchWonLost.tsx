@@ -17,8 +17,8 @@ interface CenteredTextProps {
 function CenteredText({ match }: CenteredTextProps) {
   return (
     <div style={{ textAlign: "center" }}>
-      <Box>
-        <Typography variant="h1" style={{ color: "black", width: "100%" }}>
+      <Box component="div">
+        <Typography variant="h1" style={{ color: "#FFF", width: "100%" }}>
           {match}
         </Typography>
       </Box>
@@ -32,9 +32,9 @@ function MatchBox({ title, matchCount }: MatchBoxProps) {
       <Box
         component="div"
         sx={{
-          border: "1px solid black",
+          border: "1px solid #3d3242",
           borderRadius: "5px",
-          margin: "20px",
+          marginTop: "2rem",
           marginBottom: "5px",
           fontWeight: "bold",
           height: "21vh",
@@ -43,7 +43,10 @@ function MatchBox({ title, matchCount }: MatchBoxProps) {
           textAlign: "center",
         }}
       >
-        <Typography variant="h6" sx={{fontWeight: "bold"}}>{title}</Typography>
+        <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+          {title}
+        </Typography>
+        <br />
         <CenteredText match={matchCount} />
       </Box>
     </Grid>

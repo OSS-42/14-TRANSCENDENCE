@@ -13,6 +13,7 @@ import { FriendsList } from "../components/Profile/FriendsLists";
 import { MatchHistory } from "../components/Profile/MatchHistory";
 import { useAuth } from "../contexts/AuthContext";
 import { fetchMatchHistory, fetchUserMe } from "../api/requests";
+import { TwoFactorAuthentication } from "../components/Profile/TwoFactorAuthentication";
 
 export function Profile() {
   const { user } = useAuth();
@@ -41,6 +42,7 @@ export function Profile() {
         <Name user={userData?.username} updateUserData={updateUserData} />
         <AvatarImage user={userData} />
         <ChangeAvatarButton setUser={setUserData} />
+        <TwoFactorAuthentication/>
       </LeftSideGrid>
       <RightSideGrid>
         <MatchWonLost match={match}/>

@@ -30,9 +30,10 @@ export function MatchHistory({ match }: MatchHistoryProps) {
     <Box
       component="div"
       sx={{
-        border: "1px solid black",
+        border: "1px solid #3d3242",
         borderRadius: "5px",
-        margin: "20px",
+        marginTop: "20px",
+				padding: '1rem',
         fontWeight: "bold",
         height: "28vh",
         maxHeight: "370px",

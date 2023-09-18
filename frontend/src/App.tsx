@@ -1,42 +1,77 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import PrivateRoutes from "./utils/PrivateRoutes";
-import { useAuth } from "./contexts/AuthContext";
-import socketIO from "socket.io-client";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from 'react-router-dom'
+// import PrivateRoutes from "./utils/PrivateRoutes";
+import { useAuth } from './contexts/AuthContext'
+import socketIO, { Socket } from 'socket.io-client'
 
-import Header from "./components/Header";
-import { Chat, Home, Pong, Profile, Welcome, Error } from "./pages";
-//On va surement faire un autre  websocket pour le pong.
+import Header from './components/Header'
+import { Chat, Home, Pong, Profile, Welcome, Error, Oops } from './pages'
+import { useEffect, useState } from 'react'
 
 function App() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth()
+  const [chatSocket, setChatSocket] = useState<Socket | null>(null)
+  const [chatSocketInitialized, setChatSocketInitialized] = useState(false)
 
-  if (!user) {
-    return (
-      <Router>
-        <Welcome />
-      </Router>
-    );
-  } else {
-    const socket = socketIO("/chat", {
-      query: { 
+  useEffect(() => {
+    if (!user) return
+    console.log('Getting here')
+
+    const newSocket = socketIO('/chat', {
+      query: {
         token: user?.jwtToken,
       },
-    });
-    return (
-      <Router>
-        <Header />
-        <Routes>
-          <Route element={<PrivateRoutes />}>
-            <Route path="/" element={<Home />} />
-            <Route path="/welcome" element={<Home />} />
-            <Route path="/chat" element={<Chat socket={socket} />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/game" element={<Pong />} />
-            <Route path="*" element={<Error />} />
-          </Route>
-        </Routes>
-      </Router>
-    );
+    })
+    newSocket.on('connect', () => {
+      setChatSocketInitialized(true)
+      setChatSocket(newSocket)
+      console.log('Connection made')
+    })
+    return () => {
+      newSocket.disconnect()
+    }
+  }, [user])
+
+  if (loading) {
+    console.log('Loading...')
+    return <></>
   }
+
+  return (
+    <>
+      {user ? <Header /> : null}
+      <Routes>
+        <Route
+          path="/welcome"
+          element={user ? <Navigate to="/" /> : <Welcome />}
+        />
+        <Route
+          path="/"
+          element={user ? <Home /> : <Navigate to="/welcome" />}
+        />
+        <Route
+          path="/chat"
+          element={
+            user && chatSocket ? (
+              <Chat socket={chatSocket} />
+            ) : (
+              <Navigate to="/" />
+            )
+          }
+        />
+        <Route path="/game" element={user ? <Pong /> : <Navigate to="/" />} />
+        <Route
+          path="/profile"
+          element={user ? <Profile /> : <Navigate to="/" />}
+        />
+        <Route path="*" element={<Error />} />
+      </Routes>
+    </>
+  )
 }
-export default App;
+
+export default App
