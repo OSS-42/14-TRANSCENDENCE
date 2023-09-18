@@ -75,7 +75,15 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server.emit('updateConnectedUsers', connectedUserIds);
   }
 
-    
+  @SubscribeMessage('invitation')
+  async invitation(client: Socket, payload: any){ //voir pour changer any
+    const socketId = await this.connectedUsersService.getSocketId(payload.userId)
+    console.log("TESTSTTSTSTTSTSTTSTSTST")
+    console.log(payload)
+    this.server.to(socketId).emit('invitation', {
+      roomId: payload.roomId,
+    });
+  }
   
 
   // //-------------------------------------------------------- COMMANDE DU CHAT --------------------------------------------------------
