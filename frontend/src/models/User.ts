@@ -1,13 +1,4 @@
 interface User {
-  jwtToken: string;
-  id: number;
-  createdAt: string;
-  updatedAt: string;
-  username: string;
-  gamesWon: number;
-  gameLost: number;
-  avatar?: string;
-  email: string;
   friends: Friendship[];
   friendOf: Friendship[];
   ownedChatRooms: ChatRoom[];

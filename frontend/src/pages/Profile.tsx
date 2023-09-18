@@ -42,7 +42,7 @@ export function Profile() {
         <Name user={userData?.username} updateUserData={updateUserData} />
         <AvatarImage user={userData} />
         <ChangeAvatarButton setUser={setUserData} />
-        <TwoFactorAuthentication/>
+        <TwoFactorAuthentication TwoFactorStatus={user.twoFactorSecret ? true : false}/>
       </LeftSideGrid>
       <RightSideGrid>
         <MatchWonLost match={match}/>
