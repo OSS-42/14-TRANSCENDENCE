@@ -45,13 +45,13 @@ const handleAvatarSelected = (event: any) => {
     <Box
 	  component="div"
       sx={{
-        border: "1px solid black",
         borderRadius: "5px",
         margin: "20px",
         width: "50%",
         display: "flex",
         justifyContent: "center", // Center horizontally
         alignItems: "center", // Center vertically
+				
       }}
     >
       <input

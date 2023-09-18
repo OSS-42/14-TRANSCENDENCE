@@ -14,7 +14,8 @@ export function ContainerGrid({children}) {
           height: "auto",
           width: "auto",
           boxSizing: "border-box",
-          padding: "20px"
+          padding: "20px",
+					color: "#FFF",
         }}
       >{children}</Grid>
   );

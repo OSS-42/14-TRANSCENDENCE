@@ -10,6 +10,7 @@ export function AvatarImage({user} : AvatarImageProps) {
       <Box
 	  	component="div"
         sx={{
+					
           borderRadius: "5px",
           margin: "20px",
           fontWeight: "bold",
