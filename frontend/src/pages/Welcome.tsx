@@ -10,9 +10,9 @@ export function Welcome() {
       <Box
         component="div"
         id="welcome-page"
-        sx={{
-          padding: '2rem',
-        }}
+        // sx={{
+        //   padding: '2rem',
+        // }}
       >
         <Typography className="glitch">PONG</Typography>
         <Box component="div" id="arcade" sx={{ marginBottom: '5rem' }}>
