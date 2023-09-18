@@ -70,7 +70,6 @@ export function TwoFactorAuthentication({TwoFactorStatus}: TwoFactorAuthenticati
     <Box
       component="div"
       sx={{
-        border: "1px solid black",
         borderRadius: "5px",
         margin: "20px",
         width: "50%",
@@ -86,7 +85,7 @@ export function TwoFactorAuthentication({TwoFactorStatus}: TwoFactorAuthenticati
           component="span"
           onClick={handle2FA}
         >
-		  {isActivated ? "Deactivate 2FA" : "Activate 2FA"}
+          {isActivated ? "Deactivate 2FA" : "Activate 2FA"}
         </Button>
         <Modal open={isQRCodeVisible} onClose={() => setQRCodeVisible(false)}>
           <Box
@@ -98,14 +97,18 @@ export function TwoFactorAuthentication({TwoFactorStatus}: TwoFactorAuthenticati
               transform: "translate(-50%, -50%)",
               bgcolor: "white",
               border: "2px solid #000",
+              textAlign: "center",
+              borderRadius: "5px",
               p: 2,
             }}
           >
             <Typography variant="h5">Set up 2FA</Typography>
+            <br />
             <Typography>Follow the instructions below:</Typography>
+            <br />
             <QRCode value={otpURL} size={256} />
             <Typography>
-              Scan the QR code with your authenticator app.
+              <br /> Scan the QR code with your authenticator app.
             </Typography>
           </Box>
         </Modal>

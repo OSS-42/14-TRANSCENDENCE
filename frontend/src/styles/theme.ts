@@ -1,37 +1,42 @@
-import { createTheme } from '@mui/material/styles'
-import { colors } from './colors'
+import { createTheme } from "@mui/material/styles";
 
 const theme = createTheme({
+  typography: {
+    fontFamily: "Montserrat, Press Start 2P, sans-serif",
+  },
   palette: {
     primary: {
-      main: '#005678',
+      main: "#120d23",
+      contrastText: "#fdf6ff",
     },
     secondary: {
-      main: '#ff2a6d',
+      main: "#ffb63d",
     },
     background: {
-      default: '#f9fcff',
-      paper: '#e4f7fb',
+      default: "#090609",
+      paper: "#3d3242",
     },
     text: {
-      primary: '#01012b',
+      primary: "#f9f3ff",
+      secondary: "#c96069",
+      disabled: "#8c808c",
     },
     error: {
-      main: '#bd0b12',
-    },
-    warning: {
-      main: '#f7c948',
+      main: "#d41724",
     },
     info: {
-      main: '#05d9e8',
+      main: "#d9eef3",
     },
     success: {
-      main: '#05d9e8',
+      main: "#909e66",
+    },
+    warning: {
+      main: "#ffb63d",
     },
   },
   shape: {
     borderRadius: 4,
   },
-})
+});
 
-export default theme
+export default theme;

@@ -1,37 +1,64 @@
-import { Box } from "@mui/material";
-import { useAuth } from "../contexts/AuthContext";
+import { Box } from '@mui/material'
+import { useAuth } from '../contexts/AuthContext'
 
 // Idea: Welcome page containing a little summary of the project,
 // and any extra thing we'd like to add.
 
 export function Home() {
-  const { user } = useAuth();
+  const { user } = useAuth()
 
   return (
     <>
       <Box
         component="div"
         sx={{
-          background: "#e4f7fb",
-          borderRadius: "5px",
-          margin: "10px",
-          padding: "15px",
-          height: "92.5vh",
+          marginTop: '3rem',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-evenly',
+          background: '#c9c9c5',
+          borderRadius: '5px',
+          padding: '2.5rem',
+          textAlign: 'center',
+          lineHeight: '2rem',
+          fontSize: '.8rem',
+          '@media (min-width:600px)': {
+            fontSize: '1rem',
+          },
         }}
       >
         {user ? (
           <>
-            <p>Hi, {user.username}!</p>
-            <p>Your email: {user.email}</p>
-            <p>Your avatar link: {user.avatar}</p>
-            <p>Your token: {user.jwtToken}</p>
-            <p>Your id: {user.id}</p>
-            {/* Display other user details as needed */}
+            <div className="text">
+              Hey there, {user.username}. :) <br /> Welcome to our
+              ft_transcendence!
+              <br />
+              Hope you have some fun exploring around.
+            </div>
+            <div className="sign">
+              <p>
+                <br />
+                Ana
+                <br />
+                Cesar
+                <br />
+                Eric
+                <br />
+                Morgan
+                <br />
+                Sam
+                <br />
+                🖤
+              </p>
+            </div>
+            <div className="chicken-dance">
+              <img src="../public/chickenhome.gif" />
+            </div>
           </>
         ) : (
           <p>Loading user data...</p>
         )}
       </Box>
     </>
-  );
+  )
 }

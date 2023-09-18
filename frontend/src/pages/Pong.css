@@ -6,9 +6,8 @@
 } */
 
 .pong-container {
-  position: relative;
-  width: 800px;
-  height: 600px;
+  position: sticky;
+
 }
 
 .scoreboard {
@@ -28,14 +27,16 @@
   align-items: center;
 }
 
-.left-score, .right-score, .player-name {
+.left-score,
+.right-score,
+.player-name {
   font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
   text-align: center;
   color: white;
-} 
+}
 
 .winner-message {
-  font-family:Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+  font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
   font-size: 24px;
   color: red;
   text-align: center;
@@ -47,7 +48,7 @@
 }
 
 .disconnect-message {
-  font-family:Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+  font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
   font-size: 24px;
   color: red;
   text-align: center;
@@ -61,7 +62,7 @@
 .countdown {
   position: absolute;
   top: 40px;
-  font-family:Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+  font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
   left: 50%;
   transform: translate(-50%, -50%);
   color: green;

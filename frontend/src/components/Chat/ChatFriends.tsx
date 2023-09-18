@@ -2,6 +2,7 @@ import { Socket } from "socket.io-client";
 import { Box, Button } from "@mui/material";
 import { User } from "../../models/User";
 import { destroyFriend, fetchFriendsList } from "../../api/requests";
+import PersonRemoveIcon from "@mui/icons-material/PersonRemove";
 
 type ChatFriendsProps = {
   socket: Socket;
@@ -40,7 +41,7 @@ const ChatFriends = ({
                 alignItems: "center",
                 gap: "10px",
                 padding: "5px",
-                border: "1px solid #ccc",
+                // border: '1px solid #ccc',
                 borderRadius: "5px",
                 marginBottom: "5px",
               }}
@@ -57,7 +58,7 @@ const ChatFriends = ({
               <div>
                 <p> {user.username}</p>
                 {connectedUsers?.includes(user.id) && (
-                  <span style={{ color: "green" }}> en ligne</span>
+                  <span style={{ color: "#65bf76" }}>online</span>
                 )}
               </div>
               <div
@@ -67,9 +68,13 @@ const ChatFriends = ({
                   flex: "1",
                 }}
               ></div>
-              <Button variant="contained" onClick={() => removeFriend(user.id)}>
-                Remove Friend
-              </Button>
+              <Button
+                sx={{ minWidth: ".1", padding: ".2rem .2rem .2rem 1rem" }}
+                variant="contained"
+                color="error"
+                startIcon={<PersonRemoveIcon />}
+                onClick={() => removeFriend(user.id)}
+              />
             </Box>
           ))}
         </div>
