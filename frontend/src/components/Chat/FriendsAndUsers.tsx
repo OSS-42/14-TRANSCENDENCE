@@ -82,6 +82,7 @@ export function FriendsAndUsers({ socket }: someProp) {
           <UserDetails
             selectedUser={selectedUser}
             closeUserDetails={closeUserDetails}
+            socket={socket}
           />
         )}
       </ReactModal>

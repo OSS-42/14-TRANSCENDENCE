@@ -1,13 +1,27 @@
 import { Box, Button, Dialog, DialogContent, Typography } from '@mui/material'
 import { User } from '../../models/User'
+import { useRoutes } from '../../contexts/RoutesContext'
 import { MatchHistory } from '../Profile/MatchHistory'
+import { Socket } from 'socket.io-client'
 
 type UserDetailsProps = {
   selectedUser: User
   closeUserDetails: () => void
+  socket : Socket
 }
+ 
+  
+function UserDetails({ selectedUser, closeUserDetails, socket }: UserDetailsProps) {
+  const { navigateTo } = useRoutes();
 
-function UserDetails({ selectedUser, closeUserDetails }: UserDetailsProps) {
+  function inviteToPlay(id :number){
+    const roomId = 771237812;
+    socket.emit('invitation', { userId: id, roomId: roomId });
+    
+    navigateTo(`game?${roomId}`);
+  }
+
+
   return (
     <Dialog open={Boolean(selectedUser)} onClose={closeUserDetails}>
       <DialogContent>
@@ -36,9 +50,9 @@ function UserDetails({ selectedUser, closeUserDetails }: UserDetailsProps) {
             {/* <MatchHistory user={selectedUser}></MatchHistory> */}
           </Box>
           <Box component="div" mt={2}>
-            <Button variant="contained" onClick={closeUserDetails}>
+          <Button variant="contained" onClick={() => inviteToPlay(selectedUser?.id)}>
               Invite to play
-            </Button>
+          </Button>
           </Box>
           <Box component="div" mt={2}>
             <Button variant="contained" onClick={closeUserDetails}>
