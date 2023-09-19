@@ -29,15 +29,17 @@ export function Profile() {
   console.log(params)
 
   if (params) {
-		//THIS MEANS I'M VIEWING A SOMEONE ELSE'S PROFILE IN A READ-ONLY MODE
-        <Box component="div" color="red" marginTop="25rem">
-          CLICK ME
-          <Link
-            to={generatePath('/profile/:username', { username: 'anarodri' })}
-          >
-            LINK
-          </Link>
-        </Box>
+    //THIS MEANS I'M VIEWING A SOMEONE ELSE'S PROFILE IN A READ-ONLY MODE
+    // Idea: Use the same structure we have for our own profile, but with different fetch requests.
+    // The same fetch requests would be used to the User Card in the Chat.
+
+    return (
+      <Box component="div" color="red" marginTop="25rem">
+        CLICK ME
+        <Link to={generatePath('/profile/:username', { username: 'anarodri' })}>
+          LINK
+        </Link>
+      </Box>
     )
   }
   // <Link to={`/Your-Personal-profile/${comment.UserId}/${post.fullName}`}
