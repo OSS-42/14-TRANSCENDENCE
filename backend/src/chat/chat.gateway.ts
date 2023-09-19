@@ -14,7 +14,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   //private connectedUsers: Map<number, string> = new Map(); 
 
   constructor(private chatService: ChatService, private config: ConfigService, private readonly connectedUsersService: ConnectedUsersService) {
-    setInterval(() => this.emitUpdateConnectedUsers(), 2000);
+    setInterval(() => this.emitUpdateConnectedUsers(), 1500);
   }
   @WebSocketServer()
   server: Server
@@ -32,6 +32,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
           this.connectedUsersService.set( Number(decoded.sub), client.id);
           //FONCTION QUI VERIFIE LES CHANNELS DONT LUTILASATEUR EST MEMBRE ET LES JOIN TOUS
           this.joinRoomsAtConnection(Number(decoded.sub), client)
+          this.server.emit("updateUserList")
+          this.emitUpdateConnectedUsers()
         } catch (error) {
           client.disconnect();
         }
@@ -53,6 +55,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         this.connectedUsersService.delete(userId);
         break;
       }
+      this.emitUpdateConnectedUsers()
     }
     // const connectedUserIds = Array.from(this.connectedUsers.keys());
     // this.server.emit("updateConnectedUsers", connectedUserIds)
