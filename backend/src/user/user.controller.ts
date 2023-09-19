@@ -76,7 +76,7 @@ export class UserController {
     fs.writeFileSync(imagePath, buffer);
     imagePath = imagePath.substring(1);
     const Url = "/api" + imagePath;
-    console.log(imagePath);
+    // console.log(imagePath);
     return this.userService.updateAvatar(user, Url);
   }
 

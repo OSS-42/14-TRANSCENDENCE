@@ -7,79 +7,84 @@ import {
   TableBody,
   Paper,
   Typography,
-} from "@mui/material";
-import Cookies from "js-cookie";
-import { useEffect, useState } from "react";
-import axios from "axios";
-import { User } from "../../models/User";
+  Box,
+} from '@mui/material'
+import { Matches } from '../../models/User'
 
 interface MatchHistoryProps {
-  user: User;
+  match: Matches
 }
 
-export function MatchHistory({user} : MatchHistoryProps ) {
-  const [match, setMatch] = useState({
-    matchesWon: [],
-    matchesLost: [],
-  });
-  useEffect(() => {
-    if (user) {
-      async function fetchMatch() {
-        const jwt_token = Cookies.get("jwt_token");
-        try {
-          const response = await axios.get(
-            `/api/users/matchHistory/${user.id}`,
-            {
-              headers: {
-                Authorization: "Bearer " + jwt_token,
-              },
-            }
-          );
-          console.log("Match stats fetching successful");
-          console.log(response.data);
-          setMatch(response.data);
-        } catch (error) {
-          console.error("Match stats fetching:", error);
-        }
-      }
-      fetchMatch();
-    }
-  }, [user]);  // No need to put match as a dependency here, because user class has a gamewon gamelost variable that will change
+export function MatchHistory({ match }: MatchHistoryProps) {
+  if (!match.matchesWon || !match.matchesLost) {
+    return <p>No match data available.</p>
+  }
 
-  if (!match.matchesWon || match.matchesWon.length === 0) {
-    return <p>No match data available.</p>;
+  function formatDate(dateString) {
+    const options = { year: 'numeric', month: 'long', day: 'numeric' }
+    const date = new Date(dateString)
+    return date.toLocaleDateString(undefined, options)
   }
 
   return (
-    <TableContainer component={Paper} sx={{ backgroundColor: "white" }}>
-      <Typography variant="h6" sx={{ padding: "16px" }}>
-        Match History
+    <Box
+      component="div"
+      sx={{
+        borderTop: '1px dashed #3d3242',
+        marginTop: '20px',
+        padding: '1rem',
+        height: '28vh',
+        maxHeight: '370px',
+        overflow: 'auto',
+      }}
+    >
+      <Typography sx={{ typography: { xs: 'h6', sm: 'h5' } }}>
+        MATCH HISTORY
       </Typography>
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell>Date</TableCell>
-            <TableCell>Winner</TableCell>
-            <TableCell>Loser</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {match.matchesWon.map((matches, index) => (
-            <TableRow key={index}>
-              <TableCell>{matches.date}</TableCell>
-              <TableCell>{matches.winner}</TableCell>
-              <TableCell>{matches.loser}</TableCell>
-            </TableRow>
-          ))}
-          {match.matchesLost.map((matches, index) => (
-            <TableRow key={index}>
-              <TableCell>{matches.date}</TableCell>
-              <TableCell>{matches.winner}</TableCell>
-              <TableCell>{matches.loser}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
-  );
+      {match.matchesWon.length > 0 || match.matchesLost.length > 0 ? (
+        <TableContainer
+          component={Paper}
+          sx={{ backgroundColor: 'transparent' }}
+        >
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Date</TableCell>
+                <TableCell>Winner</TableCell>
+                <TableCell>Loser</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {match.matchesWon.map((matches, index) => (
+                <TableRow key={index}>
+                  <TableCell>{formatDate(matches.date)}</TableCell>
+                  <TableCell>{matches.winner}</TableCell>
+                  <TableCell>{matches.loser}</TableCell>
+                </TableRow>
+              ))}
+              {match.matchesLost.map((matches, index) => (
+                <TableRow key={index}>
+                  <TableCell>{formatDate(matches.date)}</TableCell>
+                  <TableCell>{matches.winner}</TableCell>
+                  <TableCell>{matches.loser}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      ) : (
+        <div>
+          <Typography
+            sx={{
+              typography: { xs: 'body2', sm: 'h6' },
+              padding: '16px',
+              // fontWeight: 'bold',
+            }}
+          >
+            No games have been played yet ...
+          </Typography>
+        </div>
+      )}
+    </Box>
+  )
 }

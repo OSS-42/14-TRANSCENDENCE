@@ -4,6 +4,7 @@ import { Socket } from "socket.io-client";
 import { addFriendApi, fetchFriendsList } from "../../api/requests";
 import { useAuth } from "../../contexts/AuthContext";
 import { User } from "../../models/User";
+import PersonAddIcon from "@mui/icons-material/PersonAdd";
 
 //On va remplacer cette ligne quand on aura le context
 type ChatFriendsProps = {
@@ -33,8 +34,11 @@ function ChatBar({
   };
 
   return (
-    <div className="chat__sidebar">
-      <div>
+    <Box component="div" className="chat__sidebar">
+      <Box
+        component="div"
+        sx={{ borderTop: "1px dashed #3d3242", paddingTop: "1rem" }}
+      >
         <h4 className="chat__header">USERS LIST</h4>
         <div className="chat__users">
           <p></p>
@@ -49,8 +53,6 @@ function ChatBar({
                     alignItems: "center",
                     gap: "10px",
                     padding: "5px",
-                    border: "1px solid #ccc",
-                    borderRadius: "5px",
                     marginBottom: "5px",
                   }}
                 >
@@ -65,7 +67,7 @@ function ChatBar({
                   <div>
                     <p>{user.username}</p>
                     {connectedUsers?.includes(user.id) && (
-                      <span style={{ color: "green" }}> en ligne</span>
+                      <span style={{ color: "#65bf76" }}>online</span>
                     )}
                   </div>
                   <div
@@ -78,19 +80,23 @@ function ChatBar({
                     {user.id !== meId &&
                       !friendsList.some((friend) => friend.id === user.id) && (
                         <Button
+                          sx={{
+                            minWidth: ".1",
+                            padding: ".2rem .2rem .2rem 1rem",
+                          }}
                           variant="contained"
+                          color="secondary"
+                          startIcon={<PersonAddIcon />}
                           onClick={() => addFriend(user.username)}
-                        >
-                          Add Friend
-                        </Button>
+                        />
                       )}
                   </div>
                 </Box>
               )
           )}
         </div>
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 }
 

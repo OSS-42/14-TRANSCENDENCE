@@ -1,0 +1,237 @@
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  font-family: 'Press Start 2P', sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  /* CSS HEX */
+  --blackish: #090609;
+  --eggplant: #120d23;
+  --mauve: #3d3242;
+  --nude: #a95d6b;
+  --burnt-rose: #c96069;
+  --danger: #d41724;
+  --blush: #fdf6ff;
+  --mandarine: #e0836a;
+  --canary: #ffb63d;
+  --grey: #8c808c;
+  --pale-grey: #c9c9c5;
+  --blue-sky: #d9eef3;
+  --moss: #909e66;
+}
+
+#root {
+  background: #000;
+  max-height: fit-content;
+  height: 100vh;
+  width: 100vw;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.5rem;
+}
+
+body {
+  background: #000;
+  min-width: 600px;
+  margin: 0 auto;
+}
+
+#welcome-page {
+  position: absolute;
+  display: flex;
+  height: 50%;
+  top: 20%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+  .glitch {
+    font-size: clamp(3rem, 7vw, 5rem);
+  }
+}
+
+#arcade {
+  margin-top: 3rem;
+  border-radius: 50%;
+  display: inline-block;
+  position: relative;
+  width: 50vw;
+
+  &:after {
+    content: '';
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    box-shadow: inset 10px 24px 40px 0px black, inset -10px -24px 40px 0px black,
+      inset 20px -10px 40px 0px black, inset -20px 10px 40px 0px black;
+  }
+  img {
+    border-radius: 50%;
+    display: block;
+    border: 1px solid #000000;
+  }
+}
+
+img.round-img {
+  border-radius: 50%;
+}
+
+#navbar {
+  display: flex;
+  justify-content: space-evenly;
+  width: 100%;
+}
+
+// p {
+//   text-overflow: ellipsis;
+// }
+
+/*---------- CHAT CSS ----------*/
+.message__container {
+  margin: 0.5rem;
+  font-size: 0.5rem;
+  @media (min-width: 600px) {
+    font-size: 0.8rem;
+  }
+}
+
+.help {
+  margin: 15px;
+  tab-size: 8;
+  line-height: 1.2rem;
+  letter-spacing: 0.1rem;
+  > b {
+    color: #a95d6b;
+  }
+  > span {
+    color: #d9eef3;
+  }
+  font-size: 0.5rem;
+  @media (min-width: 600px) {
+    font-size: 0.6rem;
+  }
+}
+
+.nameSender {
+  color: var(--burnt-rose);
+}
+
+.channelSender {
+  color: var(--mandarine);
+  [chat-type='General']:after {
+    color: red;
+  }
+}
+
+.notice {
+  color: var(--canary);
+  tab-size: 4;
+}
+
+.chat__header {
+  color: var(--mandarine);
+  letter-spacing: 0.05rem;
+  font-size: 0.5rem;
+  @media (min-width: 600px) {
+    font-size: 0.6rem;
+  }
+}
+
+.chat__users {
+  margin-bottom: 25px;
+  letter-spacing: 0.05rem;
+  font-size: 0.5rem;
+  @media (min-width: 600px) {
+    font-size: 0.6rem;
+  }
+}
+
+/*---------- WELCOME CSS ----------*/
+@mixin glitchCopy {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.glitch {
+  position: relative;
+  color: #fff;
+  font-size: 4em;
+  letter-spacing: 0.5em;
+  animation: glitch-skew 2s infinite linear alternate-reverse;
+
+  &::before {
+    @include glitchCopy;
+    left: 2px;
+    text-shadow: -2px 0 #ff00c1;
+    clip: rect(44px, 450px, 56px, 0);
+    animation: glitch-anim 5s infinite linear alternate-reverse;
+  }
+
+  &::after {
+    @include glitchCopy;
+    left: -2px;
+    text-shadow: -2px 0 #ff00c1, 2px 2px #ff00c1;
+    clip: rect(44px, 450px, 56px, 0);
+    animation: glitch-anim2 5s infinite linear alternate-reverse;
+  }
+}
+
+@keyframes glitch-anim {
+  $steps: 20;
+  @for $i from 0 to $steps {
+    #{percentage($i*(1/$steps))} {
+      clip: rect(random(100) + px, 9999px, random(100) + px, 0);
+      transform: skew((random(100) / 100) + deg);
+    }
+  }
+}
+
+@keyframes glitch-anim2 {
+  $steps: 20;
+  @for $i from 0 to $steps {
+    #{percentage($i*(1/$steps))} {
+      clip: rect(random(100) + px, 9999px, random(100) + px, 0);
+      transform: skew((random(100) / 100) + deg);
+    }
+  }
+}
+
+@keyframes glitch-skew {
+  $steps: 10;
+  @for $i from 0 to $steps {
+    #{percentage($i*(1/$steps))} {
+      transform: skew((random(10) - 5) + deg);
+    }
+  }
+}
+#boxscroll::-webkit-scrollbar {
+  width: 5px; /* Set the width of the scrollbar */
+  height: 5px; /* Set the width of the scrollbar */
+}
+
+/* Define the styles for the scrollbar thumb (the draggable part) */
+#boxscroll::-webkit-scrollbar-thumb {
+  background-color: #ffb63d; /* Set the color of the scrollbar thumb */
+  border-radius: 0px; /* Round the corners of the thumb */
+}
+
+@media screen and (max-width: 600px) {
+  body {
+    width: 600px; /* Set the minimum width for the website */
+    margin: 0 auto; /* Center the content horizontally */
+  }
+}

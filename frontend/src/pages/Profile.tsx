@@ -2,53 +2,52 @@ import Cookies from "js-cookie";
 import { useEffect, useState } from "react";
 import { User } from "../models/User";
 import axios from "axios";
-import { AvatarBox } from "../components/Profile/AvatarBox";
-import { NameBox } from "../components/Profile/NameBox";
+import { AvatarImage } from "../components/Profile/AvatarImage";
+import { Name } from "../components/Profile/Name";
 import { ContainerGrid } from "../components/Profile/ContainerGrid";
 import { RightSideGrid } from "../components/Profile/RightSideGrid";
 import { LeftSideGrid } from "../components/Profile/LeftSideGrid";
-import { ChangeAvatarBox } from "../components/Profile/ChangeAvatarBox";
-import { AboutBox } from "../components/Profile/AboutBox";
-import { MatchHistoryBox } from "../components/Profile/MatchHistoryBox";
-import { FriendsListBox } from "../components/Profile/FriendsListBox";
+import { ChangeAvatarButton } from "../components/Profile/ChangeAvatarButton";
+import { MatchWonLost } from "../components/Profile/MatchWonLost";
+import { FriendsList } from "../components/Profile/FriendsLists";
 import { MatchHistory } from "../components/Profile/MatchHistory";
 import { useAuth } from "../contexts/AuthContext";
+import { fetchMatchHistory, fetchUserMe } from "../api/requests";
+import { TwoFactorAuthentication } from "../components/Profile/TwoFactorAuthentication";
 
 export function Profile() {
-	
-  const [user, setUser] = useState<User>();
+  const { user } = useAuth();
+  const [userData, setUserData] = useState(user);
+  const [match, setMatch] = useState({
+    matchesWon: [],
+    matchesLost: [],
+  });
+
+  const updateUserData = (newUser) => {
+    setUserData(newUser);
+  };
+
+  async function getMatchHistory(){
+    const matches = await fetchMatchHistory(user.id);
+    setMatch(matches);
+  }
 
   useEffect(() => {
-    async function fetchUsersData() {
-      const jwt_token = Cookies.get("jwt_token");
-      try {
-        const response = await axios.get("/api/users/me", {
-          headers: {
-            Authorization: "Bearer " + jwt_token,
-          },
-        });
-        setUser(response.data);
-        console.log("Here is the updated user: ", user);
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      }
-    }
-    fetchUsersData();
-  }, []);
+    getMatchHistory();
+  }, [user]);
 
   return (
     <ContainerGrid>
       <LeftSideGrid>
-        <NameBox user={user?.username} setUser={setUser} />
-        <AvatarBox user={user} />
-        <ChangeAvatarBox setUser={setUser} />
+        <Name user={userData?.username} updateUserData={updateUserData} />
+        <AvatarImage user={userData} />
+        <ChangeAvatarButton setUser={setUserData} />
+        <TwoFactorAuthentication/>
       </LeftSideGrid>
       <RightSideGrid>
-        <AboutBox />
-        <MatchHistoryBox>
-          <MatchHistory user={user} />
-        </MatchHistoryBox>
-        <FriendsListBox />
+        <MatchWonLost match={match}/>
+        <MatchHistory match={match} />
+        <FriendsList />
       </RightSideGrid>
     </ContainerGrid>
   );

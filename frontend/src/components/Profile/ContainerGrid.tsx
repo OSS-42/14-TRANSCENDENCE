@@ -1,17 +1,21 @@
-import { Grid } from "@mui/material";
+import { Grid } from '@mui/material'
 
-export function ContainerGrid({children}) {
+export function ContainerGrid({ children }) {
   return (
-      <Grid
-        container
-        sx={{
-          border: "1px solid black",
-          borderRadius: "5px",
-          height: "95vh",
-          width: "95vw",
-          margin: "10px",
-          boxSizing: "border-box",
-        }}
-      >{children}</Grid>
-  );
+    <Grid
+      container
+      sx={{
+        // border: '1px solid red',
+        backgroundColor: '#090609',
+        borderRadius: '5px',
+        marginTop: '3rem',
+        padding: '1rem',
+        width: '90%',
+        height: 'auto',
+        color: '#FFF',
+      }}
+    >
+      {children}
+    </Grid>
+  )
 }
