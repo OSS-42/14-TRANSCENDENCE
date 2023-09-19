@@ -775,6 +775,9 @@ export function Pong() {
     setLeftPaddlePositionZ,
   }) => {
     const { mouse } = useThree()
+    let lastEventTime = 0;
+    const throttleTime = 100;
+
     //const handleKeyPress = (event: KeyboardEvent): void => {
 
     // const [mousePosition, setMousePosition] = React.useState<({ x: number, y: number })>(1,1)
@@ -791,29 +794,34 @@ export function Pong() {
 
     // useFrame((mouseX: number, mouseY: number) => {
     useFrame(() => {
-      let newPosition
-      if (hostStatus) {
-        if (cameraMode === 'perspective') {
-          newPosition = mouse.x * (WORLD_WIDTH / 2)
+      const currentTime = Date.now();
+
+       if (currentTime - lastEventTime > throttleTime) {
+        lastEventTime = currentTime;
+        let newPosition
+        if (hostStatus) {
+          if (cameraMode === 'perspective') {
+            newPosition = mouse.x * (WORLD_WIDTH / 2)
+          } else {
+            newPosition = -mouse.y * (WORLD_HEIGHT / 2)
+          }
         } else {
-          newPosition = -mouse.y * (WORLD_HEIGHT / 2)
+          newPosition = leftPaddlePositionZ
         }
-      } else {
-        newPosition = leftPaddlePositionZ
+
+        newPosition = lerp(leftPaddlePositionZ, newPosition, lerpFactor)
+
+        const paddleTopEdge = newPosition + paddleDepth / 2
+        const paddleBottomEdge = newPosition - paddleDepth / 2
+
+        if (paddleTopEdge > WORLD_HEIGHT / 2) {
+          newPosition = WORLD_HEIGHT / 2 - paddleDepth / 2
+        } else if (paddleBottomEdge < -WORLD_HEIGHT / 2) {
+          newPosition = -WORLD_HEIGHT / 2 + paddleDepth / 2
+        }
+
+        setLeftPaddlePositionZ(newPosition)
       }
-
-      newPosition = lerp(leftPaddlePositionZ, newPosition, lerpFactor)
-
-      const paddleTopEdge = newPosition + paddleDepth / 2
-      const paddleBottomEdge = newPosition - paddleDepth / 2
-
-      if (paddleTopEdge > WORLD_HEIGHT / 2) {
-        newPosition = WORLD_HEIGHT / 2 - paddleDepth / 2
-      } else if (paddleBottomEdge < -WORLD_HEIGHT / 2) {
-        newPosition = -WORLD_HEIGHT / 2 + paddleDepth / 2
-      }
-
-      setLeftPaddlePositionZ(newPosition)
     })
 
     return (
@@ -868,31 +876,38 @@ export function Pong() {
     } else {
       // mouvement du right (user2) paddle a la souris.
       const { mouse } = useThree()
+      let lastEventTime = 0;
+      const throttleTime = 100;
 
       useFrame(() => {
-        let newPosition
-        if (!hostStatus) {
-          if (cameraMode === 'perspective') {
-            newPosition = -mouse.x * (WORLD_WIDTH / 2)
+        const currentTime = Date.now();
+
+        if (currentTime - lastEventTime > throttleTime) {
+          lastEventTime = currentTime;
+          let newPosition
+          if (!hostStatus) {
+            if (cameraMode === 'perspective') {
+              newPosition = -mouse.x * (WORLD_WIDTH / 2)
+            } else {
+              newPosition = -mouse.y * (WORLD_HEIGHT / 2)
+            }
           } else {
-            newPosition = -mouse.y * (WORLD_HEIGHT / 2)
+            newPosition = rightPaddlePositionZ
           }
-        } else {
-          newPosition = rightPaddlePositionZ
+
+          newPosition = lerp(rightPaddlePositionZ, newPosition, lerpFactor)
+
+          const paddleTopEdge = newPosition + paddleDepth / 2
+          const paddleBottomEdge = newPosition - paddleDepth / 2
+
+          if (paddleTopEdge > WORLD_HEIGHT / 2) {
+            newPosition = WORLD_HEIGHT / 2 - paddleDepth / 2
+          } else if (paddleBottomEdge < -WORLD_HEIGHT / 2) {
+            newPosition = -WORLD_HEIGHT / 2 + paddleDepth / 2
+          }
+
+          setRightPaddlePositionZ(newPosition)
         }
-
-        newPosition = lerp(rightPaddlePositionZ, newPosition, lerpFactor)
-
-        const paddleTopEdge = newPosition + paddleDepth / 2
-        const paddleBottomEdge = newPosition - paddleDepth / 2
-
-        if (paddleTopEdge > WORLD_HEIGHT / 2) {
-          newPosition = WORLD_HEIGHT / 2 - paddleDepth / 2
-        } else if (paddleBottomEdge < -WORLD_HEIGHT / 2) {
-          newPosition = -WORLD_HEIGHT / 2 + paddleDepth / 2
-        }
-
-        setRightPaddlePositionZ(newPosition)
       })
     }
 
