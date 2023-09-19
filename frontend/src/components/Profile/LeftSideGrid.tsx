@@ -1,4 +1,4 @@
-import { Grid } from "@mui/material";
+import { Box, Grid } from '@mui/material'
 
 export function LeftSideGrid({ children }) {
   return (
@@ -6,16 +6,17 @@ export function LeftSideGrid({ children }) {
       item
       xs={6}
       sm={6}
-      md={6}
-      lg={4}
+      md={4}
+      lg={3}
+      xl={2}
       sx={{
-        border: "1px solid #3d3242",
-        borderRadius: "5px",
-        marginTop: "2rem",
-        color: "#FFF",
+        border: '1px solid #3d3242',
+        borderRight: '1px dashed #3d3242',
+        borderRadius: '5px 0 0 5px',
+        color: '#FFF',
       }}
     >
       {children}
     </Grid>
-  );
+  )
 }

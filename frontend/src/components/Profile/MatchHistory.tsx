@@ -8,42 +8,44 @@ import {
   Paper,
   Typography,
   Box,
-} from "@mui/material";
-import { Matches } from "../../models/User";
+} from '@mui/material'
+import { Matches } from '../../models/User'
 
 interface MatchHistoryProps {
-  match: Matches;
+  match: Matches
 }
 
 export function MatchHistory({ match }: MatchHistoryProps) {
   if (!match.matchesWon || !match.matchesLost) {
-    return <p>No match data available.</p>;
+    return <p>No match data available.</p>
   }
 
-  function formatDate(dateString){
-    const options = { year: 'numeric', month: 'long', day: 'numeric' };
-    const date = new Date(dateString);
-    return date.toLocaleDateString(undefined, options);
+  function formatDate(dateString) {
+    const options = { year: 'numeric', month: 'long', day: 'numeric' }
+    const date = new Date(dateString)
+    return date.toLocaleDateString(undefined, options)
   }
 
   return (
     <Box
       component="div"
       sx={{
-        border: "1px solid #3d3242",
-        borderRadius: "5px",
-        marginTop: "20px",
-				padding: '1rem',
-        fontWeight: "bold",
-        height: "28vh",
-        maxHeight: "370px",
-        overflow: "auto",
-
+        borderTop: '1px dashed #3d3242',
+        marginTop: '20px',
+        padding: '1rem',
+        height: '28vh',
+        maxHeight: '370px',
+        overflow: 'auto',
       }}
     >
-      <Typography variant="h6" sx={{fontWeight: "bold"}}>MATCH HISTORY</Typography>
+      <Typography sx={{ typography: { xs: 'h6', sm: 'h5' } }}>
+        MATCH HISTORY
+      </Typography>
       {match.matchesWon.length > 0 || match.matchesLost.length > 0 ? (
-        <TableContainer component={Paper} sx={{ backgroundColor: "transparent" }}>
+        <TableContainer
+          component={Paper}
+          sx={{ backgroundColor: 'transparent' }}
+        >
           <Table>
             <TableHead>
               <TableRow>
@@ -72,11 +74,17 @@ export function MatchHistory({ match }: MatchHistoryProps) {
         </TableContainer>
       ) : (
         <div>
-          <Typography variant="h6" sx={{ padding: "16px", fontWeight: "bold" }}>
+          <Typography
+            sx={{
+              typography: { xs: 'body2', sm: 'h6' },
+              padding: '16px',
+              // fontWeight: 'bold',
+            }}
+          >
             No games have been played yet ...
           </Typography>
         </div>
       )}
     </Box>
-  );
+  )
 }
