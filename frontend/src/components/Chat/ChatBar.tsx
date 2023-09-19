@@ -57,7 +57,7 @@ function ChatBar({
                 alignItems: "center",
                 gap: "10px",
                 padding: "5px",
-                border: "1px solid #ccc",
+               // border: "1px solid #ccc",
                 borderRadius: "5px",
                 marginBottom: "5px",
               }}
@@ -73,7 +73,7 @@ function ChatBar({
               <div>
                 <p>{user.username}</p>
                 {connectedUsers?.includes(user.id) && (
-                  <span style={{ color: "green" }}> en ligne</span>
+                  <span style={{ color: '#65bf76' }}> online</span>
                 )}
               </div>
               <div
@@ -86,11 +86,15 @@ function ChatBar({
                 {user.id !== meId &&
                   !friendsList.some((friend) => friend.id === user.id) && (
                     <Button
-                      variant="contained"
-                      onClick={() => addFriend(user.username)}
-                    >
-                      Add Friend
-                    </Button>
+                    sx={{
+                      minWidth: '.1',
+                      padding: '.2rem .2rem .2rem 1rem',
+                    }}
+                    variant="contained"
+                    color="secondary"
+                    startIcon={<PersonAddIcon />}
+                    onClick={() => addFriend(user.username)}
+                  />
                   )}
               </div>
             </Box>
