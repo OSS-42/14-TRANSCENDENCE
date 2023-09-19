@@ -62,7 +62,7 @@ function App() {
             )
           }
         />
-        <Route path="/game" element={user ? <Pong /> : <Navigate to="/" />} />
+        <Route path="/game" element={user ? <Pong /> : <Navigate to="/ " />} />
         <Route
           path="/profile"
           element={user ? <Profile /> : <Navigate to="/" />}

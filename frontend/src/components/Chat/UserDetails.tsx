@@ -31,7 +31,7 @@ function UserDetails({ selectedUser, closeUserDetails, socket }: UserDetailsProp
   }, []);
 
   function inviteToPlay(id: number) {
-    const roomId = 771237812;
+    const roomId :string = "gameIdFromUrl=67436534753";
 
     // Émettre l'invitation et activer le message "Waiting for player to respond"
     socket.emit('invitation', { userId: id, roomId: roomId, challengerUsername: user.username, challengerId : user.id });

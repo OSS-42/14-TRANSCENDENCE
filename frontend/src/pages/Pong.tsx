@@ -17,6 +17,8 @@ import { useAuth } from '../contexts/AuthContext'
 
 // import for websocket
 import socketIO from 'socket.io-client'
+//import for URL params
+import { useLocation } from 'react-router-dom';
 
 //------------------ INFOS QUI TRANSITENT ENTRE SOCKETS ------------
 
@@ -51,6 +53,9 @@ type OppDisconnected = {
 }
 
 export function Pong() {
+  const location = useLocation();
+  const gameIdFromUrl = new URLSearchParams(location.search).get('gameIdFromUrl');
+
   //------------------ SOCKET CONNECTION --------------------
   const [socket, setSocket] = useState(null)
 
@@ -70,6 +75,7 @@ export function Pong() {
   //------------------ CONSTANTS NECESSARY AT TOP --------------------
 
   const { user } = useAuth()
+ 
 
   const [gameLaunched, setGameLaunched] = React.useState(false)
   const [cameraMode, setCameraMode] = React.useState<
@@ -138,6 +144,20 @@ export function Pong() {
 
   const [initialSetupComplete, setInitialSetupComplete] = useState(false)
 
+ 
+  useEffect( () => {
+    console.log("challage game id", gameIdFromUrl);
+    if (gameIdFromUrl && socket){
+      const newGM = 3
+      console.log("challage game id", gameIdFromUrl);
+      socket.emit('challengeGame', { playerName, newGM, gameIdFromUrl  })
+      setWaitingForPlayer(true)
+      setGameLaunched(true)
+      setCameraMode('orthographic')
+      setGameMode(newGM)
+      setShowButtons(false)
+    }
+}, [gameIdFromUrl, socket])
   // Ecoute parler le socket
   useEffect(() => {
     if (socket) {
@@ -241,6 +261,7 @@ export function Pong() {
     rightPaddlePositionZ,
     powerupPosition,
   ])
+  
 
   //------------------ GAME MODES ------------------------
   const handleClassicModeIA = (): void => {
