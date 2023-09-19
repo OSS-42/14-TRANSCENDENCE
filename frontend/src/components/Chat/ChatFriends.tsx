@@ -44,6 +44,7 @@ const ChatFriends = ({
                 // border: '1px solid #ccc',
                 borderRadius: '5px',
                 marginBottom: '5px',
+            
               }}
             >
               <img

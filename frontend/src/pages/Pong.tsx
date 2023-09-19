@@ -925,10 +925,10 @@ export function Pong() {
               {/* <img src="../src/assets/arcade_2k.png" alt="Starting Screen" /> */}
               <img src="../src/assets/animated.gif" alt="Starting Screen" />
               <div className="game-buttons">
-                <button onClick={handleClassicModeIA}>Classic 1 vs IA</button>
-                <button onClick={handlePowerupModeIA}>Powerup 1 vs IA</button>
+                {/* <button onClick={handleClassicModeIA}>Classic 1 vs IA</button> */}
                 <button onClick={handleClassicModeMulti}>Classic 1 vs 1</button>
-                <button onClick={handlePowerupModeMulti}>Powerup 1 vs 1</button>
+                <button onClick={handlePowerupModeIA}>Powerup 1 vs IA</button>
+                {/* <button onClick={handlePowerupModeMulti}>Powerup 1 vs 1</button> */}
               </div>
             </div>
           )
