@@ -47,58 +47,60 @@ function ChatBar({
         <div className="chat__users">
           <p></p>
           {onlineUsers
-          .filter((user) => !friendsList.some((friend) => friend.id === user.id)) 
-          .map((user) => (
-            <Box
-              component="div"
-              key={user.id}
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: "10px",
-                padding: "5px",
-               // border: "1px solid #ccc",
-                borderRadius: "5px",
-                marginBottom: "5px",
-              }}
-            >
-              <img
-                src={user.avatar}
-                alt={user.username}
-                width="50"
-                height="50"
-                style={{ borderRadius: "50%" }}
-                onClick={() => handleUserClick(user)}
-              />
-              <div>
-                <p>{user.username}</p>
-                {connectedUsers?.includes(user.id) && (
-                  <span style={{ color: '#65bf76' }}> online</span>
-                )}
-              </div>
-              <div
-                style={{
+            .filter(
+              (user) => !friendsList.some((friend) => friend.id === user.id)
+            )
+            .map((user) => (
+              <Box
+                component="div"
+                key={user.id}
+                sx={{
                   display: "flex",
-                  justifyContent: "flex-end",
-                  flex: "1",
+                  alignItems: "center",
+                  gap: "10px",
+                  padding: "5px",
+                  // border: "1px solid #ccc",
+                  borderRadius: "5px",
+                  marginBottom: "5px",
                 }}
               >
-                {user.id !== meId &&
-                  !friendsList.some((friend) => friend.id === user.id) && (
-                    <Button
-                    sx={{
-                      minWidth: '.1',
-                      padding: '.2rem .2rem .2rem 1rem',
-                    }}
-                    variant="contained"
-                    color="secondary"
-                    startIcon={<PersonAddIcon />}
-                    onClick={() => addFriend(user.username)}
-                  />
+                <img
+                  src={user.avatar}
+                  alt={user.username}
+                  width="50"
+                  height="50"
+                  style={{ borderRadius: "50%" }}
+                  onClick={() => handleUserClick(user)}
+                />
+                <div>
+                  <p>{user.username}</p>
+                  {connectedUsers?.includes(user.id) && (
+                    <span style={{ color: "#65bf76" }}> online</span>
                   )}
-              </div>
-            </Box>
-          ))}
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    flex: "1",
+                  }}
+                >
+                  {user.id !== meId &&
+                    !friendsList.some((friend) => friend.id === user.id) && (
+                      <Button
+                        sx={{
+                          minWidth: ".1",
+                          padding: ".2rem .2rem .2rem 1rem",
+                        }}
+                        variant="contained"
+                        color="secondary"
+                        startIcon={<PersonAddIcon />}
+                        onClick={() => addFriend(user.username)}
+                      />
+                    )}
+                </div>
+              </Box>
+            ))}
         </div>
       </Box>
     </Box>
