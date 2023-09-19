@@ -100,7 +100,7 @@ export async function updateAvatarApi(avatar: FormData): Promise<void> {
         Authorization: "Bearer " + jwt_token,
       },
     });
-    console.log("Avatar updated successfully");
+    console.log("Avatar updated successfully.");
   } catch (error) {
     console.error("Error updating avatar:", error);
   }
