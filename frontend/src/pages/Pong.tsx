@@ -771,7 +771,7 @@ export function Pong() {
   }
 
   const LeftPaddle: React.FC<LeftPaddleProps> = ({
-    leftPaddlePositionZ: number,
+    leftPaddlePositionZ,
     setLeftPaddlePositionZ,
   }) => {
     const { mouse } = useThree()
