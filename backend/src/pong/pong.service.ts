@@ -6,7 +6,11 @@ import { PrismaService } from 'src/prisma/prisma.service';
 export class PongService {
     constructor(private readonly prisma: PrismaService) {}
 
-    async updateHistory(winnerId : number, loserId : number){
+    async updateHistory(winnerUsername : string, loserUsername : string){
+
+      const winnerId = await this.getUserIdByUsername(winnerUsername);
+      const loserId = await this.getUserIdByUsername(loserUsername);
+
         const newMatch = await this.prisma.match.create({
             data: {
               winnerId: winnerId,
@@ -29,5 +33,18 @@ export class PongService {
     });
     return user?.username || null; 
   }
-  
+
+  async getUserIdByUsername(username: string) {
+      const user = await this.prisma.utilisateur.findFirst({
+        where: {
+          username
+        },
+        select:{
+          id: true
+        }
+      });
+      return user?.id || null; 
+ 
+  }
+ 
 }
