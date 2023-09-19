@@ -14,8 +14,10 @@ interface PrivmsgCommandProps {
   }
 
 const privmsgCommand = ({data, socket, user}: PrivmsgCommandProps) => {
+    let message : string | null = null;
     const [command, target, ...messageArray] = data.split(" ");
-    const message = messageArray.join(" ");
+    if (messageArray[0] !== "" && messageArray[0] !== undefined)
+      message = messageArray.join(" ")
     if (command === "/PRIVMSG") {
       socket.emit("privmsg", {
         username: user?.username,
