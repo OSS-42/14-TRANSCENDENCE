@@ -52,7 +52,7 @@ export class AuthControler {
     const host = this.config.get("HOST");
     //ON va avoir besoin d<une PAGE deja log qui ne se connecte pas au sockets.
     if (token_object.access_token === "poulet")
-      return  res.redirect(`${host}`);
+      return  res.redirect(`${host}/error`);
     const access_token: string = token_object.access_token;
 
     res.cookie("jwt_token", access_token, { httpOnly: false, secure: false });

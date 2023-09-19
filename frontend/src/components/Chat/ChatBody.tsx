@@ -1,43 +1,43 @@
-import { Socket } from 'socket.io-client'
-import { useEffect, useRef, useState } from 'react'
-import { fetchBlockedUsers, fetchUserMe } from '../../api/requests'
-import { useAuth } from '../../contexts/AuthContext'
+import { Socket } from "socket.io-client";
+import { useEffect, useRef, useState } from "react";
+import { fetchBlockedUsers, fetchUserMe } from "../../api/requests";
+import { useAuth } from "../../contexts/AuthContext";
 
 type ChatMessage = {
-  userId: number
-  name: string
-  channel: string
-  text: string
-  notice: string
-  help: string
-}
+  userId: number;
+  name: string;
+  channel: string;
+  text: string;
+  notice: string;
+  help: string;
+};
 
 type ChatBodyProps = {
-  messages: ChatMessage[]
-  socket: Socket
-}
+  messages: ChatMessage[];
+  socket: Socket;
+};
 
 const ChatBody = ({ messages }: ChatBodyProps) => {
-  const [banList, setBanList] = useState<number[]>()
-  const { user } = useAuth()
-  const scroll = useRef<HTMLDivElement | null>(null)
+  const [banList, setBanList] = useState<number[]>();
+  const { user } = useAuth();
+  const scroll = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     // Scroll to the bottom when messages change
-    scroll.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-  }, [messages])
+    scroll.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [messages]);
 
   async function fetchUsersData() {
     // const user = await fetchUserMe();
     if (user) {
-      const banList = await fetchBlockedUsers(user.id)
-      setBanList(banList)
+      const banList = await fetchBlockedUsers(user.id);
+      setBanList(banList);
     }
   }
 
   useEffect(() => {
-    fetchUsersData()
-  }, [messages])
+    fetchUsersData();
+  }, [messages]);
 
   return (
     <>
@@ -55,8 +55,8 @@ const ChatBody = ({ messages }: ChatBodyProps) => {
                 <>
                   {message.channel !== undefined && (
                     <span className="channelSender">{message.channel}</span>
-                  )}{' '}
-                  <span className="nameSender">{message.name}</span>:{' '}
+                  )}{" "}
+                  <span className="nameSender">{message.name}</span>:{" "}
                   {message.text}
                 </>
               )
@@ -71,7 +71,7 @@ const ChatBody = ({ messages }: ChatBodyProps) => {
         <div id="msg" ref={scroll}></div>
       </div>
     </>
-  )
-}
+  );
+};
 
-export default ChatBody
+export default ChatBody;
