@@ -21,7 +21,7 @@ export function Home() {
           padding: '2.5rem',
           textAlign: 'center',
           lineHeight: '2rem',
-          fontSize: '.8rem',
+          fontSize: '.5rem',
           '@media (min-width:600px)': {
             fontSize: '1rem',
           },

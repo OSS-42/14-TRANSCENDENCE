@@ -2,7 +2,7 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  font-family: "Press Start 2P", sans-serif;
+  font-family: 'Press Start 2P', sans-serif;
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -31,7 +31,6 @@
   height: 100vh;
   width: 100vw;
   position: relative;
-  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -65,7 +64,7 @@ body {
   width: 50vw;
 
   &:after {
-    content: "";
+    content: '';
     display: block;
     width: 100%;
     height: 100%;
@@ -119,25 +118,24 @@ img.round-img {
   }
   font-size: 0.5rem;
   @media (min-width: 600px) {
-    font-size: 0.7rem;
+    font-size: 0.6rem;
   }
 }
 
 .nameSender {
   color: var(--burnt-rose);
-  font-weight: bold; /* Texte gras */
 }
 
 .channelSender {
   color: var(--mandarine);
-  font-weight: bold; /* Texte gras */
+  [chat-type='General']:after {
+    color: red;
+  }
 }
 
 .notice {
-  color: var(--canary); /* Jaune doré */
-  font-weight: bold; /* Texte gras */
+  color: var(--canary);
   tab-size: 4;
-  // font-size: 14px; /* Taille de police de 14 pixels */
 }
 
 .chat__header {
@@ -145,7 +143,7 @@ img.round-img {
   letter-spacing: 0.05rem;
   font-size: 0.5rem;
   @media (min-width: 600px) {
-    font-size: 0.7rem;
+    font-size: 0.6rem;
   }
 }
 
@@ -154,7 +152,7 @@ img.round-img {
   letter-spacing: 0.05rem;
   font-size: 0.5rem;
   @media (min-width: 600px) {
-    font-size: 0.7rem;
+    font-size: 0.6rem;
   }
 }
 
@@ -220,13 +218,13 @@ img.round-img {
     }
   }
 }
-#chatbox::-webkit-scrollbar {
+#boxscroll::-webkit-scrollbar {
   width: 5px; /* Set the width of the scrollbar */
   height: 5px; /* Set the width of the scrollbar */
 }
 
 /* Define the styles for the scrollbar thumb (the draggable part) */
-#chatbox::-webkit-scrollbar-thumb {
+#boxscroll::-webkit-scrollbar-thumb {
   background-color: #ffb63d; /* Set the color of the scrollbar thumb */
   border-radius: 0px; /* Round the corners of the thumb */
 }
