@@ -63,7 +63,7 @@ function UserDetails({
             justifyContent="center"
             alignItems="center"
           >
-            <Typography variant="body1">
+            <Typography variant="h4">
               Waiting for {selectedUser?.username} to respond...
             </Typography>
           </Box>

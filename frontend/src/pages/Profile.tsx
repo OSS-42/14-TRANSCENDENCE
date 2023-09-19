@@ -1,40 +1,59 @@
-import Cookies from "js-cookie";
-import { useEffect, useState } from "react";
-import { User } from "../models/User";
-import axios from "axios";
-import { AvatarImage } from "../components/Profile/AvatarImage";
-import { Name } from "../components/Profile/Name";
-import { ContainerGrid } from "../components/Profile/ContainerGrid";
-import { RightSideGrid } from "../components/Profile/RightSideGrid";
-import { LeftSideGrid } from "../components/Profile/LeftSideGrid";
-import { ChangeAvatarButton } from "../components/Profile/ChangeAvatarButton";
-import { MatchWonLost } from "../components/Profile/MatchWonLost";
-import { FriendsList } from "../components/Profile/FriendsLists";
-import { MatchHistory } from "../components/Profile/MatchHistory";
-import { useAuth } from "../contexts/AuthContext";
-import { fetchMatchHistory, fetchUserMe } from "../api/requests";
-import { TwoFactorAuthentication } from "../components/Profile/TwoFactorAuthentication";
+import Cookies from 'js-cookie'
+import { useEffect, useState } from 'react'
+import { User } from '../models/User'
+import axios from 'axios'
+import { AvatarImage } from '../components/Profile/AvatarImage'
+import { Name } from '../components/Profile/Name'
+import { ContainerGrid } from '../components/Profile/ContainerGrid'
+import { RightSideGrid } from '../components/Profile/RightSideGrid'
+import { LeftSideGrid } from '../components/Profile/LeftSideGrid'
+import { ChangeAvatarButton } from '../components/Profile/ChangeAvatarButton'
+import { MatchWonLost } from '../components/Profile/MatchWonLost'
+import { FriendsList } from '../components/Profile/FriendsLists'
+import { MatchHistory } from '../components/Profile/MatchHistory'
+import { useAuth } from '../contexts/AuthContext'
+import { fetchMatchHistory, fetchUserMe } from '../api/requests'
+import { TwoFactorAuthentication } from '../components/Profile/TwoFactorAuthentication'
+import { Link, generatePath, useParams } from 'react-router-dom'
+import { Box } from '@mui/material'
 
 export function Profile() {
-  const { user } = useAuth();
-  const [userData, setUserData] = useState(user);
+  const { user } = useAuth()
+  const [userData, setUserData] = useState(user)
   const [match, setMatch] = useState({
     matchesWon: [],
     matchesLost: [],
-  });
+  })
+
+  const params = useParams()
+  console.log(params)
+
+  if (params) {
+		//THIS MEANS I'M VIEWING A SOMEONE ELSE'S PROFILE IN A READ-ONLY MODE
+        <Box component="div" color="red" marginTop="25rem">
+          CLICK ME
+          <Link
+            to={generatePath('/profile/:username', { username: 'anarodri' })}
+          >
+            LINK
+          </Link>
+        </Box>
+    )
+  }
+  // <Link to={`/Your-Personal-profile/${comment.UserId}/${post.fullName}`}
 
   const updateUserData = (newUser) => {
-    setUserData(newUser);
-  };
+    setUserData(newUser)
+  }
 
   async function getMatchHistory() {
-    const matches = await fetchMatchHistory(user.id);
-    setMatch(matches);
+    const matches = await fetchMatchHistory(user.id)
+    setMatch(matches)
   }
 
   useEffect(() => {
-    getMatchHistory();
-  }, [user]);
+    getMatchHistory()
+  }, [user])
 
   return (
     <ContainerGrid>
@@ -50,5 +69,5 @@ export function Profile() {
         <FriendsList />
       </RightSideGrid>
     </ContainerGrid>
-  );
+  )
 }
