@@ -242,7 +242,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 &emsp;To invite a user to a channel:<br/>&emsp;&emsp;<span>/INVITE username #channelName</span><br>
 <br><b>MUTE</b><br>
 &emsp;To mute a user in a channel:<br/>&emsp;&emsp;<span>/MUTE username #channelName</span><br>
-<br><b>KICK</b>><br>
+<br><b>KICK</b><br>
 &emsp;To kick a user from a channel:<br/>&emsp;&emsp;<span>/KICK username #channelName</span><br>
 <br><b>BAN</b><br>
 &emsp;To ban a user from a channel:<br/>&emsp;&emsp;<span>/BAN username #channelName</span><br>
