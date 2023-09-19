@@ -27,7 +27,7 @@ export function Profile() {
     setUserData(newUser);
   };
 
-  async function getMatchHistory(){
+  async function getMatchHistory() {
     const matches = await fetchMatchHistory(user.id);
     setMatch(matches);
   }
@@ -42,10 +42,10 @@ export function Profile() {
         <Name user={userData?.username} updateUserData={updateUserData} />
         <AvatarImage user={userData} />
         <ChangeAvatarButton setUser={setUserData} />
-        <TwoFactorAuthentication/>
+        <TwoFactorAuthentication />
       </LeftSideGrid>
       <RightSideGrid>
-        <MatchWonLost match={match}/>
+        <MatchWonLost match={match} />
         <MatchHistory match={match} />
         <FriendsList />
       </RightSideGrid>

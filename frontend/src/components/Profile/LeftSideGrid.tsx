@@ -1,4 +1,6 @@
-import { Box, Grid } from '@mui/material'
+import { Box, Grid } from "@mui/material";
+import { useEffect } from "react";
+import { useAuth } from "../../contexts/AuthContext";
 
 export function LeftSideGrid({ children }) {
   return (
@@ -10,13 +12,13 @@ export function LeftSideGrid({ children }) {
       lg={3}
       xl={2}
       sx={{
-        border: '1px solid #3d3242',
-        borderRight: '1px dashed #3d3242',
-        borderRadius: '5px 0 0 5px',
-        color: '#FFF',
+        border: "1px solid #3d3242",
+        borderRight: "1px dashed #3d3242",
+        borderRadius: "5px 0 0 5px",
+        color: "#FFF",
       }}
     >
       {children}
     </Grid>
-  )
+  );
 }

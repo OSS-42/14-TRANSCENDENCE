@@ -5,109 +5,112 @@ import {
   ReactNode,
   useEffect,
   useMemo,
-} from 'react'
-import axios from 'axios'
-import Cookies from 'js-cookie'
-import { getCookies, bearerAuthorization } from '../utils'
-import { User } from '../models/User'
-import { useRoutes } from './RoutesContext'
+} from "react";
+import axios from "axios";
+import Cookies from "js-cookie";
+import { getCookies, bearerAuthorization } from "../utils";
+import { User } from "../models/User";
+import { useRoutes } from "./RoutesContext";
 
 // Define constants
-const JWT_TOKEN_COOKIE = 'jwt_token'
+const JWT_TOKEN_COOKIE = "jwt_token";
 
 interface AuthProviderProps {
-  children: ReactNode
+  children: ReactNode;
 }
 
 interface AuthContextType {
-  loading: boolean
-  user: User | null
-  isLogged: boolean
-  login: () => void
-  logout: () => void
-  fetchUserData: () => Promise<void>
+  loading: boolean;
+  user: User | null;
+  isLogged: boolean;
+  login: () => void;
+  logout: () => void;
+  fetchUserData: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType | null>(null)
+const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
-  const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [isLogged, setIsLogged] = useState(false)
-  const { navigateTo } = useRoutes()
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [isLogged, setIsLogged] = useState(false);
+  const [is2FA, setIs2FA] = useState(false);
+  const { navigateTo } = useRoutes();
 
   const login = async () => {
-    console.log('Logging in')
+    console.log("Logging in. Hello!");
 
     try {
-      await fetchUserData()
-      redirectToHome()
+      await fetchUserData();
+      redirectToHome();
     } catch (error) {
-      redirectToWelcome()
+      redirectToWelcome();
     }
-  }
+  };
 
   const logout = () => {
-    console.log('Logging out')
-    Cookies.remove(JWT_TOKEN_COOKIE)
-    setUser(null)
-    setIsLogged(false)
-		setLoading(false)
-    redirectToWelcome()
-  }
+    console.log("Logging out. Bye!");
+    Cookies.remove(JWT_TOKEN_COOKIE);
+    setUser(null);
+    setIsLogged(false);
+    setLoading(false);
+    redirectToWelcome();
+  };
 
   const fetchUserData = async () => {
-    const jwtToken = getCookies('jwt_token')
+    const jwtToken = getCookies("jwt_token");
 
     if (jwtToken && !isLogged) {
       try {
-        const response = await axios.get('/api/users/me', {
+        const response = await axios.get("/api/users/me", {
           headers: {
             Authorization: bearerAuthorization(jwtToken),
           },
-        })
-        setUser({ ...response.data, jwtToken: jwtToken })
-        setIsLogged(true)
+        });
+        console.log(response.data);
+
+        setUser({ ...response.data, jwtToken: jwtToken });
+        setIsLogged(true);
       } catch (error) {
-        console.error('Error fetching user data:', error)
+        console.error("Error fetching user data:", error);
       }
     } else if (!jwtToken && isLogged) {
-      logout()
+      logout();
     }
-    setLoading(false)
-  }
+    setLoading(false);
+  };
 
   const redirectToOops = () => {
-    navigateTo('/oops')
-  }
+    navigateTo("/oops");
+  };
 
   const redirectToHome = () => {
-    navigateTo('/')
-  }
+    navigateTo("/");
+  };
 
   const redirectToWelcome = () => {
-    navigateTo('/welcome')
-  }
+    navigateTo("/welcome");
+  };
 
   const showError = (message: string) => {
     // You can implement how you want to show the error message to the user.
     // For example, you might display it in a modal or a notification.
-    alert(message)
-  }
+    alert(message);
+  };
 
   const isLoggedIn = (jwtToken: string | undefined) => {
     // You can customize this logic based on how your JWT token is stored.
-    return !!jwtToken
-  }
+    return !!jwtToken;
+  };
 
   const setAuthCookie = (jwtToken: string) => {
     // Use your cookie library (e.g., js-cookie) to set the JWT token as a cookie.
-    Cookies.set(JWT_TOKEN_COOKIE, jwtToken)
-  }
+    Cookies.set(JWT_TOKEN_COOKIE, jwtToken);
+  };
 
   useEffect(() => {
-    fetchUserData()
-  }, [user, isLogged])
+    fetchUserData();
+  }, [user, isLogged]);
 
   const contextData = useMemo(() => {
     return {
@@ -117,20 +120,20 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
       login,
       logout,
       fetchUserData,
-    }
-  }, [loading, user, isLogged, login, logout, fetchUserData])
+    };
+  }, [loading, user, isLogged, login, logout, fetchUserData]);
 
   return (
     <AuthContext.Provider value={contextData}>{children}</AuthContext.Provider>
-  )
-}
+  );
+};
 
 export const useAuth = () => {
-  const context = useContext(AuthContext)
+  const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider')
+    throw new Error("useAuth must be used within an AuthProvider");
   }
-  return context
-}
+  return context;
+};
 
-export default AuthContext
+export default AuthContext;

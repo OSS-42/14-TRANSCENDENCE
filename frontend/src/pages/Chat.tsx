@@ -95,7 +95,7 @@ export function Chat({ socket }: ChatProps) {
         component="div"
         sx={{
           minHeight: "90%",
-					minWidth: "30%",
+          minWidth: "30%",
           margin: "1rem 1rem 1rem 0",
           borderRadius: "5px",
           padding: "1rem",
