@@ -237,3 +237,26 @@ img.round-img {
     margin: 0 auto; /* Center the content horizontally */
   }
 }
+
+.ReactModal__Overlay {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5); /* Fond semi-transparent pour l'arrière-plan */
+  z-index: 1000; /* Assurez-vous que le modal s'affiche au-dessus de tout le reste */
+}
+
+.ReactModal__Content {
+  position: relative;
+  padding: 20px;
+  background-color: #fff; /* Couleur de fond du modal */
+  border-radius: 8px; /* Coins arrondis */
+  max-width: 80%; /* Largeur maximale du modal */
+  max-height: 80%; /* Hauteur maximale du modal */
+  overflow-y: auto; /* Activer le défilement vertical si nécessaire */
+}

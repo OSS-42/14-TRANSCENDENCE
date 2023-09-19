@@ -82,6 +82,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     console.log(payload)
     this.server.to(socketId).emit('invitation', {
       roomId: payload.roomId,
+      challengerUsername : payload.challengerUsername
     });
   }
   

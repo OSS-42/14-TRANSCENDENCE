@@ -3,6 +3,7 @@ import { User } from '../../models/User'
 import { useRoutes } from '../../contexts/RoutesContext'
 import { MatchHistory } from '../Profile/MatchHistory'
 import { Socket } from 'socket.io-client'
+import { useAuth } from '../../contexts/AuthContext'
 
 type UserDetailsProps = {
   selectedUser: User
@@ -12,11 +13,13 @@ type UserDetailsProps = {
  
   
 function UserDetails({ selectedUser, closeUserDetails, socket }: UserDetailsProps) {
+  const { user } = useAuth();
   const { navigateTo } = useRoutes();
 
   function inviteToPlay(id :number){
     const roomId = 771237812;
-    socket.emit('invitation', { userId: id, roomId: roomId });
+  
+    socket.emit('invitation', { userId: id, roomId: roomId, challengerUsername: user.username });
     
     navigateTo(`game?${roomId}`);
   }

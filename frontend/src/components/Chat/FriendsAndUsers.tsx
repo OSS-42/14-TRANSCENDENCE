@@ -5,8 +5,10 @@ import ChatBar from './ChatBar'
 import ChatFriends from './ChatFriends'
 import ReactModal from 'react-modal'
 import UserDetails from './UserDetails'
+
 import { fetchFriendsList, fetchUsersList } from '../../api/requests'
 import { useRoutes } from '../../contexts/RoutesContext'
+import { Box } from '@mui/material'
 
 
 type someProp = {
@@ -20,27 +22,43 @@ export function FriendsAndUsers({ socket }: someProp) {
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
   const [modalIsOpen, setModalIsOpen] = useState(false)
   const [invitationModalIsOpen, setInvitationModalIsOpen] = useState(false);
-
   const { navigateTo } = useRoutes();
-  let gameId :string;
+  const [gameId, setGameId] = useState<string | null>(null);
+  const [timer, setTimer] = useState<number>(10); 
+  const [challengerUsername, setChallengerUsername] = useState<string | null>(null);
+  let interval: NodeJS.Timeout | null = null;
+ 
+  
 
-  function acceptGame(){
-    navigateTo(`game?${gameId}`);
-  }
+  useEffect(() => {
+    if (invitationModalIsOpen) {
+      interval = setInterval(() => {
+        setTimer((prevTimer: number) => prevTimer - 1);
+      }, 1000);
+    }
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+        setTimer(10);
+      }
+    };
+  }, [invitationModalIsOpen]);
+  
 
   useEffect(() => {
     socket.on('updateConnectedUsers', (updatedUsers: number[]) => {
       setConnectedUsers(updatedUsers)
     })
-    socket.on('invitation', (roomId: string) => {
+    socket.on('invitation', (payload: any) => {
+      console.log("this is my payload ", payload)
+      const roomId = payload.roomId;
+      setGameId(roomId);
+      setChallengerUsername(payload.challengerUsername) 
+      console.log(challengerUsername)
       setInvitationModalIsOpen(true);
-      console.log(roomId);
-      navigateTo(`game?${gameId}`);
 
       setTimeout(() => {
         setInvitationModalIsOpen(false);
-        gameId = roomId;
-        //navigateTo(`game?${roomId}`);
       }, 10000);
       
     })
@@ -63,6 +81,15 @@ export function FriendsAndUsers({ socket }: someProp) {
     }
   }, [])
 
+  function acceptGame(){
+    if (gameId) {
+      setTimer(10);
+      navigateTo(`game?${gameId}`);
+    } else {
+      console.error('gameId is not defined.'); 
+    }
+  }
+
   const handleUserClick = (user: User) => {
     setSelectedUser(user)
     setModalIsOpen(true)
@@ -73,6 +100,11 @@ export function FriendsAndUsers({ socket }: someProp) {
     setModalIsOpen(false)
     setSelectedUser(null)
   }
+  function closeInvitationModal() {
+    setInvitationModalIsOpen(false);
+    setTimer(10);
+  }
+
 
   return (
     <>
@@ -113,13 +145,24 @@ export function FriendsAndUsers({ socket }: someProp) {
         ariaHideApp={false}
         isOpen={invitationModalIsOpen}
         contentLabel="Demande d'acceptation de partie"
+        
       >
-        <div>
-            <p>Vous avez reçu une demande d'acceptation de partie.</p>
-            <p>Acceptez-vous la partie ?</p>
-            <button onClick={acceptGame}>Accepter</button>
-        </div>
+         <Box
+          component="div"
+          display="flex"
+          flexDirection="column"
+          justifyContent="center"
+          alignItems="center"
+        >
+            <p>You have been challenged by {challengerUsername}.</p>
+            <p>Do you accept?</p>
+            <p>Time left : {timer} seconds</p>
+            <button onClick={acceptGame}>Fight</button>
+            <button onClick={closeInvitationModal}>Decline</button>
+        </Box>
       </ReactModal>
     </>
   )
 }
+
+
