@@ -104,8 +104,8 @@ const ChatFooter = ({ socket }: ChatFooterProps) => {
           className="message"
           fullWidth={true}
           value={data}
-          inputProps={{ style: { fontSize: ".7rem" } }}
-          InputLabelProps={{ style: { fontSize: ".7rem" } }}
+          inputProps={{ style: { fontSize: ".8rem" } }}
+          InputLabelProps={{ style: { fontSize: ".8rem" } }}
           onChange={(e) => setData(e.target.value)}
         />
         <Button
