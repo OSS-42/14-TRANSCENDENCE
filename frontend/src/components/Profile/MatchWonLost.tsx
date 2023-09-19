@@ -52,6 +52,7 @@ function MatchBox({ title, matchCount }: MatchBoxProps) {
         <Typography
           sx={{ typography: { xs: 'h6', sm: 'h6' }, letterSpacing: '1px' }}
         >
+					MATCHES <br/>
           {title}
         </Typography>
         <br />
@@ -67,8 +68,8 @@ export function MatchWonLost({ match }: MatchWonLostProps) {
 
   return (
     <Grid container spacing={2}>
-      <MatchBox title="MATCHES WON" matchCount={nbrMatchesWon} />
-      <MatchBox title="MATCHES LOST" matchCount={nbrMatchesLost} />
+      <MatchBox title="WON" matchCount={nbrMatchesWon} />
+      <MatchBox title="LOST" matchCount={nbrMatchesLost} />
     </Grid>
   )
 }
