@@ -31,8 +31,14 @@ export function Profile() {
   if (params) {
     //THIS MEANS I'M VIEWING A SOMEONE ELSE'S PROFILE IN A READ-ONLY MODE
     // Idea: Use the same structure we have for our own profile, but with different fetch requests.
-    // The same fetch requests would be used to the User Card in the Chat.
+		// Control the flow by checking if any params are passed.
+		// Is it a valid username that exists in the database? [YES]-> is it myself? [YES] -> Redirect to /profile
+		// Is it a valid username that exists in the database? [YES]-> is it myself? [NO]-> Redirect to /profile/:username (params)
+    
+		// The same fetch requests would be used in the User Details Card in the Chat.
 
+		//The same logic can be user to create a link at the UserDetails Card. The router should be able to handle it.
+		
     return (
       <Box component="div" color="red" marginTop="25rem">
         CLICK ME
