@@ -26,6 +26,7 @@ export function FriendsAndUsers({ socket }: someProp) {
   const [gameId, setGameId] = useState<string | null>(null);
   const [timer, setTimer] = useState<number>(10); 
   const [challengerUsername, setChallengerUsername] = useState<string | null>(null);
+  const [challengerId, setChallengerId] = useState<number | null>(null);
   let interval: NodeJS.Timeout | null = null;
  
   
@@ -50,11 +51,9 @@ export function FriendsAndUsers({ socket }: someProp) {
       setConnectedUsers(updatedUsers)
     })
     socket.on('invitation', (payload: any) => {
-      console.log("this is my payload ", payload)
-      const roomId = payload.roomId;
-      setGameId(roomId);
-      setChallengerUsername(payload.challengerUsername) 
-      console.log(challengerUsername)
+      setGameId(payload.roomId);
+      setChallengerUsername(payload.challengerUsername)
+      setChallengerId(payload.challengerId)  
       setInvitationModalIsOpen(true);
 
       setTimeout(() => {
@@ -84,6 +83,8 @@ export function FriendsAndUsers({ socket }: someProp) {
   function acceptGame(){
     if (gameId) {
       setTimer(10);
+      console.log("voici le challenger id", challengerId)
+      socket.emit('challengeAccepted', {challengerId : challengerId, roomId: gameId });
       navigateTo(`game?${gameId}`);
     } else {
       console.error('gameId is not defined.'); 
