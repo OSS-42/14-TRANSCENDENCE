@@ -55,13 +55,13 @@ export function Chat({ socket }: ChatProps) {
   return (
     <Box
       component="div"
-      color="#d4d4cf"
+      color="#ececec"
       sx={{
         backgroundColor: "#090609",
         borderRadius: "5px",
         display: "flex",
         marginTop: "3rem",
-        height: "94.2%",
+        height: "91%",
         width: "98.5%",
       }}
     >
@@ -76,7 +76,7 @@ export function Chat({ socket }: ChatProps) {
       >
         {/* Chat Box */}
         <Box
-          id="chatbox"
+          id="boxscroll"
           component="div"
           sx={{
             flexGrow: 1,
@@ -91,7 +91,7 @@ export function Chat({ socket }: ChatProps) {
         <ChatFooter socket={socket} />
       </Box>
       <Box
-        id="chatbox"
+        id="boxscroll"
         component="div"
         sx={{
           minHeight: "90%",

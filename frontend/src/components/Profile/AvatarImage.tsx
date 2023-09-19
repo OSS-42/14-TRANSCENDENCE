@@ -1,37 +1,33 @@
-import { Box, Avatar } from "@mui/material";
-import { User } from "../../models/User";
+import { Box, Avatar } from '@mui/material'
+import { User } from '../../models/User'
 
-interface AvatarImageProps{
-	user: User;
+interface AvatarImageProps {
+  user: User
 }
 
-export function AvatarImage({user} : AvatarImageProps) {
+export function AvatarImage({ user }: AvatarImageProps) {
   return (
-      <Box
-	  	component="div"
+    <Box
+      component="div"
+      sx={{
+        borderRadius: '5px',
+        margin: 'auto',
+        width: '10rem',
+        height: '10rem',
+        display: 'flex',
+        overflow: 'hidden',
+      }}
+    >
+      <Avatar
+        alt="Username"
+        src={user?.avatar}
         sx={{
-					
-          borderRadius: "5px",
-          margin: "20px",
-          fontWeight: "bold",
-          height: "35%",
-          // height: "30vh",
-          width: "50%",
-          display: "flex",
-          alignItems: "center",
-          overflow: "hidden",
+          width: '100%', // Allow width to adjust
+          height: '100%', // Fill the available height
+          maxWidth: '100%',
+          objectFit: 'cover',
         }}
-      >
-        <Avatar
-          alt="Username"
-          src={user?.avatar}
-          sx={{
-            width: "100%", // Allow width to adjust
-            height: "100%", // Fill the available height
-            maxWidth: "100%",
-            objectFit: "cover",
-          }}
-        />
-      </Box>
-  );
+      />
+    </Box>
+  )
 }
