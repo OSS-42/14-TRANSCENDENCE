@@ -42,9 +42,9 @@ type WeHaveAWinner = {
   clientName: string;
 };
 
-type Connected = {
-  isConnected: boolean;
-};
+// type Connected = {
+//   isConnected: boolean;
+// };
 
 type OppDisconnected = {
   message: string;
@@ -72,14 +72,13 @@ export function Pong() {
   const { user } = useAuth();
 
   const [gameLaunched, setGameLaunched] = React.useState(false);
-  const [cameraMode, setCameraMode] = React.useState<
-    "perspective" | "orthographic"
-  >("orthographic");
+  const [cameraMode, setCameraMode] = React.useState<"perspective" | "orthographic">("orthographic");
   const [isPaused, setIsPaused] = React.useState(true);
   const [gameStart, setGameStart] = React.useState(true);
 
   const [gameMode, setGameMode] = React.useState<0 | 1 | 2 | 3 | 4>(0);
   const [showButtons, setShowButtons] = React.useState(true);
+  const isGameOver = useRef(false);
 
   //------------------ GAME VARIABLES ------------------------
   // variables sans resizing
@@ -87,33 +86,34 @@ export function Pong() {
   const paddleHeight: number = 1;
   const paddleDepth: number = 5;
   const ballRadius: number = 0.5;
-  const INITIAL_BALL_SPEED: number = 0.3;
   const netWidth: number = 0.5;
   const netDepth: number = 8;
+  const INITIAL_BALL_SPEED: number = 0.3;
 
   const [leftPaddlePositionZ, setLeftPaddlePositionZ] = React.useState(0);
   const [rightPaddlePositionZ, setRightPaddlePositionZ] = React.useState(0);
-  const [ballSpeed, setBallSpeed] = React.useState(INITIAL_BALL_SPEED);
+  const [leftScore, setLeftScore] = React.useState(0);
+  const [rightScore, setRightScore] = React.useState(0);
+  const [winner, setWinner] = React.useState<string | null>(null);
+  const [countdown, setCountdown] = React.useState<number | null>(null);
+  const [powerupVisible, setPowerupVisible] = React.useState(false);
+
   const [ballPosition, setBallPosition] = React.useState({
     x: 0,
     y: 0,
     z: 0.00001,
   });
+
   const [ballVelocity, setBallVelocity] = React.useState({
     x: INITIAL_BALL_SPEED,
     z: INITIAL_BALL_SPEED,
   });
-  const [leftScore, setLeftScore] = React.useState(0);
-  const [rightScore, setRightScore] = React.useState(0);
-  const [winner, setWinner] = React.useState<string | null>(null);
+
   const [powerupPosition, setPowerupPosition] = React.useState({
     x: 0,
     y: 0,
     z: 0,
   });
-  const [powerupVisible, setPowerupVisible] = React.useState(false);
-  const [countdown, setCountdown] = React.useState<number | null>(null);
-  const isGameOver = useRef(false);
 
   //------------------ CLIENT-SERVER SETTINGS ------------------------
   const [isConnected, setIsConnected] = React.useState<boolean>(false);
@@ -123,18 +123,12 @@ export function Pong() {
   const [playerName, setPlayerName] = React.useState<string>("");
 
   const [gameInfos, setGameInfos] = useState<PlayerJoined>();
-  const [gameParameters, setGameParameters] = useState<GameParameters>();
-  const [connection, setConnection] = useState<Connected>();
-  const [winnerIs, setWinnerIs] = useState<WeHaveAWinner>();
+ 
   const [waitingForPlayer, setWaitingForPlayer] = React.useState(false);
   const [gameId, setGameId] = React.useState<string>("");
   const [isHostWinner, setIsHostWinner] = React.useState(false);
   const [oppDisconnected, setOppDisconnected] =
     React.useState<OppDisconnected>(false);
-
-  const [currentTime, setCurrentTime] = useState(performance.now());
-  const updateFrequency = 1000 / 60;
-  const [lastUpdateTime, setLastUpdateTime] = useState(currentTime);
 
   const [initialSetupComplete, setInitialSetupComplete] = useState(false);
 
@@ -190,7 +184,6 @@ export function Pong() {
 
   useEffect(() => {
     if (socket && initialSetupComplete) {
-      // debugger;
       if (hostStatus) {
         console.log("🏓🏓   host");
         socket.emit("hostGameParameters", {
@@ -243,52 +236,72 @@ export function Pong() {
   //------------------ GAME MODES ------------------------
   const handleClassicModeIA = (): void => {
     console.log("🏓   classic 1 vs IA");
-    const newHostStatus = true; // a cause async nature de React.
-    const newGM = 1;
-    setHostStatus(newHostStatus);
-    setGameMode(newGM);
-    setNames(playerName, newHostStatus, newGM, setHostname, setClientName);
-    setGameLaunched(true);
-    setCameraMode("orthographic");
-    setShowButtons(false);
-    handleCountdown();
+    try {
+      const newHostStatus = true; // a cause async nature de React.
+      const newGM = 1;
+      setHostStatus(newHostStatus);
+      setGameMode(newGM);
+      setNames(playerName, newHostStatus, newGM, setHostname, setClientName);
+      setGameLaunched(true);
+      setCameraMode("orthographic");
+      setShowButtons(false);
+      handleCountdown();
+    } catch {
+      console.log("🏓   we catched an issue. GM1");
+      return;
+    }
   };
 
   const handlePowerupModeIA = (): void => {
     console.log("🏓   powerup 1 vs IA");
-    const newHostStatus = true;
-    const newGM = 2;
-    setHostStatus(newHostStatus);
-    setGameMode(newGM);
-    setNames(playerName, newHostStatus, newGM, setHostname, setClientName);
-    setGameLaunched(true);
-    setCameraMode("orthographic");
-    setPowerupVisible(true);
-    setShowButtons(false);
-    handleCountdown();
+    try {
+      const newHostStatus = true;
+      const newGM = 2;
+      setHostStatus(newHostStatus);
+      setGameMode(newGM);
+      setNames(playerName, newHostStatus, newGM, setHostname, setClientName);
+      setGameLaunched(true);
+      setCameraMode("orthographic");
+      setPowerupVisible(true);
+      setShowButtons(false);
+      handleCountdown();
+    } catch {
+      console.log("🏓   we catched an issue. GM2");
+      return;
+    }
   };
 
   const handleClassicModeMulti = (): void => {
     console.log("🏓   classic 1 vs 1");
-    const newGM = 3;
-    socket.emit("waitingForPlayerGM3", { playerName, newGM });
-    setWaitingForPlayer(true);
-    setGameLaunched(true);
-    setCameraMode("orthographic");
-    setGameMode(newGM);
-    setShowButtons(false);
+    try {
+      const newGM = 3;
+      socket.emit("waitingForPlayerGM3", { playerName, newGM });
+      setWaitingForPlayer(true);
+      setGameLaunched(true);
+      setCameraMode("orthographic");
+      setGameMode(newGM);
+      setShowButtons(false);
+    } catch {
+      console.log("🏓   we catched an issue. GM3");
+      return;
+    }
   };
 
   const handlePowerupModeMulti = (): void => {
     console.log("🏓   powerup 1 vs multi");
-    const newGM = 4;
-    socket.emit("waitingForPlayerGM4", { playerName, newGM });
-    setWaitingForPlayer(true);
-    setGameLaunched(true);
-    setCameraMode("orthographic");
-    setPowerupVisible(true);
-    setGameMode(newGM);
-    setShowButtons(false);
+    try {
+      const newGM = 4;
+      socket.emit("waitingForPlayerGM4", { playerName, newGM });
+      setWaitingForPlayer(true);
+      setGameLaunched(true);
+      setCameraMode("orthographic");
+      setPowerupVisible(true);
+      setGameMode(newGM);
+      setShowButtons(false);
+    } catch {
+      console.log("🏓   we catched an issue. GM4");
+      return;
+    }
   };
 
   //------------------ USER NAMES ------------------------
@@ -315,20 +328,7 @@ export function Pong() {
 
   //------------------ SCENE SETTINGS ------------------------
   // s'assure que le canvas aura comme maximum toujours 800x600
-  const [dimension, setDimensions] = React.useState<{
-    width: number;
-    height: number;
-  }>(() => {
-    let initialWidth = window.innerWidth;
-    let initialHeight = (window.innerWidth * 3) / 4;
-
-    if (initialWidth > 800) {
-      initialWidth = 800;
-      initialHeight = 600;
-    }
-
-    return { width: initialWidth, height: initialHeight };
-  });
+  const [dimension, setDimensions] = React.useState<number, number>({ width: 800, height: 600 })
 
   // Dimensions de l'espace de jeu.
   const CAMERA_ZOOM = 20;
@@ -493,16 +493,17 @@ export function Pong() {
   };
 
   //creation de la ligne (le net) du milieu
-  const numberOfSegments: number = 15;
-  const segmentHeight: number = netDepth / 5;
-  const spaceBetweenSegments: number = 1;
-  const totalHeight: number =
-    (segmentHeight + spaceBetweenSegments) * numberOfSegments -
-    spaceBetweenSegments; // Subtract space for the last segment
-
-  const segments = Array.from({ length: numberOfSegments }).map((_, index) => {
-    const yPosition: number =
-      totalHeight / 2 - index * (segmentHeight + spaceBetweenSegments);
+  const Net = React.memo(() => {
+    const numberOfSegments: number = 15;
+    const segmentHeight: number = netDepth / 5;
+    const spaceBetweenSegments: number = 1;
+    const totalHeight: number =
+      (segmentHeight + spaceBetweenSegments) * numberOfSegments -
+      spaceBetweenSegments; // Subtract space for the last segment
+  
+    const segments = Array.from({ length: numberOfSegments }).map((_, index) => {
+      const yPosition: number =
+        totalHeight / 2 - index * (segmentHeight + spaceBetweenSegments);
 
     return (
       <Box
@@ -515,12 +516,15 @@ export function Pong() {
     );
   });
 
+    return <>{segments}</>
+  });
+
   const baseCanvasWidth: number = 800;
   const baseFontSize: number = 60;
   const fontSize: number = (dimension.width / baseCanvasWidth) * baseFontSize;
 
   // border lines
-  const Borders: React.FC<{}> = () => {
+  const Borders = React.memo(() => {
     const borderThickness = 0.05;
     return (
       <>
@@ -540,7 +544,7 @@ export function Pong() {
         </Box>
       </>
     );
-  };
+  });
 
   // sound effects
   const goalSoundRef = React.useRef<HTMLAudioElement>(null);
@@ -778,21 +782,6 @@ export function Pong() {
     let lastEventTime = 0;
     const throttleTime = 100;
 
-    //const handleKeyPress = (event: KeyboardEvent): void => {
-
-    // const [mousePosition, setMousePosition] = React.useState<({ x: number, y: number })>(1,1)
-
-    // const handleMouseMovement = (event: MouseEvent): void => {
-    //   console.log('hello');
-    //   const mouseX = event.clientX;
-    //   const mouseZ = event.clientY;
-      
-    //   return setMousePosition({ x: mouseX, z: mouseZ });
-    // }
-
-    // window.addEventListener('mousemove', handleMouseMovement, false);
-
-    // useFrame((mouseX: number, mouseY: number) => {
     useFrame(() => {
       const currentTime = Date.now();
 
@@ -989,7 +978,7 @@ export function Pong() {
               />
 
               {/* le net */}
-              {segments}
+              <Net />
 
               {/* borders */}
               <Borders />
@@ -1003,7 +992,7 @@ export function Pong() {
                 setBallPosition={setBallPosition}
                 ballVelocity={ballVelocity}
                 setBallVelocity={setBallVelocity}
-                speedFactor={ballSpeed}
+                // speedFactor={INITIAL_BALL_SPEED}
               />
 
               {/* Left Paddle */}
