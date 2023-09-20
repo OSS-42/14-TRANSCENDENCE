@@ -27,7 +27,7 @@ export function Profile() {
     setUserData(newUser);
   };
 
-  async function getMatchHistory(){
+  async function getMatchHistory() {
     const matches = await fetchMatchHistory(user.id);
     setMatch(matches);
   }
@@ -45,7 +45,7 @@ export function Profile() {
         <TwoFactorAuthentication TwoFactorStatus={user.twoFactorSecret ? true : false}/>
       </LeftSideGrid>
       <RightSideGrid>
-        <MatchWonLost match={match}/>
+        <MatchWonLost match={match} />
         <MatchHistory match={match} />
         <FriendsList />
       </RightSideGrid>

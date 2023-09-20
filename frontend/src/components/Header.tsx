@@ -74,6 +74,7 @@ const Header = () => {
         backgroundColor: 'black',
         width: '100%',
         zIndex: '999',
+				// typography: { xs: 'h1', sm: 'h6'},
       }}
     >
       <Tabs

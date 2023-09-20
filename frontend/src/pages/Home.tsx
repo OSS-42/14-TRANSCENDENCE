@@ -1,29 +1,29 @@
-import { Box } from '@mui/material'
-import { useAuth } from '../contexts/AuthContext'
+import { Box } from "@mui/material";
+import { useAuth } from "../contexts/AuthContext";
 
 // Idea: Welcome page containing a little summary of the project,
 // and any extra thing we'd like to add.
 
 export function Home() {
-  const { user } = useAuth()
+  const { user } = useAuth();
 
   return (
     <>
       <Box
         component="div"
         sx={{
-          marginTop: '3rem',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-evenly',
-          background: '#c9c9c5',
-          borderRadius: '5px',
-          padding: '2.5rem',
-          textAlign: 'center',
-          lineHeight: '2rem',
-          fontSize: '.5rem',
-          '@media (min-width:600px)': {
-            fontSize: '1rem',
+          marginTop: "3rem",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-evenly",
+          background: "#c9c9c5",
+          borderRadius: "5px",
+          padding: "2.5rem",
+          textAlign: "center",
+          lineHeight: "2rem",
+          fontSize: ".5rem",
+          "@media (min-width:600px)": {
+            fontSize: "1rem",
           },
         }}
       >
@@ -60,5 +60,5 @@ export function Home() {
         )}
       </Box>
     </>
-  )
+  );
 }
