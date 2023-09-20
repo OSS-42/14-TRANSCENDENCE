@@ -33,7 +33,8 @@ export class UserController {
   //retourne le data de l'utilisateur
   @Get("me")
   getMe(@GetUser() user: Utilisateur) {
-    return user;
+    const { id, username, avatar } = user;
+    return { id, username, avatar };
   }
 
   //retourne un array d'objets utilisateurs
