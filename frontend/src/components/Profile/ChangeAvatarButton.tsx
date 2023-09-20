@@ -1,7 +1,6 @@
 import { Box, Button } from '@mui/material'
 import axios from 'axios'
 import Cookies from 'js-cookie'
-import { updateAvatarApi } from '../../api/requests'
 
 export function ChangeAvatarButton({ setUser }) {
   const handleAvatarSelected = (event: any) => {
@@ -32,13 +31,6 @@ export function ChangeAvatarButton({ setUser }) {
       console.error("Error updating avatar:", error);
     }
   };
-
-  // const handleAvatarUpdate = async (avatarFile: File) => {
-  // 	const formData = new FormData();
-  // 	console.log(avatarFile);
-  // 	formData.append("avatar", avatarFile);
-  //   updateAvatarApi(formData);
-  // };
 
   return (
     <Box

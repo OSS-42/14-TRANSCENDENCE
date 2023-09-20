@@ -65,7 +65,7 @@ export function Name(props) {
         return;
       }
       const newUser = await updateUser(editedName);
-      props.updateUserData(newUser);
+      props.setUser(newUser);
     }
     setIsEditing(false);
   }

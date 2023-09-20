@@ -16,16 +16,11 @@ import { fetchMatchHistory, fetchUserMe } from "../api/requests";
 import { TwoFactorAuthentication } from "../components/Profile/TwoFactorAuthentication";
 
 export function Profile() {
-  const { user } = useAuth();
-  const [userData, setUserData] = useState(user);
+  const { user, setUser } = useAuth();
   const [match, setMatch] = useState({
     matchesWon: [],
     matchesLost: [],
   });
-
-  const updateUserData = (newUser) => {
-    setUserData(newUser);
-  };
 
   async function getMatchHistory() {
     const matches = await fetchMatchHistory(user.id);
@@ -39,9 +34,9 @@ export function Profile() {
   return (
     <ContainerGrid>
       <LeftSideGrid>
-        <Name user={userData?.username} updateUserData={updateUserData} />
-        <AvatarImage user={userData} />
-        <ChangeAvatarButton setUser={setUserData} />
+        <Name user={user?.username} setUser={setUser} />
+        <AvatarImage user={user} />
+        <ChangeAvatarButton setUser={setUser} />
         <TwoFactorAuthentication TwoFactorStatus={user.twoFactorSecret ? true : false}/>
       </LeftSideGrid>
       <RightSideGrid>
