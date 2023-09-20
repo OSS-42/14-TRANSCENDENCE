@@ -51,6 +51,11 @@ type OppDisconnected = {
 };
 
 export function Pong() {
+  //------------------ ERROR LISTENING ---------------------
+  window.addEventListener('error', function (event) {
+    console.log('there was an issue, but we catched it');
+  });
+
   //------------------ SOCKET CONNECTION --------------------
   const [socket, setSocket] = useState(null);
 
@@ -75,8 +80,12 @@ export function Pong() {
   const [cameraMode, setCameraMode] = React.useState<
     "perspective" | "orthographic"
   >("orthographic");
+
   const [isPaused, setIsPaused] = React.useState(true);
   const [gameStart, setGameStart] = React.useState(true);
+  const [leftScore, setLeftScore] = React.useState(0);
+  const [rightScore, setRightScore] = React.useState(0);
+  const [winner, setWinner] = React.useState<string | null>(null);
 
   const [gameMode, setGameMode] = React.useState<0 | 1 | 2 | 3 | 4>(0);
   const [showButtons, setShowButtons] = React.useState(true);
@@ -93,7 +102,9 @@ export function Pong() {
 
   const [leftPaddlePositionZ, setLeftPaddlePositionZ] = React.useState(0);
   const [rightPaddlePositionZ, setRightPaddlePositionZ] = React.useState(0);
+
   const [ballSpeed, setBallSpeed] = React.useState(INITIAL_BALL_SPEED);
+  
   const [ballPosition, setBallPosition] = React.useState({
     x: 0,
     y: 0,
@@ -103,9 +114,7 @@ export function Pong() {
     x: INITIAL_BALL_SPEED,
     z: INITIAL_BALL_SPEED,
   });
-  const [leftScore, setLeftScore] = React.useState(0);
-  const [rightScore, setRightScore] = React.useState(0);
-  const [winner, setWinner] = React.useState<string | null>(null);
+
   const [powerupPosition, setPowerupPosition] = React.useState({
     x: 0,
     y: 0,
@@ -245,52 +254,72 @@ export function Pong() {
   //------------------ GAME MODES ------------------------
   const handleClassicModeIA = (): void => {
     console.log("🏓   classic 1 vs IA");
-    const newHostStatus = true; // a cause async nature de React.
-    const newGM = 1;
-    setHostStatus(newHostStatus);
-    setGameMode(newGM);
-    setNames(playerName, newHostStatus, newGM, setHostname, setClientName);
-    setGameLaunched(true);
-    setCameraMode("orthographic");
-    setShowButtons(false);
-    handleCountdown();
+    try {
+      const newHostStatus = true; // a cause async nature de React.
+      const newGM = 1;
+      setHostStatus(newHostStatus);
+      setGameMode(newGM);
+      setNames(playerName, newHostStatus, newGM, setHostname, setClientName);
+      setGameLaunched(true);
+      setCameraMode("orthographic");
+      setShowButtons(false);
+      handleCountdown();
+    } catch (error) {
+      console.log('there was an error we catched;');
+      return;
+    }
   };
 
   const handlePowerupModeIA = (): void => {
     console.log("🏓   powerup 1 vs IA");
-    const newHostStatus = true;
-    const newGM = 2;
-    setHostStatus(newHostStatus);
-    setGameMode(newGM);
-    setNames(playerName, newHostStatus, newGM, setHostname, setClientName);
-    setGameLaunched(true);
-    setCameraMode("orthographic");
-    setPowerupVisible(true);
-    setShowButtons(false);
-    handleCountdown();
+    try {
+      const newHostStatus = true;
+      const newGM = 2;
+      setHostStatus(newHostStatus);
+      setGameMode(newGM);
+      setNames(playerName, newHostStatus, newGM, setHostname, setClientName);
+      setGameLaunched(true);
+      setCameraMode("orthographic");
+      setPowerupVisible(true);
+      setShowButtons(false);
+      handleCountdown();
+    } catch (error) {
+      console.log('there was an error we catched;');
+      return;
+    }
   };
 
   const handleClassicModeMulti = (): void => {
     console.log("🏓   classic 1 vs 1");
-    const newGM = 3;
-    socket.emit("waitingForPlayerGM3", { playerName, newGM });
-    setWaitingForPlayer(true);
-    setGameLaunched(true);
-    setCameraMode("orthographic");
-    setGameMode(newGM);
-    setShowButtons(false);
+    try {
+      const newGM = 3;
+      socket.emit("waitingForPlayerGM3", { playerName, newGM });
+      setWaitingForPlayer(true);
+      setGameLaunched(true);
+      setCameraMode("orthographic");
+      setGameMode(newGM);
+      setShowButtons(false);
+    } catch (error) {
+      console.log('there was an error we catched;');
+      return;
+    }
   };
 
   const handlePowerupModeMulti = (): void => {
     console.log("🏓   powerup 1 vs multi");
-    const newGM = 4;
-    socket.emit("waitingForPlayerGM4", { playerName, newGM });
-    setWaitingForPlayer(true);
-    setGameLaunched(true);
-    setCameraMode("orthographic");
-    setPowerupVisible(true);
-    setGameMode(newGM);
-    setShowButtons(false);
+    try {
+      const newGM = 4;
+      socket.emit("waitingForPlayerGM4", { playerName, newGM });
+      setWaitingForPlayer(true);
+      setGameLaunched(true);
+      setCameraMode("orthographic");
+      setPowerupVisible(true);
+      setGameMode(newGM);
+      setShowButtons(false);
+    } catch (error) {
+      console.log('there was an error we catched;');
+      return;
+    }
   };
 
   //------------------ USER NAMES ------------------------
@@ -495,34 +524,38 @@ export function Pong() {
   };
 
   //creation de la ligne (le net) du milieu
-  const numberOfSegments: number = 15;
-  const segmentHeight: number = netDepth / 5;
-  const spaceBetweenSegments: number = 1;
-  const totalHeight: number =
-    (segmentHeight + spaceBetweenSegments) * numberOfSegments -
-    spaceBetweenSegments; // Subtract space for the last segment
+  const Net = React.memo(() => {
+    const numberOfSegments: number = 15;
+    const segmentHeight: number = netDepth / 5;
+    const spaceBetweenSegments: number = 1;
+    const totalHeight: number =
+      (segmentHeight + spaceBetweenSegments) * numberOfSegments -
+      spaceBetweenSegments; // Subtract space for the last segment
+    
+    const segments = Array.from({ length: numberOfSegments }).map((_, index) => {
+      const yPosition: number =
+        totalHeight / 2 - index * (segmentHeight + spaceBetweenSegments);
 
-  const segments = Array.from({ length: numberOfSegments }).map((_, index) => {
-    const yPosition: number =
-      totalHeight / 2 - index * (segmentHeight + spaceBetweenSegments);
-
-    return (
-      <Box
-        key={index}
-        position={[0, 0, yPosition]}
-        args={[netWidth, 0, segmentHeight]}
-      >
-        <meshBasicMaterial color="white" />
-      </Box>
-    );
-  });
+        return (
+          <Box
+            key={index}
+            position={[0, 0, yPosition]}
+            args={[netWidth, 0, segmentHeight]}
+          >
+            <meshBasicMaterial color="white" />
+          </Box>
+        );
+      });
+    
+      return <>{segments}</>;
+    });
 
   const baseCanvasWidth: number = 800;
   const baseFontSize: number = 60;
   const fontSize: number = (dimension.width / baseCanvasWidth) * baseFontSize;
 
   // border lines
-  const Borders: React.FC<{}> = () => {
+  const Borders = React.memo(() => {
     const borderThickness = 0.05;
     return (
       <>
@@ -542,7 +575,7 @@ export function Pong() {
         </Box>
       </>
     );
-  };
+  });
 
   // sound effects
   const goalSoundRef = React.useRef<HTMLAudioElement>(null);
@@ -777,31 +810,39 @@ export function Pong() {
     setLeftPaddlePositionZ,
   }) => {
     const { mouse } = useThree();
+    let lastEventTime = 0;
+    const throttleTime = 100;
 
     useFrame(() => {
-      let newPosition;
-      if (hostStatus) {
-        if (cameraMode === "perspective") {
-          newPosition = mouse.x * (WORLD_WIDTH / 2);
+      const currentTime = Date.now();
+
+      if (currentTime - lastEventTime > throttleTime) {
+        lastEventTime = currentTime;
+
+        let newPosition;
+        if (hostStatus) {
+          if (cameraMode === "perspective") {
+            newPosition = mouse.x * (WORLD_WIDTH / 2);
+          } else {
+            newPosition = -mouse.y * (WORLD_HEIGHT / 2);
+          }
         } else {
-          newPosition = -mouse.y * (WORLD_HEIGHT / 2);
+          newPosition = leftPaddlePositionZ;
         }
-      } else {
-        newPosition = leftPaddlePositionZ;
+
+        newPosition = lerp(leftPaddlePositionZ, newPosition, lerpFactor);
+
+        const paddleTopEdge = newPosition + paddleDepth / 2;
+        const paddleBottomEdge = newPosition - paddleDepth / 2;
+
+        if (paddleTopEdge > WORLD_HEIGHT / 2) {
+          newPosition = WORLD_HEIGHT / 2 - paddleDepth / 2;
+        } else if (paddleBottomEdge < -WORLD_HEIGHT / 2) {
+          newPosition = -WORLD_HEIGHT / 2 + paddleDepth / 2;
+        }
+
+        setLeftPaddlePositionZ(newPosition);
       }
-
-      newPosition = lerp(leftPaddlePositionZ, newPosition, lerpFactor);
-
-      const paddleTopEdge = newPosition + paddleDepth / 2;
-      const paddleBottomEdge = newPosition - paddleDepth / 2;
-
-      if (paddleTopEdge > WORLD_HEIGHT / 2) {
-        newPosition = WORLD_HEIGHT / 2 - paddleDepth / 2;
-      } else if (paddleBottomEdge < -WORLD_HEIGHT / 2) {
-        newPosition = -WORLD_HEIGHT / 2 + paddleDepth / 2;
-      }
-
-      setLeftPaddlePositionZ(newPosition);
     });
 
     return (
@@ -856,31 +897,39 @@ export function Pong() {
     } else {
       // mouvement du right (user2) paddle a la souris.
       const { mouse } = useThree();
+      let lastEventTime = 0;
+      const throttleTime = 100;
 
       useFrame(() => {
-        let newPosition;
-        if (!hostStatus) {
-          if (cameraMode === "perspective") {
-            newPosition = -mouse.x * (WORLD_WIDTH / 2);
+        const currentTime = Date.now();
+
+        if (currentTime - lastEventTime > throttleTime) {
+          lastEventTime = currentTime;
+
+          let newPosition;
+          if (!hostStatus) {
+            if (cameraMode === "perspective") {
+              newPosition = -mouse.x * (WORLD_WIDTH / 2);
+            } else {
+              newPosition = -mouse.y * (WORLD_HEIGHT / 2);
+            }
           } else {
-            newPosition = -mouse.y * (WORLD_HEIGHT / 2);
+            newPosition = rightPaddlePositionZ;
           }
-        } else {
-          newPosition = rightPaddlePositionZ;
+
+          newPosition = lerp(rightPaddlePositionZ, newPosition, lerpFactor);
+
+          const paddleTopEdge = newPosition + paddleDepth / 2;
+          const paddleBottomEdge = newPosition - paddleDepth / 2;
+
+          if (paddleTopEdge > WORLD_HEIGHT / 2) {
+            newPosition = WORLD_HEIGHT / 2 - paddleDepth / 2;
+          } else if (paddleBottomEdge < -WORLD_HEIGHT / 2) {
+            newPosition = -WORLD_HEIGHT / 2 + paddleDepth / 2;
+          }
+
+          setRightPaddlePositionZ(newPosition);
         }
-
-        newPosition = lerp(rightPaddlePositionZ, newPosition, lerpFactor);
-
-        const paddleTopEdge = newPosition + paddleDepth / 2;
-        const paddleBottomEdge = newPosition - paddleDepth / 2;
-
-        if (paddleTopEdge > WORLD_HEIGHT / 2) {
-          newPosition = WORLD_HEIGHT / 2 - paddleDepth / 2;
-        } else if (paddleBottomEdge < -WORLD_HEIGHT / 2) {
-          newPosition = -WORLD_HEIGHT / 2 + paddleDepth / 2;
-        }
-
-        setRightPaddlePositionZ(newPosition);
       });
     }
 
@@ -962,7 +1011,7 @@ export function Pong() {
               />
 
               {/* le net */}
-              {segments}
+              <Net />
 
               {/* borders */}
               <Borders />
