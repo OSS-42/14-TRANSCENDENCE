@@ -13,7 +13,7 @@ import { Chat, Home, Pong, Profile, Welcome, Error, Oops } from "./pages";
 import { useEffect, useState } from "react";
 
 function App() {
-  const { user, loading } = useAuth();
+  const { user, loading, isLogged } = useAuth();
   const [chatSocket, setChatSocket] = useState<Socket | null>(null);
   const [chatSocketInitialized, setChatSocketInitialized] = useState(false);
 
@@ -33,7 +33,7 @@ function App() {
     return () => {
       newSocket.disconnect();
     };
-  }, [user]);
+  }, [isLogged]);
 
   if (loading) {
     console.log("Loading...");
