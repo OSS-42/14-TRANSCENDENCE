@@ -1,32 +1,41 @@
-import Cookies from 'js-cookie'
-import { useEffect, useState } from 'react'
-import { User } from '../models/User'
-import axios from 'axios'
-import { AvatarImage } from '../components/Profile/AvatarImage'
-import { Name } from '../components/Profile/Name'
-import { ContainerGrid } from '../components/Profile/ContainerGrid'
-import { RightSideGrid } from '../components/Profile/RightSideGrid'
-import { LeftSideGrid } from '../components/Profile/LeftSideGrid'
-import { ChangeAvatarButton } from '../components/Profile/ChangeAvatarButton'
-import { MatchWonLost } from '../components/Profile/MatchWonLost'
-import { FriendsList } from '../components/Profile/FriendsLists'
-import { MatchHistory } from '../components/Profile/MatchHistory'
-import { useAuth } from '../contexts/AuthContext'
-import { fetchMatchHistory, fetchUserMe } from '../api/requests'
-import { TwoFactorAuthentication } from '../components/Profile/TwoFactorAuthentication'
-import { Link, generatePath, useParams } from 'react-router-dom'
-import { Box } from '@mui/material'
+// import Cookies from "js-cookie";
+// import axios from "axios";
+import { useEffect, useState } from "react";
+import { User } from "../models/User";
+import { AvatarImage } from "../components/Profile/AvatarImage";
+import { Name } from "../components/Profile/Name";
+import { ContainerGrid } from "../components/Profile/ContainerGrid";
+import { RightSideGrid } from "../components/Profile/RightSideGrid";
+import { LeftSideGrid } from "../components/Profile/LeftSideGrid";
+import { ChangeAvatarButton } from "../components/Profile/ChangeAvatarButton";
+import { MatchWonLost } from "../components/Profile/MatchWonLost";
+import { FriendsList } from "../components/Profile/FriendsLists";
+import { MatchHistory } from "../components/Profile/MatchHistory";
+import { useAuth } from "../contexts/AuthContext";
+import { fetchMatchHistory } from "../api/requests";
+import { TwoFactorAuthentication } from "../components/Profile/TwoFactorAuthentication";
+import { Link, generatePath, useParams } from "react-router-dom";
+import { Box } from "@mui/material";
+
+interface MatchData {
+  date: string;
+  winner: string;
+  loser: string;
+}
+interface MatchHistoryData {
+  matchesWon: MatchData[];
+  matchesLost: MatchData[];
+}
 
 export function Profile() {
-  const { user } = useAuth()
-  const [userData, setUserData] = useState(user)
-  const [match, setMatch] = useState({
+  const { user } = useAuth();
+  const [userData, setUserData] = useState(user);
+  const [match, setMatch] = useState<MatchHistoryData>({
     matchesWon: [],
     matchesLost: [],
-  })
-
-  const params = useParams()
-  console.log(params)
+  });
+  const params = useParams();
+  console.log(params);
 
   if (params) {
     //THIS MEANS I'M POSSIBLY TRYING TO VIEW SOMEONE ELSE'S PROFILE IN A READ-ONLY MODE
@@ -46,31 +55,34 @@ export function Profile() {
     return (
       <Box component="div" color="red" marginTop="25rem">
         CLICK ME
-        <Link to={generatePath('/profile/:username', { username: 'anarodri' })}>
+        <Link to={generatePath("/profile/:username", { username: "anarodri" })}>
           LINK
         </Link>
       </Box>
-    )
+    );
   }
   // <Link to={`/Your-Personal-profile/${comment.UserId}/${post.fullName}`}
 
-  const updateUserData = (newUser) => {
-    setUserData(newUser)
-  }
+  const updateUserData = (newUser: User) => {
+    setUserData(newUser);
+  };
 
   async function getMatchHistory() {
-    const matches = await fetchMatchHistory(user.id)
-    setMatch(matches)
+    const matches = await fetchMatchHistory(user?.id ?? -1);
+    setMatch(matches);
   }
 
   useEffect(() => {
-    getMatchHistory()
-  }, [user])
+    getMatchHistory();
+  }, [user]);
 
   return (
     <ContainerGrid>
       <LeftSideGrid>
-        <Name user={userData?.username} updateUserData={updateUserData} />
+        <Name
+          user={userData?.username ?? null}
+          updateUserData={updateUserData}
+        />
         <AvatarImage user={userData} />
         <ChangeAvatarButton setUser={setUserData} />
         <TwoFactorAuthentication />
@@ -81,5 +93,5 @@ export function Profile() {
         <FriendsList />
       </RightSideGrid>
     </ContainerGrid>
-  )
+  );
 }

@@ -1,6 +1,6 @@
 import { Socket } from "socket.io-client";
 import { useEffect, useRef, useState } from "react";
-import { fetchBlockedUsers, fetchUserMe } from "../../api/requests";
+import { fetchBlockedUsers } from "../../api/requests";
 import { useAuth } from "../../contexts/AuthContext";
 
 type ChatMessage = {

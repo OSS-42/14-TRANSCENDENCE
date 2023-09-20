@@ -1,7 +1,7 @@
-import { Box, Button, Modal, TextField, Typography } from "@mui/material";
+import { Box, Button, Modal, Typography } from "@mui/material";
 import axios from "axios";
 import Cookies from "js-cookie";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import QRCode from "qrcode.react";
 
 const BASE_URL = "/api";
@@ -9,7 +9,7 @@ const BASE_URL = "/api";
 export function TwoFactorAuthentication() {
   const [otpURL, setOtpURL] = useState("");
   const [isQRCodeVisible, setQRCodeVisible] = useState(false);
-  const [isActivated, setIsActivated] = useState("");
+  const [isActivated, setIsActivated] = useState(false);
   const jwt_token = Cookies.get("jwt_token");
 
   async function activate2FA() {

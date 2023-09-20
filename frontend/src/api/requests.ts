@@ -5,6 +5,16 @@ import { User } from "../models/User";
 const BASE_URL = "/api";
 const jwt_token = Cookies.get("jwt_token");
 
+interface MatchData {
+  date: string;
+  winner: string;
+  loser: string;
+}
+interface MatchHistoryData {
+  matchesWon: MatchData[];
+  matchesLost: MatchData[];
+}
+
 export async function fetchUserMe(): Promise<User | undefined> {
   try {
     const response = await axios.get(`${BASE_URL}/users/me`, {
@@ -87,7 +97,7 @@ export async function fetchMatchHistory(id: number): Promise<{}> {
         },
       }
     );
-    return banResponse.data;
+    return banResponse.data as MatchHistoryData;
   } catch (error) {
     console.error("Error fetching user data:", error);
     throw error;
@@ -152,5 +162,6 @@ export async function updateUser(editedName: string): Promise<void> {
     return response.data;
   } catch (error) {
     console.error("Error updating user data:", error);
+    throw error;
   }
 }

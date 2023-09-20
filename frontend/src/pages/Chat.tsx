@@ -39,12 +39,12 @@ export function Chat({ socket }: ChatProps) {
   }, [messages]);
 
   useEffect(() => {
-    socket.on("messageResponse", handleMessageResponse);
-    socket.on("notice", handleMessageResponse);
+    socket?.on("messageResponse", handleMessageResponse);
+    socket?.on("notice", handleMessageResponse);
 
     return () => {
-      socket.off("messageResponse", handleMessageResponse);
-      socket.off("notice", handleMessageResponse);
+      socket?.off("messageResponse", handleMessageResponse);
+      socket?.off("notice", handleMessageResponse);
     };
   }, [socket]);
 

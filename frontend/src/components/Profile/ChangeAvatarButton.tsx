@@ -1,9 +1,14 @@
 import { Box, Button } from "@mui/material";
 import axios from "axios";
 import Cookies from "js-cookie";
-import { updateAvatarApi } from "../../api/requests";
+import { User } from "../../models/User";
+// import { updateAvatarApi } from "../../api/requests";
 
-export function ChangeAvatarButton({ setUser }) {
+export function ChangeAvatarButton({
+  setUser,
+}: {
+  setUser: (user: User) => void;
+}) {
   const handleAvatarSelected = (event: any) => {
     const selectedFile = event.target.files[0];
     if (selectedFile) {
@@ -26,7 +31,7 @@ export function ChangeAvatarButton({ setUser }) {
       });
       console.log("Avatar updated successfully");
       setUser(response.data);
-    } catch (error) {
+    } catch (error: any) {
       if (error.message === "Request failed with status code 413")
         alert("Image is too large. Please choose a smaller image");
       console.error("Error updating avatar:", error);

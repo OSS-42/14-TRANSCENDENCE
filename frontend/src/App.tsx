@@ -1,43 +1,39 @@
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-} from 'react-router-dom'
-// import PrivateRoutes from "./utils/PrivateRoutes";
-import { useAuth } from './contexts/AuthContext'
-import socketIO, { Socket } from 'socket.io-client'
+import { Routes, Route, Navigate } from "react-router-dom";
+import { useAuth } from "./contexts/AuthContext";
+import socketIO, { Socket } from "socket.io-client";
 
-import Header from './components/Header'
-import { Chat, Home, Pong, Profile, Welcome, Error, Oops } from './pages'
-import { useEffect, useState } from 'react'
+import Header from "./components/Header";
+import { Chat, Home, Pong, Profile, Welcome, Error } from "./pages";
+import { useEffect, useState } from "react";
 
 function App() {
-  const { user, loading } = useAuth()
-  const [chatSocket, setChatSocket] = useState<Socket | null>(null)
-  const [chatSocketInitialized, setChatSocketInitialized] = useState(false)
+  const { user, loading, isLogged } = useAuth();
+  const [chatSocket, setChatSocket] = useState<Socket | null>(null);
+  const [chatSocketInitialized, setChatSocketInitialized] = useState(false);
 
   useEffect(() => {
-    if (!user) return
+    if (!user) return;
 
-    const newSocket = socketIO('/chat', {
+    if (user && chatSocketInitialized) return;
+
+    const newSocket = socketIO("/chat", {
       query: {
         token: user?.jwtToken,
       },
-    })
-    newSocket.on('connect', () => {
-      setChatSocketInitialized(true)
-      setChatSocket(newSocket)
-      console.log('ChatSocket Connection made!')
-    })
+    });
+    newSocket.on("connect", () => {
+      setChatSocketInitialized(true);
+      setChatSocket(newSocket);
+      console.log("ChatSocket Connection made!");
+    });
     return () => {
-      newSocket.disconnect()
-    }
-  }, [user])
+      newSocket.disconnect();
+    };
+  }, [isLogged]);
 
   if (loading) {
-    console.log('Loading...')
-    return <></>
+    console.log("Loading...");
+    return <></>;
   }
 
   return (
@@ -74,7 +70,7 @@ function App() {
         <Route path="*" element={<Error />} />
       </Routes>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
