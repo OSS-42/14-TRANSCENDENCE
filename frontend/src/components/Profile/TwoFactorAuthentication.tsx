@@ -6,6 +6,7 @@ import QRCode from "qrcode.react";
 
 interface TwoFactorAuthenticationProps{
 	TwoFactorStatus: bool;
+	setUser		   : Function;
 }
 
 const BASE_URL = "/api";
@@ -15,6 +16,8 @@ export function TwoFactorAuthentication({TwoFactorStatus}: TwoFactorAuthenticati
   const [isQRCodeVisible, setQRCodeVisible] = useState(false);
   const [isActivated, setIsActivated] = useState(TwoFactorStatus);
   const jwt_token = Cookies.get("jwt_token");
+
+
   async function activate2FA() {
     try {
       const response = await axios.post(
@@ -26,6 +29,7 @@ export function TwoFactorAuthentication({TwoFactorStatus}: TwoFactorAuthenticati
           },
         }
       );
+	  console.log(response);
       setOtpURL(response.data.otpauthUrl);
       console.log(response.data.otpauthUrl);
       setQRCodeVisible(true);

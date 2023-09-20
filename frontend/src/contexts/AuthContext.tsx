@@ -67,10 +67,10 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
             Authorization: bearerAuthorization(jwtToken),
           },
         });
-        console.log(response.data);
-
         setUser({ ...response.data, jwtToken: jwtToken });
-        setIsLogged(true);
+		if (response.data.twoFactorSecret)  
+			setIs2FA(true);
+		setIsLogged(true);
       } catch (error) {
         console.error("Error fetching user data:", error);
       }
@@ -121,8 +121,9 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
       logout,
       fetchUserData,
 	  setUser,
+	  is2FA,
     };
-  }, [loading, user, isLogged, login, setUser, logout, fetchUserData]);
+  }, [loading, user, isLogged, login, setUser, logout, fetchUserData, is2FA]);
 
   return (
     <AuthContext.Provider value={contextData}>{children}</AuthContext.Provider>
