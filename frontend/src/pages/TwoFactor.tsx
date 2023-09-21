@@ -2,10 +2,14 @@ import { Box, Button } from "@mui/material";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { useState } from "react";
+import { useAuth } from "../contexts/AuthContext";
+import { useRoutes } from "../contexts/RoutesContext";
 
 export function TwoFactor() {
-  const [inputValue, setInputValue] = useState("");
+  const [inputValue, setInputValue] = useState("");	
   const jwt_token = Cookies.get("jwt_token");
+  const { navigateTo } = useRoutes();
+  const { setIs2FAValidated } = useAuth();
 
   function handleChange(event: any){
 
@@ -26,6 +30,16 @@ export function TwoFactor() {
         }
       );
       console.log("Response:", response.data);
+	  if (response.data.message === '2FA code is valid.')
+	  {
+		setIs2FAValidated(true);
+		navigateTo('/');
+	  }
+	  else if (response.data.message === 'Invalid 2FA code.')
+	  {
+		alert('Invalid input, please enter a valid input.');
+		setInputValue("");
+	  }
     } catch (error) {
       console.error("Error verifying user 2FA", error);
       throw error;
@@ -57,6 +71,7 @@ export function TwoFactor() {
         minLength="6"
         maxLength="6"
         size="10"
+		value={inputValue}
 		onChange={handleChange}
       />
       <br />

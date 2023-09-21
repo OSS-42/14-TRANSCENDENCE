@@ -14,7 +14,7 @@ import { useEffect, useState } from "react";
 import { TwoFactor } from "./pages/TwoFactor";
 
 function App() {
-  const { user, loading, isLogged, is2FA } = useAuth();
+  const { user, loading, isLogged, is2FA, is2FAValidated } = useAuth();
   const [chatSocket, setChatSocket] = useState<Socket | null>(null);
   const [chatSocketInitialized, setChatSocketInitialized] = useState(false);
 
@@ -43,11 +43,8 @@ function App() {
 
   return (
 	<>
-	  {is2FA ? (
-		<TwoFactor/>
-	  ) : (
 		<>
-		  {user ? <Header /> : null}
+		  {user && is2FAValidated ? <Header /> : null}
 		  <Routes>
 			<Route
 			  path="/welcome"
@@ -65,11 +62,15 @@ function App() {
 				) : (
 				  <Navigate to="/" />
 				)
-			  }
+			  }	
 			/>
 			<Route
 			  path="/game"
 			  element={user ? <Pong /> : <Navigate to="/" />}
+			/>
+			<Route
+			  path="/TwoFactor"
+			  element={user ? <TwoFactor/> : <Navigate to="/welcome" />}
 			/>
 			<Route
 			  path="/profile"
@@ -78,7 +79,6 @@ function App() {
 			<Route path="*" element={<Error />} />
 		  </Routes>
 		</>
-	  )}
 	</>
   );
 }

@@ -11,6 +11,7 @@ import Cookies from "js-cookie";
 import { getCookies, bearerAuthorization } from "../utils";
 import { User } from "../models/User";
 import { useRoutes } from "./RoutesContext";
+import { TwoFactor } from "../pages/TwoFactor";
 
 // Define constants
 const JWT_TOKEN_COOKIE = "jwt_token";
@@ -35,6 +36,7 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
   const [loading, setLoading] = useState(true);
   const [isLogged, setIsLogged] = useState(false);
   const [is2FA, setIs2FA] = useState(false);
+  const [is2FAValidated, setIs2FAValidated] = useState(false);
   const { navigateTo } = useRoutes();
 
   const login = async () => {
@@ -68,8 +70,10 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
           },
         });
         setUser({ ...response.data, jwtToken: jwtToken });
-		if (response.data.twoFactorSecret)  
+		if (response.data.twoFactorSecret && is2FAValidated === false){
 			setIs2FA(true);
+			navigateTo('TwoFactor');
+		}
 		setIsLogged(true);
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -122,8 +126,10 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
       fetchUserData,
 	  setUser,
 	  is2FA,
+	  is2FAValidated,
+	  setIs2FAValidated
     };
-  }, [loading, user, isLogged, login, setUser, logout, fetchUserData, is2FA]);
+  }, [loading, user, isLogged, login, setUser, logout, fetchUserData, is2FA, is2FAValidated, setIs2FAValidated]);
 
   return (
     <AuthContext.Provider value={contextData}>{children}</AuthContext.Provider>
