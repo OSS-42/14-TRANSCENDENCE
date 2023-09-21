@@ -76,7 +76,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   private emitUpdateConnectedUsers(): void {
     const connectedUserIds = Array.from(this.connectedUsersService.connectedUsers.keys());
-    this.server.emit('updateConnectedUsers', connectedUserIds);
+    const connectedUserIdsPong = Array.from(this.connectedUsersService.connectedtoPonng.keys());
+    this.server.emit('updateConnectedUsers', { connectedUserIds :connectedUserIds, connectedUserIdsPong:connectedUserIdsPong });
   }
 
   @SubscribeMessage('invitation')

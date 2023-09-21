@@ -12,10 +12,15 @@ export class UserService {
   constructor(private prisma: PrismaService) {}
 
 
-  async getUserInfo(username: string): Promise<Utilisateur> {
+  async getUserInfo(username: string): Promise<{ id: number, username: string, avatar: string }> {
     const user = await this.prisma.utilisateur.findFirst({
       where: {
         username: username,
+      },
+      select: {
+        id: true,
+        username: true,
+        avatar: true,
       },
     });
 
@@ -25,6 +30,7 @@ export class UserService {
 
     return user;
   }
+
   async getUserInfoPlus(id: number): Promise<{ id: number, username: string, avatar: string }> {
     const user = await this.prisma.utilisateur.findFirst({
       where: {

@@ -7,6 +7,7 @@ import PersonRemoveIcon from "@mui/icons-material/PersonRemove";
 type ChatFriendsProps = {
   socket: Socket;
   connectedUsers: number[];
+  connectedToPong: number[];
   friendsList: User[];
   setFriendsList: React.Dispatch<React.SetStateAction<User[]>>;
   handleUserClick: (user: User) => void;
@@ -19,6 +20,7 @@ const ChatFriends = ({
   connectedUsers,
   handleUserClick,
   friendsList,
+  connectedToPong
 }: ChatFriendsProps) => {
   async function removeFriend(id: number) {
     await destroyFriend(id);
