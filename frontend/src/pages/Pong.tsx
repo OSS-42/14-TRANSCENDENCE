@@ -594,7 +594,7 @@ export function Pong() {
     compHitSoundRef.current?.play();
   };
 
-
+//--------------- SCOREBOARD LOGIC -----------------
   // const goalRight = (prevScore: number) => {
   //   const newScore: number = prevScore + 1;
   //   if (newScore < 3) {
@@ -631,12 +631,11 @@ export function Pong() {
     useFrame(() => {
       if (isPaused || gameStart || winner) return;
 
-      let newX: number = 0;
-      let newZ: number = 0; // ne pas oublier la position de la camera pour la vue top-down
+      // let newX: number = 0;
+      // let newZ: number = 0; // ne pas oublier la position de la camera pour la vue top-down
 
-      if (hostStatus) {
-        newX = ballPosition.x + ballVelocity.x;
-        newZ = ballPosition.z + ballVelocity.z;
+        let newX: number = ballPosition.x + ballVelocity.x;
+        let newZ: number = ballPosition.z + ballVelocity.z;
   
         const directionZ = Math.sign(ballVelocity.z);
 
@@ -700,15 +699,15 @@ export function Pong() {
   
           ballVelocity.x = -ballVelocity.x;
   
-          const relativeCollisionPoint =
-            (newZ - hitPaddlePosition.z) / (paddleDepth / 2);
-          const newZVelocity =
-            ballVelocity.z + relativeCollisionPoint * INITIAL_BALL_SPEED;
+          // const relativeCollisionPoint =
+          //   (newZ - hitPaddlePosition.z) / (paddleDepth / 2);
+          // const newZVelocity =
+          //   ballVelocity.z + relativeCollisionPoint * INITIAL_BALL_SPEED;
   
-          // Normalize the velocity to maintain the initial speed
-          const magnitude = Math.sqrt(ballVelocity.x ** 2 + newZVelocity ** 2);
-          ballVelocity.x = (ballVelocity.x / magnitude) * INITIAL_BALL_SPEED;
-          ballVelocity.z = (newZVelocity / magnitude) * INITIAL_BALL_SPEED;
+          // // Normalize the velocity to maintain the initial speed
+          // const magnitude = Math.sqrt(ballVelocity.x ** 2 + newZVelocity ** 2);
+          // ballVelocity.x = (ballVelocity.x / magnitude) * INITIAL_BALL_SPEED;
+          // ballVelocity.z = (newZVelocity / magnitude) * INITIAL_BALL_SPEED;
   
           newX =
             hitPaddlePosition.x +
@@ -731,24 +730,24 @@ export function Pong() {
           //   setLeftScore(prevScore => goalLeft(prevScore));
           // }
           if (newX - ballRadius <= -WORLD_WIDTH / 2) {
-            setRightScore((prevScore) => {
-              const newScore = prevScore + 1;
-              if (newScore < 3) {
-                setIsPaused(true);
-                handleCountdown();
-              }
-              return newScore;
-            });
-          } else if (newX + ballRadius >= WORLD_WIDTH / 2) {
-            setLeftScore((prevScore) => {
-              const newScore = prevScore + 1;
-              if (newScore < 3) {
-                setIsPaused(true);
-                handleCountdown();
-              }
-              return newScore;
-            });
-          }
+          setRightScore((prevScore) => {
+            const newScore = prevScore + 1;
+            if (newScore < 3) {
+              setIsPaused(true);
+              handleCountdown();
+            }
+            return newScore;
+          });
+        } else if (newX + ballRadius >= WORLD_WIDTH / 2) {
+          setLeftScore((prevScore) => {
+            const newScore = prevScore + 1;
+            if (newScore < 3) {
+              setIsPaused(true);
+              handleCountdown();
+            }
+            return newScore;
+          });
+        }
   
           setCameraMode("orthographic");
   
@@ -757,10 +756,10 @@ export function Pong() {
           setBallVelocity({ x: INITIAL_BALL_SPEED, z: INITIAL_BALL_SPEED });
         }
 
-      } else {
-        newX = ballPosition.x + ballVelocity.x;
-        newZ = ballPosition.z + ballVelocity.z;
-      }
+      // } else {
+      //   newX = ballPosition.x + ballVelocity.x;
+      //   newZ = ballPosition.z + ballVelocity.z;
+      // }
 
       setBallPosition({
         x: newX,
