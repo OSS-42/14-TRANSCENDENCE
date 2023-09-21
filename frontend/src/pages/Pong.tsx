@@ -18,7 +18,7 @@ import { useAuth } from "../contexts/AuthContext";
 // import for websocket
 import socketIO from "socket.io-client";
 
-//------------------ INFOS QUI TRANSITENT ENTRE SOCKETS ------------
+//============== INFOS QUI TRANSITENT ENTRE SOCKETS ==============
 
 type GameParameters = {
   gameId: string;
@@ -56,12 +56,12 @@ type BallPosition = {
 };
 
 export function Pong() {
-  //------------------ ERROR LISTENING ---------------------
+  //============== ERROR LISTENING ==============
   window.addEventListener('error', function (event) {
     console.log('🏓   there was an issue, but we catched it: ', event);
   });
 
-  //------------------ SOCKET CONNECTION --------------------
+  //============== SOCKET CONNECTION ==============--
   const [socket, setSocket] = useState<ReturnType<typeof socketIO> | null>(null);
 
   useEffect(() => {
@@ -77,7 +77,7 @@ export function Pong() {
     };
   }, []);
 
-  //------------------ CONSTANTS NECESSARY AT TOP --------------------
+  //============== CONSTANTS NECESSARY AT TOP ==============
 
   const { user } = useAuth();
 
@@ -93,7 +93,7 @@ export function Pong() {
   const [showButtons, setShowButtons] = React.useState(true);
   const isGameOver = useRef(false);
 
-  //------------------ GAME VARIABLES ------------------------
+  //============== GAME VARIABLES ==============
   // variables sans resizing
   const paddleWidth: number = 0.5;
   const paddleHeight: number = 1;
@@ -125,7 +125,7 @@ export function Pong() {
     z: 0,
   });
 
-  //------------------ CLIENT-SERVER SETTINGS ------------------------
+  //============== CLIENT-SERVER SETTINGS ==============
   const [isConnected, setIsConnected] = React.useState<boolean>(false);
   const [hostStatus, setHostStatus] = React.useState<boolean>(false);
   const [hostname, setHostname] = React.useState<string>("");
@@ -204,7 +204,6 @@ export function Pong() {
           ballPosition,
           ballVelocity,
           leftPaddlePositionZ,
-          // rightPaddlePositionZ,
           powerupPosition,
           leftScore,
           rightScore,
@@ -223,7 +222,6 @@ export function Pong() {
             setBallPosition(data.ballPosition)
             setBallVelocity(data.ballVelocity)
             setLeftPaddlePositionZ(data.leftPaddlePositionZ)
-            // setRightPaddlePositionZ(data.rightPaddlePositionZ)
             setPowerupPosition(data.powerupPosition)
             setRightScore(data.rightScore)
             setLeftScore(data.leftScore)
@@ -254,15 +252,15 @@ export function Pong() {
       return () => {}; // No-op function when socket is null
     }
   }, [
-    // socket,
-    // initialSetupComplete,
-    // hostStatus,
+    ballPosition,
     leftPaddlePositionZ,
     rightPaddlePositionZ,
+    rightScore,
+    leftScore,
     powerupPosition,
   ]);
 
-  //------------------ GAME MODES ------------------------
+  //============== GAME MODES ==============
  
   const handlePowerupModeIA = (): void => {
     console.log("🏓   powerup 1 vs IA");
@@ -336,7 +334,7 @@ export function Pong() {
   //   }
   // };
 
-  //------------------ USER NAMES ------------------------
+  //============== USER NAMES ==============
   function setNames(
     playerName: string,
     newHostStatus: boolean,
@@ -360,7 +358,7 @@ export function Pong() {
     }
   }
 
-  //------------------ SCENE SETTINGS ------------------------
+  //============== SCENE SETTINGS ==============
   // s'assure que le canvas aura comme maximum toujours 800x600
   const [dimension] = React.useState<{ width: number, height: number }>({ width: 800, height: 600 });
 
@@ -369,8 +367,8 @@ export function Pong() {
   const WORLD_WIDTH: number = dimension.width / CAMERA_ZOOM;
   const WORLD_HEIGHT: number = dimension.height / CAMERA_ZOOM;
 
-  //------------------ GAME GENERAL BEHAVIOR ------------------------
-  // Timer to restart
+  //============== GAME GENERAL BEHAVIOR ==============
+  //-------------- Timer to restart --------------
 
   const handleCountdown = (): void => {
     if (isGameOver.current || oppDisconnected) {
@@ -399,7 +397,7 @@ export function Pong() {
     }, 1000);
   };
 
-  // Key press on multi
+  //-------------- Keypress --------------
   const handleKeyPress = (event: KeyboardEvent): void => {
     if (gameMode === 1 || gameMode === 3) return;
     if (event.key === "c" || event.key === "C") {
@@ -423,6 +421,7 @@ export function Pong() {
   // Scoreboard
   // en cas de victoire, reinitialisation du jeu, identification du gagnant et perdant pour envoi a la DB et retour a la page de selection des modes
 
+  //-------------- Disconnection management --------------
   React.useEffect(() => {
     if (oppDisconnected) {
       setIsPaused(true);
@@ -434,53 +433,56 @@ export function Pong() {
     }
   }, [oppDisconnected]);
 
+  //-------------- Score management --------------
   React.useEffect(() => {
-    if (rightScore === 3 || leftScore === 3) {
-      isGameOver.current = true;
-      console.log("🏓   Quelqu'un a gagne");
-      setIsPaused(true);
-
-      let winnerText = "";
-      if (rightScore === 3) {
-        winnerText =
-          gameMode === 1 || gameMode === 2
-            ? "Computers wins!"
-            : `${clientName} wins!`;
-        setIsHostWinner(false);
-      } else {
-        winnerText = `${hostname} wins!`;
-        setIsHostWinner(true);
-      }
-      setWinner(winnerText);
-
-      handleCountdown();
-
-      setTimeout(() => {
-        console.log("🏓   B ", winnerText);
-        console.log("🏓   B ", gameId);
-        setGameLaunched(false);
-        if (gameId && socket) {
-          console.log("🏓   envoi du resultat");
-          socket.emit("weHaveAWinner", {
-            gameId,
-            isHostWinner,
-            // hostname,
-            // clientName,
-          });
+    if (hostStatus) {
+      if (rightScore >= 3 || leftScore >= 3) {
+        isGameOver.current = true;
+        // console.log("🏓   Quelqu'un a gagne");
+        setIsPaused(true);
+  
+        let winnerText = "";
+        if (rightScore === 3) {
+          winnerText =
+            gameMode === 1 || gameMode === 2
+              ? "Computers wins!"
+              : `${clientName} wins!`;
+          setIsHostWinner(false);
+        } else {
+          winnerText = `${hostname} wins!`;
+          setIsHostWinner(true);
         }
-        window.location.href = "/game";
-      }, 5000);
+        setWinner(winnerText);
+  
+        handleCountdown();
+  
+        setTimeout(() => {
+          console.log("🏓   ", winnerText);
+          console.log("🏓   ", gameId);
+          setGameLaunched(false);
+          if (gameId && socket) {
+            console.log("🏓   envoi du resultat");
+            socket.emit("weHaveAWinner", {
+              gameId,
+              isHostWinner,
+              // hostname,
+              // clientName,
+            });
+          }
+          // window.location.href = "/game";
+        }, 5000);
+      }
     }
   }, [leftScore, rightScore]);
 
   // offsite pour maintenir les paddles a 0.5 unit de leur bordure respective lorsqu'il y a resize
   const distanceFromCenter: number = 0.024 * dimension.width;
 
-  //------------------ GAME OBJECTS ------------------------
+  //============== GAME OBJECTS ==============
   // fixed objects : net, scoreboard, borders.
   // mobile objects: powerup, ball, paddles.
 
-  // powerup seulement sur le net pour jouabilite
+  //-------------- Powerup --------------
   React.useEffect(() => {
     const randomZ = Math.random() * (WORLD_HEIGHT - 2) - (WORLD_HEIGHT / 2 - 1);
     setPowerupPosition({ x: 0, y: 0, z: randomZ });
@@ -526,7 +528,7 @@ export function Pong() {
     return new THREE.CanvasTexture(canvas);
   };
 
-  //creation de la ligne (le net) du milieu
+  //-------------- Net --------------
   const Net = React.memo(() => {
     const numberOfSegments: number = 15;
     const segmentHeight: number = netDepth / 5;
@@ -557,7 +559,7 @@ export function Pong() {
   const baseFontSize: number = 60;
   const fontSize: number = (dimension.width / baseCanvasWidth) * baseFontSize;
 
-  // border lines
+  //-------------- Borders --------------
   const Borders = React.memo(() => {
     const borderThickness = 0.05;
     return (
@@ -580,7 +582,7 @@ export function Pong() {
     );
   });
 
-  // sound effects
+  //-------------- Sound effects --------------
   const goalSoundRef = React.useRef<HTMLAudioElement>(null);
   const ballWallSoundRef = React.useRef<HTMLAudioElement>(null);
   const powerupHitSoundRef = React.useRef<HTMLAudioElement>(null);
@@ -611,7 +613,7 @@ export function Pong() {
     compHitSoundRef.current?.play();
   };
 
-//--------------- SCOREBOARD LOGIC -----------------
+//-------------- SCOREBOARD LOGIC --------------
   // const goalRight = (prevScore: number) => {
   //   const newScore: number = prevScore + 1;
   //   if (newScore < 3) {
@@ -630,7 +632,7 @@ export function Pong() {
   //     return newScore;
   // }
 
-  //------------------ GAME BALL LOGIC ------------------------
+  //============== GAME BALL LOGIC ==============
   // Ball mechanics
   interface BallProps {
     ballPosition: BallPosition;
@@ -645,17 +647,21 @@ export function Pong() {
     ballVelocity,
     setBallVelocity,
   }) => {
+
     useFrame(() => {
       if (isPaused || gameStart || winner) return;
-
+      
       // let newX: number = 0;
       // let newZ: number = 0; // ne pas oublier la position de la camera pour la vue top-down
 
-        let newX: number = ballPosition.x + ballVelocity.x;
-        let newZ: number = ballPosition.z + ballVelocity.z;
-  
+      
+      let newX: number = ballPosition.x + ballVelocity.x;
+      let newZ: number = ballPosition.z + ballVelocity.z;
+      
+      if (hostStatus) {
         const directionZ = Math.sign(ballVelocity.z);
-
+      
+        //----------- VALIDATION HIT AVEC POWERUP ----------
         if (
           powerupVisible &&
           Math.abs(ballPosition.x - powerupPosition.x) < ballRadius + 1 &&
@@ -671,112 +677,109 @@ export function Pong() {
           }, 12000);
         }
 
-        // Validation de hit avec les murs
-        if (
-          (directionZ > 0 && newZ + ballRadius > WORLD_HEIGHT / 2) ||
-          (directionZ < 0 && newZ - ballRadius < -WORLD_HEIGHT / 2)
-        ) {
-          ballVelocity.z = -ballVelocity.z;
-          newZ = ballPosition.z + ballVelocity.z;
-          if (gameMode === 2 || gameMode === 4) playBallWallSound();
-        }
-
-        // Validation de hit avec les paddles
-        const leftPaddlePosition = {
-          x: leftPaddleXPosition,
-          z: leftPaddlePositionZ,
-        };
-        const rightPaddlePosition = {
-          x: rightPaddleXPosition,
-          z: rightPaddlePositionZ,
-        };
-        const paddleDimensions = { width: paddleWidth, depth: paddleDepth };
-  
-        const hitSectionLeft = checkCollision(
-          { x: newX, z: newZ },
-          leftPaddlePosition,
-          paddleDimensions
-        );
-        const hitSectionRight = checkCollision(
-          { x: newX, z: newZ },
-          rightPaddlePosition,
-          paddleDimensions
-        );
-
-        if (hitSectionLeft || hitSectionRight) {
-          const hitPaddlePosition = hitSectionLeft
-            ? leftPaddlePosition
-            : rightPaddlePosition;
-          if (hostStatus && (gameMode === 2 || gameMode === 4)) {
-            playUserHitSound();
-          } else if (!hostStatus && (gameMode === 2 || gameMode === 4)) {
-            //attention si 1 vs 1, laissez le son utilisateur
-            playCompHitSound();
+          //----------- VALIDATION HIT AVEC WALL ----------
+          if (
+            (directionZ > 0 && newZ + ballRadius > WORLD_HEIGHT / 2) ||
+            (directionZ < 0 && newZ - ballRadius < -WORLD_HEIGHT / 2)
+          ) {
+            ballVelocity.z = -ballVelocity.z;
+            newZ = ballPosition.z + ballVelocity.z;
+            if (gameMode === 2 || gameMode === 4) playBallWallSound();
           }
   
-          ballVelocity.x = -ballVelocity.x;
+          //----------- VALIDATION HIT AVEC PADDLES ----------
+          const leftPaddlePosition = {
+            x: leftPaddleXPosition,
+            z: leftPaddlePositionZ,
+          };
+          const rightPaddlePosition = {
+            x: rightPaddleXPosition,
+            z: rightPaddlePositionZ,
+          };
+          const paddleDimensions = { width: paddleWidth, depth: paddleDepth };
+    
+          const hitSectionLeft = checkCollision(
+            { x: newX, z: newZ },
+            leftPaddlePosition,
+            paddleDimensions
+          );
+          const hitSectionRight = checkCollision(
+            { x: newX, z: newZ },
+            rightPaddlePosition,
+            paddleDimensions
+          );
   
-          // const relativeCollisionPoint =
-          //   (newZ - hitPaddlePosition.z) / (paddleDepth / 2);
-          // const newZVelocity =
-          //   ballVelocity.z + relativeCollisionPoint * INITIAL_BALL_SPEED;
-  
-          // // Normalize the velocity to maintain the initial speed
-          // const magnitude = Math.sqrt(ballVelocity.x ** 2 + newZVelocity ** 2);
-          // ballVelocity.x = (ballVelocity.x / magnitude) * INITIAL_BALL_SPEED;
-          // ballVelocity.z = (newZVelocity / magnitude) * INITIAL_BALL_SPEED;
-  
-          newX =
-            hitPaddlePosition.x +
-            Math.sign(ballVelocity.x) * (paddleWidth / 2 + ballRadius);
-        }
+          if (hitSectionLeft || hitSectionRight) {
+            const hitPaddlePosition = hitSectionLeft
+              ? leftPaddlePosition
+              : rightPaddlePosition;
+            if (hostStatus && (gameMode === 2 || gameMode === 4)) {
+              playUserHitSound();
+            } else if (!hostStatus && (gameMode === 2 || gameMode === 4)) {
+              //attention si 1 vs 1, laissez le son utilisateur
+              playCompHitSound();
+            }
+    
+            ballVelocity.x = -ballVelocity.x;
+    
+            // const relativeCollisionPoint =
+            //   (newZ - hitPaddlePosition.z) / (paddleDepth / 2);
+            // const newZVelocity =
+            //   ballVelocity.z + relativeCollisionPoint * INITIAL_BALL_SPEED;
+    
+            // // Normalize the velocity to maintain the initial speed
+            // const magnitude = Math.sqrt(ballVelocity.x ** 2 + newZVelocity ** 2);
+            // ballVelocity.x = (ballVelocity.x / magnitude) * INITIAL_BALL_SPEED;
+            // ballVelocity.z = (newZVelocity / magnitude) * INITIAL_BALL_SPEED;
+    
+            newX =
+              hitPaddlePosition.x +
+              Math.sign(ballVelocity.x) * (paddleWidth / 2 + ballRadius);
+          }
+        
 
+        //----------- IN CASE OF GOAL ----------
         if (
           newX - ballRadius <= -WORLD_WIDTH / 2 ||
           newX + ballRadius >= WORLD_WIDTH / 2
         ) {
+
           if (gameMode === 2 || gameMode === 4) {
             pausePowerupSound();
             playGoalSound();
           }
-  
-          // Update scores
-          // if (newX - ballRadius <= -WORLD_WIDTH / 2) {
-          //   setRightScore(prevScore => goalRight(prevScore));
-          // } else if (newX + ballRadius >= WORLD_WIDTH / 2) {
-          //   setLeftScore(prevScore => goalLeft(prevScore));
-          // }
-          if (newX - ballRadius <= -WORLD_WIDTH / 2) {
-          setRightScore((prevScore) => {
-            const newScore = prevScore + 1;
-            if (newScore < 3) {
-              setIsPaused(true);
-              handleCountdown();
-            }
-            return newScore;
-          });
-        } else if (newX + ballRadius >= WORLD_WIDTH / 2) {
-          setLeftScore((prevScore) => {
-            const newScore = prevScore + 1;
-            if (newScore < 3) {
-              setIsPaused(true);
-              handleCountdown();
-            }
-            return newScore;
-          });
-        }
-  
-          setCameraMode("orthographic");
-  
-          newX = 0;
-          newZ = 0;
-          setBallVelocity({ x: INITIAL_BALL_SPEED, z: INITIAL_BALL_SPEED });
-        }
 
-      // } else {
-      //   newX = ballPosition.x + ballVelocity.x;
-      //   newZ = ballPosition.z + ballVelocity.z;
-      // }
+          if (newX - ballRadius <= -WORLD_WIDTH / 2) {
+            newX = 0;
+            newZ = 0;
+            setBallVelocity({ x: INITIAL_BALL_SPEED, z: INITIAL_BALL_SPEED });
+            setRightScore((prevScore) => {
+              const newScore = prevScore + 1;
+              console.log('NEW SCORE RIGHT, GAMEID: ', gameId, ' Score: ', newScore);
+              if (newScore < 3) {
+                setIsPaused(true);
+                handleCountdown();
+              }
+              return newScore;
+            });
+          } else if (newX + ballRadius >= WORLD_WIDTH / 2) {
+            newX = 0;
+            newZ = 0;
+            setBallVelocity({ x: INITIAL_BALL_SPEED, z: INITIAL_BALL_SPEED });
+            setLeftScore((prevScore) => {
+              const newScore = prevScore + 1;
+              console.log('NEW SCORE LEFT, GAMEID: ', gameId, ' Score: ', newScore);
+              if (newScore < 3) {
+                setIsPaused(true);
+                handleCountdown();
+              }
+              return newScore;
+            });
+          }
+
+        setCameraMode("orthographic");
+      }
+    }
 
       setBallPosition({
         x: newX,
@@ -795,7 +798,7 @@ export function Pong() {
     );
   };
 
-  //------------------ GAME PADDLES LOGIC ------------------------
+  //============== GAME PADDLES LOGIC ==============
   // Collision Logic with Paddles
   type Position = { x: number; z: number };
   type PaddleDimensions = { width: number; depth: number };
@@ -974,10 +977,10 @@ export function Pong() {
     );
   };
 
-  //------------------ CONTEXT LOSS MANAGEMENT ------------------------
+  //============== CONTEXT LOSS MANAGEMENT ==============
   // code a determiner.
 
-  //------------------ GAME SCENE RENDERER ------------------------
+  //============== GAME SCENE RENDERER ==============
   return (
     <MaterialBox
       component="div"
