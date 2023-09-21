@@ -21,15 +21,9 @@ function ChatBar({
   friendsList,
   setFriendsList,
   usersList,
-  connectedUsers,
 }: ChatFriendsProps) {
   const { user } = useAuth();
   const meId = user?.id;
-
-  // Filtrer uniquement les utilisateurs en ligne
-  const onlineUsers = usersList.filter((user) =>
-    connectedUsers?.includes(user.id)
-  );
 
   const addFriend = async (friendUsername: string) => {
     await addFriendApi(friendUsername);
@@ -46,61 +40,54 @@ function ChatBar({
         <h4 className="chat__header">USERS LIST</h4>
         <div className="chat__users">
           <p></p>
-          {onlineUsers
-            .filter(
-              (user) => !friendsList.some((friend) => friend.id === user.id)
-            )
-            .map((user) => (
-              <Box
-                component="div"
-                key={user.id}
-                sx={{
+          {usersList.map((user) => (
+            <Box
+              component="div"
+              key={user.id}
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                padding: "5px",
+                // border: "1px solid #ccc",
+                borderRadius: "5px",
+                marginBottom: "5px",
+              }}
+            >
+              <img
+                src={user.avatar}
+                alt={user.username}
+                width="50"
+                height="50"
+                style={{ borderRadius: "50%" }}
+                onClick={() => handleUserClick(user)}
+              />
+              <div>
+                <p>{user.username}</p>
+              </div>
+              <div
+                style={{
                   display: "flex",
-                  alignItems: "center",
-                  gap: "10px",
-                  padding: "5px",
-                  // border: "1px solid #ccc",
-                  borderRadius: "5px",
-                  marginBottom: "5px",
+                  justifyContent: "flex-end",
+                  flex: "1",
                 }}
               >
-                <img
-                  src={user.avatar}
-                  alt={user.username}
-                  width="50"
-                  height="50"
-                  style={{ borderRadius: "50%" }}
-                  onClick={() => handleUserClick(user)}
-                />
-                <div>
-                  <p>{user.username}</p>
-                  {connectedUsers?.includes(user.id) && (
-                    <span style={{ color: "#65bf76" }}> online</span>
+                {user.id !== meId &&
+                  !friendsList.some((friend) => friend.id === user.id) && (
+                    <Button
+                      sx={{
+                        minWidth: ".1",
+                        padding: ".2rem .2rem .2rem 1rem",
+                      }}
+                      variant="contained"
+                      color="secondary"
+                      startIcon={<PersonAddIcon />}
+                      onClick={() => addFriend(user.username)}
+                    />
                   )}
-                </div>
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "flex-end",
-                    flex: "1",
-                  }}
-                >
-                  {user.id !== meId &&
-                    !friendsList.some((friend) => friend.id === user.id) && (
-                      <Button
-                        sx={{
-                          minWidth: ".1",
-                          padding: ".2rem .2rem .2rem 1rem",
-                        }}
-                        variant="contained"
-                        color="secondary"
-                        startIcon={<PersonAddIcon />}
-                        onClick={() => addFriend(user.username)}
-                      />
-                    )}
-                </div>
-              </Box>
-            ))}
+              </div>
+            </Box>
+          ))}
         </div>
       </Box>
     </Box>
@@ -108,3 +95,4 @@ function ChatBar({
 }
 
 export default ChatBar;
+
