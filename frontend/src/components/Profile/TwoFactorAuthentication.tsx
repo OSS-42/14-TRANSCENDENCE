@@ -5,7 +5,7 @@ import { useState } from "react";
 import QRCode from "qrcode.react";
 
 interface TwoFactorAuthenticationProps{
-	TwoFactorStatus: bool;
+	TwoFactorStatus: boolean;
 }
 
 const BASE_URL = "/api";

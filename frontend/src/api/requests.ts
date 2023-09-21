@@ -87,7 +87,7 @@ export async function fetchBlockedUsers(id: number): Promise<number[]> {
   }
 }
 
-export async function fetchMatchHistory(id: number): Promise<{}> {
+export async function fetchMatchHistory(id: number): Promise<MatchHistoryData> {
   try {
     const banResponse = await axios.get(
       `${BASE_URL}/users/matchHistory/${id}`,
@@ -146,7 +146,7 @@ export async function isUserExist(username: string): Promise<boolean> {
   }
 }
 
-export async function updateUser(editedName: string): Promise<void> {
+export async function updateUserName(editedName: string): Promise<void> {
   try {
     const response = await axios.post(
       `${BASE_URL}/users/updateUsername`,

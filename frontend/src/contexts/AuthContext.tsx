@@ -26,6 +26,7 @@ interface AuthContextType {
   login: () => void;
   logout: () => void;
   fetchUserData: () => Promise<void>;
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -62,7 +63,6 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
     const jwtToken = getCookies("jwt_token");
 
     if (jwtToken && !isLogged) {
-			
       try {
         const response = await axios.get("/api/users/me", {
           headers: {
@@ -122,7 +122,7 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
       login,
       logout,
       fetchUserData,
-	  setUser,
+      setUser,
     };
   }, [loading, user, isLogged, login, setUser, logout, fetchUserData]);
 

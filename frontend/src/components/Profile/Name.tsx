@@ -1,19 +1,19 @@
 import { Box, Button, TextField } from "@mui/material";
 import { useState } from "react";
 import { isUserExist } from "../../api/requests";
-import { updateUser } from "../../api/requests";
+import { updateUserName } from "../../api/requests";
 
 import BorderColorIcon from "@mui/icons-material/BorderColor";
 import { User } from "../../models/User";
 
 interface NameProps {
   user: User | null;
-  updateUserData: (newUser: User) => void;
+  handleUpdateUserName: (newUserName: string) => void;
 }
 
-export function Name({ user, updateUserData }: NameProps) {
+export function Name({ user, handleUpdateUserName }: NameProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const [editedName, setEditedName] = useState("");
+  const [editedName, setEditedName] = useState<string>("");
 
   function handleOnClick() {
     setIsEditing(true);
@@ -73,8 +73,13 @@ export function Name({ user, updateUserData }: NameProps) {
         setEditedName(user?.username ?? "");
         return;
       }
-      const newUser = await updateUser(editedName);
-      props.setUser(newUser);
+      try {
+        await updateUserName(editedName);
+        handleUpdateUserName(editedName);
+      } catch (error: any) {
+        alert("Error updating username. Try again later.");
+        console.error("Error updating username:", error);
+      }
     }
     setIsEditing(false);
   }
@@ -113,7 +118,7 @@ export function Name({ user, updateUserData }: NameProps) {
             justifyContent="space-around"
             alignContent="center"
           >
-            {user.username}
+            {user?.username}
             <Button
               sx={{
                 minWidth: ".1",

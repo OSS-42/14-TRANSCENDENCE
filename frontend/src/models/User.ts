@@ -4,8 +4,8 @@ interface User {
   createdAt: string;
   updatedAt: string;
   username: string;
-  gamesWon: number;
-  gameLost: number;
+  // gamesWon: number;
+  // gameLost: number;
   avatar?: string;
   email: string;
   twoFactorSecret?: string;

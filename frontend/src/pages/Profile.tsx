@@ -1,7 +1,7 @@
 // import Cookies from "js-cookie";
 // import axios from "axios";
 import { useEffect, useState } from "react";
-import { User } from "../models/User";
+// import { User } from "../models/User";
 import { AvatarImage } from "../components/Profile/AvatarImage";
 import { Name } from "../components/Profile/Name";
 import { ContainerGrid } from "../components/Profile/ContainerGrid";
@@ -29,14 +29,27 @@ interface MatchHistoryData {
 
 export function Profile() {
   const { user, setUser } = useAuth();
-  const [match, setMatch] = useState({
+  const [match, setMatch] = useState<MatchHistoryData>({
     matchesWon: [],
     matchesLost: [],
   });
   const params = useParams();
   console.log(params);
 
-  if (params) {
+  const updateUsername = (newUsername: string) => {
+    if (user) setUser({ ...user, username: newUsername });
+  };
+
+  async function getMatchHistory() {
+    const matches = await fetchMatchHistory(user?.id ?? -1);
+    setMatch(matches);
+  }
+
+  useEffect(() => {
+    getMatchHistory();
+  }, [user]);
+
+  if (params.username) {
     //THIS MEANS I'M POSSIBLY TRYING TO VIEW SOMEONE ELSE'S PROFILE IN A READ-ONLY MODE
     // Idea: Use the same structure we have for our own profile, but with different fetch requests.
     // The same fetch requests would be used in the User Details Card in the Chat.
@@ -62,22 +75,15 @@ export function Profile() {
   }
   // <Link to={`/Your-Personal-profile/${comment.UserId}/${post.fullName}`}
 
-  async function getMatchHistory() {
-    const matches = await fetchMatchHistory(user?.id ?? -1);
-    setMatch(matches);
-  }
-
-  useEffect(() => {
-    getMatchHistory();
-  }, [user]);
-
   return (
     <ContainerGrid>
       <LeftSideGrid>
-        <Name user={user?.username} setUser={setUser} />
+        <Name user={user} handleUpdateUserName={updateUsername} />
         <AvatarImage user={user} />
-        <ChangeAvatarButton setUser={setUser} />
-        <TwoFactorAuthentication TwoFactorStatus={user.twoFactorSecret ? true : false}/>
+        <ChangeAvatarButton updateUserData={setUser} />
+        <TwoFactorAuthentication
+          TwoFactorStatus={user?.twoFactorSecret ? true : false}
+        />
       </LeftSideGrid>
       <RightSideGrid>
         <MatchWonLost match={match} />

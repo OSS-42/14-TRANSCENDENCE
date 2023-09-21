@@ -72,6 +72,7 @@ export function Chat({ socket }: ChatProps) {
           flexGrow: 1,
           flexDirection: "column",
           margin: "1rem .5rem 1rem 1rem",
+          maxWidth: "67%",
         }}
       >
         {/* Chat Box */}
