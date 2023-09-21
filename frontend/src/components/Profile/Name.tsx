@@ -73,14 +73,8 @@ export function Name({ user, updateUserData }: NameProps) {
         setEditedName(user?.username ?? "");
         return;
       }
-      try {
-        await updateUser(editedName);
-        const updatedUserData = { ...user, username: editedName };
-        updateUserData(updatedUserData);
-      } catch (error: any) {
-        alert("Error updating username. Try again later.");
-        console.error("Error updating username:", error);
-      }
+      const newUser = await updateUser(editedName);
+      props.setUser(newUser);
     }
     setIsEditing(false);
   }

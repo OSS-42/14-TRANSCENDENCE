@@ -28,9 +28,8 @@ interface MatchHistoryData {
 }
 
 export function Profile() {
-  const { user } = useAuth();
-  const [userData, setUserData] = useState(user);
-  const [match, setMatch] = useState<MatchHistoryData>({
+  const { user, setUser } = useAuth();
+  const [match, setMatch] = useState({
     matchesWon: [],
     matchesLost: [],
   });
@@ -63,10 +62,6 @@ export function Profile() {
   }
   // <Link to={`/Your-Personal-profile/${comment.UserId}/${post.fullName}`}
 
-  const updateUserData = (newUser: User) => {
-    setUserData(newUser);
-  };
-
   async function getMatchHistory() {
     const matches = await fetchMatchHistory(user?.id ?? -1);
     setMatch(matches);
@@ -79,13 +74,10 @@ export function Profile() {
   return (
     <ContainerGrid>
       <LeftSideGrid>
-        <Name
-          user={userData?.username ?? null}
-          updateUserData={updateUserData}
-        />
-        <AvatarImage user={userData} />
-        <ChangeAvatarButton setUser={setUserData} />
-        <TwoFactorAuthentication />
+        <Name user={user?.username} setUser={setUser} />
+        <AvatarImage user={user} />
+        <ChangeAvatarButton setUser={setUser} />
+        <TwoFactorAuthentication TwoFactorStatus={user.twoFactorSecret ? true : false}/>
       </LeftSideGrid>
       <RightSideGrid>
         <MatchWonLost match={match} />

@@ -4,14 +4,17 @@ import Cookies from "js-cookie";
 import { useState } from "react";
 import QRCode from "qrcode.react";
 
+interface TwoFactorAuthenticationProps{
+	TwoFactorStatus: bool;
+}
+
 const BASE_URL = "/api";
 
-export function TwoFactorAuthentication() {
+export function TwoFactorAuthentication({TwoFactorStatus}: TwoFactorAuthenticationProps) {
   const [otpURL, setOtpURL] = useState("");
   const [isQRCodeVisible, setQRCodeVisible] = useState(false);
-  const [isActivated, setIsActivated] = useState(false);
+  const [isActivated, setIsActivated] = useState(TwoFactorStatus);
   const jwt_token = Cookies.get("jwt_token");
-
   async function activate2FA() {
     try {
       const response = await axios.post(

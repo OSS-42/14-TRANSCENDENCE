@@ -122,8 +122,9 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
       login,
       logout,
       fetchUserData,
+	  setUser,
     };
-  }, [loading, user, isLogged, login, logout, fetchUserData]);
+  }, [loading, user, isLogged, login, setUser, logout, fetchUserData]);
 
   return (
     <AuthContext.Provider value={contextData}>{children}</AuthContext.Provider>

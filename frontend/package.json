@@ -24,7 +24,6 @@
     "@types/react-modal": "^3.16.0",
     "axios": "^1.4.0",
     "js-cookie": "^3.0.5",
-    "loadash": "^1.0.0",
     "lodash": "^4.17.21",
     "popmotion": "^11.0.5",
     "qrcode.react": "^3.1.0",

@@ -8,14 +8,15 @@ interface User {
   gameLost: number;
   avatar?: string;
   email: string;
-  friends: Friendship[];
-  friendOf: Friendship[];
-  ownedChatRooms: ChatRoom[];
-  memberChatRooms: ChatRoom[];
-  moderatorChatRooms: ChatRoom[];
-  bannedChatRooms: ChatRoom[];
-  matchHistoryWinner: Match[];
-  matchHistoryLoser: Match[];
+  twoFactorSecret?: string;
+  //   friends: Friendship[];
+  //   friendOf: Friendship[];
+  //   ownedChatRooms: ChatRoom[];
+  //   memberChatRooms: ChatRoom[];
+  //   moderatorChatRooms: ChatRoom[];
+  //   bannedChatRooms: ChatRoom[];
+  //   matchHistoryWinner: Match[];
+  //   matchHistoryLoser: Match[];
 }
 
 interface Friendship {
