@@ -14,9 +14,10 @@ import { useEffect, useState } from "react";
 import { TwoFactor } from "./pages/TwoFactor";
 
 function App() {
-  const { user, loading, isLogged, is2FA, is2FAValidated } = useAuth();
+  const { user, loading, isLogged } = useAuth();
   const [chatSocket, setChatSocket] = useState<Socket | null>(null);
   const [chatSocketInitialized, setChatSocketInitialized] = useState(false);
+
 
   useEffect(() => {
     if (!user) return;
@@ -44,7 +45,7 @@ function App() {
   return (
 	<>
 		<>
-		  {user && is2FAValidated ? <Header /> : null}
+		  {user && user.is2FAValidated ?  <Header /> : null}
 		  <Routes>
 			<Route
 			  path="/welcome"

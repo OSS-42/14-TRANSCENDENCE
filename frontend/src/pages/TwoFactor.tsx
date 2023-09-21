@@ -9,7 +9,29 @@ export function TwoFactor() {
   const [inputValue, setInputValue] = useState("");	
   const jwt_token = Cookies.get("jwt_token");
   const { navigateTo } = useRoutes();
-  const { setIs2FAValidated } = useAuth();
+  const { setUser } = useAuth();
+
+
+  async function TwoFactorValidationStatus() {
+    try {
+      const response = await axios.post(
+        `api/users/is2FAValidated`,
+        {value: true},
+        {
+          headers: {
+            Authorization: `Bearer ${jwt_token}`,
+          },
+        }
+      );
+	  console.log("Update2FAStatusRequest",response);
+	  setUser(response.data);
+    } catch (error) {
+      console.error("Error fetching user 2FA", error);
+      throw error;
+    }
+  }
+
+//   setUser(response.data);
 
   function handleChange(event: any){
 
@@ -32,7 +54,7 @@ export function TwoFactor() {
       console.log("Response:", response.data);
 	  if (response.data.message === '2FA code is valid.')
 	  {
-		setIs2FAValidated(true);
+		TwoFactorValidationStatus();
 		navigateTo('/');
 	  }
 	  else if (response.data.message === 'Invalid 2FA code.')

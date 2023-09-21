@@ -70,7 +70,7 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
           },
         });
         setUser({ ...response.data, jwtToken: jwtToken });
-		if (response.data.twoFactorSecret && is2FAValidated === false){
+		if (response.data.twoFactorSecret && response.data.is2FAValidated === false){
 			setIs2FA(true);
 			navigateTo('TwoFactor');
 		}
