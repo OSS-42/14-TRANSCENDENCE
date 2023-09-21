@@ -174,13 +174,13 @@ export class UserService {
       },
     });
 
-    const matchesWon = user.matchHistoryWinner.map((match) => ({
+    const matchesWon  = user.matchHistoryWinner.map((match) => ({
       date: match.createdAt,
       winner: match.winner.username,
       loser: match.loser.username,
     }));
 
-    const matchesLost = user.matchHistoryLoser.map((match) => ({
+    const matchesLost  = user.matchHistoryLoser.map((match) => ({
       date: match.createdAt,
       winner: match.winner.username,
       loser: match.loser.username,

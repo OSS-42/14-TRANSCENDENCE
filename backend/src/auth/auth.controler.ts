@@ -1,19 +1,5 @@
-import {
-  Body,
-  Controller,
-  Get,
-  UseGuards,
-  Post,
-  Query,
-  Res,
-  Req,
-} from "@nestjs/common";
-import {
-  ApiBearerAuth,
-  ApiExcludeEndpoint,
-  ApiProperty,
-  ApiTags,
-} from "@nestjs/swagger";
+import {Body, Controller, Get, UseGuards, Post, Query, Res, Req,} from "@nestjs/common";
+import {ApiExcludeEndpoint,ApiTags,} from "@nestjs/swagger";
 import { AuthService } from "./auth.service";
 import { Response } from "express";
 import { JwtGuard } from "src/auth/guard";
@@ -45,12 +31,9 @@ export class AuthControler {
   @ApiExcludeEndpoint()
   @Get()
   async getCode42(@Query("code") code: string, @Res() res: Response) {
-    console.log("Code:", code);
-
-    //ici je vais rediriger la reponse vers le frontend
+  
     const token_object = await this.authService.getCode42(code);
     const host = this.config.get("HOST");
-    //ON va avoir besoin d<une PAGE deja log qui ne se connecte pas au sockets.
     if (token_object.access_token === "poulet")
       return  res.redirect(`${host}/error`);
     const access_token: string = token_object.access_token;
@@ -60,7 +43,12 @@ export class AuthControler {
 
     return res.redirect(`${host}`);
   }
+  
 
+  @Post("newToken")
+  async newToken(@Body() body: {userSecretId: string}) {
+   return this.authService.generateToken(body.userSecretId)
+  }
   //---routes pour le 2FA----//
 
   //C<est une route post, mais il n'y a pas de body pour l<instant
@@ -94,4 +82,6 @@ export class AuthControler {
       return { message: "Invalid 2FA code." };
     }
   }
+
+ 
 }
