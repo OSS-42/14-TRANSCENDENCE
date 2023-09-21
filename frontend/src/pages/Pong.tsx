@@ -53,7 +53,7 @@ type OppDisconnected = {
 export function Pong() {
   //------------------ ERROR LISTENING ---------------------
   window.addEventListener('error', function (event) {
-    console.log('there was an issue, but we catched it');
+    console.log('there was an issue, but we catched it: ', event);
   });
 
   //------------------ SOCKET CONNECTION --------------------
@@ -100,9 +100,6 @@ export function Pong() {
 
   const [leftPaddlePositionZ, setLeftPaddlePositionZ] = React.useState(0);
   const [rightPaddlePositionZ, setRightPaddlePositionZ] = React.useState(0);
-  const [leftScore, setLeftScore] = React.useState(0);
-  const [rightScore, setRightScore] = React.useState(0);
-  const [winner, setWinner] = React.useState<string | null>(null);
   const [countdown, setCountdown] = React.useState<number | null>(null);
   const [powerupVisible, setPowerupVisible] = React.useState(false);
 
@@ -242,24 +239,7 @@ export function Pong() {
   ]);
 
   //------------------ GAME MODES ------------------------
-  const handleClassicModeIA = (): void => {
-    console.log("🏓   classic 1 vs IA");
-    try {
-      const newHostStatus = true; // a cause async nature de React.
-      const newGM = 1;
-      setHostStatus(newHostStatus);
-      setGameMode(newGM);
-      setNames(playerName, newHostStatus, newGM, setHostname, setClientName);
-      setGameLaunched(true);
-      setCameraMode("orthographic");
-      setShowButtons(false);
-      handleCountdown();
-    } catch {
-      console.log("🏓   we catched an issue. GM1");
-      return;
-    }
-  };
-
+ 
   const handlePowerupModeIA = (): void => {
     console.log("🏓   powerup 1 vs IA");
     try {
@@ -295,22 +275,40 @@ export function Pong() {
     }
   };
 
-  const handlePowerupModeMulti = (): void => {
-    console.log("🏓   powerup 1 vs multi");
-    try {
-      const newGM = 4;
-      socket.emit("waitingForPlayerGM4", { playerName, newGM });
-      setWaitingForPlayer(true);
-      setGameLaunched(true);
-      setCameraMode("orthographic");
-      setPowerupVisible(true);
-      setGameMode(newGM);
-      setShowButtons(false);
-    } catch {
-      console.log("🏓   we catched an issue. GM4");
-      return;
-    }
-  };
+  // const handleClassicModeIA = (): void => {
+  //   console.log("🏓   classic 1 vs IA");
+  //   try {
+  //     const newHostStatus = true; // a cause async nature de React.
+  //     const newGM = 1;
+  //     setHostStatus(newHostStatus);
+  //     setGameMode(newGM);
+  //     setNames(playerName, newHostStatus, newGM, setHostname, setClientName);
+  //     setGameLaunched(true);
+  //     setCameraMode("orthographic");
+  //     setShowButtons(false);
+  //     handleCountdown();
+  //   } catch {
+  //     console.log("🏓   we catched an issue. GM1");
+  //     return;
+  //   }
+  // };
+
+  // const handlePowerupModeMulti = (): void => {
+  //   console.log("🏓   powerup 1 vs multi");
+  //   try {
+  //     const newGM = 4;
+  //     socket.emit("waitingForPlayerGM4", { playerName, newGM });
+  //     setWaitingForPlayer(true);
+  //     setGameLaunched(true);
+  //     setCameraMode("orthographic");
+  //     setPowerupVisible(true);
+  //     setGameMode(newGM);
+  //     setShowButtons(false);
+  //   } catch {
+  //     console.log("🏓   we catched an issue. GM4");
+  //     return;
+  //   }
+  // };
 
   //------------------ USER NAMES ------------------------
   function setNames(
@@ -395,7 +393,7 @@ export function Pong() {
   }, [gameMode]);
 
   // Scoreboard
-  // en cas de victoire, reinitialisation dedu jeu, identification du gagnant et perdant pour envoi a la DB et retour a la page de selection des modes
+  // en cas de victoire, reinitialisation du jeu, identification du gagnant et perdant pour envoi a la DB et retour a la page de selection des modes
 
   React.useEffect(() => {
     if (oppDisconnected) {
@@ -585,6 +583,27 @@ export function Pong() {
     compHitSoundRef.current?.play();
   };
 
+
+  const goalRight = (prevScore: number) => {
+    const newScore: number = prevScore + 1;
+    setRightScore(newScore);
+    if (newScore < 3) {
+      setIsPaused(true);
+      handleCountdown();
+    }
+    return newScore;
+  };
+
+  const goalLeft = (prevScore: number) => {
+      const newScore = prevScore + 1;
+      setLeftScore(newScore);
+      if (newScore < 3) {
+        setIsPaused(true);
+        handleCountdown();
+      }
+      return newScore;
+  }
+
   //------------------ GAME BALL LOGIC ------------------------
   // Ball mechanics
   interface BallProps {
@@ -592,7 +611,7 @@ export function Pong() {
     setBallPosition: React.Dispatch<React.SetStateAction<Position>>;
     ballVelocity: Position;
     setBallVelocity: React.Dispatch<React.SetStateAction<Position>>;
-    speedFactor: number;
+    // speedFactor: number;
   }
 
   const Ball: React.FC<BallProps> = ({
@@ -663,7 +682,7 @@ export function Pong() {
           : rightPaddlePosition;
         if (hostStatus && (gameMode === 2 || gameMode === 4)) {
           playUserHitSound();
-        } else if (gameMode === 2 || gameMode === 4) {
+        } else if (!hostStatus && (gameMode === 2 || gameMode === 4)) {
           //attention si 1 vs 1, laissez le son utilisateur
           playCompHitSound();
         }
@@ -696,23 +715,9 @@ export function Pong() {
 
         // Update scores
         if (newX - ballRadius <= -WORLD_WIDTH / 2) {
-          setRightScore((prevScore) => {
-            const newScore = prevScore + 1;
-            if (newScore < 3) {
-              setIsPaused(true);
-              handleCountdown();
-            }
-            return newScore;
-          });
+          goalRight(prevScore => goalRight(prevScore));
         } else if (newX + ballRadius >= WORLD_WIDTH / 2) {
-          setLeftScore((prevScore) => {
-            const newScore = prevScore + 1;
-            if (newScore < 3) {
-              setIsPaused(true);
-              handleCountdown();
-            }
-            return newScore;
-          });
+          goalLeft(prevScore => goalLeft(prevSCore));
         }
 
         setCameraMode("orthographic");
