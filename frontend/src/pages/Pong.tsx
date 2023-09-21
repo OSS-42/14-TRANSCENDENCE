@@ -42,9 +42,9 @@ type WeHaveAWinner = {
   clientName: string;
 };
 
-type Connected = {
-  isConnected: boolean;
-};
+// type Connected = {
+//   isConnected: boolean;
+// };
 
 type OppDisconnected = {
   message: string;
@@ -77,10 +77,7 @@ export function Pong() {
   const { user } = useAuth();
 
   const [gameLaunched, setGameLaunched] = React.useState(false);
-  const [cameraMode, setCameraMode] = React.useState<
-    "perspective" | "orthographic"
-  >("orthographic");
-
+  const [cameraMode, setCameraMode] = React.useState<"perspective" | "orthographic">("orthographic");
   const [isPaused, setIsPaused] = React.useState(true);
   const [gameStart, setGameStart] = React.useState(true);
   const [leftScore, setLeftScore] = React.useState(0);
@@ -89,6 +86,7 @@ export function Pong() {
 
   const [gameMode, setGameMode] = React.useState<0 | 1 | 2 | 3 | 4>(0);
   const [showButtons, setShowButtons] = React.useState(true);
+  const isGameOver = useRef(false);
 
   //------------------ GAME VARIABLES ------------------------
   // variables sans resizing
@@ -96,20 +94,24 @@ export function Pong() {
   const paddleHeight: number = 1;
   const paddleDepth: number = 5;
   const ballRadius: number = 0.5;
-  const INITIAL_BALL_SPEED: number = 0.3;
   const netWidth: number = 0.5;
   const netDepth: number = 8;
+  const INITIAL_BALL_SPEED: number = 0.3;
 
   const [leftPaddlePositionZ, setLeftPaddlePositionZ] = React.useState(0);
   const [rightPaddlePositionZ, setRightPaddlePositionZ] = React.useState(0);
+  const [leftScore, setLeftScore] = React.useState(0);
+  const [rightScore, setRightScore] = React.useState(0);
+  const [winner, setWinner] = React.useState<string | null>(null);
+  const [countdown, setCountdown] = React.useState<number | null>(null);
+  const [powerupVisible, setPowerupVisible] = React.useState(false);
 
-  const [ballSpeed, setBallSpeed] = React.useState(INITIAL_BALL_SPEED);
-  
   const [ballPosition, setBallPosition] = React.useState({
     x: 0,
     y: 0,
     z: 0.00001,
   });
+
   const [ballVelocity, setBallVelocity] = React.useState({
     x: INITIAL_BALL_SPEED,
     z: INITIAL_BALL_SPEED,
@@ -120,9 +122,6 @@ export function Pong() {
     y: 0,
     z: 0,
   });
-  const [powerupVisible, setPowerupVisible] = React.useState(false);
-  const [countdown, setCountdown] = React.useState<number | null>(null);
-  const isGameOver = useRef(false);
 
   //------------------ CLIENT-SERVER SETTINGS ------------------------
   const [isConnected, setIsConnected] = React.useState<boolean>(false);
@@ -132,18 +131,12 @@ export function Pong() {
   const [playerName, setPlayerName] = React.useState<string>("");
 
   const [gameInfos, setGameInfos] = useState<PlayerJoined>();
-  const [gameParameters, setGameParameters] = useState<GameParameters>();
-  const [connection, setConnection] = useState<Connected>();
-  const [winnerIs, setWinnerIs] = useState<WeHaveAWinner>();
+ 
   const [waitingForPlayer, setWaitingForPlayer] = React.useState(false);
   const [gameId, setGameId] = React.useState<string>("");
   const [isHostWinner, setIsHostWinner] = React.useState(false);
   const [oppDisconnected, setOppDisconnected] =
     React.useState<OppDisconnected>(false);
-
-  const [currentTime, setCurrentTime] = useState(performance.now());
-  const updateFrequency = 1000 / 60;
-  const [lastUpdateTime, setLastUpdateTime] = useState(currentTime);
 
   const [initialSetupComplete, setInitialSetupComplete] = useState(false);
 
@@ -199,7 +192,6 @@ export function Pong() {
 
   useEffect(() => {
     if (socket && initialSetupComplete) {
-      // debugger;
       if (hostStatus) {
         console.log("🏓🏓   host");
         socket.emit("hostGameParameters", {
@@ -218,14 +210,12 @@ export function Pong() {
       }
 
       if (!hostStatus) {
-        socket.on("hostMovesUpdate", (data: GameParameters) => {
-          // setGameId(data.gameId);
-          // console.log('🏓   GAMEID: ', gameId);
-          setBallPosition(data.ballPosition);
-          setLeftPaddlePositionZ(data.leftPaddlePositionZ);
-          setRightPaddlePositionZ(data.rightPaddlePositionZ);
-          setPowerupPosition(data.powerupPosition);
-        });
+        socket.on('hostMovesUpdate', (data: GameParameters) => {
+          setBallPosition(data.ballPosition)
+          setLeftPaddlePositionZ(data.leftPaddlePositionZ)
+          setRightPaddlePositionZ(data.rightPaddlePositionZ)
+          setPowerupPosition(data.powerupPosition)
+        })
       } else {
         socket.on("clientMovesUpdate", (data: any) => {
           setRightPaddlePositionZ(data.rightPaddlePositionZ);
@@ -264,8 +254,8 @@ export function Pong() {
       setCameraMode("orthographic");
       setShowButtons(false);
       handleCountdown();
-    } catch (error) {
-      console.log('there was an error we catched;');
+    } catch {
+      console.log("🏓   we catched an issue. GM1");
       return;
     }
   };
@@ -283,8 +273,8 @@ export function Pong() {
       setPowerupVisible(true);
       setShowButtons(false);
       handleCountdown();
-    } catch (error) {
-      console.log('there was an error we catched;');
+    } catch {
+      console.log("🏓   we catched an issue. GM2");
       return;
     }
   };
@@ -299,8 +289,8 @@ export function Pong() {
       setCameraMode("orthographic");
       setGameMode(newGM);
       setShowButtons(false);
-    } catch (error) {
-      console.log('there was an error we catched;');
+    } catch {
+      console.log("🏓   we catched an issue. GM3");
       return;
     }
   };
@@ -316,8 +306,8 @@ export function Pong() {
       setPowerupVisible(true);
       setGameMode(newGM);
       setShowButtons(false);
-    } catch (error) {
-      console.log('there was an error we catched;');
+    } catch {
+      console.log("🏓   we catched an issue. GM4");
       return;
     }
   };
@@ -346,20 +336,7 @@ export function Pong() {
 
   //------------------ SCENE SETTINGS ------------------------
   // s'assure que le canvas aura comme maximum toujours 800x600
-  const [dimension, setDimensions] = React.useState<{
-    width: number;
-    height: number;
-  }>(() => {
-    let initialWidth = window.innerWidth;
-    let initialHeight = (window.innerWidth * 3) / 4;
-
-    if (initialWidth > 800) {
-      initialWidth = 800;
-      initialHeight = 600;
-    }
-
-    return { width: initialWidth, height: initialHeight };
-  });
+  const [dimension, setDimensions] = React.useState<number, number>({ width: 800, height: 600 })
 
   // Dimensions de l'espace de jeu.
   const CAMERA_ZOOM = 20;
@@ -531,24 +508,24 @@ export function Pong() {
     const totalHeight: number =
       (segmentHeight + spaceBetweenSegments) * numberOfSegments -
       spaceBetweenSegments; // Subtract space for the last segment
-    
+  
     const segments = Array.from({ length: numberOfSegments }).map((_, index) => {
       const yPosition: number =
         totalHeight / 2 - index * (segmentHeight + spaceBetweenSegments);
 
-        return (
-          <Box
-            key={index}
-            position={[0, 0, yPosition]}
-            args={[netWidth, 0, segmentHeight]}
-          >
-            <meshBasicMaterial color="white" />
-          </Box>
-        );
-      });
-    
-      return <>{segments}</>;
-    });
+    return (
+      <Box
+        key={index}
+        position={[0, 0, yPosition]}
+        args={[netWidth, 0, segmentHeight]}
+      >
+        <meshBasicMaterial color="white" />
+      </Box>
+    );
+  });
+
+    return <>{segments}</>
+  });
 
   const baseCanvasWidth: number = 800;
   const baseFontSize: number = 60;
@@ -809,41 +786,40 @@ export function Pong() {
     leftPaddlePositionZ,
     setLeftPaddlePositionZ,
   }) => {
-    const { mouse } = useThree();
+    const { mouse } = useThree()
     let lastEventTime = 0;
     const throttleTime = 100;
 
     useFrame(() => {
       const currentTime = Date.now();
 
-      if (currentTime - lastEventTime > throttleTime) {
+       if (currentTime - lastEventTime > throttleTime) {
         lastEventTime = currentTime;
-
-        let newPosition;
+        let newPosition
         if (hostStatus) {
-          if (cameraMode === "perspective") {
-            newPosition = mouse.x * (WORLD_WIDTH / 2);
+          if (cameraMode === 'perspective') {
+            newPosition = mouse.x * (WORLD_WIDTH / 2)
           } else {
-            newPosition = -mouse.y * (WORLD_HEIGHT / 2);
+            newPosition = -mouse.y * (WORLD_HEIGHT / 2)
           }
         } else {
-          newPosition = leftPaddlePositionZ;
+          newPosition = leftPaddlePositionZ
         }
 
-        newPosition = lerp(leftPaddlePositionZ, newPosition, lerpFactor);
+        newPosition = lerp(leftPaddlePositionZ, newPosition, lerpFactor)
 
-        const paddleTopEdge = newPosition + paddleDepth / 2;
-        const paddleBottomEdge = newPosition - paddleDepth / 2;
+        const paddleTopEdge = newPosition + paddleDepth / 2
+        const paddleBottomEdge = newPosition - paddleDepth / 2
 
         if (paddleTopEdge > WORLD_HEIGHT / 2) {
-          newPosition = WORLD_HEIGHT / 2 - paddleDepth / 2;
+          newPosition = WORLD_HEIGHT / 2 - paddleDepth / 2
         } else if (paddleBottomEdge < -WORLD_HEIGHT / 2) {
-          newPosition = -WORLD_HEIGHT / 2 + paddleDepth / 2;
+          newPosition = -WORLD_HEIGHT / 2 + paddleDepth / 2
         }
 
-        setLeftPaddlePositionZ(newPosition);
+        setLeftPaddlePositionZ(newPosition)
       }
-    });
+    })
 
     return (
       <Box
@@ -896,7 +872,7 @@ export function Pong() {
       });
     } else {
       // mouvement du right (user2) paddle a la souris.
-      const { mouse } = useThree();
+      const { mouse } = useThree()
       let lastEventTime = 0;
       const throttleTime = 100;
 
@@ -905,32 +881,31 @@ export function Pong() {
 
         if (currentTime - lastEventTime > throttleTime) {
           lastEventTime = currentTime;
-
-          let newPosition;
+          let newPosition
           if (!hostStatus) {
-            if (cameraMode === "perspective") {
-              newPosition = -mouse.x * (WORLD_WIDTH / 2);
+            if (cameraMode === 'perspective') {
+              newPosition = -mouse.x * (WORLD_WIDTH / 2)
             } else {
-              newPosition = -mouse.y * (WORLD_HEIGHT / 2);
+              newPosition = -mouse.y * (WORLD_HEIGHT / 2)
             }
           } else {
-            newPosition = rightPaddlePositionZ;
+            newPosition = rightPaddlePositionZ
           }
 
-          newPosition = lerp(rightPaddlePositionZ, newPosition, lerpFactor);
+          newPosition = lerp(rightPaddlePositionZ, newPosition, lerpFactor)
 
-          const paddleTopEdge = newPosition + paddleDepth / 2;
-          const paddleBottomEdge = newPosition - paddleDepth / 2;
+          const paddleTopEdge = newPosition + paddleDepth / 2
+          const paddleBottomEdge = newPosition - paddleDepth / 2
 
           if (paddleTopEdge > WORLD_HEIGHT / 2) {
-            newPosition = WORLD_HEIGHT / 2 - paddleDepth / 2;
+            newPosition = WORLD_HEIGHT / 2 - paddleDepth / 2
           } else if (paddleBottomEdge < -WORLD_HEIGHT / 2) {
-            newPosition = -WORLD_HEIGHT / 2 + paddleDepth / 2;
+            newPosition = -WORLD_HEIGHT / 2 + paddleDepth / 2
           }
 
-          setRightPaddlePositionZ(newPosition);
+          setRightPaddlePositionZ(newPosition)
         }
-      });
+      })
     }
 
     return (
@@ -974,9 +949,9 @@ export function Pong() {
               {/* <img src="../src/assets/arcade_2k.png" alt="Starting Screen" /> */}
               <img src="../src/assets/animated.gif" alt="Starting Screen" />
               <div className="game-buttons">
-                {/* <button onClick={handleClassicModeIA}>Classic 1 vs IA</button> */}
                 <button onClick={handleClassicModeMulti}>Classic 1 vs 1</button>
                 <button onClick={handlePowerupModeIA}>Powerup 1 vs IA</button>
+                {/* <button onClick={handleClassicModeIA}>Classic 1 vs IA</button> */}
                 {/* <button onClick={handlePowerupModeMulti}>Powerup 1 vs 1</button> */}
               </div>
             </div>
@@ -1025,7 +1000,7 @@ export function Pong() {
                 setBallPosition={setBallPosition}
                 ballVelocity={ballVelocity}
                 setBallVelocity={setBallVelocity}
-                speedFactor={ballSpeed}
+                // speedFactor={INITIAL_BALL_SPEED}
               />
 
               {/* Left Paddle */}
