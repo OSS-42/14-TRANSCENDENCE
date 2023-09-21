@@ -39,12 +39,12 @@ export function Chat({ socket }: ChatProps) {
   }, [messages]);
 
   useEffect(() => {
-    socket.on("messageResponse", handleMessageResponse);
-    socket.on("notice", handleMessageResponse);
+    socket?.on("messageResponse", handleMessageResponse);
+    socket?.on("notice", handleMessageResponse);
 
     return () => {
-      socket.off("messageResponse", handleMessageResponse);
-      socket.off("notice", handleMessageResponse);
+      socket?.off("messageResponse", handleMessageResponse);
+      socket?.off("notice", handleMessageResponse);
     };
   }, [socket]);
 
@@ -72,6 +72,7 @@ export function Chat({ socket }: ChatProps) {
           flexGrow: 1,
           flexDirection: "column",
           margin: "1rem .5rem 1rem 1rem",
+          maxWidth: "67%",
         }}
       >
         {/* Chat Box */}

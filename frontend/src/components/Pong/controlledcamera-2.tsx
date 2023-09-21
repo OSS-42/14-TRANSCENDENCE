@@ -37,7 +37,7 @@ import { ReactThreeFiber, useThree } from "@react-three/fiber";
 import CameraControlsImpl from "camera-controls";
 // import { animate } from "popmotion";
 // import { PlaybackControls } from "popmotion/lib/animations/types";
-import { forwardRef, useEffect, useLayoutEffect, useMemo, useRef } from "react";
+import { forwardRef, useEffect, useLayoutEffect, useMemo } from "react";
 import {
   Box3,
   Clock,
@@ -89,7 +89,7 @@ let persPos: Vector3Tuple;
 let persTarget: Vector3Tuple;
 let orthoPos: Vector3Tuple;
 let orthoTarget: Vector3Tuple;
-let orthoZoom: number;
+let orthoZoom: number | undefined;
 let oldMat: string;
 
 export type ControlledCamerasProps = ReactThreeFiber.Overwrite<
@@ -105,15 +105,15 @@ export type ControlledCamerasProps = ReactThreeFiber.Overwrite<
 
     // Camera settings
     perspectiveCameraProps?: {
-      fov?: number;
-      near?: number;
-      far?: number;
+      fov?: number | undefined;
+      near?: number | undefined;
+      far?: number | undefined;
     };
     orthographicCameraProps?: {
       // TODO: changing the ortho zoom causes issues as the saved orthoZoom gets out of sync
-      zoom?: number;
-      near?: number;
-      far?: number;
+      zoom?: number | undefined;
+      near?: number | undefined;
+      far?: number | undefined;
     };
   }
 >;
@@ -153,7 +153,7 @@ export const ControlledCameras = forwardRef<
 
     const [persCam, orthoCam] = useMemo(() => {
       const persCam = new PerspectiveCamera();
-      const orthoCam = new OrthographicCamera();
+      const orthoCam: any = new OrthographicCamera();
       orthoCam.zoom = orthographicCameraProps.zoom;
       orthoZoom = orthographicCameraProps.zoom;
       
@@ -162,7 +162,7 @@ export const ControlledCameras = forwardRef<
     }, [set]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const controls = useMemo(() => {
-      const controls = new CameraControlsImpl(
+      const controls: any = new CameraControlsImpl(
         mode === "perspective" ? persCam : orthoCam,
         gl.domElement
       );
@@ -224,7 +224,7 @@ export const ControlledCameras = forwardRef<
      * TODO: is there a simpler way of doing this?
      */
     useEffect(() => {
-      let requestId;
+      let requestId: any;
 
       (function loop() {
         requestId = requestAnimationFrame(loop);
@@ -281,9 +281,9 @@ export const ControlledCameras = forwardRef<
           : "orthographic";
 
         const newCam = mode === "perspective" ? persCam : orthoCam;
-        const currentMat = controls.camera.projectionMatrix.elements.toString();
-        let newMat;
-
+        // const currentMat = controls.camera.projectionMatrix.elements.toString();
+        // let newMat;
+        
         // In this case a transition was interrupted and we will reverse back to the same mode
         // No camera change required
         let cameraChangeRequired = false;
@@ -291,7 +291,7 @@ export const ControlledCameras = forwardRef<
           if (!oldMat) {
             oldMat = controls.camera.projectionMatrix.elements.toString();
           }
-          newMat = oldMat;
+          // newMat = oldMat;
         }
         // However if the new  mode doesn't match the current camera, we will initiate a transition
         else {
@@ -299,7 +299,7 @@ export const ControlledCameras = forwardRef<
 
           // Store the current projection matrix so that we can switch back to this view
           oldMat = controls.camera.projectionMatrix.elements.toString();
-          newMat = newCam.projectionMatrix.elements.toString();
+          // newMat = newCam.projectionMatrix.elements.toString();
 
           // Save the current position and target for either ortho or perspective
           controls.getPosition(va);
@@ -313,44 +313,6 @@ export const ControlledCameras = forwardRef<
             vb.toArray(persTarget);
           }
         }
-        // ------------ REMOVED ANIMATION TRANSITION ---------
-        // animation.current?.stop();
-        // animation.current = animate({
-        //   from: {
-        //     // using a string because popmotion can't animate arrays!
-        //     matrix: currentMat
-        //   },
-        //   to: {
-        //     matrix: newMat
-        //   },
-        //   duration: 1000,
-        //   onUpdate: (latest) => {
-        //     controls.camera.projectionMatrix.fromArray(
-        //       latest.matrix.split(",").map(Number)
-        //     );
-
-        //     invalidate();
-        //   },
-        //   onComplete: () => {
-        //     if (cameraChangeRequired) {
-        //       // At this point, the old camera will have a switched projection matrix -
-        //       // the orthographic camera will have a perspective projection matrix
-        //       // and the perspective camera will have an ortho matrix, so we
-        //       // need to reset the projection matrix for the old camera
-        //       controls.camera.updateProjectionMatrix();
-
-        //       // And then switch the controls and R3F over to the new camera
-        //       set({ camera: newCam });
-        //       controls.camera = newCam;
-
-        //       // Finally, restore the zoom for the ortho camera
-        //       // (and remember that we use Dolly, not Zoom for perspective)
-        //       controls.zoomTo(mode === "perspective" ? 1 : orthoZoom, false);
-        //       controls.enabled = true;
-        //     }
-        //     invalidate();
-        //   }
-        // });
 
         // ------------- ADDED FROM INITIAL FILE IN REPLACEMENT OF COMMENTED CODE -------
         // Directly set the new camera mode and properties
@@ -399,3 +361,42 @@ export const ControlledCameras = forwardRef<
     );
   }
 );
+
+ // L: 316 ------------ REMOVED ANIMATION TRANSITION ---------
+        // animation.current?.stop();
+        // animation.current = animate({
+        //   from: {
+        //     // using a string because popmotion can't animate arrays!
+        //     matrix: currentMat
+        //   },
+        //   to: {
+        //     matrix: newMat
+        //   },
+        //   duration: 1000,
+        //   onUpdate: (latest) => {
+        //     controls.camera.projectionMatrix.fromArray(
+        //       latest.matrix.split(",").map(Number)
+        //     );
+
+        //     invalidate();
+        //   },
+        //   onComplete: () => {
+        //     if (cameraChangeRequired) {
+        //       // At this point, the old camera will have a switched projection matrix -
+        //       // the orthographic camera will have a perspective projection matrix
+        //       // and the perspective camera will have an ortho matrix, so we
+        //       // need to reset the projection matrix for the old camera
+        //       controls.camera.updateProjectionMatrix();
+
+        //       // And then switch the controls and R3F over to the new camera
+        //       set({ camera: newCam });
+        //       controls.camera = newCam;
+
+        //       // Finally, restore the zoom for the ortho camera
+        //       // (and remember that we use Dolly, not Zoom for perspective)
+        //       controls.zoomTo(mode === "perspective" ? 1 : orthoZoom, false);
+        //       controls.enabled = true;
+        //     }
+        //     invalidate();
+        //   }
+        // });

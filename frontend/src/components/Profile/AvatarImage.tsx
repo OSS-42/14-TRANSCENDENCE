@@ -2,7 +2,7 @@ import { Box, Avatar } from "@mui/material";
 import { User } from "../../models/User";
 
 interface AvatarImageProps {
-  user: User;
+  user: User | null;
 }
 
 export function AvatarImage({ user }: AvatarImageProps) {

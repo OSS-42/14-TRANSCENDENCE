@@ -20,8 +20,12 @@ export function MatchHistory({ match }: MatchHistoryProps) {
     return <p>No match data available.</p>;
   }
 
-  function formatDate(dateString) {
-    const options = { year: "numeric", month: "long", day: "numeric" };
+  function formatDate(dateString: string): string {
+    const options: Intl.DateTimeFormatOptions = {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    };
     const date = new Date(dateString);
     return date.toLocaleDateString(undefined, options);
   }
@@ -78,10 +82,9 @@ export function MatchHistory({ match }: MatchHistoryProps) {
             sx={{
               typography: { xs: "body2", sm: "h6" },
               padding: "16px",
-              // fontWeight: 'bold',
             }}
           >
-            No games have been played yet ...
+            No games have been played yet...
           </Typography>
         </div>
       )}

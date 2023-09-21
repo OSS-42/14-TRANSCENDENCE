@@ -1,6 +1,7 @@
 import { Grid } from "@mui/material";
+import { ReactNode } from "react";
 
-export function ContainerGrid({ children }) {
+export function ContainerGrid({ children }: { children: ReactNode }) {
   return (
     <Grid
       container

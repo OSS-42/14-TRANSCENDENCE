@@ -1,10 +1,10 @@
 import { Box, Button, Dialog, DialogContent, Typography } from "@mui/material";
 import { User } from "../../models/User";
 import { useRoutes } from "../../contexts/RoutesContext";
-import { MatchHistory } from "../Profile/MatchHistory";
 import { Socket } from "socket.io-client";
 import { useAuth } from "../../contexts/AuthContext";
 import { useEffect, useState } from "react";
+// import { MatchHistory } from "../Profile/MatchHistory";
 
 type UserDetailsProps = {
   selectedUser: User;
@@ -41,8 +41,8 @@ function UserDetails({
     socket.emit("invitation", {
       userId: id,
       roomId: roomId,
-      challengerUsername: user.username,
-      challengerId: user.id,
+      challengerUsername: user?.username,
+      challengerId: user?.id,
     });
     setWaiting(true);
 
@@ -63,7 +63,7 @@ function UserDetails({
             justifyContent="center"
             alignItems="center"
           >
-            <Typography variant="body1">
+            <Typography variant="h4">
               Waiting for {selectedUser?.username} to respond...
             </Typography>
           </Box>

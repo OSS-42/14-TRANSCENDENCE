@@ -5,6 +5,16 @@ import { User } from "../models/User";
 const BASE_URL = "/api";
 const jwt_token = Cookies.get("jwt_token");
 
+interface MatchData {
+  date: string;
+  winner: string;
+  loser: string;
+}
+interface MatchHistoryData {
+  matchesWon: MatchData[];
+  matchesLost: MatchData[];
+}
+
 export async function fetchUserMe(): Promise<User | undefined> {
   try {
     const response = await axios.get(`${BASE_URL}/users/me`, {
@@ -77,7 +87,7 @@ export async function fetchBlockedUsers(id: number): Promise<number[]> {
   }
 }
 
-export async function fetchMatchHistory(id: number): Promise<{}> {
+export async function fetchMatchHistory(id: number): Promise<MatchHistoryData> {
   try {
     const banResponse = await axios.get(
       `${BASE_URL}/users/matchHistory/${id}`,
@@ -87,7 +97,7 @@ export async function fetchMatchHistory(id: number): Promise<{}> {
         },
       }
     );
-    return banResponse.data;
+    return banResponse.data as MatchHistoryData;
   } catch (error) {
     console.error("Error fetching user data:", error);
     throw error;
@@ -136,7 +146,7 @@ export async function isUserExist(username: string): Promise<boolean> {
   }
 }
 
-export async function updateUser(editedName: string): Promise<void> {
+export async function updateUserName(editedName: string): Promise<void> {
   try {
     const response = await axios.post(
       `${BASE_URL}/users/updateUsername`,
@@ -152,5 +162,6 @@ export async function updateUser(editedName: string): Promise<void> {
     return response.data;
   } catch (error) {
     console.error("Error updating user data:", error);
+    throw error;
   }
 }

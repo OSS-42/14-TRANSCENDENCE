@@ -1,6 +1,7 @@
 import { Grid } from "@mui/material";
+import { ReactNode } from "react";
 
-export function RightSideGrid({ children }) {
+export function RightSideGrid({ children }: { children: ReactNode }) {
   return (
     <Grid
       item

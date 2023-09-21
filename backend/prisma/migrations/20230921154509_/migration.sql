@@ -7,6 +7,8 @@ CREATE TABLE "Utilisateur" (
     "avatar" TEXT,
     "email" TEXT NOT NULL,
     "twoFactorSecret" TEXT,
+    "secretId" TEXT NOT NULL,
+    "refreshToken" TEXT,
 
     CONSTRAINT "Utilisateur_pkey" PRIMARY KEY ("id")
 );
