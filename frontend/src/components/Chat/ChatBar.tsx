@@ -31,6 +31,11 @@ function ChatBar({
     setFriendsList(updatedFriendsList);
   };
 
+  // Filtrer uniquement les utilisateurs qui ne sont pas dans votre liste d'amis
+  const nonFriendsUsers = usersList.filter(
+    (user) => !friendsList.some((friend) => friend.id === user.id)
+  );
+
   return (
     <Box component="div" className="chat__sidebar">
       <Box
@@ -40,7 +45,7 @@ function ChatBar({
         <h4 className="chat__header">USERS LIST</h4>
         <div className="chat__users">
           <p></p>
-          {usersList.map((user) => (
+          {nonFriendsUsers.map((user) => (
             <Box
               component="div"
               key={user.id}
@@ -72,19 +77,18 @@ function ChatBar({
                   flex: "1",
                 }}
               >
-                {user.id !== meId &&
-                  !friendsList.some((friend) => friend.id === user.id) && (
-                    <Button
-                      sx={{
-                        minWidth: ".1",
-                        padding: ".2rem .2rem .2rem 1rem",
-                      }}
-                      variant="contained"
-                      color="secondary"
-                      startIcon={<PersonAddIcon />}
-                      onClick={() => addFriend(user.username)}
-                    />
-                  )}
+                {user.id !== meId && (
+                  <Button
+                    sx={{
+                      minWidth: ".1",
+                      padding: ".2rem .2rem .2rem 1rem",
+                    }}
+                    variant="contained"
+                    color="secondary"
+                    startIcon={<PersonAddIcon />}
+                    onClick={() => addFriend(user.username)}
+                  />
+                )}
               </div>
             </Box>
           ))}
@@ -95,4 +99,3 @@ function ChatBar({
 }
 
 export default ChatBar;
-
