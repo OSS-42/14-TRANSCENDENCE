@@ -10,12 +10,14 @@ type UserDetailsProps = {
   selectedUser: User;
   closeUserDetails: () => void;
   socket: Socket;
+  connectedToPong : Number[]
 };
 
 function UserDetails({
   selectedUser,
   closeUserDetails,
   socket,
+  connectedToPong
 }: UserDetailsProps) {
   const { user } = useAuth();
   const { navigateTo } = useRoutes();
@@ -94,6 +96,7 @@ function UserDetails({
               <Button
                 variant="contained"
                 onClick={() => inviteToPlay(selectedUser?.id)}
+                disabled={connectedToPong.includes(selectedUser?.id) || selectedUser?.id === user?.id}
               >
                 Invite to play
               </Button>
