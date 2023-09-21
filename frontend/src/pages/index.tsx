@@ -3,5 +3,6 @@ export { Error } from "./Error";
 export { Home } from "./Home";
 export { Oops } from "./Oops";
 export { Pong } from "./Pong";
-export { Profile } from "./Profile";
+export { MyProfile } from "./MyProfile";
+export { UserProfile } from "./UserProfile";
 export { Welcome } from "./Welcome";

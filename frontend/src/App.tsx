@@ -1,9 +1,17 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useParams } from "react-router-dom";
 import { useAuth } from "./contexts/AuthContext";
 import socketIO, { Socket } from "socket.io-client";
 
 import Header from "./components/Header";
-import { Chat, Home, Pong, Profile, Welcome, Error } from "./pages";
+import {
+  Chat,
+  Home,
+  Pong,
+  MyProfile,
+  UserProfile,
+  Welcome,
+  Error,
+} from "./pages";
 import { useEffect, useState } from "react";
 
 function App() {
@@ -61,11 +69,19 @@ function App() {
         <Route path="/game" element={user ? <Pong /> : <Navigate to="/" />} />
         <Route
           path="/profile"
-          element={user ? <Profile /> : <Navigate to="/" />}
+          element={user ? <MyProfile /> : <Navigate to="/" />}
         />
         <Route
           path="/profile/:username"
-          element={user ? <Profile /> : <Navigate to="/" />}
+          element={
+            user ? (
+              <UserProfile
+                username={(useParams() as { username: string }).username}
+              />
+            ) : (
+              <Navigate to="/" />
+            )
+          }
         />
         <Route path="*" element={<Error />} />
       </Routes>
