@@ -1,22 +1,31 @@
-import { Alert, Box, Button, TextField } from "@mui/material";
-import axios from "axios";
-import Cookies from "js-cookie";
-import { useEffect, useState } from "react";
+import { Box, Button, TextField } from "@mui/material";
+import { useState } from "react";
 import { isUserExist } from "../../api/requests";
-import { updateUser } from "../../api/requests";
+import { updateUserName } from "../../api/requests";
 
 import BorderColorIcon from "@mui/icons-material/BorderColor";
+import { User } from "../../models/User";
 
-export function Name(props) {
+interface NameProps {
+  user: User | null;
+  handleUpdateUserName: (newUserName: string) => void;
+}
+
+export function Name({ user, handleUpdateUserName }: NameProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const [editedName, setEditedName] = useState("");
-  const [updatedName, setUpdatedName] = useState(props.user);
+  const [editedName, setEditedName] = useState<string>("");
 
   function handleOnClick() {
     setIsEditing(true);
   }
 
-  function handleChange(event) {
+  const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") {
+      handleBlur();
+    }
+  };
+
+  function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
     const newName = event.target.value;
     setEditedName(newName);
   }
@@ -38,34 +47,39 @@ export function Name(props) {
   }
 
   async function handleBlur() {
-    if (editedName !== props.user) {
+    if (editedName !== user?.username) {
       if (editedName.trim() === "") {
         alert("You cannot have an empty name. Please enter name");
-        setEditedName(props.user);
+        setEditedName(user?.username ?? "");
         return;
       }
       if (UserNameCharacters(editedName) === false) {
         alert(
           "Invalid Username! You username must ONLY contain letters or numbers. No special characters are authorized "
         );
-        setEditedName(props.user);
+        setEditedName(user?.username ?? "");
         return;
       }
       if (UserNameLength(editedName) === false) {
         alert(
           "Invalid Username! Username must contained between 3 to 12 characters."
         );
-        setEditedName(props.user);
+        setEditedName(user?.username ?? "");
         return;
       }
       const Name = await isUserExist(editedName);
       if (Name === true) {
         alert("Invalid Username! Another user already has this username");
-        setEditedName(props.user);
+        setEditedName(user?.username ?? "");
         return;
       }
-      const newUser = await updateUser(editedName);
-      props.updateUserData(newUser);
+      try {
+        await updateUserName(editedName);
+        handleUpdateUserName(editedName);
+      } catch (error: any) {
+        alert("Error updating username. Try again later.");
+        console.error("Error updating username:", error);
+      }
     }
     setIsEditing(false);
   }
@@ -94,6 +108,7 @@ export function Name(props) {
           InputLabelProps={{ style: { fontSize: ".8rem" } }}
           onChange={handleChange}
           onBlur={handleBlur}
+          onKeyDown={handleKeyPress}
         />
       ) : (
         <>
@@ -103,7 +118,7 @@ export function Name(props) {
             justifyContent="space-around"
             alignContent="center"
           >
-            {props.user}
+            {user?.username}
             <Button
               sx={{
                 minWidth: ".1",

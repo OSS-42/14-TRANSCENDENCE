@@ -14,7 +14,7 @@ export function Welcome() {
         //   padding: '2rem',
         // }}
       >
-        <Typography className="glitch">PONG</Typography>
+        <Typography className="hero">PONG</Typography>
         <Box component="div" id="arcade" sx={{ marginBottom: "5rem" }}>
           <img width="100%" src="arcade.png" alt="" />
         </Box>

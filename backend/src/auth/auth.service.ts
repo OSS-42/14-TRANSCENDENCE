@@ -17,10 +17,7 @@ export class AuthService {
     private readonly connectedUsersService: ConnectedUsersService
   ) {}
 
-  async signToken(
-    userId: number,
-    email: string
-  ): Promise<{ access_token: string }> {
+  async signToken(userId: number, email: string): Promise<{ access_token: string }> {
     const payload = {
       sub: userId,
       email,
@@ -36,6 +33,9 @@ export class AuthService {
     };
   }
 
+
+
+
   //Fonction qui contacte lapi--42 afin de recuperer lacces token, elle cree  un nouvelle utilisateur egalement
   async getCode42(code: string) {
     let token: string;
@@ -44,10 +44,10 @@ export class AuthService {
     const clientSecret = this.config.get("CLIENT_SECRET");
     const host = this.config.get("HOST");
 
-    try {
+    try{
       const response = await axios.post(
-        `https://api.intra.42.fr/oauth/token`,
-        `client_id=${clientID}&client_secret=${clientSecret}&code=${code}&redirect_uri=${host}/api/auth&grant_type=authorization_code`,
+      `https://api.intra.42.fr/oauth/token`,
+      `client_id=${clientID}&client_secret=${clientSecret}&code=${code}&redirect_uri=${host}/api/auth&grant_type=authorization_code`,
         {
           headers: {
             Accept: "application/json",
@@ -56,10 +56,11 @@ export class AuthService {
       );
       console.log("Réponse POST:", response.data);
       token = response.data.access_token;
-    } catch (error) {
+    } 
+    catch (error) {
       console.error("Erreur POST:", error);
     }
-    try {
+    try{
       const response = await fetch("https://api.intra.42.fr/v2/me", {
         headers: {
           Authorization: "Bearer " + token,
@@ -76,31 +77,26 @@ export class AuthService {
           where: { email },
         });
         if (!user) {
+          const { v4: uuidv4 } = require('uuid');
+          const customPrefix = 'poulet';
+          const uniqueId = customPrefix + '-' + uuidv4();
           user = await this.prisma.utilisateur.create({
             data: {
               username: username,
               email: email,
               avatar: avatar,
+              secretId: uniqueId
             },
           });
-        } else {
-          console.log("Utilisateur existe deja");
-        }
-        console.log(this.connectedUsersService.connectedUsers)
+        } 
         if (this.connectedUsersService.connectedUsers.has(user.id)) {
           (await UserToken).access_token = "poulet"
-
           return (UserToken)
         }
         UserToken = this.signToken(user.id, user.email);
-        // const test = await this.prisma.utilisateur.update({
-        //   where: { email: "mbertin@student.42quebec.com" },
-        //   data: {
-        //     username: "Mangor_la_grosse",
-        //     avatar:
-        //       "https://images.squarespace-cdn.com/content/v1/55125ce9e4b01593abaf0537/1547716294492-SRU557RUPLCI8P62PNOO/fat34.png?format=1500w",
-        //   },
-        // });
+        this.createRefreshToken(user.id, user.secretId)
+        
+
       } else {
         console.error(
           "Erreur lors de la requête:",
@@ -118,46 +114,87 @@ export class AuthService {
 
 //---services pour le 2FA----//
 
+// Faire une validation quand la premiere fois qu<il ya une connexion
+  async enable2FA(userId: number): Promise<{ otpauthUrl: string, secret: string }> {
+    const secret = speakeasy.generateSecret({ length: 20 });
 
-async enable2FA(userId: number): Promise<{ otpauthUrl: string, secret: string }> {
-  const secret = speakeasy.generateSecret({ length: 20 });
+    
+    await this.prisma.utilisateur.update({
+      where: { id: userId },
+      data: { twoFactorSecret: secret.base32 },
+    });
 
-  
-  await this.prisma.utilisateur.update({
-    where: { id: userId },
-    data: { twoFactorSecret: secret.base32 },
-  });
-
-  const otpauthUrl = speakeasy.otpauthURL({
-    secret: secret.ascii,
-    label: 'Balls of Fury', 
-    issuer: 'Angry chicken', 
-  });
-  return { otpauthUrl, secret: secret.base32 };
-}
-
-// Méthode pour vérifier le code 2FA
-
-
-
-async verify2FA(userId: number, token: string): Promise<boolean> {
-  const user = await this.prisma.utilisateur.findUnique({
-    where: { id: userId },
-  });
-
-  const verified = speakeasy.totp.verify({
-    secret: user.twoFactorSecret,
-    encoding: 'base32',
-    token: token,
-  });
-  return verified;
-}
-
-
-async disable2FA(userId: number): Promise<void> {
-  await this.prisma.utilisateur.update({
-    where: { id: userId },
-    data: { twoFactorSecret: null },
-  });
+    const otpauthUrl = speakeasy.otpauthURL({
+      secret: secret.ascii,
+      label: 'Balls of Fury', 
+      issuer: 'Angry chicken', 
+    });
+    return { otpauthUrl, secret: secret.base32 };
   }
+
+  // Méthode pour vérifier le code 2FA
+
+
+
+  async verify2FA(userId: number, token: string): Promise<boolean> {
+    const user = await this.prisma.utilisateur.findUnique({
+      where: { id: userId },
+    });
+
+    const verified = speakeasy.totp.verify({
+      secret: user.twoFactorSecret,
+      encoding: 'base32',
+      token: token,
+    });
+    return verified;
+  }
+
+
+  async disable2FA(userId: number): Promise<void> {
+    await this.prisma.utilisateur.update({
+      where: { id: userId },
+      data: { twoFactorSecret: null },
+    });
+    }
+
+
+
+  async createRefreshToken(userId: number, secretId:string){
+    const payload = {
+      secretId,
+    };
+    const secret = this.config.get("JWT_SECRET");
+
+    const token = await this.jwt.signAsync(payload, {
+      expiresIn: "600m",
+      secret: secret,
+    });
+
+
+    await this.prisma.utilisateur.update({
+    where: { id: userId },
+    data: {
+      refreshToken: token,
+    },
+    });
+
+  }
+
+
+  async generateToken(secretId : string){
+    try{
+      const user = await this.prisma.utilisateur.findFirst({
+        where :{secretId},
+      })
+      const decoded = this.jwt.verify(user.refreshToken, this.config.get("JWT_SECRET")); 
+      console.log(decoded);
+      return this.signToken(user.id, user.email)
+    }
+    catch (err) {
+      console.error('JWT validation error:', err.message);
+      return null
+    }
+
+  }
+
 }

@@ -19,6 +19,8 @@ model Utilisateur {
   avatar String?
   email    String @unique
   twoFactorSecret String?
+  secretId    String
+  refreshToken String?
 
   blockedBy Banissement[] @relation("UserToBanishment")
   blockedUsers Banissement[] @relation("BanningUser")

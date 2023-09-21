@@ -115,7 +115,7 @@ export function FriendsAndUsers({ socket }: someProp) {
         connectedUsers={connectedUsers}
         handleUserClick={handleUserClick}
       />
-      <Box mb={3} />
+      <Box component="div" mb={3} />
       <ChatBar
         setUsersList={setUsersList}
         setFriendsList={setFriendsList}
