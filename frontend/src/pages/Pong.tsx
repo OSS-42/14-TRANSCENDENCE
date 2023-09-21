@@ -23,6 +23,7 @@ import socketIO from "socket.io-client";
 type GameParameters = {
   gameId: string;
   ballPosition: { x: number; y: number; z: number };
+  ballVelocity: { x: number, z: number };
   leftPaddlePositionZ: number;
   rightPaddlePositionZ: number;
   powerupPosition: { x: number; y: number; z: number };
@@ -198,6 +199,7 @@ export function Pong() {
         socket.emit("hostGameParameters", {
           gameId,
           ballPosition,
+          ballVelocity,
           leftPaddlePositionZ,
           rightPaddlePositionZ,
           powerupPosition,
@@ -213,6 +215,7 @@ export function Pong() {
       if (!hostStatus) {
         socket.on('hostMovesUpdate', (data: GameParameters) => {
           setBallPosition(data.ballPosition)
+          setBallVelocity(data.ballVelocity)
           setLeftPaddlePositionZ(data.leftPaddlePositionZ)
           setRightPaddlePositionZ(data.rightPaddlePositionZ)
           setPowerupPosition(data.powerupPosition)
@@ -592,23 +595,23 @@ export function Pong() {
   };
 
 
-  const goalRight = (prevScore: number) => {
-    const newScore: number = prevScore + 1;
-    if (newScore < 3) {
-      setIsPaused(true);
-      handleCountdown();
-    }
-    return newScore;
-  };
+  // const goalRight = (prevScore: number) => {
+  //   const newScore: number = prevScore + 1;
+  //   if (newScore < 3) {
+  //     setIsPaused(true);
+  //     handleCountdown();
+  //   }
+  //   return newScore;
+  // };
 
-  const goalLeft = (prevScore: number) => {
-      const newScore = prevScore + 1;
-      if (newScore < 3) {
-        setIsPaused(true);
-        handleCountdown();
-      }
-      return newScore;
-  }
+  // const goalLeft = (prevScore: number) => {
+  //     const newScore = prevScore + 1;
+  //     if (newScore < 3) {
+  //       setIsPaused(true);
+  //       handleCountdown();
+  //     }
+  //     return newScore;
+  // }
 
   //------------------ GAME BALL LOGIC ------------------------
   // Ball mechanics
@@ -617,7 +620,6 @@ export function Pong() {
     setBallPosition: React.Dispatch<React.SetStateAction<BallPosition>>;
     ballVelocity: Position;
     setBallVelocity: React.Dispatch<React.SetStateAction<Position>>;
-    // speedFactor: number;
   }
 
   const Ball: React.FC<BallProps> = ({
@@ -629,108 +631,135 @@ export function Pong() {
     useFrame(() => {
       if (isPaused || gameStart || winner) return;
 
-      let newX: number = ballPosition.x + ballVelocity.x;
-      // ne pas oublier la position de la camera pour la vue top-down
-      let newZ: number = ballPosition.z + ballVelocity.z;
+      let newX: number = 0;
+      let newZ: number = 0; // ne pas oublier la position de la camera pour la vue top-down
 
-      const directionZ = Math.sign(ballVelocity.z);
-
-      if (
-        powerupVisible &&
-        Math.abs(ballPosition.x - powerupPosition.x) < ballRadius + 1 &&
-        Math.abs(ballPosition.z - powerupPosition.z) < ballRadius + 1
-      ) {
-        setPowerupVisible(false);
-        setCameraMode("perspective");
-        playPowerupSound();
-
-        setTimeout(() => {
-          setCameraMode("orthographic");
-          respawnPowerup();
-        }, 12000);
-      }
-
-      // Validation de hit avec les murs
-      if (
-        (directionZ > 0 && newZ + ballRadius > WORLD_HEIGHT / 2) ||
-        (directionZ < 0 && newZ - ballRadius < -WORLD_HEIGHT / 2)
-      ) {
-        ballVelocity.z = -ballVelocity.z;
+      if (hostStatus) {
+        newX = ballPosition.x + ballVelocity.x;
         newZ = ballPosition.z + ballVelocity.z;
-        if (gameMode === 2 || gameMode === 4) playBallWallSound();
-      }
+  
+        const directionZ = Math.sign(ballVelocity.z);
 
-      // Validation de hit avec les paddles
-      const leftPaddlePosition = {
-        x: leftPaddleXPosition,
-        z: leftPaddlePositionZ,
-      };
-      const rightPaddlePosition = {
-        x: rightPaddleXPosition,
-        z: rightPaddlePositionZ,
-      };
-      const paddleDimensions = { width: paddleWidth, depth: paddleDepth };
-
-      const hitSectionLeft = checkCollision(
-        { x: newX, z: newZ },
-        leftPaddlePosition,
-        paddleDimensions
-      );
-      const hitSectionRight = checkCollision(
-        { x: newX, z: newZ },
-        rightPaddlePosition,
-        paddleDimensions
-      );
-
-      if (hitSectionLeft || hitSectionRight) {
-        const hitPaddlePosition = hitSectionLeft
-          ? leftPaddlePosition
-          : rightPaddlePosition;
-        if (hostStatus && (gameMode === 2 || gameMode === 4)) {
-          playUserHitSound();
-        } else if (!hostStatus && (gameMode === 2 || gameMode === 4)) {
-          //attention si 1 vs 1, laissez le son utilisateur
-          playCompHitSound();
+        if (
+          powerupVisible &&
+          Math.abs(ballPosition.x - powerupPosition.x) < ballRadius + 1 &&
+          Math.abs(ballPosition.z - powerupPosition.z) < ballRadius + 1
+        ) {
+          setPowerupVisible(false);
+          setCameraMode("perspective");
+          playPowerupSound();
+  
+          setTimeout(() => {
+            setCameraMode("orthographic");
+            respawnPowerup();
+          }, 12000);
         }
 
-        ballVelocity.x = -ballVelocity.x;
-
-        const relativeCollisionPoint =
-          (newZ - hitPaddlePosition.z) / (paddleDepth / 2);
-        const newZVelocity =
-          ballVelocity.z + relativeCollisionPoint * INITIAL_BALL_SPEED;
-
-        // Normalize the velocity to maintain the initial speed
-        const magnitude = Math.sqrt(ballVelocity.x ** 2 + newZVelocity ** 2);
-        ballVelocity.x = (ballVelocity.x / magnitude) * INITIAL_BALL_SPEED;
-        ballVelocity.z = (newZVelocity / magnitude) * INITIAL_BALL_SPEED;
-
-        newX =
-          hitPaddlePosition.x +
-          Math.sign(ballVelocity.x) * (paddleWidth / 2 + ballRadius);
-      }
-
-      if (
-        newX - ballRadius <= -WORLD_WIDTH / 2 ||
-        newX + ballRadius >= WORLD_WIDTH / 2
-      ) {
-        if (gameMode === 2 || gameMode === 4) {
-          pausePowerupSound();
-          playGoalSound();
+        // Validation de hit avec les murs
+        if (
+          (directionZ > 0 && newZ + ballRadius > WORLD_HEIGHT / 2) ||
+          (directionZ < 0 && newZ - ballRadius < -WORLD_HEIGHT / 2)
+        ) {
+          ballVelocity.z = -ballVelocity.z;
+          newZ = ballPosition.z + ballVelocity.z;
+          if (gameMode === 2 || gameMode === 4) playBallWallSound();
         }
 
-        // Update scores
-        if (newX - ballRadius <= -WORLD_WIDTH / 2) {
-          setRightScore(prevScore => goalRight(prevScore));
-        } else if (newX + ballRadius >= WORLD_WIDTH / 2) {
-          setLeftScore(prevScore => goalLeft(prevScore));
+        // Validation de hit avec les paddles
+        const leftPaddlePosition = {
+          x: leftPaddleXPosition,
+          z: leftPaddlePositionZ,
+        };
+        const rightPaddlePosition = {
+          x: rightPaddleXPosition,
+          z: rightPaddlePositionZ,
+        };
+        const paddleDimensions = { width: paddleWidth, depth: paddleDepth };
+  
+        const hitSectionLeft = checkCollision(
+          { x: newX, z: newZ },
+          leftPaddlePosition,
+          paddleDimensions
+        );
+        const hitSectionRight = checkCollision(
+          { x: newX, z: newZ },
+          rightPaddlePosition,
+          paddleDimensions
+        );
+
+        if (hitSectionLeft || hitSectionRight) {
+          const hitPaddlePosition = hitSectionLeft
+            ? leftPaddlePosition
+            : rightPaddlePosition;
+          if (hostStatus && (gameMode === 2 || gameMode === 4)) {
+            playUserHitSound();
+          } else if (!hostStatus && (gameMode === 2 || gameMode === 4)) {
+            //attention si 1 vs 1, laissez le son utilisateur
+            playCompHitSound();
+          }
+  
+          ballVelocity.x = -ballVelocity.x;
+  
+          const relativeCollisionPoint =
+            (newZ - hitPaddlePosition.z) / (paddleDepth / 2);
+          const newZVelocity =
+            ballVelocity.z + relativeCollisionPoint * INITIAL_BALL_SPEED;
+  
+          // Normalize the velocity to maintain the initial speed
+          const magnitude = Math.sqrt(ballVelocity.x ** 2 + newZVelocity ** 2);
+          ballVelocity.x = (ballVelocity.x / magnitude) * INITIAL_BALL_SPEED;
+          ballVelocity.z = (newZVelocity / magnitude) * INITIAL_BALL_SPEED;
+  
+          newX =
+            hitPaddlePosition.x +
+            Math.sign(ballVelocity.x) * (paddleWidth / 2 + ballRadius);
         }
 
-        setCameraMode("orthographic");
+        if (
+          newX - ballRadius <= -WORLD_WIDTH / 2 ||
+          newX + ballRadius >= WORLD_WIDTH / 2
+        ) {
+          if (gameMode === 2 || gameMode === 4) {
+            pausePowerupSound();
+            playGoalSound();
+          }
+  
+          // Update scores
+          // if (newX - ballRadius <= -WORLD_WIDTH / 2) {
+          //   setRightScore(prevScore => goalRight(prevScore));
+          // } else if (newX + ballRadius >= WORLD_WIDTH / 2) {
+          //   setLeftScore(prevScore => goalLeft(prevScore));
+          // }
+          if (newX - ballRadius <= -WORLD_WIDTH / 2) {
+            setRightScore((prevScore) => {
+              const newScore = prevScore + 1;
+              if (newScore < 3) {
+                setIsPaused(true);
+                handleCountdown();
+              }
+              return newScore;
+            });
+          } else if (newX + ballRadius >= WORLD_WIDTH / 2) {
+            setLeftScore((prevScore) => {
+              const newScore = prevScore + 1;
+              if (newScore < 3) {
+                setIsPaused(true);
+                handleCountdown();
+              }
+              return newScore;
+            });
+          }
+  
+          setCameraMode("orthographic");
+  
+          newX = 0;
+          newZ = 0;
+          setBallVelocity({ x: INITIAL_BALL_SPEED, z: INITIAL_BALL_SPEED });
+        }
 
-        newX = 0;
-        newZ = 0;
-        setBallVelocity({ x: INITIAL_BALL_SPEED, z: INITIAL_BALL_SPEED });
+      } else {
+        newX = ballPosition.x + ballVelocity.x;
+        newZ = ballPosition.z + ballVelocity.z;
       }
 
       setBallPosition({
@@ -937,17 +966,10 @@ export function Pong() {
     <MaterialBox
       component="div"
       sx={{
-        // display: 'flex',
-
-        // justifyContent: 'center',
-        // alignItems: 'center',
-        // background: `url('../src/assets/arcade.png') no-repeat center center / cover`,
         background: "#000000",
         borderRadius: "5px",
         marginTop: "4rem",
-        // padding: '15px',
         height: "92.5vh",
-        // align: 'center',
       }}
     >
       <div
@@ -957,7 +979,6 @@ export function Pong() {
         {!gameLaunched ? (
           showButtons && (
             <div className="starting-screen">
-              {/* <img src="../src/assets/arcade_2k.png" alt="Starting Screen" /> */}
               <img src="../src/assets/animated.gif" alt="Starting Screen" />
               <div className="game-buttons">
                 <button onClick={handleClassicModeMulti}>Classic 1 vs 1</button>
@@ -989,11 +1010,6 @@ export function Pong() {
                 orthographicTarget={[0, 0, 0]}
                 perspectiveCameraProps={{ fov: 40, near: 0.1, far: 1000 }}
                 orthographicCameraProps={{ zoom: 20, near: 0, far: 1000 }}
-                // mouseButtons={{ left: THREE.MOUSE.ROTATE }}
-                // touches={{
-                //   ONE: THREE.TOUCH.ROTATE,
-                //   TWO: THREE.TOUCH.DOLLY_PAN,
-                // }}
               />
 
               {/* le net */}
@@ -1049,9 +1065,6 @@ export function Pong() {
               <div className="winner-message">
                 {winner && <span>{winner}</span>}
               </div>
-              {/* <div className="pause-message">
-            {isPaused && !gameStart && <span>Game Paused</span>}
-            </div> */}
 
               {/* timer */}
               <div className="countdown">
