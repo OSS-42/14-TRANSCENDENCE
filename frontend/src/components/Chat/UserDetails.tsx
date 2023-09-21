@@ -89,8 +89,6 @@ function UserDetails({
             />
             <Typography variant="h6">{selectedUser?.username}</Typography>
             <Box component="div" mt={2}>
-              {/* Render the MatchHistory component here */}
-              {/* <MatchHistory user={selectedUser}></MatchHistory> */}
             </Box>
             <Box component="div" mt={2}>
               <Button

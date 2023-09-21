@@ -95,9 +95,23 @@ export class AuthService {
         }
         UserToken = this.signToken(user.id, user.email);
         this.createRefreshToken(user.id, user.secretId)
-        
+        const isUsernameTaken = await this.isUsernameTaken(username);
+          if (isUsernameTaken) {
+            const { v4: uuidv4 } = require('uuid');
+            const customPrefix = user.username;
+            const uniqueId = customPrefix + '-' + uuidv4().substring(0, 8);
+            await this.prisma.utilisateur.update({
+              where: { email },
+              data: {
+                username: uniqueId
+                ,
+              },
+            });
 
-      } else {
+          } 
+
+      } 
+      else {
         console.error(
           "Erreur lors de la requête:",
           response.status,
@@ -195,6 +209,13 @@ export class AuthService {
       return null
     }
 
+  }
+
+  async isUsernameTaken(username: string): Promise<boolean> {
+    const user = await this.prisma.utilisateur.findFirst({
+      where: { username },
+    });
+    return !!user; // Si l'utilisateur existe, retourne true, sinon retourne false.
   }
 
 }
