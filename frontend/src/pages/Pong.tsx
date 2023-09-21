@@ -42,17 +42,24 @@ type WeHaveAWinner = {
   clientName: string;
 };
 
-// type Connected = {
-//   isConnected: boolean;
-// };
-
 type OppDisconnected = {
   message: string;
 };
 
+type BallPosition = {
+  x: number;
+  y: number;
+  z: number;
+};
+
 export function Pong() {
+  //------------------ ERROR LISTENING ---------------------
+  window.addEventListener('error', function (event) {
+    console.log('🏓   there was an issue, but we catched it: ', event);
+  });
+
   //------------------ SOCKET CONNECTION --------------------
-  const [socket, setSocket] = useState(null);
+  const [socket, setSocket] = useState<ReturnType<typeof socketIO> | null>(null);
 
   useEffect(() => {
     const newSocket = socketIO("/pong", {
@@ -75,6 +82,9 @@ export function Pong() {
   const [cameraMode, setCameraMode] = React.useState<"perspective" | "orthographic">("orthographic");
   const [isPaused, setIsPaused] = React.useState(true);
   const [gameStart, setGameStart] = React.useState(true);
+  const [leftScore, setLeftScore] = React.useState(0);
+  const [rightScore, setRightScore] = React.useState(0);
+  const [winner, setWinner] = React.useState<string | null>(null);
 
   const [gameMode, setGameMode] = React.useState<0 | 1 | 2 | 3 | 4>(0);
   const [showButtons, setShowButtons] = React.useState(true);
@@ -92,13 +102,10 @@ export function Pong() {
 
   const [leftPaddlePositionZ, setLeftPaddlePositionZ] = React.useState(0);
   const [rightPaddlePositionZ, setRightPaddlePositionZ] = React.useState(0);
-  const [leftScore, setLeftScore] = React.useState(0);
-  const [rightScore, setRightScore] = React.useState(0);
-  const [winner, setWinner] = React.useState<string | null>(null);
   const [countdown, setCountdown] = React.useState<number | null>(null);
   const [powerupVisible, setPowerupVisible] = React.useState(false);
 
-  const [ballPosition, setBallPosition] = React.useState({
+  const [ballPosition, setBallPosition] = React.useState<BallPosition>({
     x: 0,
     y: 0,
     z: 0.00001,
@@ -122,13 +129,13 @@ export function Pong() {
   const [clientName, setClientName] = React.useState<string>("");
   const [playerName, setPlayerName] = React.useState<string>("");
 
-  const [gameInfos, setGameInfos] = useState<PlayerJoined>();
+  const [gameInfos] = useState<PlayerJoined>();
  
   const [waitingForPlayer, setWaitingForPlayer] = React.useState(false);
   const [gameId, setGameId] = React.useState<string>("");
   const [isHostWinner, setIsHostWinner] = React.useState(false);
   const [oppDisconnected, setOppDisconnected] =
-    React.useState<OppDisconnected>(false);
+    React.useState<OppDisconnected | null>(null);
 
   const [initialSetupComplete, setInitialSetupComplete] = useState(false);
 
@@ -138,8 +145,10 @@ export function Pong() {
       socket.on("connected", (data: any) => {
         console.log("🏓   Connection established ? ", data.isConnected);
         setIsConnected(data.isConnected);
-        console.log("🏓   username is ", user.username);
-        setPlayerName(user.username);
+        if (user) {
+          console.log("🏓   username is ", user.username);
+          setPlayerName(user.username);
+        }
         if (!data.isConnected) {
           console.log("🏓   Connection established ? ", data.isConnected);
           setGameLaunched(false);
@@ -162,7 +171,7 @@ export function Pong() {
 
       socket.on("opponentDisconnected", (data: any) => {
         console.log(data);
-        setOppDisconnected(true);
+        setOppDisconnected(data.message);
       });
 
       if (isConnected && gameId) {
@@ -234,24 +243,7 @@ export function Pong() {
   ]);
 
   //------------------ GAME MODES ------------------------
-  const handleClassicModeIA = (): void => {
-    console.log("🏓   classic 1 vs IA");
-    try {
-      const newHostStatus = true; // a cause async nature de React.
-      const newGM = 1;
-      setHostStatus(newHostStatus);
-      setGameMode(newGM);
-      setNames(playerName, newHostStatus, newGM, setHostname, setClientName);
-      setGameLaunched(true);
-      setCameraMode("orthographic");
-      setShowButtons(false);
-      handleCountdown();
-    } catch {
-      console.log("🏓   we catched an issue. GM1");
-      return;
-    }
-  };
-
+ 
   const handlePowerupModeIA = (): void => {
     console.log("🏓   powerup 1 vs IA");
     try {
@@ -275,34 +267,54 @@ export function Pong() {
     console.log("🏓   classic 1 vs 1");
     try {
       const newGM = 3;
-      socket.emit("waitingForPlayerGM3", { playerName, newGM });
-      setWaitingForPlayer(true);
-      setGameLaunched(true);
-      setCameraMode("orthographic");
-      setGameMode(newGM);
-      setShowButtons(false);
+      if (socket) {
+        socket.emit("waitingForPlayerGM3", { playerName, newGM });
+        setWaitingForPlayer(true);
+        setGameLaunched(true);
+        setCameraMode("orthographic");
+        setGameMode(newGM);
+        setShowButtons(false);
+      }
     } catch {
       console.log("🏓   we catched an issue. GM3");
       return;
     }
   };
 
-  const handlePowerupModeMulti = (): void => {
-    console.log("🏓   powerup 1 vs multi");
-    try {
-      const newGM = 4;
-      socket.emit("waitingForPlayerGM4", { playerName, newGM });
-      setWaitingForPlayer(true);
-      setGameLaunched(true);
-      setCameraMode("orthographic");
-      setPowerupVisible(true);
-      setGameMode(newGM);
-      setShowButtons(false);
-    } catch {
-      console.log("🏓   we catched an issue. GM4");
-      return;
-    }
-  };
+  // const handleClassicModeIA = (): void => {
+  //   console.log("🏓   classic 1 vs IA");
+  //   try {
+  //     const newHostStatus = true; // a cause async nature de React.
+  //     const newGM = 1;
+  //     setHostStatus(newHostStatus);
+  //     setGameMode(newGM);
+  //     setNames(playerName, newHostStatus, newGM, setHostname, setClientName);
+  //     setGameLaunched(true);
+  //     setCameraMode("orthographic");
+  //     setShowButtons(false);
+  //     handleCountdown();
+  //   } catch {
+  //     console.log("🏓   we catched an issue. GM1");
+  //     return;
+  //   }
+  // };
+
+  // const handlePowerupModeMulti = (): void => {
+  //   console.log("🏓   powerup 1 vs multi");
+  //   try {
+  //     const newGM = 4;
+  //     socket.emit("waitingForPlayerGM4", { playerName, newGM });
+  //     setWaitingForPlayer(true);
+  //     setGameLaunched(true);
+  //     setCameraMode("orthographic");
+  //     setPowerupVisible(true);
+  //     setGameMode(newGM);
+  //     setShowButtons(false);
+  //   } catch {
+  //     console.log("🏓   we catched an issue. GM4");
+  //     return;
+  //   }
+  // };
 
   //------------------ USER NAMES ------------------------
   function setNames(
@@ -312,23 +324,25 @@ export function Pong() {
     setHostname: Function,
     setClientName: Function
   ) {
-    if (newGM === 1 || newGM === 2) {
-      setHostname(playerName);
-      setClientName("Computer");
-    } else {
-      if (newHostStatus === true) {
+    if (gameInfos) {
+      if (newGM === 1 || newGM === 2) {
         setHostname(playerName);
-        setClientName(gameInfos.clientName);
+        setClientName("Computer");
       } else {
-        setHostname(gameInfos.clientName);
-        setClientName(playerName);
+        if (newHostStatus === true) {
+          setHostname(playerName);
+          setClientName(gameInfos.clientName);
+        } else {
+          setHostname(gameInfos.clientName);
+          setClientName(playerName);
+        }
       }
     }
   }
 
   //------------------ SCENE SETTINGS ------------------------
   // s'assure que le canvas aura comme maximum toujours 800x600
-  const [dimension, setDimensions] = React.useState<number, number>({ width: 800, height: 600 })
+  const [dimension] = React.useState<{ width: number, height: number }>({ width: 800, height: 600 });
 
   // Dimensions de l'espace de jeu.
   const CAMERA_ZOOM = 20;
@@ -387,7 +401,7 @@ export function Pong() {
   }, [gameMode]);
 
   // Scoreboard
-  // en cas de victoire, reinitialisation dedu jeu, identification du gagnant et perdant pour envoi a la DB et retour a la page de selection des modes
+  // en cas de victoire, reinitialisation du jeu, identification du gagnant et perdant pour envoi a la DB et retour a la page de selection des modes
 
   React.useEffect(() => {
     if (oppDisconnected) {
@@ -425,7 +439,7 @@ export function Pong() {
         console.log("🏓   B ", winnerText);
         console.log("🏓   B ", gameId);
         setGameLaunched(false);
-        if (gameId) {
+        if (gameId && socket) {
           console.log("🏓   envoi du resultat");
           socket.emit("weHaveAWinner", {
             gameId,
@@ -462,7 +476,7 @@ export function Pong() {
         position={[powerupPosition.x, powerupPosition.y, powerupPosition.z]}
         args={[1.5, 1.5, 1.5]}
       >
-        <meshBasicMaterial attachArray="material" map={textTexture} />
+        <meshBasicMaterial map={textTexture} />
       </Box>
     );
   };
@@ -577,14 +591,33 @@ export function Pong() {
     compHitSoundRef.current?.play();
   };
 
+
+  const goalRight = (prevScore: number) => {
+    const newScore: number = prevScore + 1;
+    if (newScore < 3) {
+      setIsPaused(true);
+      handleCountdown();
+    }
+    return newScore;
+  };
+
+  const goalLeft = (prevScore: number) => {
+      const newScore = prevScore + 1;
+      if (newScore < 3) {
+        setIsPaused(true);
+        handleCountdown();
+      }
+      return newScore;
+  }
+
   //------------------ GAME BALL LOGIC ------------------------
   // Ball mechanics
   interface BallProps {
-    ballPosition: Position;
-    setBallPosition: React.Dispatch<React.SetStateAction<Position>>;
+    ballPosition: BallPosition;
+    setBallPosition: React.Dispatch<React.SetStateAction<BallPosition>>;
     ballVelocity: Position;
     setBallVelocity: React.Dispatch<React.SetStateAction<Position>>;
-    speedFactor: number;
+    // speedFactor: number;
   }
 
   const Ball: React.FC<BallProps> = ({
@@ -655,7 +688,7 @@ export function Pong() {
           : rightPaddlePosition;
         if (hostStatus && (gameMode === 2 || gameMode === 4)) {
           playUserHitSound();
-        } else if (gameMode === 2 || gameMode === 4) {
+        } else if (!hostStatus && (gameMode === 2 || gameMode === 4)) {
           //attention si 1 vs 1, laissez le son utilisateur
           playCompHitSound();
         }
@@ -688,23 +721,9 @@ export function Pong() {
 
         // Update scores
         if (newX - ballRadius <= -WORLD_WIDTH / 2) {
-          setRightScore((prevScore) => {
-            const newScore = prevScore + 1;
-            if (newScore < 3) {
-              setIsPaused(true);
-              handleCountdown();
-            }
-            return newScore;
-          });
+          setRightScore(prevScore => goalRight(prevScore));
         } else if (newX + ballRadius >= WORLD_WIDTH / 2) {
-          setLeftScore((prevScore) => {
-            const newScore = prevScore + 1;
-            if (newScore < 3) {
-              setIsPaused(true);
-              handleCountdown();
-            }
-            return newScore;
-          });
+          setLeftScore(prevScore => goalLeft(prevScore));
         }
 
         setCameraMode("orthographic");
@@ -716,9 +735,9 @@ export function Pong() {
 
       setBallPosition({
         x: newX,
-        y: 0.0001,
+        y: 0,
         z: newZ,
-      });
+      } as BallPosition);
     });
 
     return (
@@ -828,7 +847,7 @@ export function Pong() {
   const rightPaddleXPosition: number = distanceFromCenter;
 
   interface RightPaddleProps {
-    RightPaddlePositionZ: number;
+    rightPaddlePositionZ: number;
     setRightPaddlePositionZ: React.Dispatch<React.SetStateAction<number>>;
   }
 
@@ -970,11 +989,11 @@ export function Pong() {
                 orthographicTarget={[0, 0, 0]}
                 perspectiveCameraProps={{ fov: 40, near: 0.1, far: 1000 }}
                 orthographicCameraProps={{ zoom: 20, near: 0, far: 1000 }}
-                mouseButtons={{ LEFT: THREE.MOUSE.ROTATE }}
-                touches={{
-                  ONE: THREE.TOUCH.ROTATE,
-                  TWO: THREE.TOUCH.DOLLY_PAN,
-                }}
+                // mouseButtons={{ left: THREE.MOUSE.ROTATE }}
+                // touches={{
+                //   ONE: THREE.TOUCH.ROTATE,
+                //   TWO: THREE.TOUCH.DOLLY_PAN,
+                // }}
               />
 
               {/* le net */}
@@ -992,7 +1011,6 @@ export function Pong() {
                 setBallPosition={setBallPosition}
                 ballVelocity={ballVelocity}
                 setBallVelocity={setBallVelocity}
-                // speedFactor={INITIAL_BALL_SPEED}
               />
 
               {/* Left Paddle */}
