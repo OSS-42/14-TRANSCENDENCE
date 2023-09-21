@@ -23,6 +23,7 @@ import socketIO from "socket.io-client";
 type GameParameters = {
   gameId: string;
   ballPosition: { x: number; y: number; z: number };
+  ballVelocity: { x: number, z: number };
   leftPaddlePositionZ: number;
   rightPaddlePositionZ: number;
   powerupPosition: { x: number; y: number; z: number };
@@ -42,17 +43,24 @@ type WeHaveAWinner = {
   clientName: string;
 };
 
-type Connected = {
-  isConnected: boolean;
-};
-
 type OppDisconnected = {
   message: string;
 };
 
+type BallPosition = {
+  x: number;
+  y: number;
+  z: number;
+};
+
 export function Pong() {
+  //------------------ ERROR LISTENING ---------------------
+  window.addEventListener('error', function (event) {
+    console.log('🏓   there was an issue, but we catched it: ', event);
+  });
+
   //------------------ SOCKET CONNECTION --------------------
-  const [socket, setSocket] = useState(null);
+  const [socket, setSocket] = useState<ReturnType<typeof socketIO> | null>(null);
 
   useEffect(() => {
     const newSocket = socketIO("/pong", {
@@ -72,14 +80,16 @@ export function Pong() {
   const { user } = useAuth();
 
   const [gameLaunched, setGameLaunched] = React.useState(false);
-  const [cameraMode, setCameraMode] = React.useState<
-    "perspective" | "orthographic"
-  >("orthographic");
+  const [cameraMode, setCameraMode] = React.useState<"perspective" | "orthographic">("orthographic");
   const [isPaused, setIsPaused] = React.useState(true);
   const [gameStart, setGameStart] = React.useState(true);
+  const [leftScore, setLeftScore] = React.useState(0);
+  const [rightScore, setRightScore] = React.useState(0);
+  const [winner, setWinner] = React.useState<string | null>(null);
 
   const [gameMode, setGameMode] = React.useState<0 | 1 | 2 | 3 | 4>(0);
   const [showButtons, setShowButtons] = React.useState(true);
+  const isGameOver = useRef(false);
 
   //------------------ GAME VARIABLES ------------------------
   // variables sans resizing
@@ -87,33 +97,31 @@ export function Pong() {
   const paddleHeight: number = 1;
   const paddleDepth: number = 5;
   const ballRadius: number = 0.5;
-  const INITIAL_BALL_SPEED: number = 0.3;
   const netWidth: number = 0.5;
   const netDepth: number = 8;
+  const INITIAL_BALL_SPEED: number = 0.3;
 
   const [leftPaddlePositionZ, setLeftPaddlePositionZ] = React.useState(0);
   const [rightPaddlePositionZ, setRightPaddlePositionZ] = React.useState(0);
-  const [ballSpeed, setBallSpeed] = React.useState(INITIAL_BALL_SPEED);
-  const [ballPosition, setBallPosition] = React.useState({
+  const [countdown, setCountdown] = React.useState<number | null>(null);
+  const [powerupVisible, setPowerupVisible] = React.useState(false);
+
+  const [ballPosition, setBallPosition] = React.useState<BallPosition>({
     x: 0,
     y: 0,
     z: 0.00001,
   });
+
   const [ballVelocity, setBallVelocity] = React.useState({
     x: INITIAL_BALL_SPEED,
     z: INITIAL_BALL_SPEED,
   });
-  const [leftScore, setLeftScore] = React.useState(0);
-  const [rightScore, setRightScore] = React.useState(0);
-  const [winner, setWinner] = React.useState<string | null>(null);
+
   const [powerupPosition, setPowerupPosition] = React.useState({
     x: 0,
     y: 0,
     z: 0,
   });
-  const [powerupVisible, setPowerupVisible] = React.useState(false);
-  const [countdown, setCountdown] = React.useState<number | null>(null);
-  const isGameOver = useRef(false);
 
   //------------------ CLIENT-SERVER SETTINGS ------------------------
   const [isConnected, setIsConnected] = React.useState<boolean>(false);
@@ -122,19 +130,13 @@ export function Pong() {
   const [clientName, setClientName] = React.useState<string>("");
   const [playerName, setPlayerName] = React.useState<string>("");
 
-  const [gameInfos, setGameInfos] = useState<PlayerJoined>();
-  const [gameParameters, setGameParameters] = useState<GameParameters>();
-  const [connection, setConnection] = useState<Connected>();
-  const [winnerIs, setWinnerIs] = useState<WeHaveAWinner>();
+  const [gameInfos] = useState<PlayerJoined>();
+ 
   const [waitingForPlayer, setWaitingForPlayer] = React.useState(false);
   const [gameId, setGameId] = React.useState<string>("");
   const [isHostWinner, setIsHostWinner] = React.useState(false);
   const [oppDisconnected, setOppDisconnected] =
-    React.useState<OppDisconnected>(false);
-
-  const [currentTime, setCurrentTime] = useState(performance.now());
-  const updateFrequency = 1000 / 60;
-  const [lastUpdateTime, setLastUpdateTime] = useState(currentTime);
+    React.useState<OppDisconnected | null>(null);
 
   const [initialSetupComplete, setInitialSetupComplete] = useState(false);
 
@@ -144,8 +146,10 @@ export function Pong() {
       socket.on("connected", (data: any) => {
         console.log("🏓   Connection established ? ", data.isConnected);
         setIsConnected(data.isConnected);
-        console.log("🏓   username is ", user.username);
-        setPlayerName(user.username);
+        if (user) {
+          console.log("🏓   username is ", user.username);
+          setPlayerName(user.username);
+        }
         if (!data.isConnected) {
           console.log("🏓   Connection established ? ", data.isConnected);
           setGameLaunched(false);
@@ -168,7 +172,7 @@ export function Pong() {
 
       socket.on("opponentDisconnected", (data: any) => {
         console.log(data);
-        setOppDisconnected(true);
+        setOppDisconnected(data.message);
       });
 
       if (isConnected && gameId) {
@@ -190,12 +194,12 @@ export function Pong() {
 
   useEffect(() => {
     if (socket && initialSetupComplete) {
-      // debugger;
       if (hostStatus) {
         console.log("🏓🏓   host");
         socket.emit("hostGameParameters", {
           gameId,
           ballPosition,
+          ballVelocity,
           leftPaddlePositionZ,
           rightPaddlePositionZ,
           powerupPosition,
@@ -209,14 +213,13 @@ export function Pong() {
       }
 
       if (!hostStatus) {
-        socket.on("hostMovesUpdate", (data: GameParameters) => {
-          // setGameId(data.gameId);
-          // console.log('🏓   GAMEID: ', gameId);
-          setBallPosition(data.ballPosition);
-          setLeftPaddlePositionZ(data.leftPaddlePositionZ);
-          setRightPaddlePositionZ(data.rightPaddlePositionZ);
-          setPowerupPosition(data.powerupPosition);
-        });
+        socket.on('hostMovesUpdate', (data: GameParameters) => {
+          setBallPosition(data.ballPosition)
+          setBallVelocity(data.ballVelocity)
+          setLeftPaddlePositionZ(data.leftPaddlePositionZ)
+          setRightPaddlePositionZ(data.rightPaddlePositionZ)
+          setPowerupPosition(data.powerupPosition)
+        })
       } else {
         socket.on("clientMovesUpdate", (data: any) => {
           setRightPaddlePositionZ(data.rightPaddlePositionZ);
@@ -243,55 +246,78 @@ export function Pong() {
   ]);
 
   //------------------ GAME MODES ------------------------
-  const handleClassicModeIA = (): void => {
-    console.log("🏓   classic 1 vs IA");
-    const newHostStatus = true; // a cause async nature de React.
-    const newGM = 1;
-    setHostStatus(newHostStatus);
-    setGameMode(newGM);
-    setNames(playerName, newHostStatus, newGM, setHostname, setClientName);
-    setGameLaunched(true);
-    setCameraMode("orthographic");
-    setShowButtons(false);
-    handleCountdown();
-  };
-
+ 
   const handlePowerupModeIA = (): void => {
     console.log("🏓   powerup 1 vs IA");
-    const newHostStatus = true;
-    const newGM = 2;
-    setHostStatus(newHostStatus);
-    setGameMode(newGM);
-    setNames(playerName, newHostStatus, newGM, setHostname, setClientName);
-    setGameLaunched(true);
-    setCameraMode("orthographic");
-    setPowerupVisible(true);
-    setShowButtons(false);
-    handleCountdown();
+    try {
+      const newHostStatus = true;
+      const newGM = 2;
+      setHostStatus(newHostStatus);
+      setGameMode(newGM);
+      setNames(playerName, newHostStatus, newGM, setHostname, setClientName);
+      setGameLaunched(true);
+      setCameraMode("orthographic");
+      setPowerupVisible(true);
+      setShowButtons(false);
+      handleCountdown();
+    } catch {
+      console.log("🏓   we catched an issue. GM2");
+      return;
+    }
   };
 
   const handleClassicModeMulti = (): void => {
     console.log("🏓   classic 1 vs 1");
-    const newGM = 3;
-    socket.emit("waitingForPlayerGM3", { playerName, newGM });
-    setWaitingForPlayer(true);
-    setGameLaunched(true);
-    setCameraMode("orthographic");
-    setGameMode(newGM);
-    setShowButtons(false);
+    try {
+      const newGM = 3;
+      if (socket) {
+        socket.emit("waitingForPlayerGM3", { playerName, newGM });
+        setWaitingForPlayer(true);
+        setGameLaunched(true);
+        setCameraMode("orthographic");
+        setGameMode(newGM);
+        setShowButtons(false);
+      }
+    } catch {
+      console.log("🏓   we catched an issue. GM3");
+      return;
+    }
   };
 
-  const handlePowerupModeMulti = (): void => {
-    console.log("🏓   powerup 1 vs multi");
-    const newGM = 4;
-    socket.emit("waitingForPlayerGM4", { playerName, newGM });
-    setWaitingForPlayer(true);
-    setGameLaunched(true);
-    setCameraMode("orthographic");
-    setPowerupVisible(true);
-    setGameMode(newGM);
-    setShowButtons(false);
-  };
+  // const handleClassicModeIA = (): void => {
+  //   console.log("🏓   classic 1 vs IA");
+  //   try {
+  //     const newHostStatus = true; // a cause async nature de React.
+  //     const newGM = 1;
+  //     setHostStatus(newHostStatus);
+  //     setGameMode(newGM);
+  //     setNames(playerName, newHostStatus, newGM, setHostname, setClientName);
+  //     setGameLaunched(true);
+  //     setCameraMode("orthographic");
+  //     setShowButtons(false);
+  //     handleCountdown();
+  //   } catch {
+  //     console.log("🏓   we catched an issue. GM1");
+  //     return;
+  //   }
+  // };
+
+  // const handlePowerupModeMulti = (): void => {
+  //   console.log("🏓   powerup 1 vs multi");
+  //   try {
+  //     const newGM = 4;
+  //     socket.emit("waitingForPlayerGM4", { playerName, newGM });
+  //     setWaitingForPlayer(true);
+  //     setGameLaunched(true);
+  //     setCameraMode("orthographic");
+  //     setPowerupVisible(true);
+  //     setGameMode(newGM);
+  //     setShowButtons(false);
+  //   } catch {
+  //     console.log("🏓   we catched an issue. GM4");
+  //     return;
+  //   }
+  // };
 
   //------------------ USER NAMES ------------------------
   function setNames(
@@ -301,36 +327,25 @@ export function Pong() {
     setHostname: Function,
     setClientName: Function
   ) {
-    if (newGM === 1 || newGM === 2) {
-      setHostname(playerName);
-      setClientName("Computer");
-    } else {
-      if (newHostStatus === true) {
+    if (gameInfos) {
+      if (newGM === 1 || newGM === 2) {
         setHostname(playerName);
-        setClientName(gameInfos.clientName);
+        setClientName("Computer");
       } else {
-        setHostname(gameInfos.clientName);
-        setClientName(playerName);
+        if (newHostStatus === true) {
+          setHostname(playerName);
+          setClientName(gameInfos.clientName);
+        } else {
+          setHostname(gameInfos.clientName);
+          setClientName(playerName);
+        }
       }
     }
   }
 
   //------------------ SCENE SETTINGS ------------------------
   // s'assure que le canvas aura comme maximum toujours 800x600
-  const [dimension, setDimensions] = React.useState<{
-    width: number;
-    height: number;
-  }>(() => {
-    let initialWidth = window.innerWidth;
-    let initialHeight = (window.innerWidth * 3) / 4;
-
-    if (initialWidth > 800) {
-      initialWidth = 800;
-      initialHeight = 600;
-    }
-
-    return { width: initialWidth, height: initialHeight };
-  });
+  const [dimension] = React.useState<{ width: number, height: number }>({ width: 800, height: 600 });
 
   // Dimensions de l'espace de jeu.
   const CAMERA_ZOOM = 20;
@@ -389,7 +404,7 @@ export function Pong() {
   }, [gameMode]);
 
   // Scoreboard
-  // en cas de victoire, reinitialisation dedu jeu, identification du gagnant et perdant pour envoi a la DB et retour a la page de selection des modes
+  // en cas de victoire, reinitialisation du jeu, identification du gagnant et perdant pour envoi a la DB et retour a la page de selection des modes
 
   React.useEffect(() => {
     if (oppDisconnected) {
@@ -427,7 +442,7 @@ export function Pong() {
         console.log("🏓   B ", winnerText);
         console.log("🏓   B ", gameId);
         setGameLaunched(false);
-        if (gameId) {
+        if (gameId && socket) {
           console.log("🏓   envoi du resultat");
           socket.emit("weHaveAWinner", {
             gameId,
@@ -464,7 +479,7 @@ export function Pong() {
         position={[powerupPosition.x, powerupPosition.y, powerupPosition.z]}
         args={[1.5, 1.5, 1.5]}
       >
-        <meshBasicMaterial attachArray="material" map={textTexture} />
+        <meshBasicMaterial map={textTexture} />
       </Box>
     );
   };
@@ -495,16 +510,17 @@ export function Pong() {
   };
 
   //creation de la ligne (le net) du milieu
-  const numberOfSegments: number = 15;
-  const segmentHeight: number = netDepth / 5;
-  const spaceBetweenSegments: number = 1;
-  const totalHeight: number =
-    (segmentHeight + spaceBetweenSegments) * numberOfSegments -
-    spaceBetweenSegments; // Subtract space for the last segment
-
-  const segments = Array.from({ length: numberOfSegments }).map((_, index) => {
-    const yPosition: number =
-      totalHeight / 2 - index * (segmentHeight + spaceBetweenSegments);
+  const Net = React.memo(() => {
+    const numberOfSegments: number = 15;
+    const segmentHeight: number = netDepth / 5;
+    const spaceBetweenSegments: number = 1;
+    const totalHeight: number =
+      (segmentHeight + spaceBetweenSegments) * numberOfSegments -
+      spaceBetweenSegments; // Subtract space for the last segment
+  
+    const segments = Array.from({ length: numberOfSegments }).map((_, index) => {
+      const yPosition: number =
+        totalHeight / 2 - index * (segmentHeight + spaceBetweenSegments);
 
     return (
       <Box
@@ -517,12 +533,15 @@ export function Pong() {
     );
   });
 
+    return <>{segments}</>
+  });
+
   const baseCanvasWidth: number = 800;
   const baseFontSize: number = 60;
   const fontSize: number = (dimension.width / baseCanvasWidth) * baseFontSize;
 
   // border lines
-  const Borders: React.FC<{}> = () => {
+  const Borders = React.memo(() => {
     const borderThickness = 0.05;
     return (
       <>
@@ -542,7 +561,7 @@ export function Pong() {
         </Box>
       </>
     );
-  };
+  });
 
   // sound effects
   const goalSoundRef = React.useRef<HTMLAudioElement>(null);
@@ -575,14 +594,32 @@ export function Pong() {
     compHitSoundRef.current?.play();
   };
 
+//--------------- SCOREBOARD LOGIC -----------------
+  // const goalRight = (prevScore: number) => {
+  //   const newScore: number = prevScore + 1;
+  //   if (newScore < 3) {
+  //     setIsPaused(true);
+  //     handleCountdown();
+  //   }
+  //   return newScore;
+  // };
+
+  // const goalLeft = (prevScore: number) => {
+  //     const newScore = prevScore + 1;
+  //     if (newScore < 3) {
+  //       setIsPaused(true);
+  //       handleCountdown();
+  //     }
+  //     return newScore;
+  // }
+
   //------------------ GAME BALL LOGIC ------------------------
   // Ball mechanics
   interface BallProps {
-    ballPosition: Position;
-    setBallPosition: React.Dispatch<React.SetStateAction<Position>>;
+    ballPosition: BallPosition;
+    setBallPosition: React.Dispatch<React.SetStateAction<BallPosition>>;
     ballVelocity: Position;
     setBallVelocity: React.Dispatch<React.SetStateAction<Position>>;
-    speedFactor: number;
   }
 
   const Ball: React.FC<BallProps> = ({
@@ -594,98 +631,105 @@ export function Pong() {
     useFrame(() => {
       if (isPaused || gameStart || winner) return;
 
-      let newX: number = ballPosition.x + ballVelocity.x;
-      // ne pas oublier la position de la camera pour la vue top-down
-      let newZ: number = ballPosition.z + ballVelocity.z;
+      // let newX: number = 0;
+      // let newZ: number = 0; // ne pas oublier la position de la camera pour la vue top-down
 
-      const directionZ = Math.sign(ballVelocity.z);
+        let newX: number = ballPosition.x + ballVelocity.x;
+        let newZ: number = ballPosition.z + ballVelocity.z;
+  
+        const directionZ = Math.sign(ballVelocity.z);
 
-      if (
-        powerupVisible &&
-        Math.abs(ballPosition.x - powerupPosition.x) < ballRadius + 1 &&
-        Math.abs(ballPosition.z - powerupPosition.z) < ballRadius + 1
-      ) {
-        setPowerupVisible(false);
-        setCameraMode("perspective");
-        playPowerupSound();
-
-        setTimeout(() => {
-          setCameraMode("orthographic");
-          respawnPowerup();
-        }, 12000);
-      }
-
-      // Validation de hit avec les murs
-      if (
-        (directionZ > 0 && newZ + ballRadius > WORLD_HEIGHT / 2) ||
-        (directionZ < 0 && newZ - ballRadius < -WORLD_HEIGHT / 2)
-      ) {
-        ballVelocity.z = -ballVelocity.z;
-        newZ = ballPosition.z + ballVelocity.z;
-        if (gameMode === 2 || gameMode === 4) playBallWallSound();
-      }
-
-      // Validation de hit avec les paddles
-      const leftPaddlePosition = {
-        x: leftPaddleXPosition,
-        z: leftPaddlePositionZ,
-      };
-      const rightPaddlePosition = {
-        x: rightPaddleXPosition,
-        z: rightPaddlePositionZ,
-      };
-      const paddleDimensions = { width: paddleWidth, depth: paddleDepth };
-
-      const hitSectionLeft = checkCollision(
-        { x: newX, z: newZ },
-        leftPaddlePosition,
-        paddleDimensions
-      );
-      const hitSectionRight = checkCollision(
-        { x: newX, z: newZ },
-        rightPaddlePosition,
-        paddleDimensions
-      );
-
-      if (hitSectionLeft || hitSectionRight) {
-        const hitPaddlePosition = hitSectionLeft
-          ? leftPaddlePosition
-          : rightPaddlePosition;
-        if (hostStatus && (gameMode === 2 || gameMode === 4)) {
-          playUserHitSound();
-        } else if (gameMode === 2 || gameMode === 4) {
-          //attention si 1 vs 1, laissez le son utilisateur
-          playCompHitSound();
+        if (
+          powerupVisible &&
+          Math.abs(ballPosition.x - powerupPosition.x) < ballRadius + 1 &&
+          Math.abs(ballPosition.z - powerupPosition.z) < ballRadius + 1
+        ) {
+          setPowerupVisible(false);
+          setCameraMode("perspective");
+          playPowerupSound();
+  
+          setTimeout(() => {
+            setCameraMode("orthographic");
+            respawnPowerup();
+          }, 12000);
         }
 
-        ballVelocity.x = -ballVelocity.x;
-
-        const relativeCollisionPoint =
-          (newZ - hitPaddlePosition.z) / (paddleDepth / 2);
-        const newZVelocity =
-          ballVelocity.z + relativeCollisionPoint * INITIAL_BALL_SPEED;
-
-        // Normalize the velocity to maintain the initial speed
-        const magnitude = Math.sqrt(ballVelocity.x ** 2 + newZVelocity ** 2);
-        ballVelocity.x = (ballVelocity.x / magnitude) * INITIAL_BALL_SPEED;
-        ballVelocity.z = (newZVelocity / magnitude) * INITIAL_BALL_SPEED;
-
-        newX =
-          hitPaddlePosition.x +
-          Math.sign(ballVelocity.x) * (paddleWidth / 2 + ballRadius);
-      }
-
-      if (
-        newX - ballRadius <= -WORLD_WIDTH / 2 ||
-        newX + ballRadius >= WORLD_WIDTH / 2
-      ) {
-        if (gameMode === 2 || gameMode === 4) {
-          pausePowerupSound();
-          playGoalSound();
+        // Validation de hit avec les murs
+        if (
+          (directionZ > 0 && newZ + ballRadius > WORLD_HEIGHT / 2) ||
+          (directionZ < 0 && newZ - ballRadius < -WORLD_HEIGHT / 2)
+        ) {
+          ballVelocity.z = -ballVelocity.z;
+          newZ = ballPosition.z + ballVelocity.z;
+          if (gameMode === 2 || gameMode === 4) playBallWallSound();
         }
 
-        // Update scores
-        if (newX - ballRadius <= -WORLD_WIDTH / 2) {
+        // Validation de hit avec les paddles
+        const leftPaddlePosition = {
+          x: leftPaddleXPosition,
+          z: leftPaddlePositionZ,
+        };
+        const rightPaddlePosition = {
+          x: rightPaddleXPosition,
+          z: rightPaddlePositionZ,
+        };
+        const paddleDimensions = { width: paddleWidth, depth: paddleDepth };
+  
+        const hitSectionLeft = checkCollision(
+          { x: newX, z: newZ },
+          leftPaddlePosition,
+          paddleDimensions
+        );
+        const hitSectionRight = checkCollision(
+          { x: newX, z: newZ },
+          rightPaddlePosition,
+          paddleDimensions
+        );
+
+        if (hitSectionLeft || hitSectionRight) {
+          const hitPaddlePosition = hitSectionLeft
+            ? leftPaddlePosition
+            : rightPaddlePosition;
+          if (hostStatus && (gameMode === 2 || gameMode === 4)) {
+            playUserHitSound();
+          } else if (!hostStatus && (gameMode === 2 || gameMode === 4)) {
+            //attention si 1 vs 1, laissez le son utilisateur
+            playCompHitSound();
+          }
+  
+          ballVelocity.x = -ballVelocity.x;
+  
+          // const relativeCollisionPoint =
+          //   (newZ - hitPaddlePosition.z) / (paddleDepth / 2);
+          // const newZVelocity =
+          //   ballVelocity.z + relativeCollisionPoint * INITIAL_BALL_SPEED;
+  
+          // // Normalize the velocity to maintain the initial speed
+          // const magnitude = Math.sqrt(ballVelocity.x ** 2 + newZVelocity ** 2);
+          // ballVelocity.x = (ballVelocity.x / magnitude) * INITIAL_BALL_SPEED;
+          // ballVelocity.z = (newZVelocity / magnitude) * INITIAL_BALL_SPEED;
+  
+          newX =
+            hitPaddlePosition.x +
+            Math.sign(ballVelocity.x) * (paddleWidth / 2 + ballRadius);
+        }
+
+        if (
+          newX - ballRadius <= -WORLD_WIDTH / 2 ||
+          newX + ballRadius >= WORLD_WIDTH / 2
+        ) {
+          if (gameMode === 2 || gameMode === 4) {
+            pausePowerupSound();
+            playGoalSound();
+          }
+  
+          // Update scores
+          // if (newX - ballRadius <= -WORLD_WIDTH / 2) {
+          //   setRightScore(prevScore => goalRight(prevScore));
+          // } else if (newX + ballRadius >= WORLD_WIDTH / 2) {
+          //   setLeftScore(prevScore => goalLeft(prevScore));
+          // }
+          if (newX - ballRadius <= -WORLD_WIDTH / 2) {
           setRightScore((prevScore) => {
             const newScore = prevScore + 1;
             if (newScore < 3) {
@@ -704,19 +748,24 @@ export function Pong() {
             return newScore;
           });
         }
+  
+          setCameraMode("orthographic");
+  
+          newX = 0;
+          newZ = 0;
+          setBallVelocity({ x: INITIAL_BALL_SPEED, z: INITIAL_BALL_SPEED });
+        }
 
-        setCameraMode("orthographic");
-
-        newX = 0;
-        newZ = 0;
-        setBallVelocity({ x: INITIAL_BALL_SPEED, z: INITIAL_BALL_SPEED });
-      }
+      // } else {
+      //   newX = ballPosition.x + ballVelocity.x;
+      //   newZ = ballPosition.z + ballVelocity.z;
+      // }
 
       setBallPosition({
         x: newX,
-        y: 0.0001,
+        y: 0,
         z: newZ,
-      });
+      } as BallPosition);
     });
 
     return (
@@ -776,33 +825,40 @@ export function Pong() {
     leftPaddlePositionZ,
     setLeftPaddlePositionZ,
   }) => {
-    const { mouse } = useThree();
+    const { mouse } = useThree()
+    let lastEventTime = 0;
+    const throttleTime = 100;
 
     useFrame(() => {
-      let newPosition;
-      if (hostStatus) {
-        if (cameraMode === "perspective") {
-          newPosition = mouse.x * (WORLD_WIDTH / 2);
+      const currentTime = Date.now();
+
+       if (currentTime - lastEventTime > throttleTime) {
+        lastEventTime = currentTime;
+        let newPosition
+        if (hostStatus) {
+          if (cameraMode === 'perspective') {
+            newPosition = mouse.x * (WORLD_WIDTH / 2)
+          } else {
+            newPosition = -mouse.y * (WORLD_HEIGHT / 2)
+          }
         } else {
-          newPosition = -mouse.y * (WORLD_HEIGHT / 2);
+          newPosition = leftPaddlePositionZ
         }
-      } else {
-        newPosition = leftPaddlePositionZ;
+
+        newPosition = lerp(leftPaddlePositionZ, newPosition, lerpFactor)
+
+        const paddleTopEdge = newPosition + paddleDepth / 2
+        const paddleBottomEdge = newPosition - paddleDepth / 2
+
+        if (paddleTopEdge > WORLD_HEIGHT / 2) {
+          newPosition = WORLD_HEIGHT / 2 - paddleDepth / 2
+        } else if (paddleBottomEdge < -WORLD_HEIGHT / 2) {
+          newPosition = -WORLD_HEIGHT / 2 + paddleDepth / 2
+        }
+
+        setLeftPaddlePositionZ(newPosition)
       }
-
-      newPosition = lerp(leftPaddlePositionZ, newPosition, lerpFactor);
-
-      const paddleTopEdge = newPosition + paddleDepth / 2;
-      const paddleBottomEdge = newPosition - paddleDepth / 2;
-
-      if (paddleTopEdge > WORLD_HEIGHT / 2) {
-        newPosition = WORLD_HEIGHT / 2 - paddleDepth / 2;
-      } else if (paddleBottomEdge < -WORLD_HEIGHT / 2) {
-        newPosition = -WORLD_HEIGHT / 2 + paddleDepth / 2;
-      }
-
-      setLeftPaddlePositionZ(newPosition);
-    });
+    })
 
     return (
       <Box
@@ -819,7 +875,7 @@ export function Pong() {
   const rightPaddleXPosition: number = distanceFromCenter;
 
   interface RightPaddleProps {
-    RightPaddlePositionZ: number;
+    rightPaddlePositionZ: number;
     setRightPaddlePositionZ: React.Dispatch<React.SetStateAction<number>>;
   }
 
@@ -855,33 +911,40 @@ export function Pong() {
       });
     } else {
       // mouvement du right (user2) paddle a la souris.
-      const { mouse } = useThree();
+      const { mouse } = useThree()
+      let lastEventTime = 0;
+      const throttleTime = 100;
 
       useFrame(() => {
-        let newPosition;
-        if (!hostStatus) {
-          if (cameraMode === "perspective") {
-            newPosition = -mouse.x * (WORLD_WIDTH / 2);
+        const currentTime = Date.now();
+
+        if (currentTime - lastEventTime > throttleTime) {
+          lastEventTime = currentTime;
+          let newPosition
+          if (!hostStatus) {
+            if (cameraMode === 'perspective') {
+              newPosition = -mouse.x * (WORLD_WIDTH / 2)
+            } else {
+              newPosition = -mouse.y * (WORLD_HEIGHT / 2)
+            }
           } else {
-            newPosition = -mouse.y * (WORLD_HEIGHT / 2);
+            newPosition = rightPaddlePositionZ
           }
-        } else {
-          newPosition = rightPaddlePositionZ;
+
+          newPosition = lerp(rightPaddlePositionZ, newPosition, lerpFactor)
+
+          const paddleTopEdge = newPosition + paddleDepth / 2
+          const paddleBottomEdge = newPosition - paddleDepth / 2
+
+          if (paddleTopEdge > WORLD_HEIGHT / 2) {
+            newPosition = WORLD_HEIGHT / 2 - paddleDepth / 2
+          } else if (paddleBottomEdge < -WORLD_HEIGHT / 2) {
+            newPosition = -WORLD_HEIGHT / 2 + paddleDepth / 2
+          }
+
+          setRightPaddlePositionZ(newPosition)
         }
-
-        newPosition = lerp(rightPaddlePositionZ, newPosition, lerpFactor);
-
-        const paddleTopEdge = newPosition + paddleDepth / 2;
-        const paddleBottomEdge = newPosition - paddleDepth / 2;
-
-        if (paddleTopEdge > WORLD_HEIGHT / 2) {
-          newPosition = WORLD_HEIGHT / 2 - paddleDepth / 2;
-        } else if (paddleBottomEdge < -WORLD_HEIGHT / 2) {
-          newPosition = -WORLD_HEIGHT / 2 + paddleDepth / 2;
-        }
-
-        setRightPaddlePositionZ(newPosition);
-      });
+      })
     }
 
     return (
@@ -902,17 +965,10 @@ export function Pong() {
     <MaterialBox
       component="div"
       sx={{
-        // display: 'flex',
-
-        // justifyContent: 'center',
-        // alignItems: 'center',
-        // background: `url('../src/assets/arcade.png') no-repeat center center / cover`,
         background: "#000000",
         borderRadius: "5px",
         marginTop: "4rem",
-        // padding: '15px',
         height: "92.5vh",
-        // align: 'center',
       }}
     >
       <div
@@ -922,12 +978,11 @@ export function Pong() {
         {!gameLaunched ? (
           showButtons && (
             <div className="starting-screen">
-              {/* <img src="../src/assets/arcade_2k.png" alt="Starting Screen" /> */}
               <img src="../src/assets/animated.gif" alt="Starting Screen" />
               <div className="game-buttons">
-                {/* <button onClick={handleClassicModeIA}>Classic 1 vs IA</button> */}
                 <button onClick={handleClassicModeMulti}>Classic 1 vs 1</button>
                 <button onClick={handlePowerupModeIA}>Powerup 1 vs IA</button>
+                {/* <button onClick={handleClassicModeIA}>Classic 1 vs IA</button> */}
                 {/* <button onClick={handlePowerupModeMulti}>Powerup 1 vs 1</button> */}
               </div>
             </div>
@@ -954,15 +1009,10 @@ export function Pong() {
                 orthographicTarget={[0, 0, 0]}
                 perspectiveCameraProps={{ fov: 40, near: 0.1, far: 1000 }}
                 orthographicCameraProps={{ zoom: 20, near: 0, far: 1000 }}
-                mouseButtons={{ LEFT: THREE.MOUSE.ROTATE }}
-                touches={{
-                  ONE: THREE.TOUCH.ROTATE,
-                  TWO: THREE.TOUCH.DOLLY_PAN,
-                }}
               />
 
               {/* le net */}
-              {segments}
+              <Net />
 
               {/* borders */}
               <Borders />
@@ -976,7 +1026,6 @@ export function Pong() {
                 setBallPosition={setBallPosition}
                 ballVelocity={ballVelocity}
                 setBallVelocity={setBallVelocity}
-                speedFactor={ballSpeed}
               />
 
               {/* Left Paddle */}
@@ -1015,9 +1064,6 @@ export function Pong() {
               <div className="winner-message">
                 {winner && <span>{winner}</span>}
               </div>
-              {/* <div className="pause-message">
-            {isPaused && !gameStart && <span>Game Paused</span>}
-            </div> */}
 
               {/* timer */}
               <div className="countdown">
