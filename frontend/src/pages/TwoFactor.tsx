@@ -2,49 +2,32 @@ import { Box, Button } from "@mui/material";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { useState } from "react";
+import { twoFactorValidationStatus } from "../api/requests";
 import { useAuth } from "../contexts/AuthContext";
 import { useRoutes } from "../contexts/RoutesContext";
 
 export function TwoFactor() {
-  const [inputValue, setInputValue] = useState("");	
+  const [inputValue, setInputValue] = useState("");
   const jwt_token = Cookies.get("jwt_token");
   const { navigateTo } = useRoutes();
   const { setUser } = useAuth();
 
-
-  async function TwoFactorValidationStatus() {
-    try {
-      const response = await axios.post(
-        `api/users/is2FAValidated`,
-        {value: true},
-        {
-          headers: {
-            Authorization: `Bearer ${jwt_token}`,
-          },
-        }
-      );
-	  console.log("Update2FAStatusRequest",response);
-	  setUser(response.data);
-    } catch (error) {
-      console.error("Error fetching user 2FA", error);
-      throw error;
-    }
+  async function handleTwo() {
+    const newUser = await twoFactorValidationStatus(true);
+    setUser(newUser);
   }
 
-//   setUser(response.data);
-
-  function handleChange(event: any){
-
-	const value = event.target.value;
-	console.log("The value is:", value);
-	setInputValue(value);
+  function handleChange(event: any) {
+    const value = event.target.value;
+    console.log("The value is:", value);
+    setInputValue(value);
   }
 
   async function handle2FAClick() {
     try {
       const response = await axios.post(
         `api/auth/verify2FA`,
-        {token: inputValue},
+        { token: inputValue },
         {
           headers: {
             Authorization: `Bearer ${jwt_token}`,
@@ -52,16 +35,13 @@ export function TwoFactor() {
         }
       );
       console.log("Response:", response.data);
-	  if (response.data.message === '2FA code is valid.')
-	  {
-		TwoFactorValidationStatus();
-		navigateTo('/');
-	  }
-	  else if (response.data.message === 'Invalid 2FA code.')
-	  {
-		alert('Invalid input, please enter a valid input.');
-		setInputValue("");
-	  }
+      if (response.data.message === "2FA code is valid.") {
+        handleTwo();
+        navigateTo("/");
+      } else if (response.data.message === "Invalid 2FA code.") {
+        alert("Invalid input, please enter a valid input.");
+        setInputValue("");
+      }
     } catch (error) {
       console.error("Error verifying user 2FA", error);
       throw error;
@@ -93,8 +73,8 @@ export function TwoFactor() {
         minLength="6"
         maxLength="6"
         size="10"
-		value={inputValue}
-		onChange={handleChange}
+        value={inputValue}
+        onChange={handleChange}
       />
       <br />
       <label htmlFor="2FA">

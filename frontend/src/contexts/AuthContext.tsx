@@ -12,6 +12,7 @@ import { getCookies, bearerAuthorization } from "../utils";
 import { User } from "../models/User";
 import { useRoutes } from "./RoutesContext";
 import { TwoFactor } from "../pages/TwoFactor";
+import { twoFactorValidationStatus } from "../api/requests";
 
 // Define constants
 const JWT_TOKEN_COOKIE = "jwt_token";
@@ -57,6 +58,7 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
     setIsLogged(false);
     setLoading(false);
     redirectToWelcome();
+	twoFactorValidationStatus(false);
   };
 
   const fetchUserData = async () => {

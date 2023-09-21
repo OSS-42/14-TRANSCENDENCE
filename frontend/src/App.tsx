@@ -45,7 +45,7 @@ function App() {
   return (
 	<>
 		<>
-		  {user && user.is2FAValidated ?  <Header /> : null}
+		  {user && user.is2FAValidated || user && !user.twoFactorSecret ?  <Header /> : null}
 		  <Routes>
 			<Route
 			  path="/welcome"
