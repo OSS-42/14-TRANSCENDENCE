@@ -189,8 +189,8 @@ export class PongGateway {
   @SubscribeMessage('weHaveAWinner')
   handleWinner(client: Socket, payload: any) {
     const gameId = payload.gameId; // Make sure to send gameId from client
-    const hostname = payload.hostname;
-    const clientName = payload.clientName;
+    // const hostname = payload.hostname;
+    // const clientName = payload.clientName;
     
     this.server.to(gameId).emit('weHaveAWinner', payload);
     console.log('🏓   in ${gameId}, the winner is  ', payload.isHostWinner);

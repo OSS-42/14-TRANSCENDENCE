@@ -27,6 +27,8 @@ type GameParameters = {
   leftPaddlePositionZ: number;
   rightPaddlePositionZ: number;
   powerupPosition: { x: number; y: number; z: number };
+  leftScore: number;
+  rightScore: number;
 };
 
 type PlayerJoined = {
@@ -151,7 +153,7 @@ export function Pong() {
           setPlayerName(user.username);
         }
         if (!data.isConnected) {
-          console.log("🏓   Connection established ? ", data.isConnected);
+          console.log("🏓   Connection failed ");
           setGameLaunched(false);
         }
       });
@@ -177,6 +179,7 @@ export function Pong() {
 
       if (isConnected && gameId) {
         setInitialSetupComplete(true);
+        console.log('🏓   setup completed. GAME ID: ', gameId);
       }
     } else {
       return () => {}; // No-op function when socket is null
@@ -201,8 +204,10 @@ export function Pong() {
           ballPosition,
           ballVelocity,
           leftPaddlePositionZ,
-          rightPaddlePositionZ,
+          // rightPaddlePositionZ,
           powerupPosition,
+          leftScore,
+          rightScore,
         });
       } else {
         console.log("🏓🏓   pas host");
@@ -214,15 +219,27 @@ export function Pong() {
 
       if (!hostStatus) {
         socket.on('hostMovesUpdate', (data: GameParameters) => {
-          setBallPosition(data.ballPosition)
-          setBallVelocity(data.ballVelocity)
-          setLeftPaddlePositionZ(data.leftPaddlePositionZ)
-          setRightPaddlePositionZ(data.rightPaddlePositionZ)
-          setPowerupPosition(data.powerupPosition)
+          if (data.gameId === gameId) {
+            setBallPosition(data.ballPosition)
+            setBallVelocity(data.ballVelocity)
+            setLeftPaddlePositionZ(data.leftPaddlePositionZ)
+            // setRightPaddlePositionZ(data.rightPaddlePositionZ)
+            setPowerupPosition(data.powerupPosition)
+            setRightScore(data.rightScore)
+            setLeftScore(data.leftScore)
+          } else {
+            socket.emit("oppDisconnected", { message : 'Deconnection. End of Game.' })
+            setIsPaused(true);
+          }
         })
       } else {
         socket.on("clientMovesUpdate", (data: any) => {
-          setRightPaddlePositionZ(data.rightPaddlePositionZ);
+          if (data.gameId === gameId) {
+            setRightPaddlePositionZ(data.rightPaddlePositionZ);
+          } else {
+            socket.emit("oppDisconnected", { message : 'Deconnection. End of Game.' })
+            setIsPaused(true);
+          }
         });
       }
 
@@ -237,9 +254,9 @@ export function Pong() {
       return () => {}; // No-op function when socket is null
     }
   }, [
-    socket,
-    initialSetupComplete,
-    hostStatus,
+    // socket,
+    // initialSetupComplete,
+    // hostStatus,
     leftPaddlePositionZ,
     rightPaddlePositionZ,
     powerupPosition,
@@ -447,8 +464,8 @@ export function Pong() {
           socket.emit("weHaveAWinner", {
             gameId,
             isHostWinner,
-            hostname,
-            clientName,
+            // hostname,
+            // clientName,
           });
         }
         window.location.href = "/game";
@@ -813,7 +830,7 @@ export function Pong() {
 
   // The lerp function helps you find a point that is a certain percentage t along the way from a to b.
   const lerp = (a: number, b: number, t: number): number => a + t * (b - a);
-  let lerpFactor = 0.3;
+  let lerpFactor = 0.5;
 
   // mouvement du left (user1) paddle a la souris.
   interface LeftPaddleProps {
