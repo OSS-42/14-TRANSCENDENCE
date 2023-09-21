@@ -1,25 +1,15 @@
-// import Cookies from "js-cookie";
-// import axios from "axios";
 import { useEffect, useState } from "react";
-// import { User } from "../models/User";
-import { AvatarImage } from "../components/Profile/AvatarImage";
-import { Name } from "../components/Profile/Name";
 import { ContainerGrid } from "../components/Profile/ContainerGrid";
 import { RightSideGrid } from "../components/Profile/RightSideGrid";
 import { LeftSideGrid } from "../components/Profile/LeftSideGrid";
-import { ChangeAvatarButton } from "../components/Profile/ChangeAvatarButton";
 import { MatchWonLost } from "../components/Profile/MatchWonLost";
-import { FriendsList } from "../components/Profile/FriendsLists";
 import { MatchHistory } from "../components/Profile/MatchHistory";
 import { useAuth } from "../contexts/AuthContext";
 import { fetchMatchHistory, fetchUserInfo } from "../api/requests";
-import { TwoFactorAuthentication } from "../components/Profile/TwoFactorAuthentication";
-import { Link, generatePath, useParams } from "react-router-dom";
-import { Box, Typography } from "@mui/material";
-
-interface UserProfileProps {
-  username: string;
-}
+import { useParams } from "react-router-dom";
+import { Avatar, Box } from "@mui/material";
+import { useRoutes } from "../contexts/RoutesContext";
+import { User } from "../models/User";
 
 interface MatchData {
   date: string;
@@ -31,69 +21,93 @@ interface MatchHistoryData {
   matchesLost: MatchData[];
 }
 
-export function UserProfile({ username }: UserProfileProps) {
-  // const [match, setMatch] = useState<MatchHistoryData>({
-  //   matchesWon: [],
-  //   matchesLost: [],
-  // });
+export function UserProfile() {
+  const { user } = useAuth();
+  const [userData, setUserData] = useState<User | null>(null);
+  const [match, setMatch] = useState<MatchHistoryData>({
+    matchesWon: [],
+    matchesLost: [],
+  });
+  const { navigateTo } = useRoutes();
 
-  console.log(username);
+  const params = useParams();
 
-  async function getUserInfo() {
-    const user = await fetchUserInfo(username);
-    console.log(user);
-  }
+  useEffect(() => {
+    async function fetchData() {
+      if (!params || params.username === undefined) {
+        return navigateTo("/error");
+      }
 
-  // async function getMatchHistory() {
-  //   const matches = await fetchMatchHistory(user?.id ?? -1);
-  //   setMatch(matches);
-  // }
+      const username = params.username;
 
-  // useEffect(() => {
-  //   getMatchHistory();
-  // }, [user]);
+      if (username === user?.username) {
+        return navigateTo("/profile");
+      }
 
-  //THIS MEANS I'M POSSIBLY TRYING TO VIEW SOMEONE ELSE'S PROFILE IN A READ-ONLY MODE
-  // Idea: Use the same structure we have for our own profile, but with different fetch requests.
-  // The same fetch requests would be used in the User Details Card in the Chat.
-  // The same logic can be used to create a link at the UserDetails Card. The router should be able to handle it.
+      try {
+        const fetchedUser = await fetchUserInfo(username);
+        if (fetchedUser) {
+          setUserData(fetchedUser);
+          const matches = await fetchMatchHistory(fetchedUser.id);
+          setMatch(matches);
+        } else {
+          console.error("User data not found.");
+          navigateTo("/error");
+        }
+      } catch (error) {
+        console.error("Error fetching user info:", error);
+        navigateTo("/error");
+      }
+    }
 
-  // Control the flow by checking if any params are passed.
-
-  // Is it a valid username that exists in the database? [YES]-> is it myself? [YES] -> Navigate to /profile
-  // Is it a valid username that exists in the database? [YES]-> is it myself? [NO]-> Navigate to /profile/:username (params)
-
-  // Is it a valid username that exists in the database? [NO]-> Navigate to /error
-
-  // if !params -> Continue as before, rendering our own profile.
-
-  //   return (
-  //     <Box component="div" color="red" marginTop="25rem">
-  //       CLICK ME
-  //       <Link to={generatePath("/profile/:username", { username: "anarodri" })}>
-  //         LINK
-  //       </Link>
-  //     </Box>
-  //   );
-  // }
-  // <Link to={`/Your-Personal-profile/${comment.UserId}/${post.fullName}`}
+    fetchData();
+  }, [params, user, navigateTo]);
 
   return (
-    <Typography variant="h6">ALLO</Typography>
-    // <ContainerGrid>
-    //   <LeftSideGrid>
-    //     <Name user={user} handleUpdateUserName={updateUsername} />
-    //     <AvatarImage user={user} />
-    //     <ChangeAvatarButton updateUserData={setUser} />
-    //     <TwoFactorAuthentication
-    //       TwoFactorStatus={user?.twoFactorSecret ? true : false}
-    //     />
-    //   </LeftSideGrid>
-    //   <RightSideGrid>
-    //     <MatchWonLost match={match} />
-    //     <MatchHistory match={match} />
-    //     <FriendsList />
-    //   </RightSideGrid>
-    // </ContainerGrid>
+    <ContainerGrid>
+      <LeftSideGrid>
+        <Box
+          component="div"
+          sx={{
+            borderRadius: "5px",
+            margin: "1rem 0 1rem 0",
+            textAlign: "center",
+            width: "100%",
+            height: "5vh",
+            padding: "10px",
+            alignContent: "space-around",
+            typography: { xs: "h5", sm: "h4" },
+          }}
+        >
+          {userData?.username}
+        </Box>
+        <Box
+          component="div"
+          sx={{
+            borderRadius: "5px",
+            margin: "auto",
+            width: "10rem",
+            height: "10rem",
+            display: "flex",
+            overflow: "hidden",
+          }}
+        >
+          <Avatar
+            alt="Username"
+            src={userData?.avatar}
+            sx={{
+              width: "100%", // Allow width to adjust
+              height: "100%", // Fill the available height
+              maxWidth: "100%",
+              objectFit: "cover",
+            }}
+          />
+        </Box>
+      </LeftSideGrid>
+      <RightSideGrid>
+        <MatchWonLost match={match} />
+        <MatchHistory match={match} />
+      </RightSideGrid>
+    </ContainerGrid>
   );
 }

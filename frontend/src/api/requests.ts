@@ -42,15 +42,16 @@ export async function addFriendApi(friendUsername: string): Promise<void> {
   }
 }
 
-export async function fetchUserInfo(username: string): Promise<void> {
+export async function fetchUserInfo(username: string): Promise<User | undefined> {
   try {
-    await axios.get(`${BASE_URL}/users/${username}`, {
+    const response = await axios.get(`${BASE_URL}/users/${username}`, {
       headers: {
         Authorization: `Bearer ${jwt_token}`,
       },
     });
+		return response.data;
   } catch (error) {
-    console.error("Error fetching user info friend:", error);
+    console.error("Error fetching user info:", error);
     throw error;
   }
 }

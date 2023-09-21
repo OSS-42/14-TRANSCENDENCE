@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate, useParams } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./contexts/AuthContext";
 import socketIO, { Socket } from "socket.io-client";
 
@@ -73,15 +73,7 @@ function App() {
         />
         <Route
           path="/profile/:username"
-          element={
-            user ? (
-              <UserProfile
-                username={(useParams() as { username: string }).username}
-              />
-            ) : (
-              <Navigate to="/" />
-            )
-          }
+          element={user ? <UserProfile /> : <Navigate to="/" />}
         />
         <Route path="*" element={<Error />} />
       </Routes>
