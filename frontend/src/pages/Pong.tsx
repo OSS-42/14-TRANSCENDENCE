@@ -735,11 +735,7 @@ export function Pong() {
             hitPaddlePosition.x +
             Math.sign(ballVelocity.x) * (paddleWidth / 2 + ballRadius);
         }
-      } else {
-        
-        scoreUpdated = false;
       }
-        
 
       //----------- IN CASE OF GOAL ----------
       if (
@@ -783,6 +779,8 @@ export function Pong() {
 
         setCameraMode("orthographic");
       }
+    } else {
+      scoreUpdated = false;
     }
 
       setBallPosition({
