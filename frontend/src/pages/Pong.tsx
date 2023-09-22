@@ -469,7 +469,7 @@ export function Pong() {
               // clientName,
             });
           }
-          // window.location.href = "/game";
+          window.location.href = "/game";
         }, 5000);
       }
     }
@@ -634,26 +634,24 @@ export function Pong() {
 
   //============== GAME BALL LOGIC ==============
   // Ball mechanics
+  
   interface BallProps {
     ballPosition: BallPosition;
     setBallPosition: React.Dispatch<React.SetStateAction<BallPosition>>;
     ballVelocity: Position;
     setBallVelocity: React.Dispatch<React.SetStateAction<Position>>;
   }
-
+  
   const Ball: React.FC<BallProps> = ({
     ballPosition,
     setBallPosition,
     ballVelocity,
     setBallVelocity,
   }) => {
+    let scoreUpdated = false;
 
     useFrame(() => {
       if (isPaused || gameStart || winner) return;
-      
-      // let newX: number = 0;
-      // let newZ: number = 0; // ne pas oublier la position de la camera pour la vue top-down
-
       
       let newX: number = ballPosition.x + ballVelocity.x;
       let newZ: number = ballPosition.z + ballVelocity.z;
@@ -675,111 +673,114 @@ export function Pong() {
           }, 12000);
         }
 
-        if (hostStatus) {
-          const directionZ = Math.sign(ballVelocity.z);
-        
-          //----------- VALIDATION HIT AVEC WALL ----------
-          if (
-            (directionZ > 0 && newZ + ballRadius > WORLD_HEIGHT / 2) ||
-            (directionZ < 0 && newZ - ballRadius < -WORLD_HEIGHT / 2)
-          ) {
-            ballVelocity.z = -ballVelocity.z;
-            newZ = ballPosition.z + ballVelocity.z;
-            if (gameMode === 2 || gameMode === 4) playBallWallSound();
-          }
-  
-          //----------- VALIDATION HIT AVEC PADDLES ----------
-          const leftPaddlePosition = {
-            x: leftPaddleXPosition,
-            z: leftPaddlePositionZ,
-          };
-          const rightPaddlePosition = {
-            x: rightPaddleXPosition,
-            z: rightPaddlePositionZ,
-          };
-          const paddleDimensions = { width: paddleWidth, depth: paddleDepth };
-    
-          const hitSectionLeft = checkCollision(
-            { x: newX, z: newZ },
-            leftPaddlePosition,
-            paddleDimensions
-          );
-          const hitSectionRight = checkCollision(
-            { x: newX, z: newZ },
-            rightPaddlePosition,
-            paddleDimensions
-          );
-  
-          if (hitSectionLeft || hitSectionRight) {
-            const hitPaddlePosition = hitSectionLeft
-              ? leftPaddlePosition
-              : rightPaddlePosition;
-            if (hostStatus && (gameMode === 2 || gameMode === 4)) {
-              playUserHitSound();
-            } else if (!hostStatus && (gameMode === 2 || gameMode === 4)) {
-              //attention si 1 vs 1, laissez le son utilisateur
-              playCompHitSound();
-            }
-    
-            ballVelocity.x = -ballVelocity.x;
-    
-            // const relativeCollisionPoint =
-            //   (newZ - hitPaddlePosition.z) / (paddleDepth / 2);
-            // const newZVelocity =
-            //   ballVelocity.z + relativeCollisionPoint * INITIAL_BALL_SPEED;
-    
-            // // Normalize the velocity to maintain the initial speed
-            // const magnitude = Math.sqrt(ballVelocity.x ** 2 + newZVelocity ** 2);
-            // ballVelocity.x = (ballVelocity.x / magnitude) * INITIAL_BALL_SPEED;
-            // ballVelocity.z = (newZVelocity / magnitude) * INITIAL_BALL_SPEED;
-    
-            newX =
-              hitPaddlePosition.x +
-              Math.sign(ballVelocity.x) * (paddleWidth / 2 + ballRadius);
-          }
-        
-
-        //----------- IN CASE OF GOAL ----------
+      if (hostStatus) {
+        const directionZ = Math.sign(ballVelocity.z);
+      
+        //----------- VALIDATION HIT AVEC WALL ----------
         if (
-          newX - ballRadius <= -WORLD_WIDTH / 2 ||
-          newX + ballRadius >= WORLD_WIDTH / 2
+          (directionZ > 0 && newZ + ballRadius > WORLD_HEIGHT / 2) ||
+          (directionZ < 0 && newZ - ballRadius < -WORLD_HEIGHT / 2)
         ) {
-
-          if (gameMode === 2 || gameMode === 4) {
-            pausePowerupSound();
-            playGoalSound();
+          ballVelocity.z = -ballVelocity.z;
+          newZ = ballPosition.z + ballVelocity.z;
+          if (gameMode === 2 || gameMode === 4) playBallWallSound();
+        }
+  
+        //----------- VALIDATION HIT AVEC PADDLES ----------
+        const leftPaddlePosition = {
+          x: leftPaddleXPosition,
+          z: leftPaddlePositionZ,
+        };
+        const rightPaddlePosition = {
+          x: rightPaddleXPosition,
+          z: rightPaddlePositionZ,
+        };
+        const paddleDimensions = { width: paddleWidth, depth: paddleDepth };
+  
+        const hitSectionLeft = checkCollision(
+          { x: newX, z: newZ },
+          leftPaddlePosition,
+          paddleDimensions
+        );
+        const hitSectionRight = checkCollision(
+          { x: newX, z: newZ },
+          rightPaddlePosition,
+          paddleDimensions
+        );
+  
+        if (hitSectionLeft || hitSectionRight) {
+          const hitPaddlePosition = hitSectionLeft
+            ? leftPaddlePosition
+            : rightPaddlePosition;
+          if (hostStatus && (gameMode === 2 || gameMode === 4)) {
+            playUserHitSound();
+          } else if (!hostStatus && (gameMode === 2 || gameMode === 4)) {
+            //attention si 1 vs 1, laissez le son utilisateur
+            playCompHitSound();
           }
+  
+          ballVelocity.x = -ballVelocity.x;
+  
+          // const relativeCollisionPoint =
+          //   (newZ - hitPaddlePosition.z) / (paddleDepth / 2);
+          // const newZVelocity =
+          //   ballVelocity.z + relativeCollisionPoint * INITIAL_BALL_SPEED;
+  
+          // // Normalize the velocity to maintain the initial speed
+          // const magnitude = Math.sqrt(ballVelocity.x ** 2 + newZVelocity ** 2);
+          // ballVelocity.x = (ballVelocity.x / magnitude) * INITIAL_BALL_SPEED;
+          // ballVelocity.z = (newZVelocity / magnitude) * INITIAL_BALL_SPEED;
+  
+          newX =
+            hitPaddlePosition.x +
+            Math.sign(ballVelocity.x) * (paddleWidth / 2 + ballRadius);
+        }
+      }
 
-          if (newX - ballRadius <= -WORLD_WIDTH / 2) {
-            newX = 0;
-            newZ = 0;
-            setBallVelocity({ x: INITIAL_BALL_SPEED, z: INITIAL_BALL_SPEED });
-            setRightScore((prevScore) => {
-              const newScore = prevScore + 1;
-              console.log('NEW SCORE RIGHT, GAMEID: ', gameId, ' Score: ', newScore);
-              if (newScore < 3) {
-                setIsPaused(true);
-                handleCountdown();
-              }
-              return newScore;
-            });
-          } else if (newX + ballRadius >= WORLD_WIDTH / 2) {
-            newX = 0;
-            newZ = 0;
-            setBallVelocity({ x: INITIAL_BALL_SPEED, z: INITIAL_BALL_SPEED });
-            setLeftScore((prevScore) => {
-              const newScore = prevScore + 1;
-              console.log('NEW SCORE LEFT, GAMEID: ', gameId, ' Score: ', newScore);
-              if (newScore < 3) {
-                setIsPaused(true);
-                handleCountdown();
-              }
-              return newScore;
-            });
-          }
+      //----------- IN CASE OF GOAL ----------
+      if (
+        newX - ballRadius <= -WORLD_WIDTH / 2 ||
+        newX + ballRadius >= WORLD_WIDTH / 2
+      ) {
+
+        if (gameMode === 2 || gameMode === 4) {
+          pausePowerupSound();
+          playGoalSound();
+        }
+
+        if (newX - ballRadius <= -WORLD_WIDTH / 2 && !scoreUpdated) {
+          scoreUpdated = true;
+          newX = 0;
+          newZ = 0;
+          setBallVelocity({ x: INITIAL_BALL_SPEED, z: INITIAL_BALL_SPEED });
+          setRightScore((prevScore) => {
+            const newScore = prevScore + 1;
+            console.log('NEW SCORE RIGHT, GAMEID: ', gameId, ' Score: ', newScore);
+            if (newScore < 3) {
+              setIsPaused(true);
+              handleCountdown();
+            }
+            return newScore;
+          });
+        } else if (newX + ballRadius >= WORLD_WIDTH / 2 && !scoreUpdated) {
+          scoreUpdated = true;
+          newX = 0;
+          newZ = 0;
+          setBallVelocity({ x: INITIAL_BALL_SPEED, z: INITIAL_BALL_SPEED });
+          setLeftScore((prevScore) => {
+            const newScore = prevScore + 1;
+            console.log('NEW SCORE LEFT, GAMEID: ', gameId, ' Score: ', newScore);
+            if (newScore < 3) {
+              setIsPaused(true);
+              handleCountdown();
+            }
+            return newScore;
+          });
 
         setCameraMode("orthographic");
       }
+    } else {
+      scoreUpdated = false;
     }
 
       setBallPosition({
