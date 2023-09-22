@@ -3,8 +3,13 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
 
+interface Friend {
+  avatar: string;
+  username: string;
+}
+
 export function FriendsList() {
-  const [friends, setFriends] = useState(["No friends for the moment ..."]); // SetState. Initialize friend to empty array
+  const [friends, setFriends] = useState<Friend[]>([]); // SetState. Initialize friend to empty array
   const jwt_token = Cookies.get("jwt_token"); // Cookies to identify user.
 
   useEffect(() => {
@@ -16,7 +21,7 @@ export function FriendsList() {
           },
         });
         console.log("Friends list fetching successful");
-        setFriends(response.data);
+        setFriends(response.data as Friend[]);
       } catch (error) {
         console.error("Friends list fetching:", error);
       }

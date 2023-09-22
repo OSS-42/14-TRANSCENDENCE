@@ -1,10 +1,11 @@
 import { Box, Button, Dialog, DialogContent, Typography } from "@mui/material";
 import { User } from "../../models/User";
 import { useRoutes } from "../../contexts/RoutesContext";
-import { MatchHistory } from "../Profile/MatchHistory";
 import { Socket } from "socket.io-client";
 import { useAuth } from "../../contexts/AuthContext";
 import { useEffect, useState } from "react";
+import { generatePath } from "react-router-dom";
+// import { MatchHistory } from "../Profile/MatchHistory";
 
 type UserDetailsProps = {
   selectedUser: User;
@@ -41,8 +42,8 @@ function UserDetails({
     socket.emit("invitation", {
       userId: id,
       roomId: roomId,
-      challengerUsername: user.username,
-      challengerId: user.id,
+      challengerUsername: user?.username,
+      challengerId: user?.id,
     });
     setWaiting(true);
 
@@ -63,7 +64,7 @@ function UserDetails({
             justifyContent="center"
             alignItems="center"
           >
-            <Typography variant="body1">
+            <Typography variant="h4">
               Waiting for {selectedUser?.username} to respond...
             </Typography>
           </Box>
@@ -84,7 +85,18 @@ function UserDetails({
               alt={selectedUser?.username}
               width="250rem"
               height="250rem"
-            />
+              onClick={() => {
+                let path = "";
+                if (user?.username !== selectedUser.username) {
+                  path = generatePath("/profile/:username", {
+                    username: selectedUser?.username,
+                  });
+                } else {
+                  path = "/profile";
+                }
+                navigateTo(path);
+              }}
+            />{" "}
             <Typography variant="h6">{selectedUser?.username}</Typography>
             <Box component="div" mt={2}>
               {/* Render the MatchHistory component here */}
