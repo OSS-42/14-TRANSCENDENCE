@@ -658,25 +658,26 @@ export function Pong() {
       let newX: number = ballPosition.x + ballVelocity.x;
       let newZ: number = ballPosition.z + ballVelocity.z;
       
-      if (hostStatus) {
-        const directionZ = Math.sign(ballVelocity.z);
-      
-        //----------- VALIDATION HIT AVEC POWERUP ----------
-        if (
-          powerupVisible &&
-          Math.abs(ballPosition.x - powerupPosition.x) < ballRadius + 1 &&
-          Math.abs(ballPosition.z - powerupPosition.z) < ballRadius + 1
+      //----------- VALIDATION HIT AVEC POWERUP ----------
+      //uniquement (defense) pour Powerup vs IA
+      if (
+        powerupVisible &&
+        Math.abs(ballPosition.x - powerupPosition.x) < ballRadius + 1 &&
+        Math.abs(ballPosition.z - powerupPosition.z) < ballRadius + 1
         ) {
           setPowerupVisible(false);
           setCameraMode("perspective");
           playPowerupSound();
-  
+          
           setTimeout(() => {
             setCameraMode("orthographic");
             respawnPowerup();
           }, 12000);
         }
 
+        if (hostStatus) {
+          const directionZ = Math.sign(ballVelocity.z);
+        
           //----------- VALIDATION HIT AVEC WALL ----------
           if (
             (directionZ > 0 && newZ + ballRadius > WORLD_HEIGHT / 2) ||
