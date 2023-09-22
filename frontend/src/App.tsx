@@ -1,24 +1,20 @@
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-} from "react-router-dom";
-// import PrivateRoutes from "./utils/PrivateRoutes";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./contexts/AuthContext";
 import socketIO, { Socket } from "socket.io-client";
 
 import Header from "./components/Header";
-import { Chat, Home, Pong, Profile, Welcome, Error, Oops } from "./pages";
+import { Chat, Home, Pong, Profile, Welcome, Error } from "./pages";
 import { useEffect, useState } from "react";
 
 function App() {
-  const { user, loading } = useAuth();
+  const { user, loading, isLogged } = useAuth();
   const [chatSocket, setChatSocket] = useState<Socket | null>(null);
   const [chatSocketInitialized, setChatSocketInitialized] = useState(false);
 
   useEffect(() => {
     if (!user) return;
+
+    if (user && chatSocketInitialized) return;
 
     const newSocket = socketIO("/chat", {
       query: {
@@ -33,7 +29,7 @@ function App() {
     return () => {
       newSocket.disconnect();
     };
-  }, [user]);
+  }, [isLogged]);
 
   if (loading) {
     console.log("Loading...");
@@ -65,6 +61,10 @@ function App() {
         <Route path="/game" element={user ? <Pong /> : <Navigate to="/" />} />
         <Route
           path="/profile"
+          element={user ? <Profile /> : <Navigate to="/" />}
+        />
+        <Route
+          path="/profile/:username"
           element={user ? <Profile /> : <Navigate to="/" />}
         />
         <Route path="*" element={<Error />} />

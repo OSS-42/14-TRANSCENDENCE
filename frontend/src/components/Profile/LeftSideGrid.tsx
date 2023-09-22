@@ -1,8 +1,7 @@
-import { Box, Grid } from "@mui/material";
-import { useEffect } from "react";
-import { useAuth } from "../../contexts/AuthContext";
+import { Grid } from "@mui/material";
+import { ReactNode } from "react";
 
-export function LeftSideGrid({ children }) {
+export function LeftSideGrid({ children }: { children: ReactNode }) {
   return (
     <Grid
       item

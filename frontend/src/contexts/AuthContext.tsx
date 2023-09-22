@@ -26,6 +26,7 @@ interface AuthContextType {
   login: () => void;
   logout: () => void;
   fetchUserData: () => Promise<void>;
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -34,7 +35,7 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [isLogged, setIsLogged] = useState(false);
-  const [is2FA, setIs2FA] = useState(false);
+  // const [is2FA, setIs2FA] = useState(false);
   const { navigateTo } = useRoutes();
 
   const login = async () => {
@@ -42,6 +43,7 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
 
     try {
       await fetchUserData();
+
       redirectToHome();
     } catch (error) {
       redirectToWelcome();
@@ -80,9 +82,9 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
     setLoading(false);
   };
 
-  const redirectToOops = () => {
-    navigateTo("/oops");
-  };
+  // const redirectToOops = () => {
+  //   navigateTo("/oops");
+  // };
 
   const redirectToHome = () => {
     navigateTo("/");
@@ -92,21 +94,21 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
     navigateTo("/welcome");
   };
 
-  const showError = (message: string) => {
-    // You can implement how you want to show the error message to the user.
-    // For example, you might display it in a modal or a notification.
-    alert(message);
-  };
+  // const showError = (message: string) => {
+  //   // You can implement how you want to show the error message to the user.
+  //   // For example, you might display it in a modal or a notification.
+  //   alert(message);
+  // };
 
-  const isLoggedIn = (jwtToken: string | undefined) => {
-    // You can customize this logic based on how your JWT token is stored.
-    return !!jwtToken;
-  };
+  // const isLoggedIn = (jwtToken: string | undefined) => {
+  //   // You can customize this logic based on how your JWT token is stored.
+  //   return !!jwtToken;
+  // };
 
-  const setAuthCookie = (jwtToken: string) => {
-    // Use your cookie library (e.g., js-cookie) to set the JWT token as a cookie.
-    Cookies.set(JWT_TOKEN_COOKIE, jwtToken);
-  };
+  // const setAuthCookie = (jwtToken: string) => {
+  //   // Use your cookie library (e.g., js-cookie) to set the JWT token as a cookie.
+  //   Cookies.set(JWT_TOKEN_COOKIE, jwtToken);
+  // };
 
   useEffect(() => {
     fetchUserData();
@@ -120,8 +122,9 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
       login,
       logout,
       fetchUserData,
+      setUser,
     };
-  }, [loading, user, isLogged, login, logout, fetchUserData]);
+  }, [loading, user, isLogged, login, setUser, logout, fetchUserData]);
 
   return (
     <AuthContext.Provider value={contextData}>{children}</AuthContext.Provider>
