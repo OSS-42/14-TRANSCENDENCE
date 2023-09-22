@@ -4,10 +4,11 @@ import { Server, Socket } from 'socket.io';
 import { ConfigService } from '@nestjs/config';
 import { PongService } from './pong.service';
 import { v4 as uuid } from 'uuid';
+import { ConnectedUsersService } from 'src/connectedUsers/connectedUsers.service';
 
 @WebSocketGateway({ cors: true,  namespace: 'pong' })
 export class PongGateway {
-  constructor(private pongService: PongService, private config: ConfigService) {}
+  constructor(private pongService: PongService, private config: ConfigService, private readonly connectedUsersService: ConnectedUsersService) {}
 
   private playerNames: Map<string, string> = new Map();
   private gameModeQueue: Map<number, Socket[]> = new Map();
@@ -29,6 +30,9 @@ export class PongGateway {
           console.log("🏓   voici lidentite du socket");
           console.log("🏓   ", decoded);
 
+          //Array of Users connected to Pong
+          
+          this.connectedUsersService.setPong(Number(decoded.sub), client.id)
           const isConnected = { isConnected: true };
           client.emit("connected", isConnected);
 
@@ -47,7 +51,11 @@ export class PongGateway {
     let gameIdToTerminate: string;
     let clientsMapToTerminate: any;
     
+    //update connectedToPong
+    
+    this.connectedUsersService.deleteBySocketIdPonng(client.id);
     // Identify the game ID to terminate when disconnect or end of game.
+    
     for (const [clientsMap, gameId] of this.gameIds.entries()) {
       if (clientsMap.has(client.id)) {
         gameIdToTerminate = gameId;

@@ -7,6 +7,7 @@ import PersonRemoveIcon from "@mui/icons-material/PersonRemove";
 type ChatFriendsProps = {
   socket: Socket;
   connectedUsers: number[];
+  connectedToPong: number[];
   friendsList: User[];
   setFriendsList: React.Dispatch<React.SetStateAction<User[]>>;
   handleUserClick: (user: User) => void;
@@ -19,6 +20,7 @@ const ChatFriends = ({
   connectedUsers,
   handleUserClick,
   friendsList,
+  connectedToPong
 }: ChatFriendsProps) => {
   async function removeFriend(id: number) {
     await destroyFriend(id);
@@ -59,6 +61,11 @@ const ChatFriends = ({
                 <p> {user.username}</p>
                 {connectedUsers?.includes(user.id) && (
                   <span style={{ color: "#65bf76" }}>online</span>
+                )}
+                {connectedToPong?.includes(user.id) && (
+                 <span style={{ color: "#65bf76", textAlign: "center", width: "100%", marginLeft: "1rem"}}>
+                    in game {/* Icône ou texte d'indication */}
+               </span>
                 )}
               </div>
               <div
