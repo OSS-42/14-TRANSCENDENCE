@@ -174,7 +174,7 @@ export class PongGateway {
     
     this.gameStates.set(gameId, payload);
 
-    this.server.to(gameId).emit('hostMovesUpdate', payload);
+    this.server.to(gameId).volatile.emit('hostMovesUpdate', payload);
   }
 
   @SubscribeMessage('clientGameParameters')
@@ -183,7 +183,7 @@ export class PongGateway {
     
     this.gameStates.set(gameId, payload);
 
-    this.server.to(gameId).emit('clientMovesUpdate', payload);
+    this.server.to(gameId).volatile.emit('clientMovesUpdate', payload);
   }
 
   @SubscribeMessage('weHaveAWinner')
