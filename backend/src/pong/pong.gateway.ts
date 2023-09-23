@@ -186,14 +186,14 @@ export class PongGateway {
     this.server.to(gameId).volatile.emit('clientMovesUpdate', payload);
   }
 
-  @SubscribeMessage('goalScored')
-  handleGoal(client: Socket, payload: any) {
-    const gameId = payload.gameId;
+  // @SubscribeMessage('goalScored')
+  // handleGoal(client: Socket, payload: any) {
+  //   const gameId = payload.gameId;
 
-    this.gameStates.set(gameId, payload);
+  //   this.gameStates.set(gameId, payload);
 
-    this.server.to(gameId).volatile.emit('goalScored', payload);
-  }
+  //   this.server.to(gameId).volatile.emit('goalScored', payload);
+  // }
 
   @SubscribeMessage('weHaveAWinner')
   handleWinner(client: Socket, payload: any) {
@@ -202,7 +202,7 @@ export class PongGateway {
     // const clientName = payload.clientName;
     
     this.server.to(gameId).emit('weHaveAWinner', payload);
-    console.log('🏓   in ${gameId}, the winner is  ', payload.isHostWinner);
+    console.log(`🏓   in ${gameId}, the winner is  `, payload.isHostWinner.current);
 
     this.gameStates.set(gameId, payload);
     this.server.to(gameId).volatile.emit('weHaveAWinner', payload);

@@ -53,13 +53,13 @@ type BallPosition = {
   z: number;
 };
 
-type Goal = {
-  gameId: string;
-  rightScore: number;
-  leftScore: number;
-  ballPosition: { x: number, y: number, z: number };
-  ballVelocity: { x: number, z: number };
-}
+// type Goal = {
+//   gameId: string;
+//   rightScore: number;
+//   leftScore: number;
+//   ballPosition: { x: number, y: number, z: number };
+//   ballVelocity: { x: number, z: number };
+// }
 
 export function Pong() {
   //============== ERROR LISTENING ==============
@@ -142,7 +142,7 @@ export function Pong() {
  
   const [waitingForPlayer, setWaitingForPlayer] = React.useState(false);
   const [gameId, setGameId] = React.useState<string>("");
-  const [isHostWinner, setIsHostWinner] = React.useState(false);
+  const isHostWinner = useRef<boolean>(false);
   const [oppDisconnected, setOppDisconnected] =
     React.useState<OppDisconnected | null>(null);
 
@@ -174,18 +174,6 @@ export function Pong() {
         handleCountdown();
       });
 
-      socket.on("weHaveAWinner", (data: WeHaveAWinner) => {
-        if (data.gameId === gameId) {
-          console.log('THERE IS A WINNER');
-          setIsHostWinner(data.isHostWinner);
-          setIsPaused(true);
-          handleCountdown();
-        } else {
-          socket.emit("oppDisconnected", { message : 'Deconnection. End of Game.' })
-          setIsPaused(true);
-        }
-      });
-
       socket.on("opponentDisconnected", (data: any) => {
         console.log(data);
         setOppDisconnected(data.message);
@@ -203,17 +191,16 @@ export function Pong() {
       if (socket) {
         socket.off("connected");
         socket.off("playerJoined");
-        socket.off("weHaveAWinner");
         socket.off("oppDisconnected");
       }
     };
-  }, [socket, isConnected, gameId, oppDisconnected, isHostWinner]);
+  }, [socket, isConnected, gameId, oppDisconnected]);
 
   useEffect(() => {
     if (socket && initialSetupComplete) {
       if (hostStatus) {
-        console.log("🏓🏓   emitting info as host");
-        socket.emit("hostGameParameters", {
+        console.log("🏓🏓   emitting info as host, ", gameId);
+        socket.volatile.emit("hostGameParameters", {
           gameId,
           ballPosition,
           ballVelocity,
@@ -223,8 +210,8 @@ export function Pong() {
           rightScore,
         });
       } else {
-        console.log("🏓🏓   emitting info as invite");
-        socket.emit("clientGameParameters", {
+        console.log("🏓🏓   emitting info as invite, ", gameId);
+        socket.volatile.emit("clientGameParameters", {
           gameId,
           rightPaddlePositionZ,
         });
@@ -269,32 +256,48 @@ export function Pong() {
     ballPosition,
     leftPaddlePositionZ,
     rightPaddlePositionZ,
-    // rightScore,
-    // leftScore,
     powerupPosition,
   ]);
 
-  // useEffect (() => {
-  //   if (socket && gameId) {
-  //     socket.on("goalScored", (data: Goal) => {
-  //       console.log('info GOAL');
-  //       if (data.gameId === gameId) {
-  //         setRightScore(data.rightScore);
-  //         setLeftScore(data.leftScore);
-  //         setBallPosition(data.ballPosition);
-  //         setBallVelocity(data.ballVelocity);
-  //       } else {
-  //         socket.emit("oppDisconnected", { message : 'Deconnection. End of Game.' })
-  //         setIsPaused(true);
-  //       }
-  //     });
-  //   };
-  //   return () => {
-  //     if (socket) {
-  //       socket.off("goalScored");
-  //     }
-  //   };
-  // });
+  useEffect (() => {
+    if (socket && gameId) {
+      // socket.on("goalScored", (data: Goal) => {
+      //   console.log('info GOAL');
+      //   if (data.gameId === gameId) {
+      //     setRightScore(data.rightScore);
+      //     setLeftScore(data.leftScore);
+      //     setBallPosition(data.ballPosition);
+      //     setBallVelocity(data.ballVelocity);
+      //   } else {
+      //     socket.emit("oppDisconnected", { message : 'Deconnection. End of Game.' })
+      //     setIsPaused(true);
+      //   }
+      // });
+
+      socket.on("weHaveAWinner", (data: WeHaveAWinner) => {
+        if (data.gameId === gameId) {
+          setTimeout(() => {
+            console.log('THERE IS A WINNER ', gameId);
+            isHostWinner.current = data.isHostWinner;
+            isGameOver.current = true;
+            setGameLaunched(false);
+            setIsPaused(true);
+            window.location.href = "/game";
+          }, 5000);
+        } else {
+          socket.emit("oppDisconnected", { message : 'Deconnection. End of Game.' })
+          setIsPaused(true);
+        }
+      });
+
+    };
+    return () => {
+      if (socket) {
+        // socket.off("goalScored");
+        socket.off("weHaveAWinner");
+      }
+    };
+  });
 
   //============== GAME MODES ==============
  
@@ -612,11 +615,13 @@ export function Pong() {
   const goalScored = (prevScore: number, side: string) => {
     console.log('goalScored is called');
     let newScore = prevScore + 1;
+
     if (side === 'right') {
       setRightScore(newScore);
     } else if (side === 'left') {
       setLeftScore(newScore);
     }
+
     setBallPosition({ x: 0, y: 0, z: 0 });
     setBallVelocity({ x: INITIAL_BALL_SPEED, z: INITIAL_BALL_SPEED });
     setCameraMode("orthographic");
@@ -627,29 +632,24 @@ export function Pong() {
   const sentWinnerMessage = (winnerText: string) => {
     setWinner(winnerText);
 
-    handleCountdown();
-
-    setTimeout(() => {
-      console.log("🏓   ", winnerText);
-      console.log("🏓   ", gameId);
-      setGameLaunched(false);
-      if (gameId && socket) {
-        console.log("🏓   envoi du resultat");
-        socket.emit("weHaveAWinner", {
-          gameId,
-          isHostWinner,
-        });
-      }
-      window.location.href = "/game";
-    }, 5000);
+    console.log("🏓   ", winnerText);
+    console.log("🏓   ", gameId);
+    console.log("🏓   ", isHostWinner.current);
+    if (gameId && socket && hostStatus) {
+      console.log("🏓   envoi du resultat");
+      socket.emit("weHaveAWinner", {
+        gameId,
+        isHostWinner,
+        winnerText,
+      });
+    };
   }
 
   useEffect (() => {
-    if (hostStatus) {
       if (rightScore >= 3 || leftScore >= 3) {
         isGameOver.current = true;
-        console.log("🏓   Quelqu'un a gagne");
         setIsPaused(true);
+        console.log("🏓   Quelqu'un a gagne: ", leftScore, " - ", rightScore);
 
         let winnerText = "";
         if (rightScore === 3) {
@@ -657,25 +657,24 @@ export function Pong() {
             gameMode === 1 || gameMode === 2
               ? "Computers wins!"
               : `${clientName} wins!`;
-          setIsHostWinner(false);
+          isHostWinner.current = false;
         } else {
           winnerText = `${hostname} wins!`;
-          setIsHostWinner(true);
+          isHostWinner.current = true;
         }
         
         sentWinnerMessage(winnerText);
 
-      } else {
+      } else if (hostStatus) {
         console.log('envoi du nouveau score : ', leftScore, " - ", rightScore);
-        socket.emit('goalScored', {
-          gameId,
-          rightScore,
-          leftScore,
-          ballPosition,
-          ballVelocity,
-        });
+        // socket.volatile.emit('goalScored', {
+        //   gameId,
+        //   rightScore,
+        //   leftScore,
+        //   ballPosition,
+        //   ballVelocity,
+        // });
       };
-    };
   }, [leftScore, rightScore])
 
   //============== GAME BALL LOGIC ==============
@@ -729,7 +728,9 @@ export function Pong() {
         ) {
           ballVelocity.z = -ballVelocity.z;
           newZ = ballPosition.z + ballVelocity.z;
-          if (gameMode === 2 || gameMode === 4) playBallWallSound();
+          if (gameMode === 2 || gameMode === 4) {
+            playBallWallSound();
+          }
         }
   
         //----------- VALIDATION HIT AVEC PADDLES ----------
