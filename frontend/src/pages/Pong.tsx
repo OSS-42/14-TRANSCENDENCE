@@ -41,8 +41,6 @@ type PlayerJoined = {
 type WeHaveAWinner = {
   gameId: string;
   isHostWinner: boolean;
-  hostname: string;
-  clientName: string;
 };
 
 type OppDisconnected = {
@@ -54,6 +52,14 @@ type BallPosition = {
   y: number;
   z: number;
 };
+
+// type Goal = {
+//   gameId: string;
+//   rightScore: number;
+//   leftScore: number;
+//   ballPosition: { x: number, y: number, z: number };
+//   ballVelocity: { x: number, z: number };
+// }
 
 export function Pong() {
   //============== ERROR LISTENING ==============
@@ -107,6 +113,7 @@ export function Pong() {
   const [rightPaddlePositionZ, setRightPaddlePositionZ] = React.useState(0);
   const [countdown, setCountdown] = React.useState<number | null>(null);
   const [powerupVisible, setPowerupVisible] = React.useState(false);
+  const soundsON = useRef<boolean>(false);
 
   const [ballPosition, setBallPosition] = React.useState<BallPosition>({
     x: 0,
@@ -136,7 +143,7 @@ export function Pong() {
  
   const [waitingForPlayer, setWaitingForPlayer] = React.useState(false);
   const [gameId, setGameId] = React.useState<string>("");
-  const [isHostWinner, setIsHostWinner] = React.useState(false);
+  const isHostWinner = useRef<boolean>(false);
   const [oppDisconnected, setOppDisconnected] =
     React.useState<OppDisconnected | null>(null);
 
@@ -168,10 +175,6 @@ export function Pong() {
         handleCountdown();
       });
 
-      socket.on("weHaveAWinner", (data: WeHaveAWinner) => {
-        setIsHostWinner(data.isHostWinner);
-      });
-
       socket.on("opponentDisconnected", (data: any) => {
         console.log(data);
         setOppDisconnected(data.message);
@@ -189,17 +192,16 @@ export function Pong() {
       if (socket) {
         socket.off("connected");
         socket.off("playerJoined");
-        socket.off("weHaveAWinner");
         socket.off("oppDisconnected");
       }
     };
-  }, [socket, isConnected, gameId]);
+  }, [socket, isConnected, gameId, oppDisconnected]);
 
   useEffect(() => {
     if (socket && initialSetupComplete) {
       if (hostStatus) {
-        console.log("🏓🏓   host");
-        socket.emit("hostGameParameters", {
+        console.log("🏓🏓   emitting info as host, ", gameId);
+        socket.volatile.emit("hostGameParameters", {
           gameId,
           ballPosition,
           ballVelocity,
@@ -209,8 +211,8 @@ export function Pong() {
           rightScore,
         });
       } else {
-        console.log("🏓🏓   pas host");
-        socket.emit("clientGameParameters", {
+        console.log("🏓🏓   emitting info as invite, ", gameId);
+        socket.volatile.emit("clientGameParameters", {
           gameId,
           rightPaddlePositionZ,
         });
@@ -255,31 +257,69 @@ export function Pong() {
     ballPosition,
     leftPaddlePositionZ,
     rightPaddlePositionZ,
-    rightScore,
-    leftScore,
     powerupPosition,
   ]);
 
+  useEffect (() => {
+    if (socket && gameId) {
+      // socket.on("goalScored", (data: Goal) => {
+      //   console.log('info GOAL');
+      //   if (data.gameId === gameId) {
+      //     setRightScore(data.rightScore);
+      //     setLeftScore(data.leftScore);
+      //     setBallPosition(data.ballPosition);
+      //     setBallVelocity(data.ballVelocity);
+      //   } else {
+      //     socket.emit("oppDisconnected", { message : 'Deconnection. End of Game.' })
+      //     setIsPaused(true);
+      //   }
+      // });
+
+      socket.on("weHaveAWinner", (data: WeHaveAWinner) => {
+        if (data.gameId === gameId) {
+          setTimeout(() => {
+            console.log('THERE IS A WINNER ', gameId);
+            isHostWinner.current = data.isHostWinner;
+            isGameOver.current = true;
+            setGameLaunched(false);
+            setIsPaused(true);
+            window.location.href = "/game";
+          }, 5000);
+        } else {
+          socket.emit("oppDisconnected", { message : 'Deconnection. End of Game.' })
+          setIsPaused(true);
+        }
+      });
+
+    };
+    return () => {
+      if (socket) {
+        // socket.off("goalScored");
+        socket.off("weHaveAWinner");
+      }
+    };
+  });
+
   //============== GAME MODES ==============
  
-  const handlePowerupModeIA = (): void => {
-    console.log("🏓   powerup 1 vs IA");
-    try {
-      const newHostStatus = true;
-      const newGM = 2;
-      setHostStatus(newHostStatus);
-      setGameMode(newGM);
-      setNames(playerName, newHostStatus, newGM, setHostname, setClientName);
-      setGameLaunched(true);
-      setCameraMode("orthographic");
-      setPowerupVisible(true);
-      setShowButtons(false);
-      handleCountdown();
-    } catch {
-      console.log("🏓   we catched an issue. GM2");
-      return;
-    }
-  };
+  // const handlePowerupModeIA = (): void => {
+  //   console.log("🏓   powerup 1 vs IA");
+  //   try {
+  //     const newHostStatus = true;
+  //     const newGM = 2;
+  //     setHostStatus(newHostStatus);
+  //     setGameMode(newGM);
+  //     setNames(playerName, newHostStatus, newGM, setHostname, setClientName);
+  //     setGameLaunched(true);
+  //     setCameraMode("orthographic");
+  //     setPowerupVisible(true);
+  //     setShowButtons(false);
+  //     handleCountdown();
+  //   } catch {
+  //     console.log("🏓   we catched an issue. GM2");
+  //     return;
+  //   }
+  // };
 
   const handleClassicModeMulti = (): void => {
     console.log("🏓   classic 1 vs 1");
@@ -399,13 +439,21 @@ export function Pong() {
 
   //-------------- Keypress --------------
   const handleKeyPress = (event: KeyboardEvent): void => {
-    if (gameMode === 1 || gameMode === 3) return;
     if (event.key === "c" || event.key === "C") {
       // Toggle the camera mode when the "C" key is pressed
       console.log("🏓   c has been pressed");
       setCameraMode((prevMode) =>
         prevMode === "orthographic" ? "perspective" : "orthographic"
       );
+    }
+    if (event.key === "s" || event.key === "S") {
+      //Toggle sounds when "S" key is pressed
+      console.log("🏓   s has been pressed");
+      if (!soundsON.current) {
+        soundsON.current = true;
+      } else {
+        soundsON.current = false;
+      }
     }
   };
 
@@ -432,48 +480,6 @@ export function Pong() {
       }, 5000);
     }
   }, [oppDisconnected]);
-
-  //-------------- Score management --------------
-  React.useEffect(() => {
-    if (hostStatus) {
-      if (rightScore >= 3 || leftScore >= 3) {
-        isGameOver.current = true;
-        // console.log("🏓   Quelqu'un a gagne");
-        setIsPaused(true);
-  
-        let winnerText = "";
-        if (rightScore === 3) {
-          winnerText =
-            gameMode === 1 || gameMode === 2
-              ? "Computers wins!"
-              : `${clientName} wins!`;
-          setIsHostWinner(false);
-        } else {
-          winnerText = `${hostname} wins!`;
-          setIsHostWinner(true);
-        }
-        setWinner(winnerText);
-  
-        handleCountdown();
-  
-        setTimeout(() => {
-          console.log("🏓   ", winnerText);
-          console.log("🏓   ", gameId);
-          setGameLaunched(false);
-          if (gameId && socket) {
-            console.log("🏓   envoi du resultat");
-            socket.emit("weHaveAWinner", {
-              gameId,
-              isHostWinner,
-              // hostname,
-              // clientName,
-            });
-          }
-          window.location.href = "/game";
-        }, 5000);
-      }
-    }
-  }, [leftScore, rightScore]);
 
   // offsite pour maintenir les paddles a 0.5 unit de leur bordure respective lorsqu'il y a resize
   const distanceFromCenter: number = 0.024 * dimension.width;
@@ -614,23 +620,71 @@ export function Pong() {
   };
 
 //-------------- SCOREBOARD LOGIC --------------
-  // const goalRight = (prevScore: number) => {
-  //   const newScore: number = prevScore + 1;
-  //   if (newScore < 3) {
-  //     setIsPaused(true);
-  //     handleCountdown();
-  //   }
-  //   return newScore;
-  // };
 
-  // const goalLeft = (prevScore: number) => {
-  //     const newScore = prevScore + 1;
-  //     if (newScore < 3) {
-  //       setIsPaused(true);
-  //       handleCountdown();
-  //     }
-  //     return newScore;
-  // }
+  const goalScored = (prevScore: number, side: string) => {
+    console.log('goalScored is called');
+    let newScore = prevScore + 1;
+
+    if (side === 'right') {
+      setRightScore(newScore);
+    } else if (side === 'left') {
+      setLeftScore(newScore);
+    }
+
+    setBallPosition({ x: 0, y: 0, z: 0 });
+    setBallVelocity({ x: INITIAL_BALL_SPEED, z: INITIAL_BALL_SPEED });
+    setCameraMode("orthographic");
+    setIsPaused(true);
+    handleCountdown();
+  }
+
+  const sentWinnerMessage = (winnerText: string) => {
+    setWinner(winnerText);
+
+    console.log("🏓   ", winnerText);
+    console.log("🏓   ", gameId);
+    console.log("🏓   ", isHostWinner.current);
+    if (gameId && socket && hostStatus) {
+      console.log("🏓   envoi du resultat");
+      socket.emit("weHaveAWinner", {
+        gameId,
+        isHostWinner,
+        winnerText,
+      });
+    };
+  }
+
+  useEffect (() => {
+      if (rightScore >= 3 || leftScore >= 3) {
+        isGameOver.current = true;
+        setIsPaused(true);
+        console.log("🏓   Quelqu'un a gagne: ", leftScore, " - ", rightScore);
+
+        let winnerText = "";
+        if (rightScore === 3) {
+          winnerText =
+            gameMode === 1 || gameMode === 2
+              ? "Computers wins!"
+              : `${clientName} wins!`;
+          isHostWinner.current = false;
+        } else {
+          winnerText = `${hostname} wins!`;
+          isHostWinner.current = true;
+        }
+        
+        sentWinnerMessage(winnerText);
+
+      } else if (hostStatus) {
+        console.log('envoi du nouveau score : ', leftScore, " - ", rightScore);
+        // socket.volatile.emit('goalScored', {
+        //   gameId,
+        //   rightScore,
+        //   leftScore,
+        //   ballPosition,
+        //   ballVelocity,
+        // });
+      };
+  }, [leftScore, rightScore])
 
   //============== GAME BALL LOGIC ==============
   // Ball mechanics
@@ -639,16 +693,16 @@ export function Pong() {
     ballPosition: BallPosition;
     setBallPosition: React.Dispatch<React.SetStateAction<BallPosition>>;
     ballVelocity: Position;
-    setBallVelocity: React.Dispatch<React.SetStateAction<Position>>;
+    // setBallVelocity: React.Dispatch<React.SetStateAction<Position>>;
   }
   
   const Ball: React.FC<BallProps> = ({
     ballPosition,
     setBallPosition,
     ballVelocity,
-    setBallVelocity,
   }) => {
-    let scoreUpdated = false;
+
+    const goalUpdate = useRef<boolean>(false);
 
     useFrame(() => {
       if (isPaused || gameStart || winner) return;
@@ -683,7 +737,9 @@ export function Pong() {
         ) {
           ballVelocity.z = -ballVelocity.z;
           newZ = ballPosition.z + ballVelocity.z;
-          if (gameMode === 2 || gameMode === 4) playBallWallSound();
+          if (soundsON.current) {
+            playBallWallSound();
+          }
         }
   
         //----------- VALIDATION HIT AVEC PADDLES ----------
@@ -712,24 +768,13 @@ export function Pong() {
           const hitPaddlePosition = hitSectionLeft
             ? leftPaddlePosition
             : rightPaddlePosition;
-          if (hostStatus && (gameMode === 2 || gameMode === 4)) {
+          if (hostStatus && soundsON.current) {
             playUserHitSound();
-          } else if (!hostStatus && (gameMode === 2 || gameMode === 4)) {
-            //attention si 1 vs 1, laissez le son utilisateur
-            playCompHitSound();
+          } else if (!hostStatus && soundsON.current) {
+            playCompHitSound(); //attention si 1 vs 1, laissez le son utilisateur
           }
   
           ballVelocity.x = -ballVelocity.x;
-  
-          // const relativeCollisionPoint =
-          //   (newZ - hitPaddlePosition.z) / (paddleDepth / 2);
-          // const newZVelocity =
-          //   ballVelocity.z + relativeCollisionPoint * INITIAL_BALL_SPEED;
-  
-          // // Normalize the velocity to maintain the initial speed
-          // const magnitude = Math.sqrt(ballVelocity.x ** 2 + newZVelocity ** 2);
-          // ballVelocity.x = (ballVelocity.x / magnitude) * INITIAL_BALL_SPEED;
-          // ballVelocity.z = (newZVelocity / magnitude) * INITIAL_BALL_SPEED;
   
           newX =
             hitPaddlePosition.x +
@@ -742,52 +787,30 @@ export function Pong() {
         newX - ballRadius <= -WORLD_WIDTH / 2 ||
         newX + ballRadius >= WORLD_WIDTH / 2
       ) {
+        if (!goalUpdate.current) {
+          goalUpdate.current = true;
+        }
 
-        if (gameMode === 2 || gameMode === 4) {
+        if (soundsON.current) {
           pausePowerupSound();
           playGoalSound();
         }
 
-        if (newX - ballRadius <= -WORLD_WIDTH / 2 && !scoreUpdated) {
-          scoreUpdated = true;
-          newX = 0;
-          newZ = 0;
-          setBallVelocity({ x: INITIAL_BALL_SPEED, z: INITIAL_BALL_SPEED });
-          setRightScore((prevScore) => {
-            const newScore = prevScore + 1;
-            console.log('NEW SCORE RIGHT, GAMEID: ', gameId, ' Score: ', newScore);
-            if (newScore < 3) {
-              setIsPaused(true);
-              handleCountdown();
-            }
-            return newScore;
-          });
-        } else if (newX + ballRadius >= WORLD_WIDTH / 2 && !scoreUpdated) {
-          scoreUpdated = true;
-          newX = 0;
-          newZ = 0;
-          setBallVelocity({ x: INITIAL_BALL_SPEED, z: INITIAL_BALL_SPEED });
-          setLeftScore((prevScore) => {
-            const newScore = prevScore + 1;
-            console.log('NEW SCORE LEFT, GAMEID: ', gameId, ' Score: ', newScore);
-            if (newScore < 3) {
-              setIsPaused(true);
-              handleCountdown();
-            }
-            return newScore;
-          });
+        if (newX - ballRadius <= -WORLD_WIDTH / 2) {
+          goalScored(rightScore, 'right');
+        } else if (newX + ballRadius >= WORLD_WIDTH / 2) {
+          goalScored(leftScore, 'left');
+        }
 
-        setCameraMode("orthographic");
+      } else {
+        goalUpdate.current = false;
+
+        setBallPosition({
+          x: newX,
+          y: 0,
+          z: newZ,
+        } as BallPosition);
       }
-    } else {
-      scoreUpdated = false;
-    }
-
-      setBallPosition({
-        x: newX,
-        y: 0,
-        z: newZ,
-      } as BallPosition);
     });
 
     return (
@@ -1003,7 +1026,7 @@ export function Pong() {
               <img src="../src/assets/animated.gif" alt="Starting Screen" />
               <div className="game-buttons">
                 <button onClick={handleClassicModeMulti}>Classic 1 vs 1</button>
-                <button onClick={handlePowerupModeIA}>Powerup 1 vs IA</button>
+                {/* <button onClick={handlePowerupModeIA}>Powerup 1 vs IA</button> */}
                 {/* <button onClick={handleClassicModeIA}>Classic 1 vs IA</button> */}
                 {/* <button onClick={handlePowerupModeMulti}>Powerup 1 vs 1</button> */}
               </div>
@@ -1047,7 +1070,6 @@ export function Pong() {
                 ballPosition={ballPosition}
                 setBallPosition={setBallPosition}
                 ballVelocity={ballVelocity}
-                setBallVelocity={setBallVelocity}
               />
 
               {/* Left Paddle */}
