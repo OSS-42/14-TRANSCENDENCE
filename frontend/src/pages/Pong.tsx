@@ -113,6 +113,7 @@ export function Pong() {
   const [rightPaddlePositionZ, setRightPaddlePositionZ] = React.useState(0);
   const [countdown, setCountdown] = React.useState<number | null>(null);
   const [powerupVisible, setPowerupVisible] = React.useState(false);
+  const soundsON = useRef<boolean>(false);
 
   const [ballPosition, setBallPosition] = React.useState<BallPosition>({
     x: 0,
@@ -301,24 +302,24 @@ export function Pong() {
 
   //============== GAME MODES ==============
  
-  const handlePowerupModeIA = (): void => {
-    console.log("🏓   powerup 1 vs IA");
-    try {
-      const newHostStatus = true;
-      const newGM = 2;
-      setHostStatus(newHostStatus);
-      setGameMode(newGM);
-      setNames(playerName, newHostStatus, newGM, setHostname, setClientName);
-      setGameLaunched(true);
-      setCameraMode("orthographic");
-      setPowerupVisible(true);
-      setShowButtons(false);
-      handleCountdown();
-    } catch {
-      console.log("🏓   we catched an issue. GM2");
-      return;
-    }
-  };
+  // const handlePowerupModeIA = (): void => {
+  //   console.log("🏓   powerup 1 vs IA");
+  //   try {
+  //     const newHostStatus = true;
+  //     const newGM = 2;
+  //     setHostStatus(newHostStatus);
+  //     setGameMode(newGM);
+  //     setNames(playerName, newHostStatus, newGM, setHostname, setClientName);
+  //     setGameLaunched(true);
+  //     setCameraMode("orthographic");
+  //     setPowerupVisible(true);
+  //     setShowButtons(false);
+  //     handleCountdown();
+  //   } catch {
+  //     console.log("🏓   we catched an issue. GM2");
+  //     return;
+  //   }
+  // };
 
   const handleClassicModeMulti = (): void => {
     console.log("🏓   classic 1 vs 1");
@@ -438,13 +439,21 @@ export function Pong() {
 
   //-------------- Keypress --------------
   const handleKeyPress = (event: KeyboardEvent): void => {
-    if (gameMode === 1 || gameMode === 3) return;
     if (event.key === "c" || event.key === "C") {
       // Toggle the camera mode when the "C" key is pressed
       console.log("🏓   c has been pressed");
       setCameraMode((prevMode) =>
         prevMode === "orthographic" ? "perspective" : "orthographic"
       );
+    }
+    if (event.key === "s" || event.key === "S") {
+      //Toggle sounds when "S" key is pressed
+      console.log("🏓   s has been pressed");
+      if (!soundsON.current) {
+        soundsON.current = true;
+      } else {
+        soundsON.current = false;
+      }
     }
   };
 
@@ -728,7 +737,7 @@ export function Pong() {
         ) {
           ballVelocity.z = -ballVelocity.z;
           newZ = ballPosition.z + ballVelocity.z;
-          if (gameMode === 2 || gameMode === 4) {
+          if (soundsON.current) {
             playBallWallSound();
           }
         }
@@ -759,9 +768,9 @@ export function Pong() {
           const hitPaddlePosition = hitSectionLeft
             ? leftPaddlePosition
             : rightPaddlePosition;
-          if (hostStatus && (gameMode === 2 || gameMode === 4)) {
+          if (hostStatus && soundsON.current) {
             playUserHitSound();
-          } else if (!hostStatus && (gameMode === 2 || gameMode === 4)) {
+          } else if (!hostStatus && soundsON.current) {
             playCompHitSound(); //attention si 1 vs 1, laissez le son utilisateur
           }
   
@@ -782,7 +791,7 @@ export function Pong() {
           goalUpdate.current = true;
         }
 
-        if (gameMode === 2 || gameMode === 4) {
+        if (soundsON.current) {
           pausePowerupSound();
           playGoalSound();
         }
@@ -1017,7 +1026,7 @@ export function Pong() {
               <img src="../src/assets/animated.gif" alt="Starting Screen" />
               <div className="game-buttons">
                 <button onClick={handleClassicModeMulti}>Classic 1 vs 1</button>
-                <button onClick={handlePowerupModeIA}>Powerup 1 vs IA</button>
+                {/* <button onClick={handlePowerupModeIA}>Powerup 1 vs IA</button> */}
                 {/* <button onClick={handleClassicModeIA}>Classic 1 vs IA</button> */}
                 {/* <button onClick={handlePowerupModeMulti}>Powerup 1 vs 1</button> */}
               </div>
