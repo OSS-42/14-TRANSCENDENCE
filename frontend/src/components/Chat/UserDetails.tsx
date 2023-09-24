@@ -38,7 +38,7 @@ function UserDetails({
   }, []);
 
   function inviteToPlay(id: number) {
-    const roomId = 771237812;
+    const roomId = "gameIdFromUrl=771237812";
 
     // Émettre l'invitation et activer le message "Waiting for player to respond"
     socket.emit("invitation", {

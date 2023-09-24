@@ -32,7 +32,7 @@ export class ConnectedUsersService {
     for (const [userId, id] of this.connectedtoPonng) {
       if (id === socketId) {
         this.connectedtoPonng.delete(userId);
-        break; // Sortir de la boucle une fois que l'élément est supprimé
+        break; 
       }
     }
   }
