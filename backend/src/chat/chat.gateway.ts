@@ -90,8 +90,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     });
   }
+  
   @SubscribeMessage('challengeAccepted')
-  async challengeAccepted(client: Socket, payload: any){ //voir pour changer any
+  async challengeAccepted(client: Socket, payload: any){ 
+    
+          
     const socketId = await this.connectedUsersService.getSocketId(payload.challengerId)
     this.server.to(socketId).emit('challengeAccepted', {
       roomId: payload.roomId,

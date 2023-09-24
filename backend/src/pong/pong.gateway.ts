@@ -104,7 +104,7 @@ export class PongGateway {
     this.playerNames.set(client.id, payload.playerName);    
   
   if (queue.length >= 2) {
-      console.log('🏓   ⚡ 2 clients for GM 3!! ⚡');
+      console.log('🏓   ⚡ 2 clients for GM 6!! ⚡');
       const gameId = payload.gameIdFromUrl;
 
       const player1 = queue.shift();
@@ -268,7 +268,12 @@ export class PongGateway {
     //   const loserId = 2;
     // }
 
-    // this.pongService.updateHistory(winnerId, loserId);
+    // 
+    if(payload.isHostWinner)
+      this.pongService.updateHistory(payload.hostName, payload.clientName);
+    else{
+      this.pongService.updateHistory(payload.clientName, payload.hostName);
+    } 
 
     // cleaning the gameId from the list of gameIds:
     let clientsMapToTerminate: any;

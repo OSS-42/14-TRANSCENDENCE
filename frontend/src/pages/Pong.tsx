@@ -207,7 +207,7 @@ export function Pong() {
 
   useEffect(() => {
     if (gameIdFromUrl && socket && playerName) {
-      const newGM = 3;
+      const newGM = 6;
       
       setWaitingForPlayer(true);
       setGameLaunched(true);
@@ -669,6 +669,8 @@ export function Pong() {
       console.log("🏓   envoi du resultat");
       socket.emit("weHaveAWinner", {
         gameId,
+        hostname,
+        clientName,
         isHostWinner,
         winnerText,
       });
