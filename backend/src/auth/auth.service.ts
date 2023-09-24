@@ -76,6 +76,8 @@ export class AuthService {
         let user = await this.prisma.utilisateur.findUnique({
           where: { email },
         });
+        const isUsernameTaken = await this.isUsernameTaken(username);
+       
         if (!user) {
           const { v4: uuidv4 } = require('uuid');
           const customPrefix = 'poulet';
@@ -95,22 +97,20 @@ export class AuthService {
         }
         UserToken = this.signToken(user.id, user.email);
         this.createRefreshToken(user.id, user.secretId)
-        const isUsernameTaken = await this.isUsernameTaken(username);
-          if (isUsernameTaken) {
-            const { v4: uuidv4 } = require('uuid');
-            const customPrefix = user.username;
-            const uniqueId = customPrefix + '-' + uuidv4().substring(0, 8);
-            await this.prisma.utilisateur.update({
-              where: { email },
-              data: {
-                username: uniqueId
-                ,
-              },
-            });
+        if (isUsernameTaken) {
+          const { v4: uuidv4 } = require('uuid');
+          const customPrefix = user.username;
+          const uniqueId = customPrefix + '-' + uuidv4().substring(0, 8);
+          await this.prisma.utilisateur.update({
+            where: { email },
+            data: {
+              username: uniqueId
+              ,
+            },
+          });
 
-          } 
-
-      } 
+        } 
+      }
       else {
         console.error(
           "Erreur lors de la requête:",
@@ -135,7 +135,8 @@ export class AuthService {
     
     await this.prisma.utilisateur.update({
       where: { id: userId },
-      data: { twoFactorSecret: secret.base32 },
+      data: { twoFactorSecret: secret.base32,
+        is2FA: true },
     });
 
     const otpauthUrl = speakeasy.otpauthURL({
@@ -167,7 +168,8 @@ export class AuthService {
   async disable2FA(userId: number): Promise<void> {
     await this.prisma.utilisateur.update({
       where: { id: userId },
-      data: { twoFactorSecret: null },
+      data: { twoFactorSecret: null,
+      is2FA: false },
     });
     }
 

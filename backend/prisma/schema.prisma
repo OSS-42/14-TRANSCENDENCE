@@ -21,6 +21,7 @@ model Utilisateur {
   twoFactorSecret String?
   secretId    String
   refreshToken String?
+  is2FA Boolean @default(false)
 
   blockedBy Banissement[] @relation("UserToBanishment")
   blockedUsers Banissement[] @relation("BanningUser")

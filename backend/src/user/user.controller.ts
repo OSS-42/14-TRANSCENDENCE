@@ -34,8 +34,8 @@ export class UserController {
   //retourne le data de l'utilisateur
   @Get("me")
   getMe(@GetUser() user: Utilisateur) {
-    const { id, username, avatar, secretId } = user;
-    return { id, username, avatar, secretId };
+    const { id, username, avatar, is2FA } = user;
+    return { id, username, avatar, is2FA };
   }
 
   //retourne un array d'objets utilisateurs
@@ -57,9 +57,8 @@ export class UserController {
       return user;
     } catch (error) {
       if (error instanceof NotFoundException) {
-        throw error; // Réponse 404 si l'utilisateur n'est pas trouvé
+        throw error; 
       }
-      // Gérer d'autres erreurs ici si nécessaire
       throw new InternalServerErrorException('Internal Server Error');
     }
   }
