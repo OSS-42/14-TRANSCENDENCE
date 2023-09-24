@@ -201,16 +201,17 @@ export function Pong() {
 
 
   useEffect(() => {
-    if (gameIdFromUrl && socket) {
+    if (gameIdFromUrl && socket && playerName) {
       const newGM = 3;
-      socket.emit('challengeGame', { playerName, newGM, gameIdFromUrl });
+      
       setWaitingForPlayer(true);
       setGameLaunched(true);
       setCameraMode('orthographic');
       setGameMode(newGM);
       setShowButtons(false);
+      socket.emit('challengeGame', { playerName, newGM, gameIdFromUrl });
     }
-}, [gameIdFromUrl, socket]);
+}, [isConnected]);
 
   useEffect(() => {
     if (socket && initialSetupComplete) {
