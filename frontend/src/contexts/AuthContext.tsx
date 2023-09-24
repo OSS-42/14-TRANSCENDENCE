@@ -60,7 +60,7 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
     setIsLogged(false);
     setLoading(false);
     redirectToWelcome();
-	twoFactorValidationStatus(false);
+    twoFactorValidationStatus(false);
   };
 
   const fetchUserData = async () => {
@@ -74,11 +74,12 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
           },
         });
         setUser({ ...response.data, jwtToken: jwtToken });
-		if (response.data.twoFactorSecret && response.data.is2FAValidated === false){
-			setIs2FA(true);
-			navigateTo('TwoFactor');
-		}
-		setIsLogged(true);
+        if (response.data.is2FA) {
+          console.log("is2FAValidated:",response.data.is2FAValidated);
+          setIs2FA(true);
+          navigateTo("TwoFactor");
+        }
+        setIsLogged(true);
       } catch (error) {
         console.error("Error fetching user data:", error);
       }
@@ -128,12 +129,23 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
       login,
       logout,
       fetchUserData,
-	  setUser,
-	  is2FA,
-	  is2FAValidated,
-	  setIs2FAValidated
+      setUser,
+      is2FA,
+      is2FAValidated,
+      setIs2FAValidated,
     };
-  }, [loading, user, isLogged, login, setUser, logout, fetchUserData, is2FA, is2FAValidated, setIs2FAValidated]);
+  }, [
+    loading,
+    user,
+    isLogged,
+    login,
+    setUser,
+    logout,
+    fetchUserData,
+    is2FA,
+    is2FAValidated,
+    setIs2FAValidated,
+  ]);
 
   return (
     <AuthContext.Provider value={contextData}>{children}</AuthContext.Provider>
