@@ -4,6 +4,7 @@ import { useRoutes } from "../../contexts/RoutesContext";
 import { Socket } from "socket.io-client";
 import { useAuth } from "../../contexts/AuthContext";
 import { useEffect, useState } from "react";
+import { generatePath } from "react-router-dom";
 // import { MatchHistory } from "../Profile/MatchHistory";
 
 type UserDetailsProps = {
@@ -86,7 +87,18 @@ function UserDetails({
               alt={selectedUser?.username}
               width="250rem"
               height="250rem"
-            />
+              onClick={() => {
+                let path = "";
+                if (user?.username !== selectedUser.username) {
+                  path = generatePath("/profile/:username", {
+                    username: selectedUser?.username,
+                  });
+                } else {
+                  path = "/profile";
+                }
+                navigateTo(path);
+              }}
+            />{" "}
             <Typography variant="h6">{selectedUser?.username}</Typography>
             <Box component="div" mt={2}>
             </Box>
