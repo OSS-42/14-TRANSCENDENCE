@@ -250,5 +250,29 @@ export class UserService {
     });
     return updatedUser;
   }
+<<<<<<< HEAD
+
+  async is2FAValidated(user: Utilisateur, value: boolean) {
+    // const userToChange = await this.prisma.utilisateur.findUnique({
+    //     where: {
+    //     id: user.id,
+    //     },
+    // });
+    // if (!userToChange) {
+    //     throw new Error("Utilisateur non trouvé");
+    // }
+
+    const updatedUser = await this.prisma.utilisateur.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        is2FAValidated: value,
+      },
+    });
+    return updatedUser;
+  }
+=======
   
+>>>>>>> main
 }

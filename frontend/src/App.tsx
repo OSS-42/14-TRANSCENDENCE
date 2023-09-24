@@ -13,6 +13,7 @@ import {
   Error,
 } from "./pages";
 import { useEffect, useState } from "react";
+import { TwoFactor } from "./pages/TwoFactor";
 
 function App() {
   const { user, loading, isLogged } = useAuth();
@@ -46,37 +47,45 @@ function App() {
 
   return (
     <>
-      {user ? <Header /> : null}
-      <Routes>
-        <Route
-          path="/welcome"
-          element={user ? <Navigate to="/" /> : <Welcome />}
-        />
-        <Route
-          path="/"
-          element={user ? <Home /> : <Navigate to="/welcome" />}
-        />
-        <Route
-          path="/chat"
-          element={
-            user && chatSocket ? (
-              <Chat socket={chatSocket} />
-            ) : (
-              <Navigate to="/" />
-            )
-          }
-        />
-        <Route path="/game" element={user ? <Pong /> : <Navigate to="/" />} />
-        <Route
-          path="/profile"
-          element={user ? <MyProfile /> : <Navigate to="/" />}
-        />
-        <Route
-          path="/profile/:username"
-          element={user ? <UserProfile /> : <Navigate to="/" />}
-        />
-        <Route path="*" element={<Error />} />
-      </Routes>
+      <>
+        {(user && user.is2FAValidated) || (user && !user.twoFactorSecret) ? (
+          <Header />
+        ) : null}
+        <Routes>
+          <Route
+            path="/welcome"
+            element={user ? <Navigate to="/" /> : <Welcome />}
+          />
+          <Route
+            path="/"
+            element={user ? <Home /> : <Navigate to="/welcome" />}
+          />
+          <Route
+            path="/chat"
+            element={
+              user && chatSocket ? (
+                <Chat socket={chatSocket} />
+              ) : (
+                <Navigate to="/" />
+              )
+            }
+          />
+          <Route path="/game" element={user ? <Pong /> : <Navigate to="/" />} />
+          <Route
+            path="/TwoFactor"
+            element={user ? <TwoFactor /> : <Navigate to="/welcome" />}
+          />
+          <Route
+            path="/profile"
+            element={user ? <MyProfile /> : <Navigate to="/" />}
+          />
+          <Route
+            path="/profile/:username"
+            element={user ? <UserProfile /> : <Navigate to="/" />}
+          />
+          <Route path="*" element={<Error />} />
+        </Routes>
+      </>
     </>
   );
 }

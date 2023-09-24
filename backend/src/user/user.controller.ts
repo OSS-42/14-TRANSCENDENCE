@@ -127,4 +127,12 @@ export class UserController {
     console.log("New Username:", updateData);
     return this.userService.updateUsername(user, updateData.newUsername);
   }
+
+  @Post("is2FAValidated")
+  is2FAValidated(
+    @GetUser() user: Utilisateur,
+    @Body() updateData: { value: boolean }
+  ) {
+    return this.userService.is2FAValidated(user, updateData.value);
+  }
 }
