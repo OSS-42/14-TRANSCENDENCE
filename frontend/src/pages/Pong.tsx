@@ -669,11 +669,17 @@ export function Pong() {
       console.log("🏓   envoi du resultat");
       socket.emit("weHaveAWinner", {
         gameId,
-        hostname,
-        clientName,
         isHostWinner,
         winnerText,
       });
+      if(clientName === user.username){
+        socket.emit("updateHistory", {
+        hostname,
+        clientName,
+        isHostWinner,
+      });
+
+      }
     };
   }
 

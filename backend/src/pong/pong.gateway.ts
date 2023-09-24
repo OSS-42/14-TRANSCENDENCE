@@ -268,12 +268,7 @@ export class PongGateway {
     //   const loserId = 2;
     // }
 
-    // 
-    if(payload.isHostWinner)
-      this.pongService.updateHistory(payload.hostName, payload.clientName);
-    else{
-      this.pongService.updateHistory(payload.clientName, payload.hostName);
-    } 
+  
 
     // cleaning the gameId from the list of gameIds:
     let clientsMapToTerminate: any;
@@ -291,4 +286,16 @@ export class PongGateway {
       this.gameIds.delete(clientsMapToTerminate);
     }
   }
+  @SubscribeMessage('updateHistory')
+  updateHistory(client: Socket, payload: {hostname:string, clientName:string, isHostWinner:boolean}){
+    if(!payload.isHostWinner){
+      this.pongService.updateHistory(payload.clientName, payload.hostname);
+    }
+    else{
+      this.pongService.updateHistory(payload.hostname, payload.clientName);
+    }
+    
+
+  }
+  
 }
