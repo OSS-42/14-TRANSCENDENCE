@@ -76,7 +76,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   private emitUpdateConnectedUsers(): void {
     const connectedUserIds = Array.from(this.connectedUsersService.connectedUsers.keys());
-    this.server.emit('updateConnectedUsers', connectedUserIds);
+    const connectedUserIdsPong = Array.from(this.connectedUsersService.connectedtoPonng.keys());
+    this.server.emit('updateConnectedUsers', { connectedUserIds :connectedUserIds, connectedUserIdsPong:connectedUserIdsPong });
   }
 
   @SubscribeMessage('invitation')
@@ -89,8 +90,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     });
   }
+  
   @SubscribeMessage('challengeAccepted')
-  async challengeAccepted(client: Socket, payload: any){ //voir pour changer any
+  async challengeAccepted(client: Socket, payload: any){ 
+    
+          
     const socketId = await this.connectedUsersService.getSocketId(payload.challengerId)
     this.server.to(socketId).emit('challengeAccepted', {
       roomId: payload.roomId,

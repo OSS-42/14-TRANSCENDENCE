@@ -26,6 +26,7 @@ export function TwoFactorAuthentication({TwoFactorStatus}: TwoFactorAuthenticati
           },
         }
       );
+	  console.log(response);
       setOtpURL(response.data.otpauthUrl);
       console.log(response.data.otpauthUrl);
       setQRCodeVisible(true);

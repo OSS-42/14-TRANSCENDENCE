@@ -11,6 +11,8 @@ import Cookies from "js-cookie";
 import { getCookies, bearerAuthorization } from "../utils";
 import { User } from "../models/User";
 import { useRoutes } from "./RoutesContext";
+import { TwoFactor } from "../pages/TwoFactor";
+import { twoFactorValidationStatus } from "../api/requests";
 
 // Define constants
 const JWT_TOKEN_COOKIE = "jwt_token";
@@ -35,7 +37,8 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [isLogged, setIsLogged] = useState(false);
-  // const [is2FA, setIs2FA] = useState(false);
+  const [is2FA, setIs2FA] = useState(false);
+  const [is2FAValidated, setIs2FAValidated] = useState(false);
   const { navigateTo } = useRoutes();
 
   const login = async () => {
@@ -57,6 +60,7 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
     setIsLogged(false);
     setLoading(false);
     redirectToWelcome();
+    twoFactorValidationStatus(false);
   };
 
   const fetchUserData = async () => {
@@ -69,9 +73,11 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
             Authorization: bearerAuthorization(jwtToken),
           },
         });
-        console.log(response.data);
-
         setUser({ ...response.data, jwtToken: jwtToken });
+        if (response.data.is2FA && response.data.is2FAValidated === false) {
+          setIs2FA(true);
+          navigateTo("TwoFactor");
+        }
         setIsLogged(true);
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -123,8 +129,22 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
       logout,
       fetchUserData,
       setUser,
+      is2FA,
+      is2FAValidated,
+      setIs2FAValidated,
     };
-  }, [loading, user, isLogged, login, setUser, logout, fetchUserData]);
+  }, [
+    loading,
+    user,
+    isLogged,
+    login,
+    setUser,
+    logout,
+    fetchUserData,
+    is2FA,
+    is2FAValidated,
+    setIs2FAValidated,
+  ]);
 
   return (
     <AuthContext.Provider value={contextData}>{children}</AuthContext.Provider>
