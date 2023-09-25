@@ -260,13 +260,11 @@ export class PongGateway {
     this.gameStates.set(gameId, payload);
     this.server.to(gameId).volatile.emit('weHaveAWinner', payload);
     
-    if(!payload.isHostWinner){
-      console.log('coucou invité')
+    if(!payload.isHostWinner.current){
       console.log("Winner (invite): ", payload.clientName, " - Loser: ", payload.hostname);
       this.pongService.updateHistory(payload.clientName, payload.hostname);
     }
     else{
-      console.log('coucou host')
       console.log("Winner (host): ", payload.hostname, " - Loser: ", payload.clientName);
       this.pongService.updateHistory(payload.hostname, payload.clientName);
     }
