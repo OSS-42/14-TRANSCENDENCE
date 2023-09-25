@@ -1,17 +1,20 @@
-import './index.scss'
+import "./index.scss";
 
-import ReactDOM from 'react-dom/client'
-import App from './App'
-import axios from 'axios';
-import theme from './styles/theme'
-import { ThemeProvider } from '@mui/material/styles'
-import { AuthProvider } from './contexts/AuthContext'
-import { RoutesProvider } from './contexts/RoutesContext'
-import { BrowserRouter as Router } from 'react-router-dom'
-const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
+import ReactDOM from "react-dom/client";
+import App from "./App";
+import axios from "axios";
+import theme from "./styles/theme";
+import { ThemeProvider } from "@mui/material/styles";
+import { AuthProvider } from "./contexts/AuthContext";
+import { RoutesProvider } from "./contexts/RoutesContext";
+import { BrowserRouter as Router } from "react-router-dom";
+import { useEffect } from "react";
+const root = ReactDOM.createRoot(
+  document.getElementById("root") as HTMLElement
+);
 
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: "/api",
 });
 
 api.interceptors.response.use(
@@ -32,11 +35,10 @@ root.render(
     <ThemeProvider theme={theme}>
       <RoutesProvider>
         <AuthProvider>
-			<App/>
+          <App />
         </AuthProvider>
       </RoutesProvider>
     </ThemeProvider>
   </Router>
   //</React.StrictMode>
-)
-
+);
