@@ -8,7 +8,6 @@ import { ThemeProvider } from "@mui/material/styles";
 import { AuthProvider } from "./contexts/AuthContext";
 import { RoutesProvider } from "./contexts/RoutesContext";
 import { BrowserRouter as Router } from "react-router-dom";
-import { useEffect } from "react";
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );
