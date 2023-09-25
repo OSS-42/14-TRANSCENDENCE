@@ -247,9 +247,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     help = `
       <br>Here are some tips on how to use the chat commands:<br>
       <br><b>JOIN</b><br>
-      &emsp;To join or create a public room:<br/>&emsp;&emsp;<span>/JOIN #roomName</span><br>
-      &emsp;To join or create a room with a password:<br/>&emsp;&emsp;<span>/JOIN #roomName password</span><br>
-      &emsp;To create a private room:<br/>&emsp;&emsp;<span>/JOIN #roomName +i</span><br>
+      &emsp;To join or create a public room:<br/>&emsp;&emsp;<span>/JOIN #channelName</span><br>
+      &emsp;To join or create a room with a password:<br/>&emsp;&emsp;<span>/JOIN #channelName password</span><br>
+      &emsp;To create a private room:<br/>&emsp;&emsp;<span>/JOIN #channelName +i</span><br>
       <br><b>BLOCK</b><br>
       &emsp;To block a user:<br/>&emsp;&emsp;<span>/BLOCK username</span><br>
       <br><b>UNBLOCK</b><br>
