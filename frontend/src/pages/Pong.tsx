@@ -95,7 +95,7 @@ export function Pong() {
   const [rightScore, setRightScore] = React.useState(0);
   const [winner, setWinner] = React.useState<string | null>(null);
 
-  const [gameMode, setGameMode] = React.useState<0 | 1 | 2 | 3 | 4>(0);
+  const [gameMode, setGameMode] = React.useState<0 | 1 | 2 | 3 | 4 | 5>(0);
   const [showButtons, setShowButtons] = React.useState(true);
   const isGameOver = useRef(false);
 
@@ -375,28 +375,28 @@ export function Pong() {
   // };
 
   //============== USER NAMES ==============
-  function setNames(
-    playerName: string,
-    newHostStatus: boolean,
-    newGM: number,
-    setHostname: Function,
-    setClientName: Function
-  ) {
-    if (gameInfos) {
-      if (newGM === 1 || newGM === 2) {
-        setHostname(playerName);
-        setClientName("Computer");
-      } else {
-        if (newHostStatus === true) {
-          setHostname(playerName);
-          setClientName(gameInfos.clientName);
-        } else {
-          setHostname(gameInfos.clientName);
-          setClientName(playerName);
-        }
-      }
-    }
-  }
+  // function setNames(
+  //   playerName: string,
+  //   newHostStatus: boolean,
+  //   newGM: number,
+  //   setHostname: Function,
+  //   setClientName: Function
+  // ) {
+  //   if (gameInfos) {
+  //     if (newGM === 1 || newGM === 2) {
+  //       setHostname(playerName);
+  //       setClientName("Computer");
+  //     } else {
+  //       if (newHostStatus === true) {
+  //         setHostname(playerName);
+  //         setClientName(gameInfos.clientName);
+  //       } else {
+  //         setHostname(gameInfos.clientName);
+  //         setClientName(playerName);
+  //       }
+  //     }
+  //   }
+  // }
 
   //============== SCENE SETTINGS ==============
   // s'assure que le canvas aura comme maximum toujours 800x600
