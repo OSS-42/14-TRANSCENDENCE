@@ -19,8 +19,10 @@ model Utilisateur {
   avatar String?
   email    String @unique
   twoFactorSecret String?
+  is2FAValidated Boolean@default(false)
   secretId    String
   refreshToken String?
+  is2FA Boolean @default(false)
 
   blockedBy Banissement[] @relation("UserToBanishment")
   blockedUsers Banissement[] @relation("BanningUser")

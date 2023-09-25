@@ -5,6 +5,9 @@ import { Socket } from "socket.io-client";
 import { useAuth } from "../../contexts/AuthContext";
 import { useEffect, useState } from "react";
 import { generatePath } from "react-router-dom";
+import { v4 as uuidv4 } from 'uuid';
+
+
 // import { MatchHistory } from "../Profile/MatchHistory";
 
 type UserDetailsProps = {
@@ -38,7 +41,10 @@ function UserDetails({
   }, []);
 
   function inviteToPlay(id: number) {
-    const roomId :string = "gameIdFromUrl=67436534753";
+     
+ 
+    const customPrefix = 'gameIdFromUrl=';
+    const roomId = customPrefix + uuidv4();
 
     // Émettre l'invitation et activer le message "Waiting for player to respond"
     socket.emit("invitation", {

@@ -88,8 +88,8 @@ export class PongGateway {
 
   }
 
-  @SubscribeMessage('waitingForPlayerGM3')
-  handleWaitingForPlayerGM3(client: Socket, payload: any) {
+  @SubscribeMessage('challengeGame')
+  challengeGame(client: Socket, payload: any) {
 
     // Initializing the queue if not existing
     if (!this.gameModeQueue.has(payload.newGM)) {
@@ -104,8 +104,8 @@ export class PongGateway {
     this.playerNames.set(client.id, payload.playerName);    
   
   if (queue.length >= 2) {
-      console.log('🏓   ⚡ 2 clients for GM 3!! ⚡');
-      const gameId = uuid();
+      console.log('🏓   ⚡ 2 clients for GM 6!! ⚡');
+      const gameId = payload.gameIdFromUrl;
 
       const player1 = queue.shift();
       const player2 = queue.shift();
@@ -135,6 +135,10 @@ export class PongGateway {
   @SubscribeMessage('challengeGame')
   challengeGame(client: Socket, payload: any) {
 
+
+  @SubscribeMessage('waitingForPlayerGM3')
+  handleWaitingForPlayerGM3(client: Socket, payload: any) {
+
     // Initializing the queue if not existing
     if (!this.gameModeQueue.has(payload.newGM)) {
       this.gameModeQueue.set(payload.newGM, []);
@@ -149,7 +153,7 @@ export class PongGateway {
   
   if (queue.length >= 2) {
       console.log('🏓   ⚡ 2 clients for GM 3!! ⚡');
-      const gameId = payload.gameIdFromUrl;
+      const gameId = uuid();
 
       const player1 = queue.shift();
       const player2 = queue.shift();
@@ -266,7 +270,7 @@ export class PongGateway {
     //   const loserId = 2;
     // }
 
-    // this.pongService.updateHistory(winnerId, loserId);
+  
 
     // cleaning the gameId from the list of gameIds:
     let clientsMapToTerminate: any;
@@ -284,4 +288,16 @@ export class PongGateway {
       this.gameIds.delete(clientsMapToTerminate);
     }
   }
+  @SubscribeMessage('updateHistory')
+  updateHistory(client: Socket, payload: {hostname:string, clientName:string, isHostWinner:boolean}){
+    if(!payload.isHostWinner){
+      this.pongService.updateHistory(payload.clientName, payload.hostname);
+    }
+    else{
+      this.pongService.updateHistory(payload.hostname, payload.clientName);
+    }
+    
+
+  }
+  
 }

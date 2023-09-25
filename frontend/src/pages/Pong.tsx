@@ -18,6 +18,9 @@ import { useAuth } from "../contexts/AuthContext";
 // import for websocket
 import socketIO from "socket.io-client";
 
+//import for URL params
+import { useLocation } from 'react-router-dom';
+
 //============== INFOS QUI TRANSITENT ENTRE SOCKETS ==============
 
 type GameParameters = {
@@ -86,6 +89,9 @@ export function Pong() {
   //============== CONSTANTS NECESSARY AT TOP ==============
 
   const { user } = useAuth();
+  // ---get the game id from de URL----
+  const location = useLocation();
+  const gameIdFromUrl = new URLSearchParams(location.search).get('gameIdFromUrl');
 
   const [gameLaunched, setGameLaunched] = React.useState(false);
   const [cameraMode, setCameraMode] = React.useState<"perspective" | "orthographic">("orthographic");
@@ -201,6 +207,7 @@ export function Pong() {
     } else {
       return () => {}; // No-op function when socket is null
     }
+    
 
     return () => {
       if (socket) {
@@ -210,6 +217,20 @@ export function Pong() {
       }
     };
   }, [socket, isConnected, gameId, oppDisconnected]);
+
+
+  useEffect(() => {
+    if (gameIdFromUrl && socket && playerName) {
+      const newGM = 6;
+      
+      setWaitingForPlayer(true);
+      setGameLaunched(true);
+      setCameraMode('orthographic');
+      setGameMode(newGM);
+      setShowButtons(false);
+      socket.emit('challengeGame', { playerName, newGM, gameIdFromUrl });
+    }
+}, [isConnected]);
 
   useEffect(() => {
     if (socket && initialSetupComplete) {
@@ -665,6 +686,14 @@ export function Pong() {
         isHostWinner,
         winnerText,
       });
+      if(clientName === user.username){
+        socket.emit("updateHistory", {
+        hostname,
+        clientName,
+        isHostWinner,
+      });
+
+      }
     };
   }
 
