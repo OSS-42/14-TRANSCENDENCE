@@ -533,6 +533,27 @@ export function Pong() {
     }
   }, [oppDisconnected]);
 
+  //-------------- Alt Tab management ----------------
+  React.useEffect(() => {
+    function handleVisibilityChange() {
+      if (document.hidden) {
+        if (socket) {
+          console.log("Tab is now inactive. Disconnecting.");
+          socket.emit("disconnected", {
+            gameId: gameId });
+        }
+      }
+    }
+    
+    // Listen for visibility changes
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+  
+    // Cleanup
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [socket]);
+
   // offsite pour maintenir les paddles a 0.5 unit de leur bordure respective lorsqu'il y a resize
   const distanceFromCenter: number = 0.024 * dimension.width;
 
