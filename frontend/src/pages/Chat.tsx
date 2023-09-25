@@ -48,7 +48,7 @@ export function Chat({ socket }: ChatProps) {
     };
   }, [socket]);
 
-  if (!socket) {
+  if (!socket || socket === undefined) {
     return <div>Loading...</div>; // or any other loading indicator or error message
   }
 

@@ -10,7 +10,7 @@ import {
   MyProfile,
   UserProfile,
   Welcome,
-  Error
+  Error,
 } from "./pages";
 import { useEffect, useState } from "react";
 import { TwoFactor } from "./pages/TwoFactor";
@@ -33,7 +33,6 @@ function App() {
     newSocket.on("connect", () => {
       setChatSocketInitialized(true);
       setChatSocket(newSocket);
-      console.log("ChatSocket Connection made!");
     });
     return () => {
       newSocket.disconnect();
@@ -63,8 +62,8 @@ function App() {
           <Route
             path="/chat"
             element={
-              user && chatSocket ? (
-                <Chat socket={chatSocket} />
+              user ? (
+                <Chat socket={chatSocket || undefined} />
               ) : (
                 <Navigate to="/" />
               )
