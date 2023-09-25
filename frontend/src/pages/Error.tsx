@@ -1,7 +1,5 @@
 import { Box } from "@mui/material";
 
-//(Extremely) Generic error page.
-
 export function Error() {
   return (
     <Box
@@ -18,6 +16,7 @@ export function Error() {
     >
       <strong>Error!</strong> <br />
       <br />I not sure where you're trying to go, but that page doesn't exist.
+      <br />(Make sure you're not connected somewhere else!)
     </Box>
   );
 }

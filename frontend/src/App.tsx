@@ -10,14 +10,14 @@ import {
   MyProfile,
   UserProfile,
   Welcome,
-  Error
+  Error,
 } from "./pages";
 import { useEffect, useState } from "react";
 import { TwoFactor } from "./pages/TwoFactor";
 
 function App() {
   const { user, loading, isLogged } = useAuth();
-  const [chatSocket, setChatSocket] = useState<Socket | null>(null);
+  const [chatSocket, setChatSocket] = useState<Socket | undefined>();
   const [chatSocketInitialized, setChatSocketInitialized] = useState(false);
 
   useEffect(() => {
@@ -63,7 +63,7 @@ function App() {
           <Route
             path="/chat"
             element={
-              user && chatSocket ? (
+              user && chatSocketInitialized ? (
                 <Chat socket={chatSocket} />
               ) : (
                 <Navigate to="/" />

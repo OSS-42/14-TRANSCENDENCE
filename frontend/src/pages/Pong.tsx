@@ -19,14 +19,14 @@ import { useAuth } from "../contexts/AuthContext";
 import socketIO from "socket.io-client";
 
 //import for URL params
-import { useLocation } from 'react-router-dom';
+import { useLocation } from "react-router-dom";
 
 //============== INFOS QUI TRANSITENT ENTRE SOCKETS ==============
 
 type GameParameters = {
   gameId: string;
   ballPosition: { x: number; y: number; z: number };
-  ballVelocity: { x: number, z: number };
+  ballVelocity: { x: number; z: number };
   leftPaddlePositionZ: number;
   rightPaddlePositionZ: number;
   powerupPosition: { x: number; y: number; z: number };
@@ -66,12 +66,14 @@ type BallPosition = {
 
 export function Pong() {
   //============== ERROR LISTENING ==============
-  window.addEventListener('error', function (event) {
-    console.log('🏓   there was an issue, but we catched it: ', event);
+  window.addEventListener("error", function (event) {
+    console.log("🏓   there was an issue, but we catched it: ", event);
   });
 
   //============== SOCKET CONNECTION ==============--
-  const [socket, setSocket] = useState<ReturnType<typeof socketIO> | null>(null);
+  const [socket, setSocket] = useState<ReturnType<typeof socketIO> | null>(
+    null
+  );
 
   useEffect(() => {
     const newSocket = socketIO("/pong", {
@@ -91,10 +93,14 @@ export function Pong() {
   const { user } = useAuth();
   // ---get the game id from de URL----
   const location = useLocation();
-  const gameIdFromUrl = new URLSearchParams(location.search).get('gameIdFromUrl');
+  const gameIdFromUrl = new URLSearchParams(location.search).get(
+    "gameIdFromUrl"
+  );
 
   const [gameLaunched, setGameLaunched] = React.useState(false);
-  const [cameraMode, setCameraMode] = React.useState<"perspective" | "orthographic">("orthographic");
+  const [cameraMode, setCameraMode] = React.useState<
+    "perspective" | "orthographic"
+  >("orthographic");
   const [isPaused, setIsPaused] = React.useState(true);
   const [gameStart, setGameStart] = React.useState(true);
   const [leftScore, setLeftScore] = React.useState(0);
@@ -146,7 +152,7 @@ export function Pong() {
   const [playerName, setPlayerName] = React.useState<string>("");
 
   const [gameInfos] = useState<PlayerJoined>();
- 
+
   const [waitingForPlayer, setWaitingForPlayer] = React.useState(false);
   const [gameId, setGameId] = React.useState<string>("");
   const isHostWinner = useRef<boolean>(false);
@@ -155,20 +161,19 @@ export function Pong() {
 
   const [initialSetupComplete, setInitialSetupComplete] = useState(false);
 
- 
-  useEffect( () => {
+  useEffect(() => {
     console.log("challage game id", gameIdFromUrl);
-    if (gameIdFromUrl && socket){
-      const newGM = 3
+    if (gameIdFromUrl && socket) {
+      const newGM = 3;
       console.log("challage game id", gameIdFromUrl);
-      socket.emit('challengeGame', { playerName, newGM, gameIdFromUrl  })
-      setWaitingForPlayer(true)
-      setGameLaunched(true)
-      setCameraMode('orthographic')
-      setGameMode(newGM)
-      setShowButtons(false)
+      socket.emit("challengeGame", { playerName, newGM, gameIdFromUrl });
+      setWaitingForPlayer(true);
+      setGameLaunched(true);
+      setCameraMode("orthographic");
+      setGameMode(newGM);
+      setShowButtons(false);
     }
-}, [gameIdFromUrl, socket])
+  }, [gameIdFromUrl, socket]);
   // Ecoute parler le socket
   useEffect(() => {
     if (socket) {
@@ -202,12 +207,11 @@ export function Pong() {
 
       if (isConnected && gameId) {
         setInitialSetupComplete(true);
-        console.log('🏓   setup completed. GAME ID: ', gameId);
+        console.log("🏓   setup completed. GAME ID: ", gameId);
       }
     } else {
       return () => {}; // No-op function when socket is null
     }
-    
 
     return () => {
       if (socket) {
@@ -218,19 +222,18 @@ export function Pong() {
     };
   }, [socket, isConnected, gameId, oppDisconnected]);
 
-
   useEffect(() => {
     if (gameIdFromUrl && socket && playerName) {
       const newGM = 6;
-      
+
       setWaitingForPlayer(true);
       setGameLaunched(true);
-      setCameraMode('orthographic');
+      setCameraMode("orthographic");
       setGameMode(newGM);
       setShowButtons(false);
-      socket.emit('challengeGame', { playerName, newGM, gameIdFromUrl });
+      socket.emit("challengeGame", { playerName, newGM, gameIdFromUrl });
     }
-}, [isConnected]);
+  }, [isConnected]);
 
   useEffect(() => {
     if (socket && initialSetupComplete) {
@@ -254,25 +257,29 @@ export function Pong() {
       }
 
       if (!hostStatus) {
-        socket.on('hostMovesUpdate', (data: GameParameters) => {
+        socket.on("hostMovesUpdate", (data: GameParameters) => {
           if (data.gameId === gameId) {
-            setBallPosition(data.ballPosition)
-            setBallVelocity(data.ballVelocity)
-            setLeftPaddlePositionZ(data.leftPaddlePositionZ)
-            setPowerupPosition(data.powerupPosition)
-            setRightScore(data.rightScore)
-            setLeftScore(data.leftScore)
+            setBallPosition(data.ballPosition);
+            setBallVelocity(data.ballVelocity);
+            setLeftPaddlePositionZ(data.leftPaddlePositionZ);
+            setPowerupPosition(data.powerupPosition);
+            setRightScore(data.rightScore);
+            setLeftScore(data.leftScore);
           } else {
-            socket.emit("oppDisconnected", { message : 'Deconnection. End of Game.' })
+            socket.emit("oppDisconnected", {
+              message: "Deconnection. End of Game.",
+            });
             setIsPaused(true);
           }
-        })
+        });
       } else {
         socket.on("clientMovesUpdate", (data: any) => {
           if (data.gameId === gameId) {
             setRightPaddlePositionZ(data.rightPaddlePositionZ);
           } else {
-            socket.emit("oppDisconnected", { message : 'Deconnection. End of Game.' })
+            socket.emit("oppDisconnected", {
+              message: "Deconnection. End of Game.",
+            });
             setIsPaused(true);
           }
         });
@@ -295,7 +302,7 @@ export function Pong() {
     powerupPosition,
   ]);
 
-  useEffect (() => {
+  useEffect(() => {
     if (socket && gameId) {
       // socket.on("goalScored", (data: Goal) => {
       //   console.log('info GOAL');
@@ -313,7 +320,7 @@ export function Pong() {
       socket.on("weHaveAWinner", (data: WeHaveAWinner) => {
         if (data.gameId === gameId) {
           setTimeout(() => {
-            console.log('THERE IS A WINNER ', gameId);
+            console.log("THERE IS A WINNER ", gameId);
             isHostWinner.current = data.isHostWinner;
             isGameOver.current = true;
             setGameLaunched(false);
@@ -321,12 +328,13 @@ export function Pong() {
             window.location.href = "/game";
           }, 5000);
         } else {
-          socket.emit("oppDisconnected", { message : 'Deconnection. End of Game.' })
+          socket.emit("oppDisconnected", {
+            message: "Deconnection. End of Game.",
+          });
           setIsPaused(true);
         }
       });
-
-    };
+    }
     return () => {
       if (socket) {
         // socket.off("goalScored");
@@ -336,7 +344,7 @@ export function Pong() {
   });
 
   //============== GAME MODES ==============
- 
+
   // const handlePowerupModeIA = (): void => {
   //   console.log("🏓   powerup 1 vs IA");
   //   try {
@@ -435,7 +443,10 @@ export function Pong() {
 
   //============== SCENE SETTINGS ==============
   // s'assure que le canvas aura comme maximum toujours 800x600
-  const [dimension] = React.useState<{ width: number, height: number }>({ width: 800, height: 600 });
+  const [dimension] = React.useState<{ width: number; height: number }>({
+    width: 800,
+    height: 600,
+  });
 
   // Dimensions de l'espace de jeu.
   const CAMERA_ZOOM = 20;
@@ -577,23 +588,25 @@ export function Pong() {
     const totalHeight: number =
       (segmentHeight + spaceBetweenSegments) * numberOfSegments -
       spaceBetweenSegments; // Subtract space for the last segment
-  
-    const segments = Array.from({ length: numberOfSegments }).map((_, index) => {
-      const yPosition: number =
-        totalHeight / 2 - index * (segmentHeight + spaceBetweenSegments);
 
-    return (
-      <Box
-        key={index}
-        position={[0, 0, yPosition]}
-        args={[netWidth, 0, segmentHeight]}
-      >
-        <meshBasicMaterial color="white" />
-      </Box>
+    const segments = Array.from({ length: numberOfSegments }).map(
+      (_, index) => {
+        const yPosition: number =
+          totalHeight / 2 - index * (segmentHeight + spaceBetweenSegments);
+
+        return (
+          <Box
+            key={index}
+            position={[0, 0, yPosition]}
+            args={[netWidth, 0, segmentHeight]}
+          >
+            <meshBasicMaterial color="white" />
+          </Box>
+        );
+      }
     );
-  });
 
-    return <>{segments}</>
+    return <>{segments}</>;
   });
 
   const baseCanvasWidth: number = 800;
@@ -654,15 +667,15 @@ export function Pong() {
     compHitSoundRef.current?.play();
   };
 
-//-------------- SCOREBOARD LOGIC --------------
+  //-------------- SCOREBOARD LOGIC --------------
 
   const goalScored = (prevScore: number, side: string) => {
-    console.log('goalScored is called');
+    console.log("goalScored is called");
     let newScore = prevScore + 1;
 
-    if (side === 'right') {
+    if (side === "right") {
       setRightScore(newScore);
-    } else if (side === 'left') {
+    } else if (side === "left") {
       setLeftScore(newScore);
     }
 
@@ -671,7 +684,7 @@ export function Pong() {
     setCameraMode("orthographic");
     setIsPaused(true);
     handleCountdown();
-  }
+  };
 
   const sentWinnerMessage = (winnerText: string) => {
     setWinner(winnerText);
@@ -686,93 +699,90 @@ export function Pong() {
         isHostWinner,
         winnerText,
       });
-      if(clientName === user.username){
+      if (clientName === user?.username) {
         socket.emit("updateHistory", {
-        hostname,
-        clientName,
-        isHostWinner,
-      });
-
+          hostname,
+          clientName,
+          isHostWinner,
+        });
       }
-    };
-  }
+    }
+  };
 
-  useEffect (() => {
-      if (rightScore >= 3 || leftScore >= 3) {
-        isGameOver.current = true;
-        setIsPaused(true);
-        console.log("🏓   Quelqu'un a gagne: ", leftScore, " - ", rightScore);
+  useEffect(() => {
+    if (rightScore >= 3 || leftScore >= 3) {
+      isGameOver.current = true;
+      setIsPaused(true);
+      console.log("🏓   Quelqu'un a gagne: ", leftScore, " - ", rightScore);
 
-        let winnerText = "";
-        if (rightScore === 3) {
-          winnerText =
-            gameMode === 1 || gameMode === 2
-              ? "Computers wins!"
-              : `${clientName} wins!`;
-          isHostWinner.current = false;
-        } else {
-          winnerText = `${hostname} wins!`;
-          isHostWinner.current = true;
-        }
-        
-        sentWinnerMessage(winnerText);
+      let winnerText = "";
+      if (rightScore === 3) {
+        winnerText =
+          gameMode === 1 || gameMode === 2
+            ? "Computers wins!"
+            : `${clientName} wins!`;
+        isHostWinner.current = false;
+      } else {
+        winnerText = `${hostname} wins!`;
+        isHostWinner.current = true;
+      }
 
-      } else if (hostStatus) {
-        console.log('envoi du nouveau score : ', leftScore, " - ", rightScore);
-        // socket.volatile.emit('goalScored', {
-        //   gameId,
-        //   rightScore,
-        //   leftScore,
-        //   ballPosition,
-        //   ballVelocity,
-        // });
-      };
-  }, [leftScore, rightScore])
+      sentWinnerMessage(winnerText);
+    } else if (hostStatus) {
+      console.log("envoi du nouveau score : ", leftScore, " - ", rightScore);
+      // socket.volatile.emit('goalScored', {
+      //   gameId,
+      //   rightScore,
+      //   leftScore,
+      //   ballPosition,
+      //   ballVelocity,
+      // });
+    }
+  }, [leftScore, rightScore]);
 
   //============== GAME BALL LOGIC ==============
   // Ball mechanics
-  
+
   interface BallProps {
     ballPosition: BallPosition;
     setBallPosition: React.Dispatch<React.SetStateAction<BallPosition>>;
     ballVelocity: Position;
     // setBallVelocity: React.Dispatch<React.SetStateAction<Position>>;
   }
-  
+
   const Ball: React.FC<BallProps> = ({
     ballPosition,
     setBallPosition,
     ballVelocity,
   }) => {
-
     const goalUpdate = useRef<boolean>(false);
 
     useFrame(() => {
       if (isPaused || gameStart || winner) return;
-      
+
       let newX: number = ballPosition.x + ballVelocity.x;
       let newZ: number = ballPosition.z + ballVelocity.z;
-      
+
       //----------- VALIDATION HIT AVEC POWERUP ----------
       //uniquement (defense) pour Powerup vs IA
       if (
         powerupVisible &&
         Math.abs(ballPosition.x - powerupPosition.x) < ballRadius + 1 &&
         Math.abs(ballPosition.z - powerupPosition.z) < ballRadius + 1
-        ) {
-          setPowerupVisible(false);
-          setCameraMode("perspective");
-          playPowerupSound();
-          
-          setTimeout(() => {
-            setCameraMode("orthographic");
-            respawnPowerup();
-          }, 12000);
-        }
+      ) {
+        setPowerupVisible(false);
+        setCameraMode("perspective");
+        playPowerupSound();
+
+        setTimeout(() => {
+          setCameraMode("orthographic");
+          respawnPowerup();
+        }, 12000);
+      }
 
       if (hostStatus) {
         const directionZ = Math.sign(ballVelocity.z);
-      
+
         //----------- VALIDATION HIT AVEC WALL ----------
         if (
           (directionZ > 0 && newZ + ballRadius > WORLD_HEIGHT / 2) ||
@@ -784,7 +794,7 @@ export function Pong() {
             playBallWallSound();
           }
         }
-  
+
         //----------- VALIDATION HIT AVEC PADDLES ----------
         const leftPaddlePosition = {
           x: leftPaddleXPosition,
@@ -795,7 +805,7 @@ export function Pong() {
           z: rightPaddlePositionZ,
         };
         const paddleDimensions = { width: paddleWidth, depth: paddleDepth };
-  
+
         const hitSectionLeft = checkCollision(
           { x: newX, z: newZ },
           leftPaddlePosition,
@@ -806,7 +816,7 @@ export function Pong() {
           rightPaddlePosition,
           paddleDimensions
         );
-  
+
         if (hitSectionLeft || hitSectionRight) {
           const hitPaddlePosition = hitSectionLeft
             ? leftPaddlePosition
@@ -816,9 +826,9 @@ export function Pong() {
           } else if (!hostStatus && soundsON.current) {
             playCompHitSound(); //attention si 1 vs 1, laissez le son utilisateur
           }
-  
+
           ballVelocity.x = -ballVelocity.x;
-  
+
           newX =
             hitPaddlePosition.x +
             Math.sign(ballVelocity.x) * (paddleWidth / 2 + ballRadius);
@@ -840,11 +850,10 @@ export function Pong() {
         }
 
         if (newX - ballRadius <= -WORLD_WIDTH / 2) {
-          goalScored(rightScore, 'right');
+          goalScored(rightScore, "right");
         } else if (newX + ballRadius >= WORLD_WIDTH / 2) {
-          goalScored(leftScore, 'left');
+          goalScored(leftScore, "left");
         }
-
       } else {
         goalUpdate.current = false;
 
@@ -913,40 +922,40 @@ export function Pong() {
     leftPaddlePositionZ,
     setLeftPaddlePositionZ,
   }) => {
-    const { mouse } = useThree()
+    const { mouse } = useThree();
     let lastEventTime = 0;
     const throttleTime = 100;
 
     useFrame(() => {
       const currentTime = Date.now();
 
-       if (currentTime - lastEventTime > throttleTime) {
+      if (currentTime - lastEventTime > throttleTime) {
         lastEventTime = currentTime;
-        let newPosition
+        let newPosition;
         if (hostStatus) {
-          if (cameraMode === 'perspective') {
-            newPosition = mouse.x * (WORLD_WIDTH / 2)
+          if (cameraMode === "perspective") {
+            newPosition = mouse.x * (WORLD_WIDTH / 2);
           } else {
-            newPosition = -mouse.y * (WORLD_HEIGHT / 2)
+            newPosition = -mouse.y * (WORLD_HEIGHT / 2);
           }
         } else {
-          newPosition = leftPaddlePositionZ
+          newPosition = leftPaddlePositionZ;
         }
 
-        newPosition = lerp(leftPaddlePositionZ, newPosition, lerpFactor)
+        newPosition = lerp(leftPaddlePositionZ, newPosition, lerpFactor);
 
-        const paddleTopEdge = newPosition + paddleDepth / 2
-        const paddleBottomEdge = newPosition - paddleDepth / 2
+        const paddleTopEdge = newPosition + paddleDepth / 2;
+        const paddleBottomEdge = newPosition - paddleDepth / 2;
 
         if (paddleTopEdge > WORLD_HEIGHT / 2) {
-          newPosition = WORLD_HEIGHT / 2 - paddleDepth / 2
+          newPosition = WORLD_HEIGHT / 2 - paddleDepth / 2;
         } else if (paddleBottomEdge < -WORLD_HEIGHT / 2) {
-          newPosition = -WORLD_HEIGHT / 2 + paddleDepth / 2
+          newPosition = -WORLD_HEIGHT / 2 + paddleDepth / 2;
         }
 
-        setLeftPaddlePositionZ(newPosition)
+        setLeftPaddlePositionZ(newPosition);
       }
-    })
+    });
 
     return (
       <Box
@@ -999,7 +1008,7 @@ export function Pong() {
       });
     } else {
       // mouvement du right (user2) paddle a la souris.
-      const { mouse } = useThree()
+      const { mouse } = useThree();
       let lastEventTime = 0;
       const throttleTime = 100;
 
@@ -1008,31 +1017,31 @@ export function Pong() {
 
         if (currentTime - lastEventTime > throttleTime) {
           lastEventTime = currentTime;
-          let newPosition
+          let newPosition;
           if (!hostStatus) {
-            if (cameraMode === 'perspective') {
-              newPosition = -mouse.x * (WORLD_WIDTH / 2)
+            if (cameraMode === "perspective") {
+              newPosition = -mouse.x * (WORLD_WIDTH / 2);
             } else {
-              newPosition = -mouse.y * (WORLD_HEIGHT / 2)
+              newPosition = -mouse.y * (WORLD_HEIGHT / 2);
             }
           } else {
-            newPosition = rightPaddlePositionZ
+            newPosition = rightPaddlePositionZ;
           }
 
-          newPosition = lerp(rightPaddlePositionZ, newPosition, lerpFactor)
+          newPosition = lerp(rightPaddlePositionZ, newPosition, lerpFactor);
 
-          const paddleTopEdge = newPosition + paddleDepth / 2
-          const paddleBottomEdge = newPosition - paddleDepth / 2
+          const paddleTopEdge = newPosition + paddleDepth / 2;
+          const paddleBottomEdge = newPosition - paddleDepth / 2;
 
           if (paddleTopEdge > WORLD_HEIGHT / 2) {
-            newPosition = WORLD_HEIGHT / 2 - paddleDepth / 2
+            newPosition = WORLD_HEIGHT / 2 - paddleDepth / 2;
           } else if (paddleBottomEdge < -WORLD_HEIGHT / 2) {
-            newPosition = -WORLD_HEIGHT / 2 + paddleDepth / 2
+            newPosition = -WORLD_HEIGHT / 2 + paddleDepth / 2;
           }
 
-          setRightPaddlePositionZ(newPosition)
+          setRightPaddlePositionZ(newPosition);
         }
-      })
+      });
     }
 
     return (

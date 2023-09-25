@@ -1,9 +1,6 @@
 import { Box } from "@mui/material";
 import { useAuth } from "../contexts/AuthContext";
 
-// Idea: Welcome page containing a little summary of the project,
-// and any extra thing we'd like to add.
-
 export function Home() {
   const { user } = useAuth();
 
@@ -33,7 +30,8 @@ export function Home() {
               Hey there, {user.username}. :) <br /> Welcome to our
               ft_transcendence!
               <br />
-              Hope you have some fun exploring around.
+              Hope you have some fun exploring around. <br />
+              To edit your user details, go to your profile page. ;)
             </div>
             <div className="sign">
               <p>
