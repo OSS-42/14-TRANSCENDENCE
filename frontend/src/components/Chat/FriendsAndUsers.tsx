@@ -85,7 +85,7 @@ export function FriendsAndUsers({ socket }: someProp) {
       socket.off("updateConnectedUsers");
       socket.off("invitation");
     };
-  }, []);
+  }, [connectedUsers]);
 
   function acceptGame() {
     if (gameId) {

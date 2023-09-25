@@ -69,6 +69,7 @@ function ChatBar({
               />
               <div>
                 <p>{user.username}</p>
+                {user.id === meId &&   <span style={{ color: "#65bf76" }}>online</span>}
               </div>
               <div
                 style={{
