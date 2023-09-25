@@ -70,15 +70,17 @@ export class AuthService {
         const data = await response.json();
 
         //Extraction des donnees vers la base de donnees--> login  Si l'utilisateur n'existe pas.  On va utiliser le email a place
-        const username = data.login;
-        const email = data.email;
-        const avatar = data.image.versions.small;
+        const username: string = data.login;
+        const email :string= data.email;
+        const avatar :string = data.image.versions.small;
+        
         let user = await this.prisma.utilisateur.findUnique({
           where: { email },
         });
         const isUsernameTaken = await this.isUsernameTaken(username);
        
         if (!user) {
+          
           const { v4: uuidv4 } = require('uuid');
           const customPrefix = 'poulet';
           const uniqueId = customPrefix + '-' + uuidv4();
@@ -90,11 +92,27 @@ export class AuthService {
               secretId: uniqueId
             },
           });
+          if (isUsernameTaken) {
+            const { v4: uuidv4 } = require('uuid');
+            const customPrefix = user.username;
+            const uniqueId = customPrefix + '-' + uuidv4().substring(0, 8);
+            await this.prisma.utilisateur.update({
+              where: { email },
+              data: {
+                username: uniqueId
+                ,
+              },
+            });
+  
+          } 
         } 
         if (this.connectedUsersService.connectedUsers.has(user.id)) {
           (await UserToken).access_token = "poulet"
           return (UserToken)
         }
+
+
+
         UserToken = this.signToken(user.id, user.email);
         this.createRefreshToken(user.id, user.secretId)
         if (isUsernameTaken) {

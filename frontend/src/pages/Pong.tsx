@@ -101,7 +101,7 @@ export function Pong() {
   const [rightScore, setRightScore] = React.useState(0);
   const [winner, setWinner] = React.useState<string | null>(null);
 
-  const [gameMode, setGameMode] = React.useState<0 | 1 | 2 | 3 | 4>(0);
+  const [gameMode, setGameMode] = React.useState<0 | 1 | 2 | 3 | 4 | 5>(0);
   const [showButtons, setShowButtons] = React.useState(true);
   const isGameOver = useRef(false);
 
@@ -145,7 +145,7 @@ export function Pong() {
   const [clientName, setClientName] = React.useState<string>("");
   const [playerName, setPlayerName] = React.useState<string>("");
 
-  const [gameInfos] = useState<PlayerJoined>();
+  // const [gameInfos] = useState<PlayerJoined>();
  
   const [waitingForPlayer, setWaitingForPlayer] = React.useState(false);
   const [gameId, setGameId] = React.useState<string>("");
@@ -190,6 +190,7 @@ export function Pong() {
         setInitialSetupComplete(true);
         console.log('🏓   setup completed. GAME ID: ', gameId);
       }
+
     } else {
       return () => {}; // No-op function when socket is null
     }
@@ -204,24 +205,10 @@ export function Pong() {
     };
   }, [socket, isConnected, gameId, oppDisconnected]);
 
-
-  useEffect(() => {
-    if (gameIdFromUrl && socket && playerName) {
-      const newGM = 6;
-      
-      setWaitingForPlayer(true);
-      setGameLaunched(true);
-      setCameraMode('orthographic');
-      setGameMode(newGM);
-      setShowButtons(false);
-      socket.emit('challengeGame', { playerName, newGM, gameIdFromUrl });
-    }
-}, [isConnected]);
-
   useEffect(() => {
     if (socket && initialSetupComplete) {
       if (hostStatus) {
-        console.log("🏓🏓   emitting info as host, ", gameId);
+        // console.log("🏓🏓   emitting info as host, ", gameId);
         socket.volatile.emit("hostGameParameters", {
           gameId,
           ballPosition,
@@ -232,7 +219,7 @@ export function Pong() {
           rightScore,
         });
       } else {
-        console.log("🏓🏓   emitting info as invite, ", gameId);
+        // console.log("🏓🏓   emitting info as invite, ", gameId);
         socket.volatile.emit("clientGameParameters", {
           gameId,
           rightPaddlePositionZ,
@@ -280,6 +267,18 @@ export function Pong() {
     rightPaddlePositionZ,
     powerupPosition,
   ]);
+
+  // useEffect(() => {
+  //   const urlParams = new URLSearchParams(window.location.search);
+  //   const mode = urlParams.get("gameIdFromUrl");
+  //   console.log(mode);
+    
+  //   if (mode != "") {
+  //     handleInvitationMode();
+  //   } else {
+  //     return ;
+  //   }
+  // }, [isConnected]);
 
   useEffect (() => {
     if (socket && gameId) {
@@ -342,6 +341,39 @@ export function Pong() {
   //   }
   // };
 
+  useEffect(() => {
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const mode = urlParams.get("gameIdFromUrl");
+      console.log("MODE: ", mode);
+      if (mode && isConnected) {
+        handleInvitationMode();
+      } else {
+        setIsPaused(true);
+      }
+    
+  }, [isConnected])
+  
+  const handleInvitationMode = (): void => {
+    console.log("🏓   classic 1 vs 1 sur INVITATION");
+    try {
+      const newGM = 5;
+      console.log(socket);
+      if (socket) {
+        socket.emit("challengeGame", { playerName, newGM, gameIdFromUrl });
+        console.log("coucou");
+        setWaitingForPlayer(true);
+        setGameLaunched(true);
+        setCameraMode("orthographic");
+        setGameMode(newGM);
+        setShowButtons(false);
+      }
+    } catch {
+      console.log("🏓   we catched an issue. GM5");
+      return;
+    }
+  };
+
   const handleClassicModeMulti = (): void => {
     console.log("🏓   classic 1 vs 1");
     try {
@@ -396,28 +428,28 @@ export function Pong() {
   // };
 
   //============== USER NAMES ==============
-  function setNames(
-    playerName: string,
-    newHostStatus: boolean,
-    newGM: number,
-    setHostname: Function,
-    setClientName: Function
-  ) {
-    if (gameInfos) {
-      if (newGM === 1 || newGM === 2) {
-        setHostname(playerName);
-        setClientName("Computer");
-      } else {
-        if (newHostStatus === true) {
-          setHostname(playerName);
-          setClientName(gameInfos.clientName);
-        } else {
-          setHostname(gameInfos.clientName);
-          setClientName(playerName);
-        }
-      }
-    }
-  }
+  // function setNames(
+  //   playerName: string,
+  //   newHostStatus: boolean,
+  //   newGM: number,
+  //   setHostname: Function,
+  //   setClientName: Function
+  // ) {
+  //   if (gameInfos) {
+  //     if (newGM === 1 || newGM === 2) {
+  //       setHostname(playerName);
+  //       setClientName("Computer");
+  //     } else {
+  //       if (newHostStatus === true) {
+  //         setHostname(playerName);
+  //         setClientName(gameInfos.clientName);
+  //       } else {
+  //         setHostname(gameInfos.clientName);
+  //         setClientName(playerName);
+  //       }
+  //     }
+  //   }
+  // }
 
   //============== SCENE SETTINGS ==============
   // s'assure que le canvas aura comme maximum toujours 800x600
@@ -501,6 +533,27 @@ export function Pong() {
       }, 5000);
     }
   }, [oppDisconnected]);
+
+  //-------------- Alt Tab management ----------------
+  React.useEffect(() => {
+    function handleVisibilityChange() {
+      if (document.hidden) {
+        if (socket) {
+          console.log("Tab is now inactive. Disconnecting.");
+          socket.emit("disconnected", {
+            gameId: gameId });
+        }
+      }
+    }
+    
+    // Listen for visibility changes
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+  
+    // Cleanup
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [socket]);
 
   // offsite pour maintenir les paddles a 0.5 unit de leur bordure respective lorsqu'il y a resize
   const distanceFromCenter: number = 0.024 * dimension.width;
@@ -671,15 +724,14 @@ export function Pong() {
         gameId,
         isHostWinner,
         winnerText,
-      });
-      if(clientName === user.username){
-        socket.emit("updateHistory", {
         hostname,
         clientName,
-        isHostWinner,
       });
-
-      }
+      // if(clientName === user.username) {
+      //   socket.emit("updateHistory", {
+      //   isHostWinner,
+      // });
+      // }
     };
   }
 
@@ -804,6 +856,14 @@ export function Pong() {
           }
   
           ballVelocity.x = -ballVelocity.x;
+
+          const relativeCollisionPoint = (newZ - hitPaddlePosition.z) / (paddleDepth / 2);
+        const newZVelocity = ballVelocity.z + relativeCollisionPoint * INITIAL_BALL_SPEED;
+
+        // Normalize the velocity to maintain the initial speed
+        const magnitude = Math.sqrt(ballVelocity.x ** 2 + newZVelocity ** 2);
+        ballVelocity.x = (ballVelocity.x / magnitude) * INITIAL_BALL_SPEED;
+        ballVelocity.z = (newZVelocity / magnitude) * INITIAL_BALL_SPEED;
   
           newX =
             hitPaddlePosition.x +

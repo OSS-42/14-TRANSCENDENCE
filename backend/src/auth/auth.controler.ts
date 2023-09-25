@@ -35,7 +35,7 @@ export class AuthControler {
     const token_object = await this.authService.getCode42(code);
     const host = this.config.get("HOST");
     if (token_object.access_token === "poulet")
-      return  res.redirect(`${host}/error`);
+      return  res.redirect(`${host}/oops`);
     const access_token: string = token_object.access_token;
 
     res.cookie("jwt_token", access_token, { httpOnly: false, secure: false });

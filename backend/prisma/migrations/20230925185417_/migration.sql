@@ -7,8 +7,10 @@ CREATE TABLE "Utilisateur" (
     "avatar" TEXT,
     "email" TEXT NOT NULL,
     "twoFactorSecret" TEXT,
+    "is2FAValidated" BOOLEAN NOT NULL DEFAULT false,
     "secretId" TEXT NOT NULL,
     "refreshToken" TEXT,
+    "is2FA" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "Utilisateur_pkey" PRIMARY KEY ("id")
 );
