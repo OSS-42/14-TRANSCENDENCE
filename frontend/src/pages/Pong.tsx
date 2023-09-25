@@ -834,6 +834,14 @@ export function Pong() {
           }
   
           ballVelocity.x = -ballVelocity.x;
+
+          const relativeCollisionPoint = (newZ - hitPaddlePosition.z) / (paddleDepth / 2);
+        const newZVelocity = ballVelocity.z + relativeCollisionPoint * INITIAL_BALL_SPEED;
+
+        // Normalize the velocity to maintain the initial speed
+        const magnitude = Math.sqrt(ballVelocity.x ** 2 + newZVelocity ** 2);
+        ballVelocity.x = (ballVelocity.x / magnitude) * INITIAL_BALL_SPEED;
+        ballVelocity.z = (newZVelocity / magnitude) * INITIAL_BALL_SPEED;
   
           newX =
             hitPaddlePosition.x +
