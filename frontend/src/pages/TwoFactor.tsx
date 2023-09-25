@@ -71,9 +71,9 @@ export function TwoFactor() {
         id="2FA"
         name="2FA"
         required
-        minLength={6}
-        maxLength={6}
-        size={10}
+        minLength="6"
+        maxLength="6"
+        size="10"
         value={inputValue}
         onChange={handleChange}
       />

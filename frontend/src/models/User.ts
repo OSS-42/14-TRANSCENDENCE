@@ -6,8 +6,7 @@ interface User {
   username: string;
   avatar?: string;
   email: string;
-  is2FA: boolean;
-  is2FAValidated: boolean;
+  twoFactorSecret?: string;
 }
 
 interface Friendship {
