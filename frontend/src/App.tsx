@@ -11,7 +11,6 @@ import {
   UserProfile,
   Welcome,
   Error,
-  Oops,
 } from "./pages";
 import { useEffect, useState } from "react";
 import { TwoFactor } from "./pages/TwoFactor";
