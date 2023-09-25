@@ -11,7 +11,6 @@ import Cookies from "js-cookie";
 import { getCookies, bearerAuthorization } from "../utils";
 import { User } from "../models/User";
 import { useRoutes } from "./RoutesContext";
-import { TwoFactor } from "../pages/TwoFactor";
 import { twoFactorValidationStatus } from "../api/requests";
 
 // Define constants
@@ -88,10 +87,6 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
     setLoading(false);
   };
 
-  // const redirectToOops = () => {
-  //   navigateTo("/oops");
-  // };
-
   const redirectToHome = () => {
     navigateTo("/");
   };
@@ -99,22 +94,6 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
   const redirectToWelcome = () => {
     navigateTo("/welcome");
   };
-
-  // const showError = (message: string) => {
-  //   // You can implement how you want to show the error message to the user.
-  //   // For example, you might display it in a modal or a notification.
-  //   alert(message);
-  // };
-
-  // const isLoggedIn = (jwtToken: string | undefined) => {
-  //   // You can customize this logic based on how your JWT token is stored.
-  //   return !!jwtToken;
-  // };
-
-  // const setAuthCookie = (jwtToken: string) => {
-  //   // Use your cookie library (e.g., js-cookie) to set the JWT token as a cookie.
-  //   Cookies.set(JWT_TOKEN_COOKIE, jwtToken);
-  // };
 
   useEffect(() => {
     fetchUserData();

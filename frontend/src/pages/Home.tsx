@@ -52,7 +52,7 @@ export function Home() {
               </p>
             </div>
             <div className="chicken-dance">
-              <img src="../public/chickenhome.gif" />
+              <img src="/chickenhome.gif" />
             </div>
           </>
         ) : (

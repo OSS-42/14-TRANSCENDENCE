@@ -11,12 +11,16 @@ export function Error() {
         borderRadius: "5px",
         margin: "10px",
         padding: "15px",
-        height: "92.5vh",
+        height: "25vh",
         textAlign: "center",
+        marginTop: "3rem",
       }}
     >
       <strong>Error!</strong> <br />
-      <br />I not sure where you're trying to go, but that page doesn't exist.
+      <br />
+      I not sure where you're trying to go, but that page doesn't exist.
+      <br />
+      Make sure you're not logged in somewhere else. ;)
     </Box>
   );
 }

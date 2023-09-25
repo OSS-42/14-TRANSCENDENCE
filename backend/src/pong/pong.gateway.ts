@@ -212,12 +212,12 @@ export class PongGateway {
 
   //     this.gameIds.set(clientsMap, gameId);
       
-  //     console.log('🏓   player1: ', player1.id);
-  //     console.log('🏓   player1 username: ', this.playerNames.get(player1.id));
+      // console.log('🏓   player1: ', player1.id);
+      // console.log('🏓   player1 username: ', this.playerNames.get(player1.id));
   //     const hostName = this.playerNames.get(player1.id);
   //     const clientName = this.playerNames.get(player2.id);
-  //     console.log('🏓   player2: ', player2.id);
-  //     console.log('🏓   player2 username: ', this.playerNames.get(player2.id));
+      // console.log('🏓   player2: ', player2.id);
+      // console.log('🏓   player2 username: ', this.playerNames.get(player2.id));
   
   //     player1.join(gameId);
   //     player2.join(gameId);
@@ -225,7 +225,7 @@ export class PongGateway {
   //     // Emit an event to both clients to indicate that the match is ready to start
   //     player1.emit('playerJoined', { gameId: gameId, hostStatus: true, hostName: hostName, clientName: clientName });
   //     player2.emit('playerJoined', { gameId: gameId, hostStatus: false, hostName: hostName, clientName: clientName });
-  //     console.log(`🏓   Game ${gameId} started between ${hostName} and ${clientName}`);
+      // console.log(`🏓   Game ${gameId} started between ${hostName} and ${clientName}`);
   //   }
   // }
 
@@ -291,17 +291,11 @@ export class PongGateway {
       this.gameIds.delete(clientsMapToTerminate);
     }
   }
-  
-  @SubscribeMessage('updateHistory')
-  updateHistory(client: Socket, payload: {hostname:string, clientName:string, isHostWinner:boolean}){
-    if(!payload.isHostWinner){
-      this.pongService.updateHistory(payload.clientName, payload.hostname);
-    }
-    else{
-      this.pongService.updateHistory(payload.hostname, payload.clientName);
-    }
+
+  // @SubscribeMessage('updateHistory')
+  // updateHistory(client: Socket, payload: {hostname:string, clientName:string, isHostWinner:boolean}){
     
 
-  }
+  // }
   
 }

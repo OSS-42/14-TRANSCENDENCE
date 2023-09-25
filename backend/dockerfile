@@ -5,6 +5,8 @@ COPY . /app/backend/
 
 RUN npm install
 
+RUN rm -rf backend/prisma/migrations 
+
 CMD ["npm", "run", "start:dev"]
 
-#CMD ["npx", "prisma", "migrate", "dev"]
+# ENTRYPOINT ["npx", "prisma", "migrate", "dev"]

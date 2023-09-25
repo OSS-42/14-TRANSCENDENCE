@@ -27,7 +27,7 @@ export function Chat({ socket }: ChatProps) {
   };
 
   const [messages, setMessages] = useState<ChatMessage[]>(() => {
-    const localValues = sessionStorage.getItem("chatMessages");
+    const localValues = localStorage.getItem("chatMessages");
     if (localValues == null) return [];
     return JSON.parse(localValues);
   });
@@ -35,7 +35,7 @@ export function Chat({ socket }: ChatProps) {
   //QUand la variable messages change, on l<enregistre dans le localStorage
   useEffect(() => {
     const messagesJSON = JSON.stringify(messages);
-    sessionStorage.setItem("chatMessages", messagesJSON);
+    localStorage.setItem("chatMessages", messagesJSON);
   }, [messages]);
 
   useEffect(() => {
@@ -48,7 +48,7 @@ export function Chat({ socket }: ChatProps) {
     };
   }, [socket]);
 
-  if (!socket) {
+  if (!socket || socket === undefined) {
     return <div>Loading...</div>; // or any other loading indicator or error message
   }
 

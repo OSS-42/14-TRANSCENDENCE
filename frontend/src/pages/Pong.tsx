@@ -157,6 +157,20 @@ export function Pong() {
 
   const [initialSetupComplete, setInitialSetupComplete] = useState(false);
 
+ 
+  useEffect( () => {
+    console.log("challage game id", gameIdFromUrl);
+    if (gameIdFromUrl && socket){
+      const newGM = 3
+      console.log("challage game id", gameIdFromUrl);
+      socket.emit('challengeGame', { playerName, newGM, gameIdFromUrl  })
+      setWaitingForPlayer(true)
+      setGameLaunched(true)
+      setCameraMode('orthographic')
+      setGameMode(newGM)
+      setShowButtons(false)
+    }
+}, [gameIdFromUrl, socket])
   // Ecoute parler le socket
   useEffect(() => {
     if (socket) {
@@ -206,6 +220,7 @@ export function Pong() {
       }
     };
   }, [socket, isConnected, gameId, oppDisconnected]);
+
 
   useEffect(() => {
     if (socket && initialSetupComplete) {
