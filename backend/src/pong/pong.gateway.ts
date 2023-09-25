@@ -91,6 +91,7 @@ export class PongGateway {
   @SubscribeMessage('challengeGame')
   challengeGame(client: Socket, payload: any) {
 
+    console.log("coucou");
     // Initializing the queue if not existing
     if (!this.gameModeQueue.has(payload.newGM)) {
       this.gameModeQueue.set(payload.newGM, []);
@@ -259,16 +260,14 @@ export class PongGateway {
     this.gameStates.set(gameId, payload);
     this.server.to(gameId).volatile.emit('weHaveAWinner', payload);
     
-    //player1 = host (toujours)
-    // if (payload.isHostWinner) {
-    //   const winnerId = 1;
-    //   const loserId = 2;
-    // } else {
-    //   const winnerId = 1;
-    //   const loserId = 2;
-    // }
-
-  
+    if(!payload.isHostWinner){
+      console.log("Winner (invite): ", payload.clientName, " - Loser: ", payload.hostname);
+      this.pongService.updateHistory(payload.clientName, payload.hostname);
+    }
+    else{
+      console.log("Winner (host): ", payload.hostname, " - Loser: ", payload.clientName);
+      this.pongService.updateHistory(payload.hostname, payload.clientName);
+    }
 
     // cleaning the gameId from the list of gameIds:
     let clientsMapToTerminate: any;
@@ -286,16 +285,11 @@ export class PongGateway {
       this.gameIds.delete(clientsMapToTerminate);
     }
   }
-  @SubscribeMessage('updateHistory')
-  updateHistory(client: Socket, payload: {hostname:string, clientName:string, isHostWinner:boolean}){
-    if(!payload.isHostWinner){
-      this.pongService.updateHistory(payload.clientName, payload.hostname);
-    }
-    else{
-      this.pongService.updateHistory(payload.hostname, payload.clientName);
-    }
+
+  // @SubscribeMessage('updateHistory')
+  // updateHistory(client: Socket, payload: {hostname:string, clientName:string, isHostWinner:boolean}){
     
 
-  }
+  // }
   
 }

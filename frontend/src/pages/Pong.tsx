@@ -145,7 +145,7 @@ export function Pong() {
   const [clientName, setClientName] = React.useState<string>("");
   const [playerName, setPlayerName] = React.useState<string>("");
 
-  const [gameInfos] = useState<PlayerJoined>();
+  // const [gameInfos] = useState<PlayerJoined>();
  
   const [waitingForPlayer, setWaitingForPlayer] = React.useState(false);
   const [gameId, setGameId] = React.useState<string>("");
@@ -190,10 +190,10 @@ export function Pong() {
         setInitialSetupComplete(true);
         console.log('🏓   setup completed. GAME ID: ', gameId);
       }
+
     } else {
       return () => {}; // No-op function when socket is null
     }
-    
 
     return () => {
       if (socket) {
@@ -203,20 +203,6 @@ export function Pong() {
       }
     };
   }, [socket, isConnected, gameId, oppDisconnected]);
-
-
-  useEffect(() => {
-    if (gameIdFromUrl && socket && playerName) {
-      const newGM = 6;
-      
-      setWaitingForPlayer(true);
-      setGameLaunched(true);
-      setCameraMode('orthographic');
-      setGameMode(newGM);
-      setShowButtons(false);
-      socket.emit('challengeGame', { playerName, newGM, gameIdFromUrl });
-    }
-}, [isConnected]);
 
   useEffect(() => {
     if (socket && initialSetupComplete) {
@@ -281,6 +267,18 @@ export function Pong() {
     powerupPosition,
   ]);
 
+  // useEffect(() => {
+  //   const urlParams = new URLSearchParams(window.location.search);
+  //   const mode = urlParams.get("gameIdFromUrl");
+  //   console.log(mode);
+    
+  //   if (mode != "") {
+  //     handleInvitationMode();
+  //   } else {
+  //     return ;
+  //   }
+  // }, [isConnected]);
+
   useEffect (() => {
     if (socket && gameId) {
       // socket.on("goalScored", (data: Goal) => {
@@ -341,6 +339,39 @@ export function Pong() {
   //     return;
   //   }
   // };
+
+  useEffect(() => {
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const mode = urlParams.get("gameIdFromUrl");
+      console.log("MODE: ", mode);
+      if (mode && isConnected) {
+        handleInvitationMode();
+      } else {
+        setIsPaused(true);
+      }
+    
+  }, [isConnected])
+  
+  const handleInvitationMode = (): void => {
+    console.log("🏓   classic 1 vs 1 sur INVITATION");
+    try {
+      const newGM = 5;
+      console.log(socket);
+      if (socket) {
+        socket.emit("challengeGame", { playerName, newGM, gameIdFromUrl });
+        console.log("coucou");
+        setWaitingForPlayer(true);
+        setGameLaunched(true);
+        setCameraMode("orthographic");
+        setGameMode(newGM);
+        setShowButtons(false);
+      }
+    } catch {
+      console.log("🏓   we catched an issue. GM5");
+      return;
+    }
+  };
 
   const handleClassicModeMulti = (): void => {
     console.log("🏓   classic 1 vs 1");
@@ -671,15 +702,14 @@ export function Pong() {
         gameId,
         isHostWinner,
         winnerText,
-      });
-      if(clientName === user.username){
-        socket.emit("updateHistory", {
         hostname,
         clientName,
-        isHostWinner,
       });
-
-      }
+      // if(clientName === user.username) {
+      //   socket.emit("updateHistory", {
+      //   isHostWinner,
+      // });
+      // }
     };
   }
 
