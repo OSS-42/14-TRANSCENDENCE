@@ -33,7 +33,7 @@ export function Name({ user, handleUpdateUserName }: NameProps) {
   function UserNameCharacters(username: string) {
     for (let i = 0; i < username.length; i++) {
       const char = username[i];
-      console.log("Printing:", username[i]);
+      // console.log("Printing:", username[i]);
       if (!/[a-zA-Z0-9]/.test(char)) {
         return false;
       }

@@ -8,7 +8,7 @@ import UserDetails from "./UserDetails";
 
 import { fetchFriendsList, fetchUsersList } from "../../api/requests";
 import { useRoutes } from "../../contexts/RoutesContext";
-import { Box } from "@mui/material";
+import { Box, Button } from "@mui/material";
 interface UpdateConnectedUsersData {
   connectedUserIds: number[];
   connectedUserIdsPong: number[];
@@ -51,13 +51,12 @@ export function FriendsAndUsers({ socket }: someProp) {
 
   useEffect(() => {
     socket.on("updateConnectedUsers", (data: UpdateConnectedUsersData) => {
-  
-      const { connectedUserIds, connectedUserIdsPong } = data; 
+      const { connectedUserIds, connectedUserIdsPong } = data;
       setConnectedUsers(connectedUserIds);
-  
+
       setConnectedToPong(connectedUserIdsPong);
     });
-    
+
     socket.on("invitation", (payload: any) => {
       setGameId(payload.roomId);
       setChallengerUsername(payload.challengerUsername);
@@ -161,15 +160,26 @@ export function FriendsAndUsers({ socket }: someProp) {
         <Box
           component="div"
           display="flex"
+          height="50vh"
           flexDirection="column"
           justifyContent="center"
           alignItems="center"
+          lineHeight="2rem"
         >
           <p>You have been challenged by {challengerUsername}.</p>
           <p>Do you accept?</p>
-          <p>Time left : {timer} seconds</p>
-          <button onClick={acceptGame}>Fight</button>
-          <button onClick={closeInvitationModal}>Decline</button>
+          <p>Time left : {timer} seconds</p> <br />
+          <Button color="secondary" variant="contained" onClick={acceptGame}>
+            Fight
+          </Button>{" "}
+          <br />
+          <Button
+            color="secondary"
+            variant="contained"
+            onClick={closeInvitationModal}
+          >
+            Decline
+          </Button>
         </Box>
       </ReactModal>
     </>
