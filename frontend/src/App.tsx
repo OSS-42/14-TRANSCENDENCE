@@ -10,8 +10,7 @@ import {
   MyProfile,
   UserProfile,
   Welcome,
-  Error,
-	Oops,
+  Error
 } from "./pages";
 import { useEffect, useState } from "react";
 

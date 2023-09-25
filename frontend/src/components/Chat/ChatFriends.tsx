@@ -3,6 +3,7 @@ import { Box, Button } from "@mui/material";
 import { User } from "../../models/User";
 import { destroyFriend, fetchFriendsList } from "../../api/requests";
 import PersonRemoveIcon from "@mui/icons-material/PersonRemove";
+import SportsCricketSharpIcon from "@mui/icons-material/SportsCricketSharp";
 
 type ChatFriendsProps = {
   socket: Socket;
@@ -20,7 +21,7 @@ const ChatFriends = ({
   connectedUsers,
   handleUserClick,
   friendsList,
-  connectedToPong
+  connectedToPong,
 }: ChatFriendsProps) => {
   async function removeFriend(id: number) {
     await destroyFriend(id);
@@ -63,9 +64,15 @@ const ChatFriends = ({
                   <span style={{ color: "#65bf76" }}>online</span>
                 )}
                 {connectedToPong?.includes(user.id) && (
-                 <span style={{ color: "#65bf76", textAlign: "center", width: "100%", marginLeft: "1rem"}}>
-                    in game {/* Icône ou texte d'indication */}
-               </span>
+                  //    <span style={{ color: "#65bf76", textAlign: "center", width: "100%", marginLeft: "1rem"}}>
+                  //       in game {/* Icône ou texte d'indication */}
+                  //  </span>
+                  <Box
+                    component="div"
+                    sx={{ color: "secondary", fontSize: "small" }}
+                  >
+                    <SportsCricketSharpIcon />
+                  </Box>
                 )}
               </div>
               <div
