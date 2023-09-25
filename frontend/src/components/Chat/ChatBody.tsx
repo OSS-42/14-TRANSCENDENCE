@@ -37,7 +37,7 @@ const ChatBody = ({ messages }: ChatBodyProps) => {
 
   useEffect(() => {
     fetchUsersData();
-  }, [messages, banList]);
+  }, [messages]);
 
   return (
     <>
