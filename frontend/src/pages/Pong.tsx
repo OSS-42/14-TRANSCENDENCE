@@ -194,6 +194,7 @@ export function Pong() {
     } else {
       return () => {}; // No-op function when socket is null
     }
+    
 
     return () => {
       if (socket) {

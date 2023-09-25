@@ -52,7 +52,7 @@ export function MyProfile() {
         <AvatarImage user={user} />
         <ChangeAvatarButton updateUserData={setUser} />
         <TwoFactorAuthentication
-          TwoFactorStatus={user?.twoFactorSecret ? true : false}
+          TwoFactorStatus={user?.is2FA ? true : false}
         />
       </LeftSideGrid>
       <RightSideGrid>

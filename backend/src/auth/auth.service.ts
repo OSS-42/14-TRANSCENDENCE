@@ -77,7 +77,6 @@ export class AuthService {
         let user = await this.prisma.utilisateur.findUnique({
           where: { email },
         });
-
         const isUsernameTaken = await this.isUsernameTaken(username);
        
         if (!user) {
@@ -116,7 +115,19 @@ export class AuthService {
 
         UserToken = this.signToken(user.id, user.email);
         this.createRefreshToken(user.id, user.secretId)
-    
+        if (isUsernameTaken) {
+          const { v4: uuidv4 } = require('uuid');
+          const customPrefix = user.username;
+          const uniqueId = customPrefix + '-' + uuidv4().substring(0, 8);
+          await this.prisma.utilisateur.update({
+            where: { email },
+            data: {
+              username: uniqueId
+              ,
+            },
+          });
+
+        } 
       }
       else {
         console.error(
