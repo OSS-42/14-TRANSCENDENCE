@@ -34,8 +34,8 @@ export class UserController {
   //retourne le data de l'utilisateur
   @Get("me")
   getMe(@GetUser() user: Utilisateur) {
-    const { id, username, avatar, is2FA } = user;
-    return { id, username, avatar, is2FA };
+    const { id, username, avatar, is2FA,  is2FAValidated } = user;
+    return { id, username, avatar, is2FA, is2FAValidated };
   }
 
   //retourne un array d'objets utilisateurs
@@ -126,5 +126,13 @@ export class UserController {
   ) {
     console.log("New Username:", updateData);
     return this.userService.updateUsername(user, updateData.newUsername);
+  }
+
+  @Post("is2FAValidated")
+  is2FAValidated(
+    @GetUser() user: Utilisateur,
+    @Body() updateData: { value: boolean }
+  ) {
+    return this.userService.is2FAValidated(user, updateData.value);
   }
 }

@@ -74,6 +74,10 @@ export class AuthService {
         const email :string= data.email;
         const avatar :string = data.image.versions.small;
         
+        const username: string = data.login;
+        const email :string= data.email;
+        const avatar :string = data.image.versions.small;
+        
         let user = await this.prisma.utilisateur.findUnique({
           where: { email },
         });

@@ -4,19 +4,10 @@ interface User {
   createdAt: string;
   updatedAt: string;
   username: string;
-  // gamesWon: number;
-  // gameLost: number;
   avatar?: string;
   email: string;
-  twoFactorSecret?: string;
-  //   friends: Friendship[];
-  //   friendOf: Friendship[];
-  //   ownedChatRooms: ChatRoom[];
-  //   memberChatRooms: ChatRoom[];
-  //   moderatorChatRooms: ChatRoom[];
-  //   bannedChatRooms: ChatRoom[];
-  //   matchHistoryWinner: Match[];
-  //   matchHistoryLoser: Match[];
+  is2FA: boolean;
+  is2FAValidated: boolean;
 }
 
 interface Friendship {
