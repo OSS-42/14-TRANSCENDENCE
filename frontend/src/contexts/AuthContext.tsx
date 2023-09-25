@@ -11,7 +11,6 @@ import Cookies from "js-cookie";
 import { getCookies, bearerAuthorization } from "../utils";
 import { User } from "../models/User";
 import { useRoutes } from "./RoutesContext";
-import { TwoFactor } from "../pages/TwoFactor";
 import { twoFactorValidationStatus } from "../api/requests";
 
 // Define constants

@@ -5,10 +5,9 @@ import App from './App'
 import axios from 'axios';
 import theme from './styles/theme'
 import { ThemeProvider } from '@mui/material/styles'
-import { AuthProvider, useAuth } from './contexts/AuthContext'
+import { AuthProvider } from './contexts/AuthContext'
 import { RoutesProvider } from './contexts/RoutesContext'
 import { BrowserRouter as Router } from 'react-router-dom'
-import { TwoFactor } from './pages/TwoFactor'
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
 
 const api = axios.create({
