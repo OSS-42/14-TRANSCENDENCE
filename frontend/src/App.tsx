@@ -48,7 +48,7 @@ function App() {
   return (
     <>
       <>
-        {(user && user.is2FAValidated) || (user && !user.twoFactorSecret) ? (
+        {(user && user.is2FAValidated) || (user && !user.is2FA) ? (
           <Header />
         ) : null}
         <Routes>

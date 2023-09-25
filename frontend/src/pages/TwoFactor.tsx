@@ -14,6 +14,7 @@ export function TwoFactor() {
 
   async function handleTwo() {
     const newUser = await twoFactorValidationStatus(true);
+    console.log("Value of newUser:", newUser);
     setUser(newUser);
   }
 
