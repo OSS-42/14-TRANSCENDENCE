@@ -17,7 +17,10 @@ export function Error() {
       }}
     >
       <strong>Error!</strong> <br />
-      <br />I not sure where you're trying to go, but that page doesn't exist.
+      <br />
+      I not sure where you're trying to go, but that page doesn't exist.
+      <br />
+      Make sure you're not logged in somewhere else. ;)
     </Box>
   );
 }

@@ -5,6 +5,7 @@ import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   build: {
+    outDir: "dist",
     rollupOptions: {
       input: "./src/main.tsx",
     },
@@ -13,7 +14,6 @@ export default defineConfig({
   server: {
     watch: {
       // usePolling: true,
-			
     },
     host: true, // Here
     strictPort: true,
