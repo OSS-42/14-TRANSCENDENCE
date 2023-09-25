@@ -18,8 +18,6 @@ import { useAuth } from "../contexts/AuthContext";
 // import for websocket
 import socketIO from "socket.io-client";
 
-//import for URL params
-import { useLocation } from 'react-router-dom';
 
 //============== INFOS QUI TRANSITENT ENTRE SOCKETS ==============
 //import for URL params
