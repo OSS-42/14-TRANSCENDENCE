@@ -247,8 +247,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     help = `
       <br>Here are some tips on how to use the chat commands:<br>
       <br><b>JOIN</b><br>
+      &emsp;To join or create a public room:<br/>&emsp;&emsp;<span>/JOIN #roomName password</span><br>
       &emsp;To join or create a room with a password:<br/>&emsp;&emsp;<span>/JOIN #roomName password</span><br>
-      &emsp;To join or create a public room with a password:<br/>&emsp;&emsp;<span>/JOIN #roomName password</span><br>
       &emsp;To create a private room:<br/>&emsp;&emsp;<span>/JOIN #roomName +i</span><br>
       <br><b>BLOCK</b><br>
       &emsp;To block a user:<br/>&emsp;&emsp;<span>/BLOCK username</span><br>
@@ -263,7 +263,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       &emsp;To invite a user to a channel:<br/>&emsp;&emsp;<span>/INVITE username #channelName</span><br>
       <br><b>MUTE</b><br>
       &emsp;To mute a user in a channel:<br/>&emsp;&emsp;<span>/MUTE username #channelName</span><br>
-      <br><b>KICK</b>><br>
+      <br><b>KICK</b><br>
       &emsp;To kick a user from a channel:<br/>&emsp;&emsp;<span>/KICK username #channelName</span><br>
       <br><b>BAN</b><br>
       &emsp;To ban a user from a channel:<br/>&emsp;&emsp;<span>/BAN username #channelName</span><br>
@@ -273,7 +273,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       &emsp;To change channel modes:<br>
       &emsp;Invitation-only: &nbsp;<span>/MODE #channelName invite</span><br>
       &emsp;Public mode: &emsp;&emsp;&emsp;&emsp;<span>/MODE #channelName public</span><br>
-      &emsp;Protected mode: &emsp;<span>/MODE #channelName password</span><br><br>
+      &emsp;Protected mode: &emsp;<span>/MODE #channelName protected password</span><br><br>
     `;
 
 
@@ -344,7 +344,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       if (payload.target.startsWith("#")) {
         // ---------------------- LE  CHANNEL N'EXISTE PAS ----------------------
         if (roomObject === null)
-          notice = `/PRIVMSG: The channel ${payload.target} doesn't exist`
+          notice = `/PRIVMSG: The channel or user ${payload.target} doesn't exist`
         // ---------------------- L'UTILISATEUR N'EST PAS MEMBRE DU CHANNEL ----------------------
         else if (await this.chatService.isUserMemberOfRoom(userId, roomObject.id) === false) //l'utilisateur ne fait pas partie du channel
           notice = `/PRIVMSG: You are not a member of the channel ${payload.target}`
@@ -720,13 +720,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const roomObject = await this.chatService.isRoomExist(payload.channelName)
       // ------------------------ Le room est inconnu ------------------------
       if (roomObject === null)
-      userNotice = `/MODE: The room ${payload.channelName[0]} don't exist`
+      userNotice = `/MODE: The room ${payload.channelName} don't exist`
       // ------------------------ Le flag est inconnu ------------------------
       else if (payload.param[0] !== 'private' && payload.param[0] !== 'public' && payload.param[0] !== 'protected')
       userNotice = `/MODE: Unknown flag ${payload.param[0]}`
       // ------------------------ L'utilisateur n'est pas membre de la room ------------------------
       else if (await this.chatService.isUserMemberOfRoom(userId, roomObject.id) === false)
-      userNotice = `/MODE: The user ${payload.target} is not a member of the room ${payload.channelName[0]}`
+      userNotice = `/MODE: You are not a member of the room ${payload.channelName}`
       // ------------------------ L'utilisateur n'a pas les autorisations (n'est pas owner ou admin du channel) ------------------------
       else if (await this.chatService.isUserOwnerOfChatRoom(userId, roomObject.id) === false 
       && await this.chatService.isUserModeratorOfChatRoom(userId, roomObject.id) === false)
