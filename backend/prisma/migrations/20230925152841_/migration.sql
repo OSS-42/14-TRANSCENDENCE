@@ -9,6 +9,7 @@ CREATE TABLE "Utilisateur" (
     "twoFactorSecret" TEXT,
     "secretId" TEXT NOT NULL,
     "refreshToken" TEXT,
+    "is2FA" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "Utilisateur_pkey" PRIMARY KEY ("id")
 );

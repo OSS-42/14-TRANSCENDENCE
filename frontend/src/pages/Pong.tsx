@@ -207,7 +207,7 @@ export function Pong() {
   useEffect(() => {
     if (socket && initialSetupComplete) {
       if (hostStatus) {
-        console.log("🏓🏓   emitting info as host, ", gameId);
+        // console.log("🏓🏓   emitting info as host, ", gameId);
         socket.volatile.emit("hostGameParameters", {
           gameId,
           ballPosition,
@@ -218,7 +218,7 @@ export function Pong() {
           rightScore,
         });
       } else {
-        console.log("🏓🏓   emitting info as invite, ", gameId);
+        // console.log("🏓🏓   emitting info as invite, ", gameId);
         socket.volatile.emit("clientGameParameters", {
           gameId,
           rightPaddlePositionZ,

@@ -11,6 +11,7 @@ import {
   UserProfile,
   Welcome,
   Error,
+  Oops,
 } from "./pages";
 import { useEffect, useState } from "react";
 
@@ -76,6 +77,7 @@ function App() {
           element={user ? <UserProfile /> : <Navigate to="/" />}
         />
         <Route path="*" element={<Error />} />
+        <Route path="oops" element={<Oops/>} />
       </Routes>
     </>
   );
