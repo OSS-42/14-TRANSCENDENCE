@@ -9,6 +9,10 @@ import UserDetails from "./UserDetails";
 import { fetchFriendsList, fetchUsersList } from "../../api/requests";
 import { useRoutes } from "../../contexts/RoutesContext";
 import { Box } from "@mui/material";
+interface UpdateConnectedUsersData {
+  connectedUserIds: number[];
+  connectedUserIdsPong: number[];
+}
 
 type someProp = {
   socket: Socket;
@@ -18,6 +22,7 @@ export function FriendsAndUsers({ socket }: someProp) {
   const [usersList, setUsersList] = useState<User[]>([]);
   const [friendsList, setFriendsList] = useState<User[]>([]);
   const [connectedUsers, setConnectedUsers] = useState<number[]>([]);
+  const [connectedToPong, setConnectedToPong] = useState<number[]>([]);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [invitationModalIsOpen, setInvitationModalIsOpen] = useState(false);
@@ -45,9 +50,14 @@ export function FriendsAndUsers({ socket }: someProp) {
   }, [invitationModalIsOpen]);
 
   useEffect(() => {
-    socket.on("updateConnectedUsers", (updatedUsers: number[]) => {
-      setConnectedUsers(updatedUsers);
+    socket.on("updateConnectedUsers", (data: UpdateConnectedUsersData) => {
+  
+      const { connectedUserIds, connectedUserIdsPong } = data; 
+      setConnectedUsers(connectedUserIds);
+  
+      setConnectedToPong(connectedUserIdsPong);
     });
+    
     socket.on("invitation", (payload: any) => {
       setGameId(payload.roomId);
       setChallengerUsername(payload.challengerUsername);
@@ -113,6 +123,7 @@ export function FriendsAndUsers({ socket }: someProp) {
         friendsList={friendsList}
         setFriendsList={setFriendsList}
         connectedUsers={connectedUsers}
+        connectedToPong={connectedToPong}
         handleUserClick={handleUserClick}
       />
       <Box component="div" mb={3} />
@@ -138,6 +149,7 @@ export function FriendsAndUsers({ socket }: someProp) {
             selectedUser={selectedUser}
             closeUserDetails={closeUserDetails}
             socket={socket}
+            connectedToPong={connectedToPong}
           />
         )}
       </ReactModal>

@@ -21,6 +21,7 @@ import { Utilisateur } from "@prisma/client";
 import { GetUser } from "src/auth/decorator";
 import { JwtGuard } from "src/auth/guard";
 import { UserService } from "./user.service";
+import { NotFoundException, InternalServerErrorException } from '@nestjs/common';
 import * as fs from "fs";
 
 @Controller("api/users")
@@ -33,8 +34,8 @@ export class UserController {
   //retourne le data de l'utilisateur
   @Get("me")
   getMe(@GetUser() user: Utilisateur) {
-    const { id, username, avatar, secretId } = user;
-    return { id, username, avatar, secretId };
+    const { id, username, avatar, is2FA } = user;
+    return { id, username, avatar, is2FA };
   }
 
   //retourne un array d'objets utilisateurs
@@ -49,10 +50,19 @@ export class UserController {
 
   //retourne le data d'un utilisateur particulier
   @ApiParam({ name: "username", type: String })
-  @Get(":username")
-  getUserInfo(@Param("username") username: string) {
-    return this.userService.getUserInfo(username);
+  @Get(':username')
+  async getUserInfo(@Param('username') username: string) {
+    try {
+      const user = await this.userService.getUserInfo(username);
+      return user;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error; 
+      }
+      throw new InternalServerErrorException('Internal Server Error');
+    }
   }
+
 
   @ApiParam({ name: "id", type: Number })
   @Get("plus/:id")
@@ -77,7 +87,6 @@ export class UserController {
     fs.writeFileSync(imagePath, buffer);
     imagePath = imagePath.substring(1);
     const Url = "/api" + imagePath;
-    // console.log(imagePath);
     return this.userService.updateAvatar(user, Url);
   }
 

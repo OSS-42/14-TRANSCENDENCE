@@ -4,18 +4,24 @@ import { useRoutes } from "../../contexts/RoutesContext";
 import { Socket } from "socket.io-client";
 import { useAuth } from "../../contexts/AuthContext";
 import { useEffect, useState } from "react";
+import { generatePath } from "react-router-dom";
+import { v4 as uuidv4 } from 'uuid';
+
+
 // import { MatchHistory } from "../Profile/MatchHistory";
 
 type UserDetailsProps = {
   selectedUser: User;
   closeUserDetails: () => void;
   socket: Socket;
+  connectedToPong : Number[]
 };
 
 function UserDetails({
   selectedUser,
   closeUserDetails,
   socket,
+  connectedToPong
 }: UserDetailsProps) {
   const { user } = useAuth();
   const { navigateTo } = useRoutes();
@@ -35,7 +41,10 @@ function UserDetails({
   }, []);
 
   function inviteToPlay(id: number) {
-    const roomId = 771237812;
+     
+ 
+    const customPrefix = 'gameIdFromUrl=';
+    const roomId = customPrefix + uuidv4();
 
     // Émettre l'invitation et activer le message "Waiting for player to respond"
     socket.emit("invitation", {
@@ -84,16 +93,26 @@ function UserDetails({
               alt={selectedUser?.username}
               width="250rem"
               height="250rem"
-            />
+              onClick={() => {
+                let path = "";
+                if (user?.username !== selectedUser.username) {
+                  path = generatePath("/profile/:username", {
+                    username: selectedUser?.username,
+                  });
+                } else {
+                  path = "/profile";
+                }
+                navigateTo(path);
+              }}
+            />{" "}
             <Typography variant="h6">{selectedUser?.username}</Typography>
             <Box component="div" mt={2}>
-              {/* Render the MatchHistory component here */}
-              {/* <MatchHistory user={selectedUser}></MatchHistory> */}
             </Box>
             <Box component="div" mt={2}>
               <Button
                 variant="contained"
                 onClick={() => inviteToPlay(selectedUser?.id)}
+                disabled={connectedToPong.includes(selectedUser?.id) || selectedUser?.id === user?.id}
               >
                 Invite to play
               </Button>

@@ -53,6 +53,7 @@ body {
   justify-content: space-around;
   .hero {
     font-size: clamp(3rem, 7vw, 5rem);
+    color: #d9eef3;
   }
 }
 
@@ -100,8 +101,8 @@ img.round-img {
 .message__container {
   margin: 0.5rem;
   font-size: 0.5rem;
-	line-break: auto;
-	word-break: break-word;
+  line-break: auto;
+  word-break: break-word;
   @media (min-width: 600px) {
     font-size: 0.8rem;
   }

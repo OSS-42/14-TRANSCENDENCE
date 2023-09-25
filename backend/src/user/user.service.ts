@@ -12,10 +12,16 @@ export class UserService {
   constructor(private prisma: PrismaService) {}
 
 
-  async getUserInfo(username: string): Promise<Utilisateur> {
+  async getUserInfo(username: string): Promise<{ id: number, username: string, avatar: string, is2FA: boolean }> {
     const user = await this.prisma.utilisateur.findFirst({
       where: {
         username: username,
+      },
+      select: {
+        id: true,
+        username: true,
+        avatar: true,
+        is2FA: true,
       },
     });
 
@@ -25,7 +31,8 @@ export class UserService {
 
     return user;
   }
-  async getUserInfoPlus(id: number): Promise<{ id: number, username: string, avatar: string }> {
+
+  async getUserInfoPlus(id: number): Promise<{ id: number, username: string, avatar: string, is2FA: boolean }> {
     const user = await this.prisma.utilisateur.findFirst({
       where: {
         id: id,
@@ -34,6 +41,7 @@ export class UserService {
         id: true,
         username: true,
         avatar: true,
+        is2FA: true,
       },
     });
   
@@ -46,12 +54,13 @@ export class UserService {
   
   
 
-  async getAllUsers(): Promise<{ id: number, username: string, avatar: string }[]> {
+  async getAllUsers(): Promise<{ id: number, username: string, avatar: string, is2FA: boolean }[]> {
     const usersData = await this.prisma.utilisateur.findMany({
       select: {
         id: true,
         username: true,
         avatar: true,
+        is2FA : true,
       },
     });
   

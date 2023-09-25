@@ -42,6 +42,20 @@ export async function addFriendApi(friendUsername: string): Promise<void> {
   }
 }
 
+export async function fetchUserInfo(username: string): Promise<User | undefined> {
+  try {
+    const response = await axios.get(`${BASE_URL}/users/${username}`, {
+      headers: {
+        Authorization: `Bearer ${jwt_token}`,
+      },
+    });
+		return response.data;
+  } catch (error) {
+    console.error("Error fetching user info:", error);
+    throw error;
+  }
+}
+
 export async function fetchFriendsList(): Promise<User[]> {
   try {
     const response = await axios.get(`${BASE_URL}/users/friendsList`, {
@@ -103,6 +117,7 @@ export async function fetchMatchHistory(id: number): Promise<MatchHistoryData> {
     throw error;
   }
 }
+
 export async function updateAvatarApi(avatar: FormData): Promise<void> {
   try {
     await axios.post(`${BASE_URL}/users/updateAvatar`, avatar, {

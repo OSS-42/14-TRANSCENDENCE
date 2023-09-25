@@ -16,7 +16,7 @@ export class PongController {
             const winnerId = Number(requestBody.winner)
             const loserId = Number(requestBody.loser)
 
-            return this.pongService.updateHistory(winnerId, loserId)
+            //return this.pongService.updateHistory(winnerId, loserId)
         }
     
 
