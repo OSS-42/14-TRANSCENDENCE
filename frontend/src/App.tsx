@@ -10,7 +10,7 @@ import {
   MyProfile,
   UserProfile,
   Welcome,
-  Error
+  Error,
 } from "./pages";
 import { useEffect, useState } from "react";
 import { TwoFactor } from "./pages/TwoFactor";

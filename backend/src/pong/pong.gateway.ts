@@ -176,8 +176,8 @@ export class PongGateway {
       // console.log('🏓   player2: ', player2.id);
       // console.log('🏓   player2 username: ', this.playerNames.get(player2.id));
   
-      player1.join(gameId);
-      player2.join(gameId);
+  //     player1.join(gameId);
+  //     player2.join(gameId);
 
       // Emit an event to both clients to indicate that the match is ready to start
       player1.emit('playerJoined', { gameId: gameId, hostStatus: true, hostName: hostName, clientName: clientName });
