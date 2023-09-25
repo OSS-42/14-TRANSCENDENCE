@@ -47,6 +47,49 @@ export class PongGateway {
   }
 
   handleDisconnect(client: Socket) {
+    let gameIdToTerminate: string;
+    let clientsMapToTerminate: any;
+    
+    //update connectedToPong
+    
+    this.connectedUsersService.deleteBySocketIdPonng(client.id);
+    // Identify the game ID to terminate when disconnect or end of game.
+    
+    for (const [clientsMap, gameId] of this.gameIds.entries()) {
+      if (clientsMap.has(client.id)) {
+        gameIdToTerminate = gameId;
+        clientsMapToTerminate = clientsMap;
+        break;
+      }
+    }
+
+    // Remove client from all game mode queues
+    this.gameModeQueue.forEach((queue, gameMode) => {
+      const index = queue.findIndex((queuedClient) => queuedClient.id === client.id);
+      if (index !== -1) {
+        queue.splice(index, 1);
+      }
+    });
+
+    if (gameIdToTerminate && clientsMapToTerminate) {
+      //Notify remaining player
+      for (const [playerId, playerSocket] of clientsMapToTerminate.entries()) {
+        if (playerId !== client.id) {
+          console.log(`🏓   ⚡: ${client.id} user just disconnected!`);
+          playerSocket.emit('opponentDisconnected', { message: 'Your opponent has Disconnected. End of Game.' });
+        }
+      }
+    }
+
+    const isConnected = false;
+    console.log(`🏓   🔥: ${client.id} user disconnected`);
+    client.emit('connected', isConnected ); 
+
+  }
+
+  @SubscribeMessage('disconnected')
+  handlePlayerDisconnect(client: Socket, payload: any) {
+    console.log("gameID: ", payload.gameId, " must be terminated");
 
     let gameIdToTerminate: string;
     let clientsMapToTerminate: any;
@@ -76,7 +119,7 @@ export class PongGateway {
       //Notify remaining player
       for (const [playerId, playerSocket] of clientsMapToTerminate.entries()) {
         if (playerId !== client.id) {
-          console.log(`🏓   ⚡: ${client.id} user just connected!`);
+          console.log(`🏓   ⚡: ${client.id} user just disconnected!`);
           playerSocket.emit('opponentDisconnected', { message: 'Your opponent has Disconnected. End of Game.' });
         }
       }
@@ -84,8 +127,7 @@ export class PongGateway {
 
     const isConnected = false;
     console.log(`🏓   🔥: ${client.id} user disconnected`);
-    client.emit('connected', isConnected ); 
-
+    client.emit('connected', isConnected );
   }
 
   @SubscribeMessage('challengeGame')
