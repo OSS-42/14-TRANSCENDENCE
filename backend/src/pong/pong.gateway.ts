@@ -97,7 +97,6 @@ export class PongGateway {
   @SubscribeMessage('challengeGame')
   challengeGame(client: Socket, payload: any) {
 
-    // console.log("coucou");
     // Initializing the queue if not existing
     if (!this.gameModeQueue.has(payload.newGM)) {
       this.gameModeQueue.set(payload.newGM, []);

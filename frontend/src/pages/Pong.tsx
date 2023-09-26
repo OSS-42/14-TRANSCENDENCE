@@ -293,7 +293,6 @@ export function Pong() {
       console.log(socket);
       if (socket) {
         socket.emit("challengeGame", { playerName, newGM, gameIdFromUrl });
-        console.log("coucou");
         setWaitingForPlayer(true);
         setGameLaunched(true);
         setCameraMode("orthographic");
