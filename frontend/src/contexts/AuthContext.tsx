@@ -23,6 +23,7 @@ interface AuthProviderProps {
 interface AuthContextType {
   loading: boolean;
   user: User | null;
+  tkn: string | null;
   isLogged: boolean;
   login: () => void;
   logout: () => void;
@@ -34,6 +35,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
   const [user, setUser] = useState<User | null>(null);
+  const [tkn, setTkn] = useState("");
   const [loading, setLoading] = useState(true);
   const [isLogged, setIsLogged] = useState(false);
   const [is2FA, setIs2FA] = useState(false);
@@ -73,16 +75,19 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
             Authorization: bearerAuthorization(jwtToken),
           },
         });
+
         setUser({ ...response.data, jwtToken: jwtToken });
+        if (!tkn) setTkn(jwtToken);
         if (response.data.is2FA && response.data.is2FAValidated === false) {
           setIs2FA(true);
           navigateTo("TwoFactor");
         }
+
         setIsLogged(true);
       } catch (error) {
         console.error("Error fetching user data:", error);
       }
-    } else if (!jwtToken && isLogged) {
+    } else if ((!jwtToken || tkn !== jwtToken) && isLogged) {
       logout();
     }
     setLoading(false);
@@ -105,6 +110,7 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
       loading,
       user,
       isLogged,
+      tkn,
       login,
       logout,
       fetchUserData,
@@ -117,6 +123,7 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
     loading,
     user,
     isLogged,
+    tkn,
     login,
     setUser,
     logout,
