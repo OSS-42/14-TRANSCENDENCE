@@ -54,7 +54,7 @@ export class AuthService {
           },
         }
       );
-      console.log("Réponse POST:", response.data);
+      // console.log("Réponse POST:", response.data);
       token = response.data.access_token;
     } 
     catch (error) {

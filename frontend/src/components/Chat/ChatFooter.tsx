@@ -78,14 +78,10 @@ const ChatFooter = ({ socket }: ChatFooterProps) => {
       else if (data.startsWith("/BLOCK")) blockCommand({ data, socket, user });
       else if (data.startsWith("/UNBLOCK"))
         unblockCommand({ data, socket, user });
-      else if (data.startsWith("/MODE"))
-        modeCommand({ data, socket, user });
-      else if (data.startsWith("/HELP"))
-        helpCommand({ data, socket, user });
-      else if (data.startsWith("/LIST"))
-        listCommand({ data, socket, user });
-      else
-        defaultCommand({ data, socket, user });
+      else if (data.startsWith("/MODE")) modeCommand({ data, socket, user });
+      else if (data.startsWith("/HELP")) helpCommand({ data, socket, user });
+      else if (data.startsWith("/LIST")) listCommand({ data, socket, user });
+      else defaultCommand({ data, socket, user });
     }
     setData("");
   };
@@ -103,6 +99,7 @@ const ChatFooter = ({ socket }: ChatFooterProps) => {
         }}
       >
         <TextField
+          autoComplete="off"
           type="text"
           placeholder="Write message"
           className="message"

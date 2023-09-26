@@ -21,7 +21,6 @@ type ChatProps = {
 };
 
 export function Chat({ socket }: ChatProps) {
-
   //la valeur de base de setMessage est prise dans le localStorage
   const { logout, tkn } = useAuth();
   const handleMessageResponse = (data: ChatMessage) => {
@@ -33,17 +32,15 @@ export function Chat({ socket }: ChatProps) {
     const localValues = localStorage.getItem("chatMessages");
     if (localValues == null) return [];
     return JSON.parse(localValues);
-   
-
   });
 
   //QUand la variable messages change, on l<enregistre dans le localStorage
   useEffect(() => {
     const messagesJSON = JSON.stringify(messages);
     localStorage.setItem("chatMessages", messagesJSON);
-    const jwtToken:string  =  getCookies("jwt_token");
-    if(tkn !== jwtToken ){
-      logout() 
+    const jwtToken: string = getCookies("jwt_token");
+    if (tkn !== jwtToken) {
+      logout();
     }
   }, [messages]);
 

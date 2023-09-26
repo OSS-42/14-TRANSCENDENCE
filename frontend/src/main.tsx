@@ -28,6 +28,7 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
 root.render(
   //<React.StrictMode>
   <Router>

@@ -14,13 +14,11 @@ export function TwoFactor() {
 
   async function handleTwo() {
     const newUser = await twoFactorValidationStatus(true);
-    console.log("Value of newUser:", newUser);
     setUser(newUser);
   }
 
   function handleChange(event: any) {
     const value = event.target.value;
-    console.log("The value is:", value);
     setInputValue(value);
   }
 
@@ -35,7 +33,6 @@ export function TwoFactor() {
           },
         }
       );
-      console.log("Response:", response.data);
       if (response.data.message === "2FA code is valid.") {
         handleTwo();
         navigateTo("/");

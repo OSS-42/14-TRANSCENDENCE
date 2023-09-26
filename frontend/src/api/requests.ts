@@ -173,7 +173,6 @@ export async function updateUserName(editedName: string): Promise<void> {
       }
     );
     console.log("Updating name was successful");
-    console.log(response.data);
     return response.data;
   } catch (error) {
     console.error("Error updating user data:", error);
@@ -192,7 +191,6 @@ export async function twoFactorValidationStatus(bool: boolean) {
         },
       }
     );
-    console.log("Update2FAStatusRequest", response);
     return response.data;
   } catch (error) {
     console.error("Error fetching user 2FA", error);
