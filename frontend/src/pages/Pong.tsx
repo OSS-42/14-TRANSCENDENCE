@@ -4,7 +4,6 @@ import React, { useEffect, useState, useRef } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Sphere, Box } from "@react-three/drei";
 import "./Pong.css";
-import * as THREE from "three";
 
 // import { ControlledCameras } from "./controlledcamera";
 import { ControlledCameras } from "../components/Pong/controlledcamera-2"; // Assuming it's exported from a file named ControlledCameras.tsx
@@ -31,7 +30,6 @@ type GameParameters = {
   ballVelocity: { x: number, z: number };
   leftPaddlePositionZ: number;
   rightPaddlePositionZ: number;
-  powerupPosition: { x: number; y: number; z: number };
   leftScore: number;
   rightScore: number;
 };
@@ -57,14 +55,6 @@ type BallPosition = {
   y: number;
   z: number;
 };
-
-// type Goal = {
-//   gameId: string;
-//   rightScore: number;
-//   leftScore: number;
-//   ballPosition: { x: number, y: number, z: number };
-//   ballVelocity: { x: number, z: number };
-// }
 
 export function Pong() {
   //============== ERROR LISTENING ==============
@@ -120,7 +110,6 @@ export function Pong() {
   const [leftPaddlePositionZ, setLeftPaddlePositionZ] = React.useState(0);
   const [rightPaddlePositionZ, setRightPaddlePositionZ] = React.useState(0);
   const [countdown, setCountdown] = React.useState<number | null>(null);
-  const [powerupVisible, setPowerupVisible] = React.useState(false);
   const soundsON = useRef<boolean>(false);
 
   const [ballPosition, setBallPosition] = React.useState<BallPosition>({
@@ -134,20 +123,12 @@ export function Pong() {
     z: INITIAL_BALL_SPEED,
   });
 
-  const [powerupPosition, setPowerupPosition] = React.useState({
-    x: 0,
-    y: 0,
-    z: 0,
-  });
-
   //============== CLIENT-SERVER SETTINGS ==============
   const [isConnected, setIsConnected] = React.useState<boolean>(false);
   const [hostStatus, setHostStatus] = React.useState<boolean>(false);
   const [hostname, setHostname] = React.useState<string>("");
   const [clientName, setClientName] = React.useState<string>("");
   const [playerName, setPlayerName] = React.useState<string>("");
-
-  // const [gameInfos] = useState<PlayerJoined>();
  
   const [waitingForPlayer, setWaitingForPlayer] = React.useState(false);
   const [gameId, setGameId] = React.useState<string>("");
@@ -157,20 +138,6 @@ export function Pong() {
 
   const [initialSetupComplete, setInitialSetupComplete] = useState(false);
 
- 
-  useEffect( () => {
-    console.log("challage game id", gameIdFromUrl);
-    if (gameIdFromUrl && socket){
-      const newGM = 3
-      console.log("challage game id", gameIdFromUrl);
-      socket.emit('challengeGame', { playerName, newGM, gameIdFromUrl  })
-      setWaitingForPlayer(true)
-      setGameLaunched(true)
-      setCameraMode('orthographic')
-      setGameMode(newGM)
-      setShowButtons(false)
-    }
-}, [gameIdFromUrl, socket])
   // Ecoute parler le socket
   useEffect(() => {
     if (socket) {
@@ -210,7 +177,6 @@ export function Pong() {
     } else {
       return () => {}; // No-op function when socket is null
     }
-    
 
     return () => {
       if (socket) {
@@ -221,7 +187,6 @@ export function Pong() {
     };
   }, [socket, isConnected, gameId, oppDisconnected]);
 
-
   useEffect(() => {
     if (socket && initialSetupComplete) {
       if (hostStatus) {
@@ -231,7 +196,6 @@ export function Pong() {
           ballPosition,
           ballVelocity,
           leftPaddlePositionZ,
-          powerupPosition,
           leftScore,
           rightScore,
         });
@@ -249,7 +213,6 @@ export function Pong() {
             setBallPosition(data.ballPosition)
             setBallVelocity(data.ballVelocity)
             setLeftPaddlePositionZ(data.leftPaddlePositionZ)
-            setPowerupPosition(data.powerupPosition)
             setRightScore(data.rightScore)
             setLeftScore(data.leftScore)
           } else {
@@ -282,36 +245,10 @@ export function Pong() {
     ballPosition,
     leftPaddlePositionZ,
     rightPaddlePositionZ,
-    powerupPosition,
   ]);
-
-  // useEffect(() => {
-  //   const urlParams = new URLSearchParams(window.location.search);
-  //   const mode = urlParams.get("gameIdFromUrl");
-  //   console.log(mode);
-    
-  //   if (mode != "") {
-  //     handleInvitationMode();
-  //   } else {
-  //     return ;
-  //   }
-  // }, [isConnected]);
 
   useEffect (() => {
     if (socket && gameId) {
-      // socket.on("goalScored", (data: Goal) => {
-      //   console.log('info GOAL');
-      //   if (data.gameId === gameId) {
-      //     setRightScore(data.rightScore);
-      //     setLeftScore(data.leftScore);
-      //     setBallPosition(data.ballPosition);
-      //     setBallVelocity(data.ballVelocity);
-      //   } else {
-      //     socket.emit("oppDisconnected", { message : 'Deconnection. End of Game.' })
-      //     setIsPaused(true);
-      //   }
-      // });
-
       socket.on("weHaveAWinner", (data: WeHaveAWinner) => {
         if (data.gameId === gameId) {
           setTimeout(() => {
@@ -331,38 +268,16 @@ export function Pong() {
     };
     return () => {
       if (socket) {
-        // socket.off("goalScored");
         socket.off("weHaveAWinner");
       }
     };
   });
 
   //============== GAME MODES ==============
- 
-  // const handlePowerupModeIA = (): void => {
-  //   console.log("🏓   powerup 1 vs IA");
-  //   try {
-  //     const newHostStatus = true;
-  //     const newGM = 2;
-  //     setHostStatus(newHostStatus);
-  //     setGameMode(newGM);
-  //     setNames(playerName, newHostStatus, newGM, setHostname, setClientName);
-  //     setGameLaunched(true);
-  //     setCameraMode("orthographic");
-  //     setPowerupVisible(true);
-  //     setShowButtons(false);
-  //     handleCountdown();
-  //   } catch {
-  //     console.log("🏓   we catched an issue. GM2");
-  //     return;
-  //   }
-  // };
-
   useEffect(() => {
-
       const urlParams = new URLSearchParams(window.location.search);
       const mode = urlParams.get("gameIdFromUrl");
-      console.log("MODE: ", mode);
+      // console.log("MODE: ", mode);
       if (mode && isConnected) {
         handleInvitationMode();
       } else {
@@ -408,65 +323,6 @@ export function Pong() {
       return;
     }
   };
-
-  // const handleClassicModeIA = (): void => {
-  //   console.log("🏓   classic 1 vs IA");
-  //   try {
-  //     const newHostStatus = true; // a cause async nature de React.
-  //     const newGM = 1;
-  //     setHostStatus(newHostStatus);
-  //     setGameMode(newGM);
-  //     setNames(playerName, newHostStatus, newGM, setHostname, setClientName);
-  //     setGameLaunched(true);
-  //     setCameraMode("orthographic");
-  //     setShowButtons(false);
-  //     handleCountdown();
-  //   } catch {
-  //     console.log("🏓   we catched an issue. GM1");
-  //     return;
-  //   }
-  // };
-
-  // const handlePowerupModeMulti = (): void => {
-  //   console.log("🏓   powerup 1 vs multi");
-  //   try {
-  //     const newGM = 4;
-  //     socket.emit("waitingForPlayerGM4", { playerName, newGM });
-  //     setWaitingForPlayer(true);
-  //     setGameLaunched(true);
-  //     setCameraMode("orthographic");
-  //     setPowerupVisible(true);
-  //     setGameMode(newGM);
-  //     setShowButtons(false);
-  //   } catch {
-  //     console.log("🏓   we catched an issue. GM4");
-  //     return;
-  //   }
-  // };
-
-  //============== USER NAMES ==============
-  // function setNames(
-  //   playerName: string,
-  //   newHostStatus: boolean,
-  //   newGM: number,
-  //   setHostname: Function,
-  //   setClientName: Function
-  // ) {
-  //   if (gameInfos) {
-  //     if (newGM === 1 || newGM === 2) {
-  //       setHostname(playerName);
-  //       setClientName("Computer");
-  //     } else {
-  //       if (newHostStatus === true) {
-  //         setHostname(playerName);
-  //         setClientName(gameInfos.clientName);
-  //       } else {
-  //         setHostname(gameInfos.clientName);
-  //         setClientName(playerName);
-  //       }
-  //     }
-  //   }
-  // }
 
   //============== SCENE SETTINGS ==============
   // s'assure que le canvas aura comme maximum toujours 800x600
@@ -577,53 +433,7 @@ export function Pong() {
 
   //============== GAME OBJECTS ==============
   // fixed objects : net, scoreboard, borders.
-  // mobile objects: powerup, ball, paddles.
-
-  //-------------- Powerup --------------
-  React.useEffect(() => {
-    const randomZ = Math.random() * (WORLD_HEIGHT - 2) - (WORLD_HEIGHT / 2 - 1);
-    setPowerupPosition({ x: 0, y: 0, z: randomZ });
-  }, []);
-
-  const Powerup: React.FC<{}> = () => {
-    if (!powerupVisible || gameMode === 1 || gameMode === 3) return null;
-
-    const textTexture = React.useMemo(createTextTexture, []);
-
-    return (
-      <Box
-        position={[powerupPosition.x, powerupPosition.y, powerupPosition.z]}
-        args={[1.5, 1.5, 1.5]}
-      >
-        <meshBasicMaterial map={textTexture} />
-      </Box>
-    );
-  };
-
-  const respawnPowerup: () => void = () => {
-    // const randomX = (Math.random() * (WORLD_WIDTH - 2)) - (WORLD_WIDTH / 2 - 1);
-    const randomZ = Math.random() * (WORLD_HEIGHT - 2) - (WORLD_HEIGHT / 2 - 1);
-
-    setPowerupPosition({ x: 0, y: 0, z: randomZ });
-    setPowerupVisible(true);
-  };
-
-  const createTextTexture: () => THREE.CanvasTexture = () => {
-    const canvas = document.createElement("canvas");
-    canvas.width = 256;
-    canvas.height = 256;
-    const ctx = canvas.getContext("2d");
-    if (ctx) {
-      ctx.fillStyle = "yellow"; // Background color
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.font = "Bold 200px Impact";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillStyle = "black"; // Text color
-      ctx.fillText("3D", canvas.width / 2, canvas.height / 2);
-    }
-    return new THREE.CanvasTexture(canvas);
-  };
+  // mobile objects: ball, paddles.
 
   //-------------- Net --------------
   const Net = React.memo(() => {
@@ -682,20 +492,11 @@ export function Pong() {
   //-------------- Sound effects --------------
   const goalSoundRef = React.useRef<HTMLAudioElement>(null);
   const ballWallSoundRef = React.useRef<HTMLAudioElement>(null);
-  const powerupHitSoundRef = React.useRef<HTMLAudioElement>(null);
   const userHitSoundRef = React.useRef<HTMLAudioElement>(null);
   const compHitSoundRef = React.useRef<HTMLAudioElement>(null);
 
   const playGoalSound: () => void = () => {
     goalSoundRef.current?.play();
-  };
-
-  const playPowerupSound: () => void = () => {
-    powerupHitSoundRef.current?.play();
-  };
-
-  const pausePowerupSound: () => void = () => {
-    powerupHitSoundRef.current?.pause();
   };
 
   const playBallWallSound: () => void = () => {
@@ -744,11 +545,6 @@ export function Pong() {
         hostname,
         clientName,
       });
-      // if(clientName === user.username) {
-      //   socket.emit("updateHistory", {
-      //   isHostWinner,
-      // });
-      // }
     };
   }
 
@@ -774,13 +570,6 @@ export function Pong() {
 
       } else if (hostStatus) {
         console.log('envoi du nouveau score : ', leftScore, " - ", rightScore);
-        // socket.volatile.emit('goalScored', {
-        //   gameId,
-        //   rightScore,
-        //   leftScore,
-        //   ballPosition,
-        //   ballVelocity,
-        // });
       };
   }, [leftScore, rightScore])
 
@@ -791,7 +580,6 @@ export function Pong() {
     ballPosition: BallPosition;
     setBallPosition: React.Dispatch<React.SetStateAction<BallPosition>>;
     ballVelocity: Position;
-    // setBallVelocity: React.Dispatch<React.SetStateAction<Position>>;
   }
   
   const Ball: React.FC<BallProps> = ({
@@ -807,23 +595,6 @@ export function Pong() {
       
       let newX: number = ballPosition.x + ballVelocity.x;
       let newZ: number = ballPosition.z + ballVelocity.z;
-      
-      //----------- VALIDATION HIT AVEC POWERUP ----------
-      //uniquement (defense) pour Powerup vs IA
-      if (
-        powerupVisible &&
-        Math.abs(ballPosition.x - powerupPosition.x) < ballRadius + 1 &&
-        Math.abs(ballPosition.z - powerupPosition.z) < ballRadius + 1
-        ) {
-          setPowerupVisible(false);
-          setCameraMode("perspective");
-          playPowerupSound();
-          
-          setTimeout(() => {
-            setCameraMode("orthographic");
-            respawnPowerup();
-          }, 12000);
-        }
 
       if (hostStatus) {
         const directionZ = Math.sign(ballVelocity.z);
@@ -898,7 +669,6 @@ export function Pong() {
         }
 
         if (soundsON.current) {
-          pausePowerupSound();
           playGoalSound();
         }
 
@@ -1021,7 +791,7 @@ export function Pong() {
     );
   };
 
-  // Right paddle (Computer - User2)
+  // Right paddle (User2)
   // fixation de la position droite du paddle
   const rightPaddleXPosition: number = distanceFromCenter;
 
@@ -1034,69 +804,41 @@ export function Pong() {
     rightPaddlePositionZ,
     setRightPaddlePositionZ,
   }) => {
-    if (gameMode === 1 || gameMode === 2) {
-      // si computer
-      const RIGHT_PADDLE_SPEED: number = 0.8;
+    // mouvement du right (user2) paddle a la souris.
+    const { mouse } = useThree()
+    let lastEventTime = 0;
+    const throttleTime = 100;
 
-      useFrame(() => {
-        const direction: number = Math.sign(
-          ballPosition.z - rightPaddlePositionZ
-        );
+    useFrame(() => {
+      const currentTime = Date.now();
 
-        let newZ = lerp(
-          rightPaddlePositionZ,
-          rightPaddlePositionZ + direction * RIGHT_PADDLE_SPEED,
-          0.2
-        );
+      if (currentTime - lastEventTime > throttleTime) {
+        lastEventTime = currentTime;
+        let newPosition
+        if (!hostStatus) {
+          if (cameraMode === 'perspective') {
+            newPosition = -mouse.x * (WORLD_WIDTH / 2)
+          } else {
+            newPosition = -mouse.y * (WORLD_HEIGHT / 2)
+          }
+        } else {
+          newPosition = rightPaddlePositionZ
+        }
 
-        const paddleTopEdge: number = newZ + paddleDepth / 2;
-        const paddleBottomEdge: number = newZ - paddleDepth / 2;
+        newPosition = lerp(rightPaddlePositionZ, newPosition, lerpFactor)
+
+        const paddleTopEdge = newPosition + paddleDepth / 2
+        const paddleBottomEdge = newPosition - paddleDepth / 2
 
         if (paddleTopEdge > WORLD_HEIGHT / 2) {
-          newZ = WORLD_HEIGHT / 2 - paddleDepth / 2;
+          newPosition = WORLD_HEIGHT / 2 - paddleDepth / 2
         } else if (paddleBottomEdge < -WORLD_HEIGHT / 2) {
-          newZ = -WORLD_HEIGHT / 2 + paddleDepth / 2;
+          newPosition = -WORLD_HEIGHT / 2 + paddleDepth / 2
         }
 
-        setRightPaddlePositionZ(newZ);
-      });
-    } else {
-      // mouvement du right (user2) paddle a la souris.
-      const { mouse } = useThree()
-      let lastEventTime = 0;
-      const throttleTime = 100;
-
-      useFrame(() => {
-        const currentTime = Date.now();
-
-        if (currentTime - lastEventTime > throttleTime) {
-          lastEventTime = currentTime;
-          let newPosition
-          if (!hostStatus) {
-            if (cameraMode === 'perspective') {
-              newPosition = -mouse.x * (WORLD_WIDTH / 2)
-            } else {
-              newPosition = -mouse.y * (WORLD_HEIGHT / 2)
-            }
-          } else {
-            newPosition = rightPaddlePositionZ
-          }
-
-          newPosition = lerp(rightPaddlePositionZ, newPosition, lerpFactor)
-
-          const paddleTopEdge = newPosition + paddleDepth / 2
-          const paddleBottomEdge = newPosition - paddleDepth / 2
-
-          if (paddleTopEdge > WORLD_HEIGHT / 2) {
-            newPosition = WORLD_HEIGHT / 2 - paddleDepth / 2
-          } else if (paddleBottomEdge < -WORLD_HEIGHT / 2) {
-            newPosition = -WORLD_HEIGHT / 2 + paddleDepth / 2
-          }
-
-          setRightPaddlePositionZ(newPosition)
-        }
-      })
-    }
+        setRightPaddlePositionZ(newPosition)
+      }
+    })
 
     return (
       <Box
@@ -1132,9 +874,6 @@ export function Pong() {
               <img src="../src/assets/animated.gif" alt="Starting Screen" />
               <div className="game-buttons">
                 <button onClick={handleClassicModeMulti}>Classic 1 vs 1</button>
-                {/* <button onClick={handlePowerupModeIA}>Powerup 1 vs IA</button> */}
-                {/* <button onClick={handleClassicModeIA}>Classic 1 vs IA</button> */}
-                {/* <button onClick={handlePowerupModeMulti}>Powerup 1 vs 1</button> */}
               </div>
             </div>
           )
@@ -1167,9 +906,6 @@ export function Pong() {
 
               {/* borders */}
               <Borders />
-
-              {/* PowerUp Cube */}
-              <Powerup />
 
               {/* Ball */}
               <Ball
@@ -1243,8 +979,7 @@ export function Pong() {
 
             {/* Sound elements */}
             <audio ref={goalSoundRef} src="src/assets/neo-tokyo-goal.mp3" />
-            <audio ref={powerupHitSoundRef} src="src/assets/mario-star.mp3" />
-            <audio ref={ballWallSoundRef} src="src/assets/pong-ball.ogg" />
+            <audio ref={ballWallSoundRef} src="src/assets/pong-ball.mp3" />
             <audio ref={userHitSoundRef} src="src/assets/paddle-hit.mp3" />
             <audio ref={compHitSoundRef} src="src/assets/paddle-hit2.mp3" />
           </div>

@@ -58,9 +58,9 @@ const ChatFooter = ({ socket }: ChatFooterProps) => {
   }, []);
 
   // Use another useEffect to log the updated user state
-  useEffect(() => {
-    console.log(user);
-  }, [user]);
+  // useEffect(() => {
+  //   console.log(user);
+  // }, [user]);
 
   const handleSendMessage = (e: React.FormEvent) => {
     //e pour evenement, c'est une convention

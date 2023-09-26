@@ -11,7 +11,6 @@ const Header = () => {
 
   useEffect(() => {
     const currentPath = window.location.pathname;
-    console.log(currentPath);
 
     switch (currentPath) {
       case "/":
@@ -43,7 +42,6 @@ const Header = () => {
   const handleTabChange = (newValue: number) => {
     setActiveTab(newValue);
     localStorage.setItem("activeTab", newValue.toString());
-    console.log(newValue);
 
     switch (newValue) {
       case 0:
