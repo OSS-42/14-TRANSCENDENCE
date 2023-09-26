@@ -55,6 +55,7 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
   const logout = () => {
     console.log("Logging out. Bye!");
     Cookies.remove(JWT_TOKEN_COOKIE);
+    localStorage.clear();
     setUser(null);
     setIsLogged(false);
     setLoading(false);

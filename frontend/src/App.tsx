@@ -16,6 +16,16 @@ import { useEffect, useState } from "react";
 import { TwoFactor } from "./pages/TwoFactor";
 
 function App() {
+  const clearLocalStorageOnTabClose = () => {
+    localStorage.clear();
+  };
+  window.addEventListener("beforeunload", clearLocalStorageOnTabClose);
+  useEffect(() => {
+    return () => {
+      window.removeEventListener("beforeunload", clearLocalStorageOnTabClose);
+    };
+  }, []);
+
   const { user, loading, isLogged } = useAuth();
   const [chatSocket, setChatSocket] = useState<Socket | null>(null);
   const [chatSocketInitialized, setChatSocketInitialized] = useState(false);
