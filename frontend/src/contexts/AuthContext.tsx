@@ -91,6 +91,7 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
       logout();
     }
     setLoading(false);
+    console.log(tkn);
   };
 
   const redirectToHome = () => {
