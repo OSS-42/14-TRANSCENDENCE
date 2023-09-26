@@ -37,7 +37,7 @@ const ChatBody = ({ messages }: ChatBodyProps) => {
 
   useEffect(() => {
     fetchUsersData();
-  }, [messages]);
+  }, [messages, localStorage]);
 
   return (
     <>
