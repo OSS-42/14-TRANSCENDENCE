@@ -8,6 +8,7 @@ interface User {
   email: string;
   is2FA: boolean;
   is2FAValidated: boolean;
+  tkn :string| null;
 }
 
 interface Friendship {

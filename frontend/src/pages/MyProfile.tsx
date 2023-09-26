@@ -14,6 +14,7 @@ import { MatchHistory } from "../components/Profile/MatchHistory";
 import { useAuth } from "../contexts/AuthContext";
 import { fetchMatchHistory } from "../api/requests";
 import { TwoFactorAuthentication } from "../components/Profile/TwoFactorAuthentication";
+import { getCookies } from "../utils";
 
 interface MatchData {
   date: string;
@@ -26,7 +27,7 @@ interface MatchHistoryData {
 }
 
 export function MyProfile() {
-  const { user, setUser } = useAuth();
+  const { user, setUser, tkn, logout } = useAuth();
   const [match, setMatch] = useState<MatchHistoryData>({
     matchesWon: [],
     matchesLost: [],
@@ -42,7 +43,13 @@ export function MyProfile() {
   }
 
   useEffect(() => {
+    const jwtToken:string  =  getCookies("jwt_token");
+
+    if(tkn !== jwtToken ){
+      logout() 
+    }
     getMatchHistory();
+
   }, [user]);
 
   return (

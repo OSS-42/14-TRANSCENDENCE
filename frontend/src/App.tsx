@@ -25,11 +25,9 @@ function App() {
       window.removeEventListener("beforeunload", clearLocalStorageOnTabClose);
     };
   }, []);
-
   const { user, loading, isLogged } = useAuth();
   const [chatSocket, setChatSocket] = useState<Socket | null>(null);
   const [chatSocketInitialized, setChatSocketInitialized] = useState(false);
-
   useEffect(() => {
     if (!user) return;
 
