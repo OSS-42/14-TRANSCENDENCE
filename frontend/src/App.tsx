@@ -16,17 +16,10 @@ import { useEffect, useState } from "react";
 import { TwoFactor } from "./pages/TwoFactor";
 
 function App() {
-  // Define a function to clear localStorage when the tab/window is closed
   const clearLocalStorageOnTabClose = () => {
-    // Perform any cleanup or additional actions here if needed
     localStorage.clear();
   };
-
-  // Attach the event listener to the window's beforeunload or unload event
   window.addEventListener("beforeunload", clearLocalStorageOnTabClose);
-
-  // Make sure to remove the event listener when your component unmounts to avoid memory leaks
-  // For functional components, use useEffect with an empty dependency array
   useEffect(() => {
     return () => {
       window.removeEventListener("beforeunload", clearLocalStorageOnTabClose);
