@@ -5,10 +5,11 @@ import ChatBar from "./ChatBar";
 import ChatFriends from "./ChatFriends";
 import ReactModal from "react-modal";
 import UserDetails from "./UserDetails";
-
+import { useAuth } from "../../contexts/AuthContext";
 import { fetchFriendsList, fetchUsersList } from "../../api/requests";
 import { useRoutes } from "../../contexts/RoutesContext";
 import { Box, Button } from "@mui/material";
+import { getCookies } from "../../utils";
 interface UpdateConnectedUsersData {
   connectedUserIds: number[];
   connectedUserIdsPong: number[];
@@ -34,6 +35,7 @@ export function FriendsAndUsers({ socket }: someProp) {
   );
   const [challengerId, setChallengerId] = useState<number | null>(null);
   let interval: NodeJS.Timeout | null = null;
+  const { logout, tkn } = useAuth();
 
   useEffect(() => {
     if (invitationModalIsOpen) {
@@ -51,6 +53,11 @@ export function FriendsAndUsers({ socket }: someProp) {
 
   useEffect(() => {
     socket.on("updateConnectedUsers", (data: UpdateConnectedUsersData) => {
+      const jwtToken:string  =  getCookies("jwt_token");
+    if(tkn !== jwtToken ){
+      logout() 
+    }
+      
       const { connectedUserIds, connectedUserIdsPong } = data;
       setConnectedUsers(connectedUserIds);
 

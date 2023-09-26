@@ -77,12 +77,14 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
         });
 
         setUser({ ...response.data, jwtToken: jwtToken });
-        if (!tkn) setTkn(jwtToken);
+      setTkn(jwtToken);
+
+        console.log(tkn)
         if (response.data.is2FA && response.data.is2FAValidated === false) {
           setIs2FA(true);
           navigateTo("TwoFactor");
         }
-
+        
         setIsLogged(true);
       } catch (error) {
         console.error("Error fetching user data:", error);
