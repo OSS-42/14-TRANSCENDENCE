@@ -277,7 +277,7 @@ export function Pong() {
   useEffect(() => {
       const urlParams = new URLSearchParams(window.location.search);
       const mode = urlParams.get("gameIdFromUrl");
-      console.log("MODE: ", mode);
+      // console.log("MODE: ", mode);
       if (mode && isConnected) {
         handleInvitationMode();
       } else {
