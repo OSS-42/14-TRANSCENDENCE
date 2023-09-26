@@ -165,7 +165,7 @@ export function Pong() {
       });
 
       socket.on("opponentDisconnected", (data: any) => {
-        console.log(data);
+        // console.log(data);
         setOppDisconnected(data.message);
       });
 
@@ -252,7 +252,7 @@ export function Pong() {
       socket.on("weHaveAWinner", (data: WeHaveAWinner) => {
         if (data.gameId === gameId) {
           setTimeout(() => {
-            console.log('THERE IS A WINNER ', gameId);
+            // console.log('THERE IS A WINNER ', gameId);
             isHostWinner.current = data.isHostWinner;
             isGameOver.current = true;
             setGameLaunched(false);
@@ -290,7 +290,7 @@ export function Pong() {
     console.log("🏓   classic 1 vs 1 sur INVITATION");
     try {
       const newGM = 5;
-      console.log(socket);
+      // console.log(socket);
       if (socket) {
         socket.emit("challengeGame", { playerName, newGM, gameIdFromUrl });
         setWaitingForPlayer(true);
@@ -299,8 +299,8 @@ export function Pong() {
         setGameMode(newGM);
         setShowButtons(false);
       }
-    } catch {
-      console.log("🏓   we catched an issue. GM5");
+    } catch (error) {
+      console.log("🏓   we catched an issue. GM5: ", error);
       return;
     }
   };
@@ -317,8 +317,8 @@ export function Pong() {
         setGameMode(newGM);
         setShowButtons(false);
       }
-    } catch {
-      console.log("🏓   we catched an issue. GM3");
+    } catch (error) {
+      console.log("🏓   we catched an issue. GM3: ", error);
       return;
     }
   };
@@ -513,7 +513,7 @@ export function Pong() {
 //-------------- SCOREBOARD LOGIC --------------
 
   const goalScored = (prevScore: number, side: string) => {
-    console.log('goalScored is called');
+    // console.log('goalScored is called');
     let newScore = prevScore + 1;
 
     if (side === 'right') {
@@ -534,7 +534,7 @@ export function Pong() {
 
     console.log("🏓   ", winnerText);
     console.log("🏓   ", gameId);
-    console.log("🏓   ", isHostWinner.current);
+    // console.log("🏓   ", isHostWinner.current);
     if (gameId && socket && hostStatus) {
       console.log("🏓   envoi du resultat");
       socket.emit("weHaveAWinner", {
