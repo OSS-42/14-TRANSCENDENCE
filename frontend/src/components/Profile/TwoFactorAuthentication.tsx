@@ -4,13 +4,15 @@ import Cookies from "js-cookie";
 import { useState } from "react";
 import QRCode from "qrcode.react";
 
-interface TwoFactorAuthenticationProps{
-	TwoFactorStatus: boolean;
+interface TwoFactorAuthenticationProps {
+  TwoFactorStatus: boolean;
 }
 
 const BASE_URL = "/api";
 
-export function TwoFactorAuthentication({TwoFactorStatus}: TwoFactorAuthenticationProps) {
+export function TwoFactorAuthentication({
+  TwoFactorStatus,
+}: TwoFactorAuthenticationProps) {
   const [otpURL, setOtpURL] = useState("");
   const [isQRCodeVisible, setQRCodeVisible] = useState(false);
   const [isActivated, setIsActivated] = useState(TwoFactorStatus);
@@ -26,9 +28,7 @@ export function TwoFactorAuthentication({TwoFactorStatus}: TwoFactorAuthenticati
           },
         }
       );
-	  console.log(response);
       setOtpURL(response.data.otpauthUrl);
-      console.log(response.data.otpauthUrl);
       setQRCodeVisible(true);
     } catch (error) {
       console.error("Error fetching user 2FA", error);
