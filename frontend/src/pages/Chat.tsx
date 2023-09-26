@@ -4,6 +4,8 @@ import { Socket } from "socket.io-client";
 import ChatBody from "../components/Chat/ChatBody";
 import ChatFooter from "../components/Chat/ChatFooter";
 import { FriendsAndUsers } from "../components/Chat/FriendsAndUsers";
+import { getCookies } from "../utils";
+import { useAuth } from "../contexts/AuthContext";
 
 type ChatMessage = {
   userId: number;
@@ -19,8 +21,9 @@ type ChatProps = {
 };
 
 export function Chat({ socket }: ChatProps) {
-  //la valeur de base de setMessage est prise dans le localStorage
 
+  //la valeur de base de setMessage est prise dans le localStorage
+  const { logout, tkn } = useAuth();
   const handleMessageResponse = (data: ChatMessage) => {
     console.log(data);
     setMessages((prevMessages) => [...prevMessages, data]);
@@ -30,12 +33,18 @@ export function Chat({ socket }: ChatProps) {
     const localValues = localStorage.getItem("chatMessages");
     if (localValues == null) return [];
     return JSON.parse(localValues);
+   
+
   });
 
   //QUand la variable messages change, on l<enregistre dans le localStorage
   useEffect(() => {
     const messagesJSON = JSON.stringify(messages);
     localStorage.setItem("chatMessages", messagesJSON);
+    const jwtToken:string  =  getCookies("jwt_token");
+    if(tkn !== jwtToken ){
+      logout() 
+    }
   }, [messages]);
 
   useEffect(() => {
