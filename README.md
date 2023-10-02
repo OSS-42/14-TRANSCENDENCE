@@ -1,18 +1,16 @@
 # 14-TRANSCENDENCE
 
-Installation (version sans makefile)
-1. git clone le projet
-2. a la racine du projet, creer un fichier .env vide
-3. a la racine du projet, dans un terminal, entrer "docker compose up"
-4. une fois le build fait (env. 5min actullement), utiliser les commandes habituelles de docker (ou l'application desktop)
+Projet utilisant les technologies suivantes :
+- Docker avec mise en place de containers NGINX, PostgreSQL, "Backend" et "Frontend"
+- FrameWork NestJS pour la backend, avec Prisma et Axios
+- framework TypeScript REACT pour le frontend.
 
-Installation (version avec makefile)
-1. git clone le projet
-2. a la racine du projet, dans un terminal, entrer "make"
-   - le fichier .env se cree automatiquement
-   - lancement de docker compose up automatiquement
-   - disponibilite des logs soit de builds (auto) ou des dockers (avec la commande "make logs")
+Objectifs principaux :
+- Création d'une "Single Page Application"
+- Gestion de profil utilisateurs
+- Jeu PONG avec matchmaking ou sur invitaiton
+- Chat avec création de channels et autres fonctionnalités de base à la IRC.
+- 2FA
 
-
-***IMPORTANT : Lorsque les modèles prisma ont été modifiés, ou simplement que la base de données a été restet 
-   Lancez cette commande à la racine du container backend :   "npx prisma migrate deploy"
+Réalisation connexe :
+- le PONG est en 3D.
