@@ -33,7 +33,6 @@ type HostGameParameters = {
   ballPosition: { x: number; y: number; z: number };
   ballVelocity: { x: number, z: number };
   leftPaddlePositionZ: number;
-  rightPaddlePositionZ: number; // a garder ?
   leftScore: number;
   rightScore: number;
 };

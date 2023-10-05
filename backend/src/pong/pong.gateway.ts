@@ -27,7 +27,6 @@ interface HostGameParameters {
   ballPosition: { x: number; y: number; z: number };
   ballVelocity: { x: number, z: number };
   leftPaddlePositionZ: number;
-  rightPaddlePositionZ: number;
   leftScore: number;
   rightScore: number;
 };
