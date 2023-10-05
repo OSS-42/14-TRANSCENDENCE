@@ -141,10 +141,10 @@ export const ControlledCameras = forwardRef<
     // const animation = useRef<PlaybackControls>();
 
     const [persCam, orthoCam] = useMemo(() => {
-      const persCam: PerspectiveCamera = new PerspectiveCamera();
-      const orthoCam: OrthographicCamera = new OrthographicCamera();
-      orthoCam.zoom = orthographicCameraProps.zoom;
-      orthoZoom = orthographicCameraProps.zoom;
+      const persCam = new PerspectiveCamera();
+      const orthoCam = new OrthographicCamera();
+      orthoCam.zoom = orthographicCameraProps.zoom!;
+      orthoZoom = orthographicCameraProps.zoom!;
       
       set(() => ({ camera: mode === "perspective" ? persCam : orthoCam }));
       return [persCam, orthoCam];
@@ -179,8 +179,8 @@ export const ControlledCameras = forwardRef<
       orthoCam.right = size.width / 2;
       orthoCam.top = size.height / 2;
       orthoCam.bottom = size.height / -2;
-      orthoCam.near = orthographicCameraProps.near;
-      orthoCam.far = orthographicCameraProps.far;
+      orthoCam.near = orthographicCameraProps.near!;
+      orthoCam.far = orthographicCameraProps.far!;
       orthoCam.updateProjectionMatrix();
 
       persCam.aspect = size.width / size.height;
@@ -314,7 +314,7 @@ export const ControlledCameras = forwardRef<
           controls.camera = newCam;
 
           // Restore the zoom for the ortho camera
-          controls.zoomTo(mode === "perspective" ? 1 : orthoZoom, false);
+          controls.zoomTo(mode === "perspective" ? 1 : orthoZoom!, false);
           controls.enabled = true;
 
           // Invalidate to cause re-render

@@ -144,8 +144,7 @@ export function Pong() {
   const [waitingForPlayer, setWaitingForPlayer] = React.useState(false);
   const [gameId, setGameId] = React.useState<string>("");
   const isHostWinner = useRef<boolean>(false);
-  const [oppDisconnected, setOppDisconnected] =
-    React.useState<OppDisconnected | null>(null);
+  const [oppDisconnected, setOppDisconnected] = React.useState<string | null>(null);
 
   const [initialSetupComplete, setInitialSetupComplete] = useState(false);
 
@@ -220,6 +219,7 @@ export function Pong() {
 
       if (!hostStatus) {
         socket.on('hostMovesUpdate', (data: HostGameParameters) => {
+          console.log("🏓🏓   receiving info as invite, ", gameId);
           if (data.gameId === gameId) {
             setBallPosition(data.ballPosition)
             setBallVelocity(data.ballVelocity)
@@ -233,6 +233,7 @@ export function Pong() {
         })
       } else {
         socket.on("clientMovesUpdate", (data: ClientGameParameters) => {
+          console.log("🏓🏓   receiving info as host, ", gameId);
           if (data.gameId === gameId) {
             setRightPaddlePositionZ(data.rightPaddlePositionZ);
           } else {
@@ -244,7 +245,7 @@ export function Pong() {
 
       return () => {
         if (socket) {
-          socket.off("gameParameters");
+          socket.off("hostGameParameters");
           socket.off("hostMovesUpdate");
           socket.off("clientMovesUpdate");
         }
@@ -427,6 +428,7 @@ export function Pong() {
           socket.emit("disconnected", {
             gameId: gameId });
         }
+        setIsConnected(false);
       }
     }
     

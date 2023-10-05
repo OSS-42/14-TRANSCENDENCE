@@ -54,10 +54,7 @@ export class PongGateway {
   server: Server
 
   handleConnection(client: Socket): void {
-    // console.log(`🏓   ${new Date().toISOString()} - ⚡: ${client.id} user just connected!`);
     const token = client.handshake.query.token as string;
-
-    // console.log("🏓   Received Token:", token);
 
       if (token) {
         try {
@@ -70,7 +67,7 @@ export class PongGateway {
           client.emit("connected", isConnected);
 
         } catch (error) {
-          // console.log("🏓   Error:", error.message);
+          console.log("🏓   Error:", error.message);
           client.disconnect();
         }
       } else {
@@ -222,7 +219,6 @@ export class PongGateway {
 
   @SubscribeMessage('hostGameParameters')
   handleGameParameters(payload: HostGameParameters) {
-  // handleGameParameters(client: Socket, payload: HostGameParameters) {
     const gameId = payload.gameId; // Make sure to send gameId from client
     
     this.gameStates.set(gameId, payload);
@@ -232,7 +228,6 @@ export class PongGateway {
 
   @SubscribeMessage('clientGameParameters')
   handleGameParametersClient(payload: ClientGameParameters) {
-  // handleGameParametersClient(client: Socket, payload: ClientGameParameters) {
     const gameId = payload.gameId; // Make sure to send gameId from client
     
     this.gameStates.set(gameId, payload);
@@ -242,7 +237,6 @@ export class PongGateway {
 
   @SubscribeMessage('weHaveAWinner')
   handleWinner(payload: WeHaveAWinner) {
-  // handleWinner(client: Socket, payload: WeHaveAWinner) {
     const gameId = payload.gameId; // Make sure to send gameId from client
     
     this.server.to(gameId).emit('weHaveAWinner', payload);
