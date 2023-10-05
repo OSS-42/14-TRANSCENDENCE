@@ -21,20 +21,20 @@ interface BlockPayload {
 }
 
 // default(message), help, list
-interface GeneralMessage {
+interface GeneralMessagePayload {
   message: string[],
   name: string
 }
 
 //joinRoom, modeRoom, 
-interface JoinChannel {
+interface ChannelPayload {
   username: string,
   channelName: string,
   param : string[]
 }
 
 // privmsg
-interface Privmsg {
+interface PrivmsgPayload {
   username: string,
   channelName: string,
   param : string
@@ -142,7 +142,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   // //-------------------------------------------------------- COMMANDE DU CHAT --------------------------------------------------------
   
   @SubscribeMessage('message')
-  async handleMessage(client: Socket, payload: any){ //voir pour changer any
+  async handleMessage(client: Socket, payload: GeneralMessagePayload){
     const userId = await this.chatService.getUserIdFromUsername(payload.name)
     this.server.emit('messageResponse', {
       userId: userId,
@@ -160,7 +160,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   // Utilisation :  /JOIN #nomDuchannel motDePasse 
   // Utilisation :  /JOIN #nomDuchannel +i (channel sur invitation seulement) 
   @SubscribeMessage('joinRoom')
-  async joinRoom(client: Socket, payload: any) {
+  async joinRoom(client: Socket, payload: ChannelPayload) {
     const userId = await this.chatService.getUserIdFromUsername(payload.username)
     let notice : string = null
     // ------------------------ Mauvais parametre ------------------------
@@ -217,7 +217,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   // ---------------------------------------------------------- BLOCK ----------------------------------------------------------
   // Utilisation :  /BLOCK nomCible 
   @SubscribeMessage('blockUser')
-  async blockUser(client: Socket, payload: any) {
+  async blockUser(client: Socket, payload: BlockPayload) {
     const userId = await this.chatService.getUserIdFromUsername(payload.username)
     const blockedUserIds = await this.chatService.getBlockedUserIds(userId)
     let notice : string = null
@@ -237,7 +237,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
     client.emit('notice', {
     name: payload.username,
-    channel: payload.channelName,
+    channel: undefined,
     text: undefined,
     notice : notice
     })
@@ -246,7 +246,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   // ---------------------------------------------------------- UNBLOCK ----------------------------------------------------------
   // Utilisation :  /UNBLOCK nomCible 
   @SubscribeMessage('unblockUser')
-  async unblockUser(client: Socket, payload: any) {
+  async unblockUser(client: Socket, payload: BlockPayload) {
     const userId = await this.chatService.getUserIdFromUsername(payload.username)
     const blockedUserIds = await this.chatService.getBlockedUserIds(userId)
     let notice : string = null
@@ -266,7 +266,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
     client.emit('notice', {
     name: payload.username,
-    channel: payload.channelName,
+    channel: undefined,
     text: undefined,
     notice : notice
     })
@@ -275,7 +275,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   // ---------------------------------------------------------- HELP ----------------------------------------------------------
   // Utilisation :  /HELP 
   @SubscribeMessage('help')
-  async help(client: Socket, payload: any) {
+  async help(client: Socket, payload: GeneralMessagePayload) {
     const userId = await this.chatService.getUserIdFromUsername(payload.name)
     let notice : string = undefined
     let help : string = undefined
@@ -319,7 +319,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }      
     client.emit('notice', {
     name: payload.name,
-    channel: payload.channelName,
+    channel: undefined,
     text: undefined,
     notice : notice,
     help : help
@@ -329,7 +329,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   // ---------------------------------------------------------- LIST ----------------------------------------------------------
   // Utilisation :  /LIST 
   @SubscribeMessage('list')
-  async listChannel(client: Socket, payload: any) {
+  async listChannel(client: Socket, payload: GeneralMessagePayload) {
     const userId = await this.chatService.getUserIdFromUsername(payload.name)
     const channelList = await this.chatService.getRoomNamesUserIsMemberOf(userId)
     let notice : string = undefined
@@ -361,7 +361,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   // Utilisation :  /PRIVMSG NomUtilisateur message ...                    
   @SubscribeMessage('privmsg')
 
-  async privateMessage(client: Socket, payload: any) {
+  async privateMessage(client: Socket, payload: PrivmsgPayload) {
     const userId = await this.chatService.getUserIdFromUsername(payload.username)
     let notice : string = null
     let event : string = "notice"
@@ -452,7 +452,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   // ---------------------------------------------------------- INVITE ----------------------------------------------------------
   // Utilisation :  /INVITE nomCible nomDuChannel   
   @SubscribeMessage('inviteRoom')
-  async inviteRoom(client: Socket, payload: any) {
+  async inviteRoom(client: Socket, payload: ChatPayload) {
     const userId = await this.chatService.getUserIdFromUsername(payload.username)
     const userSocketId = await this.connectedUsersService.getSocketId(userId)
     const targetId = await this.chatService.getUserIdFromUsername(payload.target)
@@ -509,7 +509,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   // ---------------------------------------------------------- MUTE ----------------------------------------------------------
   // Utilisation :  /MUTE nomCible nomDuChannel   
   @SubscribeMessage('mute')
-  async muteUser(client: Socket, payload: any) {
+  async muteUser(client: Socket, payload: ChatPayload) {
     const userId = await this.chatService.getUserIdFromUsername(payload.username)
     const userSocketId = await this.connectedUsersService.getSocketId(userId)
     let targetSocketId = null;
@@ -569,7 +569,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   // ---------------------------------------------------------- KICK ----------------------------------------------------------
   // Utilisation :  /KICK nomCible nomDuChannel   
   @SubscribeMessage('kickUser')
-  async kickUser(client: Socket, payload: any) {
+  async kickUser(client: Socket, payload: ChatPayload) {
     const userId = await this.chatService.getUserIdFromUsername(payload.username)
     const userSocketId = await this.connectedUsersService.getSocketId(userId)
     let targetSocketId = null;
@@ -626,7 +626,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   // ---------------------------------------------------------- BAN ----------------------------------------------------------
   // Utilisation :  /BAN nomCible nomDuChannel   
   @SubscribeMessage('banUser')
-  async banUser(client: Socket, payload: any) {
+  async banUser(client: Socket, payload: ChatPayload) {
     const userId = await this.chatService.getUserIdFromUsername(payload.username)
     const userSocketId = await this.connectedUsersService.getSocketId(userId)
     let targetSocketId = null
@@ -684,7 +684,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   // ---------------------------------------------------------- ADMIN ----------------------------------------------------------
   // Utilisation :  /ADMIN nomCible nomDuChannel   
   @SubscribeMessage('admin')
-  async adminUser(client: Socket, payload: any) {
+  async adminUser(client: Socket, payload: ChatPayload) {
     const userId = await this.chatService.getUserIdFromUsername(payload.username)
     const userSocketId = await this.connectedUsersService.getSocketId(userId)
     let targetSocketId = null;
@@ -747,7 +747,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   // Passer le channel en public : /MODE nomDuChannel public 
   // Passer le channel en mode protection : /MODE nomDuChannel protected motDePasse
   @SubscribeMessage('modeRoom')
-  async modeRoom(client: Socket, payload: any) {
+  async modeRoom(client: Socket, payload: ChannelPayload) {
     const userId = await this.chatService.getUserIdFromUsername(payload.username)
     const userSocketId = await this.connectedUsersService.getSocketId(userId)
     let userNotice : string = null
