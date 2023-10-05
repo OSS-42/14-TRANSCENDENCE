@@ -5,8 +5,9 @@ COPY . /app/backend/
 
 RUN npm install
 
-RUN rm -rf backend/prisma/migrations 
+RUN rm -rf backend/prisma/migrations
+COPY startDB.sh /app/backend/
 
-CMD ["npm", "run", "start:dev"]
+# CMD ["npm", "run", "start:dev"]
 
-# ENTRYPOINT ["npx", "prisma", "migrate", "dev"]
+ENTRYPOINT ["sh", "/app/backend/start.sh"]
