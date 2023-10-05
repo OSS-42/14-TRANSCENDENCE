@@ -876,6 +876,11 @@ export function Pong() {
         height: "92.5vh",
       }}
     >
+      <div className="instructions">
+        To change Camera POV during game : press C.
+        <br />
+        In case of disconnections of any party, wait 5 seconds for a page refresh.
+      </div>
       <div
         className="pong-container"
         style={{ width: dimension.width, height: dimension.height }}

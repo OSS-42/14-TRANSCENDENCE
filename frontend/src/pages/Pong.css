@@ -1,10 +1,3 @@
-/* #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
-} */
-
 .pong-container {
   position: sticky;
 }
@@ -110,12 +103,9 @@
   object-fit: cover;
 }
 
-/* .pause-message {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 32px;
-  color: white;
+.instructions {
+  font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
   text-align: center;
-} */
+  color: white;
+  padding: 0.5rem;
+}
