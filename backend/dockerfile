@@ -1,10 +1,10 @@
 FROM node:18-alpine3.17
 
-RUN rm -rf ./prisma/migrations
-
 WORKDIR /app/backend/
 COPY . /app/backend/
 
 RUN npm install
+
+RUN rm -rf ./prisma/migrations
 
 CMD ["npm", "run", "start:migrate:dev"]
