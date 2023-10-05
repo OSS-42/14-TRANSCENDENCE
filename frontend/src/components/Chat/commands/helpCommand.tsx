@@ -18,8 +18,8 @@ interface HelpCommandProps {
     if (command === "/HELP") {
       // Format du message pour le serveur
       socket.emit("help", {
-        username: user?.username,
-        param: param
+        message: param,
+        name: user?.username,
       });
     }
 }
