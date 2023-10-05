@@ -219,7 +219,6 @@ export function Pong() {
 
       if (!hostStatus) {
         socket.on('hostMovesUpdate', (data: HostGameParameters) => {
-          console.log("🏓🏓   receiving info as invite, ", gameId);
           if (data.gameId === gameId) {
             setBallPosition(data.ballPosition)
             setBallVelocity(data.ballVelocity)
@@ -233,7 +232,6 @@ export function Pong() {
         })
       } else {
         socket.on("clientMovesUpdate", (data: ClientGameParameters) => {
-          console.log("🏓🏓   receiving info as host, ", gameId);
           if (data.gameId === gameId) {
             setRightPaddlePositionZ(data.rightPaddlePositionZ);
           } else {
