@@ -6,14 +6,14 @@ import { ConfigService } from '@nestjs/config';
 import { ConnectedUsersService } from '../connectedUsers/connectedUsers.service';
 import { empty } from '@prisma/client/runtime/library';
 
-// admin, ban, inviteRoom, kickUser
+// admin, ban, inviteRoom, kickUser, mute
 interface ChatPayload {
   username: string,
   channelName: string[],
   target: string
 }
 
-// block,
+// block,unblock
 interface BlockPayload {
   username: string,
   socketID: string,
@@ -26,11 +26,18 @@ interface GeneralMessage {
   name: string
 }
 
-//joinRoom, modeRoom
+//joinRoom, modeRoom, 
 interface JoinChannel {
   username: string,
   channelName: string,
   param : string[]
+}
+
+// privmsg
+interface Privmsg {
+  username: string,
+  channelName: string,
+  param : string
 }
 
 
@@ -360,14 +367,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     let event : string = "notice"
     
     // --------------------------------------------- LE MESSAGE S'ADRESSE A UN CHANNEL ---------------------------------------------
-    if (payload.target === undefined || payload.message === null)
+    if (payload.target === undefined || payload.param === null)
     {
       notice = "/PRIVMSG: bad format"
       client.emit(event, {
         userId: userId,
         name: payload.username,
         channel: payload.target,
-        text: payload.message,
+        text: payload.param,
         notice : notice
       })
     }
@@ -392,7 +399,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
             userId: userId,
             name: payload.username,
             channel: payload.target,
-            text: payload.message,
+            text: payload.param,
             notice : notice
           })
         // ---------------------- J'ENVOIS UNE NOTICE A L'UTILSATEUR DE LA COMMANDE (ERREUR)  ----------------------
@@ -401,7 +408,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
             userId: userId,
             name: payload.username,
             channel: payload.target,
-            text: payload.message,
+            text: payload.param,
             notice : notice
           })
       } 
@@ -423,7 +430,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
             userId: userId,
             name: payload.username,
             channel: undefined,
-            text: payload.message,
+            text: payload.param,
             notice : notice
           })
           else
@@ -432,7 +439,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
           userId: userId,
           name: payload.username,
           channel: undefined,
-          text: payload.message,
+          text: payload.param,
           notice : notice
           })
       }
