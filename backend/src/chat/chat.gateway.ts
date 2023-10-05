@@ -7,6 +7,12 @@ import { ConnectedUsersService } from '../connectedUsers/connectedUsers.service'
 import { empty } from '@prisma/client/runtime/library';
 
 
+interface ChatPayload {
+  username: string,
+  channelName: string,
+  target: string
+}
+
 @WebSocketGateway({ cors: true,  namespace: 'chat' })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   // Map pour stocker les ID d'utilisateur associés aux IDs de socket
