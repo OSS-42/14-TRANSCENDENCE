@@ -178,7 +178,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         let invite : boolean = false;
         if (payload.param[0] === '+i')
         invite = true;
-        await this.chatService.createRoom(payload.channelName, userId, payload.param, invite)// voir avec sam pour le param invit
+        await this.chatService.createRoom(payload.channelName, userId, payload.param[0], invite)// voir avec sam pour le param invit
         client.join(payload.channelName);
         if (payload.param[0] !== undefined && payload.param[0] !== '+i' && payload.param[0] !== "")//Channel avec mdp
         await this.chatService.createPassword(payload.param[0], payload.channelName)
@@ -345,7 +345,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
     client.emit('notice', {
     name: payload.name,
-    channel: payload.channelName,
+    channel: undefined,
     text: undefined,
     notice: notice,
     help : help,
@@ -367,38 +367,38 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     let event : string = "notice"
     
     // --------------------------------------------- LE MESSAGE S'ADRESSE A UN CHANNEL ---------------------------------------------
-    if (payload.target === undefined || payload.param === null)
+    if (payload.channelName === undefined || payload.param === null)
     {
       notice = "/PRIVMSG: bad format"
       client.emit(event, {
         userId: userId,
         name: payload.username,
-        channel: payload.target,
+        channel: payload.channelName,
         text: payload.param,
         notice : notice
       })
     }
     else {
-      const roomObject = await this.chatService.isRoomExist(payload.target)
-      if (payload.target.startsWith("#")) {
+      const roomObject = await this.chatService.isRoomExist(payload.channelName)
+      if (payload.channelName.startsWith("#")) {
         // ---------------------- LE  CHANNEL N'EXISTE PAS ----------------------
         if (roomObject === null)
-          notice = `/PRIVMSG: The channel or user ${payload.target} doesn't exist`
+          notice = `/PRIVMSG: The channel or user ${payload.channelName} doesn't exist`
         // ---------------------- L'UTILISATEUR N'EST PAS MEMBRE DU CHANNEL ----------------------
         else if (await this.chatService.isUserMemberOfRoom(userId, roomObject.id) === false) //l'utilisateur ne fait pas partie du channel
-          notice = `/PRIVMSG: You are not a member of the channel ${payload.target}`
+          notice = `/PRIVMSG: You are not a member of the channel ${payload.channelName}`
         // ---------------------- L'UTILISATEUR EST MUTE DANS LE CHANNEL ----------------------
         else if (await this.chatService.isUserMutedInRoom(userId, roomObject.id) === true)
-          notice = `/PRIVMSG: You are muted in the room ${payload.target}`
+          notice = `/PRIVMSG: You are muted in the room ${payload.channelName}`
         // ---------------------- ON ENVOI LE MESSAGE AU CHANNEL  ----------------------
         else
           event = "messageResponse"
         // ---------------------- J'ENVOIS LE MESSAGE AU CHANNEL ----------------------
         if (event === "messageResponse")
-          this.server.to(payload.target).emit(event, {
+          this.server.to(payload.channelName).emit(event, {
             userId: userId,
             name: payload.username,
-            channel: payload.target,
+            channel: payload.channelName,
             text: payload.param,
             notice : notice
           })
@@ -407,7 +407,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
           client.emit(event, {
             userId: userId,
             name: payload.username,
-            channel: payload.target,
+            channel: payload.channelName,
             text: payload.param,
             notice : notice
           })
@@ -415,11 +415,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       
       // ------------------------------------------ LE MESSAGE S'ADRESSE A UN UTILISATEUR ------------------------------------------
       else { //le message s'adresse a un utilistateur 
-        const userId = await this.chatService.getUserIdFromUsername(payload.target);
+        const userId = await this.chatService.getUserIdFromUsername(payload.channelName);
         const socketId = await this.connectedUsersService.getSocketId(userId)
         // ---------------------- L'UTILISATEUR N'EXISTE PAS ----------------------
         if (userId === null)
-          notice = `/PRIVMSG: The user ${payload.target} doesn't exist`
+          notice = `/PRIVMSG: The user ${payload.channelName} doesn't exist`
         // il faut verifier si l'utilisateur n'est pas bloqué. Mais c'est plus frontend je penses
         // ---------------------- SINON ON ENVOI LE MESSAGE A L'UTILISATEUR  ----------------------
         else
