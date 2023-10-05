@@ -10,4 +10,4 @@ COPY startDB.sh /app/backend/
 
 # CMD ["npm", "run", "start:dev"]
 
-ENTRYPOINT ["sh", "/app/backend/start.sh"]
+ENTRYPOINT ["sh", "/app/backend/startDB.sh"]
