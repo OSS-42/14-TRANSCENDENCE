@@ -36,7 +36,7 @@ export class AuthService {
 
 
 
-  //Fonction qui contacte lapi--42 afin de recuperer lacces token, elle cree  un nouvelle utilisateur egalement
+  //Fonction qui contacte l'api-42 afin de récuperer l'acces token, elle cree  un nouvelle utilisateur egalement
   async getCode42(code: string) {
     let token: string;
     let UserToken: Promise<{ access_token: string }> = Promise.resolve({ access_token: '' })
@@ -54,9 +54,8 @@ export class AuthService {
           },
         }
       );
-      // console.log("Réponse POST:", response.data);
       token = response.data.access_token;
-    } 
+    }
     catch (error) {
       console.error("Erreur POST:", error);
     }
@@ -73,15 +72,14 @@ export class AuthService {
         const username: string = data.login;
         const email :string= data.email;
         const avatar :string = data.image.versions.small;
-        
+
         let user = await this.prisma.utilisateur.findUnique({
           where: { email },
         });
 
         const isUsernameTaken = await this.isUsernameTaken(username);
-       
         if (!user) {
-          
+
           const { v4: uuidv4 } = require('uuid');
           const customPrefix = 'poulet';
           const uniqueId = customPrefix + '-' + uuidv4();
@@ -135,11 +133,10 @@ export class AuthService {
 
 //---services pour le 2FA----//
 
-// Faire une validation quand la premiere fois qu<il ya une connexion
+// Faire une validation quand la premiere fois qu'il ya une connexion
   async enable2FA(userId: number): Promise<{ otpauthUrl: string, secret: string }> {
     const secret = speakeasy.generateSecret({ length: 20 });
 
-    
     await this.prisma.utilisateur.update({
       where: { id: userId },
       data: { twoFactorSecret: secret.base32,
@@ -148,15 +145,13 @@ export class AuthService {
 
     const otpauthUrl = speakeasy.otpauthURL({
       secret: secret.ascii,
-      label: 'Balls of Fury', 
-      issuer: 'Angry chicken', 
+      label: 'Balls of Fury',
+      issuer: 'Angry chicken',
     });
     return { otpauthUrl, secret: secret.base32 };
   }
 
   // Méthode pour vérifier le code 2FA
-
-
 
   async verify2FA(userId: number, token: string): Promise<boolean> {
     const user = await this.prisma.utilisateur.findUnique({

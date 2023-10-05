@@ -47,7 +47,6 @@ export class AuthControler {
     const access_token: string = token_object.access_token;
 
     res.cookie("jwt_token", access_token, { httpOnly: false, secure: false });
-    // console.log(token_object);
 
     return res.redirect(`${host}`);
   }
@@ -58,7 +57,6 @@ export class AuthControler {
   }
   //---routes pour le 2FA----//
 
-  //C<est une route post, mais il n'y a pas de body pour l<instant
   @UseGuards(JwtGuard)
   @Post("enable2FA")
   async enable2FA(@Req() req) {
@@ -67,7 +65,6 @@ export class AuthControler {
     return { otpauthUrl };
   }
 
-  //C<est une route post, mais il n'y a pas de body pour l<instant
   @UseGuards(JwtGuard)
   @Post("disable2FA")
   async disable2FA(@Req() req) {

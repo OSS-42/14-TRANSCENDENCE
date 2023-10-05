@@ -96,7 +96,6 @@ export async function updateUser(editedName: string): Promise<void> {
       newUsername: editedName,
     });
     console.log("Updating name was successful");
-    // console.log(response.data);
     return response.data;
   } catch (error) {
     console.error("Error updating user data:", error);
