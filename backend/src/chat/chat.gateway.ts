@@ -6,12 +6,34 @@ import { ConfigService } from '@nestjs/config';
 import { ConnectedUsersService } from '../connectedUsers/connectedUsers.service';
 import { empty } from '@prisma/client/runtime/library';
 
-
+// admin, ban, inviteRoom, kickUser
 interface ChatPayload {
   username: string,
-  channelName: string,
+  channelName: string[],
   target: string
 }
+
+// block,
+interface BlockPayload {
+  username: string,
+  socketID: string,
+  target: string[]
+}
+
+// default(message), help, list
+interface GeneralMessage {
+  message: string[],
+  name: string
+}
+
+//joinRoom, modeRoom
+interface JoinChannel {
+  username: string,
+  channelName: string,
+  param : string[]
+}
+
+
 
 @WebSocketGateway({ cors: true,  namespace: 'chat' })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -247,11 +269,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   // Utilisation :  /HELP 
   @SubscribeMessage('help')
   async help(client: Socket, payload: any) {
-    const userId = await this.chatService.getUserIdFromUsername(payload.username)
+    const userId = await this.chatService.getUserIdFromUsername(payload.name)
     let notice : string = undefined
     let help : string = undefined
     // ------------------------ Trop de parametre ------------------------
-    if (payload.param[0] !== undefined)
+    if (payload.message[0] !== undefined)
       notice = '/HELP: Too many argument'
     else {
     help = `
@@ -289,7 +311,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     }      
     client.emit('notice', {
-    name: payload.username,
+    name: payload.name,
     channel: payload.channelName,
     text: undefined,
     notice : notice,
@@ -301,12 +323,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   // Utilisation :  /LIST 
   @SubscribeMessage('list')
   async listChannel(client: Socket, payload: any) {
-    const userId = await this.chatService.getUserIdFromUsername(payload.username)
+    const userId = await this.chatService.getUserIdFromUsername(payload.name)
     const channelList = await this.chatService.getRoomNamesUserIsMemberOf(userId)
     let notice : string = undefined
     let help : string = null
     // ------------------------ Trop de parametre ------------------------
-    if (payload.param[0] !== undefined && payload.param[0] !== "")
+    if (payload.message[0] !== undefined && payload.message[0] !== "")
       notice = '/LIST: Too many argument'
     else if (channelList.length === 0)
       notice = '/LIST: You are not inside any channel'
@@ -315,7 +337,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       help = `<br>Here is the list of channels you are part of :<br>${formattedList}<br>`;
     }
     client.emit('notice', {
-    name: payload.username,
+    name: payload.name,
     channel: payload.channelName,
     text: undefined,
     notice: notice,

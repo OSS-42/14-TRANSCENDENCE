@@ -25,5 +25,3 @@ interface JoinCommandProps {
     }
 }
 export default joinCommand
-
-// 

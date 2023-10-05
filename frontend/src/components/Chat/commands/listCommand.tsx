@@ -18,8 +18,8 @@ interface ListCommandProps {
     if (command === "/LIST") {
       // Format du message pour le serveur
       socket.emit("list", {
-        username: user?.username,
-        param: param
+        message: param,
+        name: user?.username,
       });
     }
 }
