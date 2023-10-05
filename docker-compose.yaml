@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   db:
     image: postgres:15
@@ -11,7 +13,6 @@ services:
   backend:
     build:
       context: ./backend
-      dockerfile: dockerfile
     volumes:
       - ./backend:/app/backend:delegated
       - /app/backend/node_modules
@@ -27,7 +28,6 @@ services:
   frontend:
     build:
       context: ./frontend
-      dockerfile: dockerfile
     volumes:
       - ./frontend:/app/frontend:delegated
       - /app/frontend/node_modules
