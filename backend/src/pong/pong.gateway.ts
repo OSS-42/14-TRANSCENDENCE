@@ -6,14 +6,50 @@ import { PongService } from './pong.service';
 import { v4 as uuid } from 'uuid';
 import { ConnectedUsersService } from 'src/connectedUsers/connectedUsers.service';
 
+interface ChallengeGame {
+  playerName: string;
+  newGM: number;
+  gameIdFromUrl: string;
+}
+
+interface GM3 {
+  playerName: string;
+  newGM: number;
+}
+
+interface ClientGameParameters {
+  gameId: string;
+  rightPaddlePositionZ: number;
+}
+
+interface HostGameParameters {
+  gameId: string;
+  ballPosition: { x: number; y: number; z: number };
+  ballVelocity: { x: number, z: number };
+  leftPaddlePositionZ: number;
+  rightPaddlePositionZ: number;
+  leftScore: number;
+  rightScore: number;
+};
+
+interface WeHaveAWinner {
+  gameId: string;
+  theHostIsWinner: boolean;
+  winnerText: string;
+  hostname: string;
+  clientName: string;
+};
+
+type GameState = HostGameParameters | ClientGameParameters | WeHaveAWinner;
+
 @WebSocketGateway({ cors: true,  namespace: 'pong' })
 export class PongGateway {
   constructor(private pongService: PongService, private config: ConfigService, private readonly connectedUsersService: ConnectedUsersService) {}
 
   private playerNames: Map<string, string> = new Map();
   private gameModeQueue: Map<number, Socket[]> = new Map();
-  private gameStates: Map<string, any> = new Map();
-  private gameIds: Map<any, string> = new Map();
+  private gameStates: Map<string, GameState> = new Map();
+  private gameIds: Map<Map<string, Socket>, string> = new Map();
   
   @WebSocketServer()
   server: Server
@@ -27,8 +63,6 @@ export class PongGateway {
       if (token) {
         try {
           const decoded = verify(token, this.config.get("JWT_SECRET"));
-          // console.log("🏓   voici lidentite du socket");
-          // console.log("🏓   ", decoded);
 
           //Array of Users connected to Pong
           
@@ -48,7 +82,7 @@ export class PongGateway {
 
   handleDisconnect(client: Socket) {
     let gameIdToTerminate: string;
-    let clientsMapToTerminate: any;
+    let clientsMapToTerminate: Map<string, Socket>;
     
     //update connectedToPong
     
@@ -88,14 +122,15 @@ export class PongGateway {
   }
 
   @SubscribeMessage('disconnected')
-  handlePlayerDisconnect(client: Socket, payload: any) {
+  handlePlayerDisconnect(client: Socket) {
+  // handlePlayerDisconnect(client: Socket, payload: any) {
     // console.log("gameID: ", payload.gameId, " must be terminated");
 
     this.handleDisconnect(client);
   }
 
   @SubscribeMessage('challengeGame')
-  challengeGame(client: Socket, payload: any) {
+  challengeGame(client: Socket, payload: ChallengeGame) {
 
     // console.log("coucou");
     // Initializing the queue if not existing
@@ -142,7 +177,7 @@ export class PongGateway {
 
 
   @SubscribeMessage('waitingForPlayerGM3')
-  handleWaitingForPlayerGM3(client: Socket, payload: any) {
+  handleWaitingForPlayerGM3(client: Socket, payload: GM3) {
 
     // Initializing the queue if not existing
     if (!this.gameModeQueue.has(payload.newGM)) {
@@ -187,7 +222,8 @@ export class PongGateway {
   }
 
   @SubscribeMessage('hostGameParameters')
-  handleGameParameters(client: Socket, payload: any) {
+  handleGameParameters(payload: HostGameParameters) {
+  // handleGameParameters(client: Socket, payload: HostGameParameters) {
     const gameId = payload.gameId; // Make sure to send gameId from client
     
     this.gameStates.set(gameId, payload);
@@ -196,7 +232,8 @@ export class PongGateway {
   }
 
   @SubscribeMessage('clientGameParameters')
-  handleGameParametersClient(client: Socket, payload: any) {
+  handleGameParametersClient(payload: ClientGameParameters) {
+  // handleGameParametersClient(client: Socket, payload: ClientGameParameters) {
     const gameId = payload.gameId; // Make sure to send gameId from client
     
     this.gameStates.set(gameId, payload);
@@ -205,16 +242,17 @@ export class PongGateway {
   }
 
   @SubscribeMessage('weHaveAWinner')
-  handleWinner(client: Socket, payload: any) {
+  handleWinner(payload: WeHaveAWinner) {
+  // handleWinner(client: Socket, payload: WeHaveAWinner) {
     const gameId = payload.gameId; // Make sure to send gameId from client
     
     this.server.to(gameId).emit('weHaveAWinner', payload);
-    // console.log(`🏓   in ${gameId}, the winner is  `, payload.isHostWinner.current);
+    // console.log(`🏓   in ${gameId}, the winner is  `, payload.theHostIsWinner);
 
     this.gameStates.set(gameId, payload);
     this.server.to(gameId).volatile.emit('weHaveAWinner', payload);
     
-    if(!payload.isHostWinner.current){
+    if(!payload.theHostIsWinner){
       // console.log("Winner (invite): ", payload.clientName, " - Loser: ", payload.hostname);
       this.pongService.updateHistory(payload.clientName, payload.hostname);
     }
@@ -224,7 +262,7 @@ export class PongGateway {
     }
 
     // cleaning the gameId from the list of gameIds:
-    let clientsMapToTerminate: any;
+    let clientsMapToTerminate: Map<string, Socket>;
   
     // Identify the game ID to terminate when the game ends.
     for (const [clientsMap, existingGameId] of this.gameIds.entries()) {

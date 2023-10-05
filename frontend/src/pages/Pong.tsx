@@ -24,15 +24,24 @@ import { useLocation } from 'react-router-dom';
 
 //============== INFOS QUI TRANSITENT ENTRE SOCKETS ==============
 
-type GameParameters = {
+type Connection = {
+  isConnected: boolean;
+}
+
+type HostGameParameters = {
   gameId: string;
   ballPosition: { x: number; y: number; z: number };
   ballVelocity: { x: number, z: number };
   leftPaddlePositionZ: number;
-  rightPaddlePositionZ: number;
+  rightPaddlePositionZ: number; // a garder ?
   leftScore: number;
   rightScore: number;
 };
+
+type ClientGameParameters = {
+  gameId: string;
+  rightPaddlePositionZ: number;
+}
 
 type PlayerJoined = {
   gameId: string;
@@ -43,7 +52,10 @@ type PlayerJoined = {
 
 type WeHaveAWinner = {
   gameId: string;
-  isHostWinner: boolean;
+  theHostIsWinner: boolean;
+  winnerText: string;
+  hostname: string;
+  clientName: string;
 };
 
 type OppDisconnected = {
@@ -141,7 +153,7 @@ export function Pong() {
   // Ecoute parler le socket
   useEffect(() => {
     if (socket) {
-      socket.on("connected", (data: any) => {
+      socket.on("connected", (data: Connection) => {
         console.log("🏓   Connection established ? ", data.isConnected);
         setIsConnected(data.isConnected);
         if (user) {
@@ -164,7 +176,7 @@ export function Pong() {
         handleCountdown();
       });
 
-      socket.on("opponentDisconnected", (data: any) => {
+      socket.on("opponentDisconnected", (data: OppDisconnected) => {
         console.log(data);
         setOppDisconnected(data.message);
       });
@@ -208,7 +220,7 @@ export function Pong() {
       }
 
       if (!hostStatus) {
-        socket.on('hostMovesUpdate', (data: GameParameters) => {
+        socket.on('hostMovesUpdate', (data: HostGameParameters) => {
           if (data.gameId === gameId) {
             setBallPosition(data.ballPosition)
             setBallVelocity(data.ballVelocity)
@@ -221,7 +233,7 @@ export function Pong() {
           }
         })
       } else {
-        socket.on("clientMovesUpdate", (data: any) => {
+        socket.on("clientMovesUpdate", (data: ClientGameParameters) => {
           if (data.gameId === gameId) {
             setRightPaddlePositionZ(data.rightPaddlePositionZ);
           } else {
@@ -253,7 +265,7 @@ export function Pong() {
         if (data.gameId === gameId) {
           setTimeout(() => {
             console.log('THERE IS A WINNER ', gameId);
-            isHostWinner.current = data.isHostWinner;
+            isHostWinner.current = data.theHostIsWinner;
             isGameOver.current = true;
             setGameLaunched(false);
             setIsPaused(true);
@@ -536,11 +548,12 @@ export function Pong() {
     console.log("🏓   ", winnerText);
     console.log("🏓   ", gameId);
     console.log("🏓   ", isHostWinner.current);
+    let theHostIsWinner: boolean = isHostWinner.current;
     if (gameId && socket && hostStatus) {
       console.log("🏓   envoi du resultat");
       socket.emit("weHaveAWinner", {
         gameId,
-        isHostWinner,
+        theHostIsWinner,
         winnerText,
         hostname,
         clientName,
