@@ -200,7 +200,6 @@ export function Pong() {
   useEffect(() => {
     if (socket && initialSetupComplete) {
       if (hostStatus) {
-        // console.log("🏓🏓   emitting info as host, ", gameId);
         socket.volatile.emit("hostGameParameters", {
           gameId,
           ballPosition,
@@ -210,7 +209,6 @@ export function Pong() {
           rightScore,
         });
       } else {
-        // console.log("🏓🏓   emitting info as invite, ", gameId);
         socket.volatile.emit("clientGameParameters", {
           gameId,
           rightPaddlePositionZ,
@@ -287,15 +285,14 @@ export function Pong() {
   useEffect(() => {
       const urlParams = new URLSearchParams(window.location.search);
       const mode = urlParams.get("gameIdFromUrl");
-      // console.log("MODE: ", mode);
       if (mode && isConnected) {
         handleInvitationMode();
       } else {
         setIsPaused(true);
       }
-    
+
   }, [isConnected])
-  
+
   const handleInvitationMode = (): void => {
     console.log("🏓   classic 1 vs 1 sur INVITATION");
     try {
