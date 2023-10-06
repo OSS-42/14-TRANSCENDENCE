@@ -1,7 +1,5 @@
 FROM node:18-alpine3.17
 
-RUN rm -rf /app/backend/prisma/migrations
-
 WORKDIR /app/backend/
 COPY . /app/backend/
 
