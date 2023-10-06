@@ -14,12 +14,7 @@ Objectifs du projet :
 
 Quelques Screenshots :
 
-<img src="./assets/demo/chat.png" width="300">
-<img src="./assets/demo/pong.png" height="170">
-<img src="./assets/demo/pong1.png" height="170">
-<img src="./assets/demo/pong2.png" height="170">
-<img src="./assets/demo/profile.png" width="300">
-<img src="./assets/demo/invite.png" height="170">
+<img src="./assets/demo/chat.png" width="300"><img src="./assets/demo/pong.png" height="170"><img src="./assets/demo/pong1.png" height="170"><img src="./assets/demo/pong2.png" height="170"><img src="./assets/demo/profile.png" width="300"><img src="./assets/demo/invite.png" height="170">
 
 
 Réalisé par :
