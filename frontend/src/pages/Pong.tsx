@@ -152,10 +152,10 @@ export function Pong() {
   useEffect(() => {
     if (socket) {
       socket.on("connected", (data: Connection) => {
-        console.log("🏓   Connection established ? ", data.isConnected);
+        // console.log("🏓   Connection established ? ", data.isConnected);
         setIsConnected(data.isConnected);
         if (user) {
-          console.log("🏓   username is ", user.username);
+          // console.log("🏓   username is ", user.username);
           setPlayerName(user.username);
         }
         if (!data.isConnected) {
@@ -170,12 +170,12 @@ export function Pong() {
         setHostStatus(data.hostStatus);
         setHostname(data.hostName);
         setClientName(data.clientName);
-        console.log("🏓   GAMEID: ", data.gameId);
+        // console.log("🏓   GAMEID: ", data.gameId);
         handleCountdown();
       });
 
       socket.on("opponentDisconnected", (data: OppDisconnected) => {
-        console.log(data);
+        // console.log(data);
         setOppDisconnected(data.message);
       });
 
@@ -260,7 +260,7 @@ export function Pong() {
       socket.on("weHaveAWinner", (data: WeHaveAWinner) => {
         if (data.gameId === gameId) {
           setTimeout(() => {
-            console.log('THERE IS A WINNER ', gameId);
+            // console.log('THERE IS A WINNER ', gameId);
             isHostWinner.current = data.theHostIsWinner;
             isGameOver.current = true;
             setGameLaunched(false);
