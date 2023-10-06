@@ -266,7 +266,7 @@ export function Pong() {
             setGameLaunched(false);
             setIsPaused(true);
             window.location.href = "/game";
-          }, 5000);
+          }, 2000);
         } else {
           socket.emit("oppDisconnected", { message : 'Deconnection. End of Game.' })
           setIsPaused(true);
@@ -297,18 +297,18 @@ export function Pong() {
     console.log("🏓   classic 1 vs 1 sur INVITATION");
     try {
       const newGM = 5;
-      console.log(socket);
+      // console.log(socket);
       if (socket) {
         socket.emit("challengeGame", { playerName, newGM, gameIdFromUrl });
-        console.log("coucou");
+        // console.log("coucou");
         setWaitingForPlayer(true);
         setGameLaunched(true);
         setCameraMode("orthographic");
         setGameMode(newGM);
         setShowButtons(false);
       }
-    } catch {
-      console.log("🏓   we catched an issue. GM5");
+    } catch (error) {
+      console.log("🏓   we catched an issue. GM5: ", error);
       return;
     }
   };
@@ -325,8 +325,8 @@ export function Pong() {
         setGameMode(newGM);
         setShowButtons(false);
       }
-    } catch {
-      console.log("🏓   we catched an issue. GM3");
+    } catch (error) {
+      console.log("🏓   we catched an issue. GM3: ", error);
       return;
     }
   };
@@ -374,14 +374,14 @@ export function Pong() {
   const handleKeyPress = (event: KeyboardEvent): void => {
     if (event.key === "c" || event.key === "C") {
       // Toggle the camera mode when the "C" key is pressed
-      console.log("🏓   c has been pressed");
+      // console.log("🏓   c has been pressed");
       setCameraMode((prevMode) =>
         prevMode === "orthographic" ? "perspective" : "orthographic"
       );
     }
     if (event.key === "s" || event.key === "S") {
       //Toggle sounds when "S" key is pressed
-      console.log("🏓   s has been pressed");
+      // console.log("🏓   s has been pressed");
       if (!soundsON.current) {
         soundsON.current = true;
       } else {
@@ -410,7 +410,7 @@ export function Pong() {
 
       setTimeout(() => {
         window.location.href = "/game";
-      }, 5000);
+      }, 2000);
     }
   }, [oppDisconnected]);
 
@@ -419,7 +419,7 @@ export function Pong() {
     function handleVisibilityChange() {
       if (document.hidden) {
         if (socket) {
-          console.log("Tab is now inactive. Disconnecting.");
+          // console.log("Tab is now inactive. Disconnecting.");
           socket.emit("disconnected", {
             gameId: gameId });
         }
@@ -522,7 +522,7 @@ export function Pong() {
 //-------------- SCOREBOARD LOGIC --------------
 
   const goalScored = (prevScore: number, side: string) => {
-    console.log('goalScored is called');
+    // console.log('goalScored is called');
     let newScore = prevScore + 1;
 
     if (side === 'right') {
@@ -541,9 +541,9 @@ export function Pong() {
   const sentWinnerMessage = (winnerText: string) => {
     setWinner(winnerText);
 
-    console.log("🏓   ", winnerText);
-    console.log("🏓   ", gameId);
-    console.log("🏓   ", isHostWinner.current);
+    // console.log("🏓   ", winnerText);
+    // console.log("🏓   ", gameId);
+    // console.log("🏓   ", isHostWinner.current);
     let theHostIsWinner: boolean = isHostWinner.current;
     if (gameId && socket && hostStatus) {
       console.log("🏓   envoi du resultat");
@@ -561,7 +561,7 @@ export function Pong() {
       if (rightScore >= 3 || leftScore >= 3) {
         isGameOver.current = true;
         setIsPaused(true);
-        console.log("🏓   Quelqu'un a gagne: ", leftScore, " - ", rightScore);
+        // console.log("🏓   Quelqu'un a gagne: ", leftScore, " - ", rightScore);
 
         let winnerText = "";
         if (rightScore === 3) {
@@ -576,10 +576,10 @@ export function Pong() {
         }
         
         sentWinnerMessage(winnerText);
-
-      } else if (hostStatus) {
-        console.log('envoi du nouveau score : ', leftScore, " - ", rightScore);
-      };
+      }
+      // } else if (hostStatus) {
+      //   console.log('envoi du nouveau score : ', leftScore, " - ", rightScore);
+      // };
   }, [leftScore, rightScore])
 
   //============== GAME BALL LOGIC ==============
@@ -876,7 +876,7 @@ export function Pong() {
       <div className="instructions">
         To change Camera POV during game : press C.
         <br />
-        In case of disconnections of any party or at the end of game, wait 5 seconds for a page refresh.
+        In case of disconnections of any party or at the end of game, wait 2 seconds for a page refresh.
       </div>
       <div
         className="pong-container"
