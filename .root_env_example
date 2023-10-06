@@ -1,0 +1,7 @@
+# DB config
+# Uncomment and update variables, then change this file's name to .env
+
+# POSTGRES_USER=
+# POSTGRES_PASSWORD=
+# POSTGRES_DB=
+POSTGRES_PORT=5432:5432
