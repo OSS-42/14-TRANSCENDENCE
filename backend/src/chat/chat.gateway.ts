@@ -97,9 +97,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
 //Retourne le clientId du socket, si lutilisateur n<est pas connect/ la fonciton retourne undefined.
-  // connectedUsersService.getSocketId(id: number): string | undefined {
-  //   return this.connectedUsers.get(id);
-  // }
   //join chaque channel dont le user est membre
   private  async joinRoomsAtConnection(userId:number, client:Socket){
     const memberOf = await this.chatService.getRoomNamesUserIsMemberOf(userId)
@@ -611,7 +608,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       else {
         targetNotice = `You are kick of the channel ${payload.channelName}`
         userNotice = `/KICK: The user ${payload.target} is now kicked of the room ${payload.channelName[0]}`
-        client.leave(payload.channelName[0])
         await this.chatService.removeMember(roomObject.id, targetId)
       }
     } 
@@ -665,13 +661,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       else if (await this.chatService.isUserOwnerOfChatRoom(targetId, roomObject.id) === true)
         userNotice = `/BAN: The target is the owner of the room ${payload.channelName}`
       else if (userId === targetId)
-        userNotice = `/MUTE: You can't mute yourself`
+        userNotice = `/BAN: You can't BAN yourself`
       // ------------------------ Sinon on ban la cible ------------------------
       else {
         targetNotice = `You are ban of the channel ${payload.channelName}`
         userNotice = `/BAN: The user ${payload.target} is now ban of the room ${payload.channelName[0]}`
         await this.chatService.banUserFromRoom(targetId, roomObject.id)
-        client.leave(payload.channelName[0])
       }
     }
     if (targetSocketId !== null && targetNotice !== null)
