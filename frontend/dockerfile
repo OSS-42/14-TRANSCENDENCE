@@ -11,4 +11,4 @@ RUN chmod +x /usr/local/bin/wait-for-it.sh
 COPY startup.sh /usr/local/bin/startup.sh
 RUN chmod +x /usr/local/bin/startup.sh
 
-CMD ["startup.sh"]
+CMD ["/bin/sh","startup.sh"]
