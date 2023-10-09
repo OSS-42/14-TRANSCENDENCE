@@ -50,13 +50,14 @@ export function FriendsAndUsers({ socket }: someProp) {
       }
     };
   }, [invitationModalIsOpen]);
-
+  
+  // ----------------------------- DEBUT DU useEffect -----------------------------
   useEffect(() => {
     socket.on("updateConnectedUsers", (data: UpdateConnectedUsersData) => {
       const jwtToken:string  =  getCookies("jwt_token");
-    if(tkn !== jwtToken ){
-      logout() 
-    }
+      if(tkn !== jwtToken ){
+        logout() 
+      }
       
       const { connectedUserIds, connectedUserIdsPong } = data;
       setConnectedUsers(connectedUserIds);
@@ -75,6 +76,7 @@ export function FriendsAndUsers({ socket }: someProp) {
       }, 10000);
     });
 
+    // Je crois que c'est ici que ca ce passe pour les appel d'API en boucle
     async function fetchInitialData() {
       try {
         const newFriendsList = await fetchFriendsList();
@@ -92,6 +94,7 @@ export function FriendsAndUsers({ socket }: someProp) {
       socket.off("invitation");
     };
   }, [connectedUsers]);
+  // ----------------------------- FIN DU useEffect -----------------------------
 
   function acceptGame() {
     if (gameId) {

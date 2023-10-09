@@ -92,8 +92,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       }
       this.emitUpdateConnectedUsers()
     }
-    // const connectedUserIds = Array.from(this.connectedUsers.keys());
-    // this.server.emit("updateConnectedUsers", connectedUserIds)
   }
 
 //Retourne le clientId du socket, si lutilisateur n<est pas connect/ la fonciton retourne undefined.
@@ -808,13 +806,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     })
   }  
 }
-
-
-   //cette ligne permet de diffuser a tout le monde, sauf celui qui emet
-   //client.broadcast.emit('test', {'payload':'test'});
-
-  //exemple pour envoyer un message a une room.
-   //this.server.to('room-name').emit('message', 'Hello from the room!');
 
 
 
