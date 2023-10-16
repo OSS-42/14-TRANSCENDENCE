@@ -49,7 +49,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   //private connectedUsers: Map<number, string> = new Map(); 
 
   constructor(private chatService: ChatService, private config: ConfigService, private readonly connectedUsersService: ConnectedUsersService) {
-    setInterval(() => this.emitUpdateConnectedUsers(), 1500);
+    // setInterval(() => this.emitUpdateConnectedUsers(), 1500);
   }
   @WebSocketServer()
   server: Server

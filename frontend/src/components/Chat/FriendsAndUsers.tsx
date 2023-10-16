@@ -10,6 +10,7 @@ import { fetchFriendsList, fetchUsersList } from "../../api/requests";
 import { useRoutes } from "../../contexts/RoutesContext";
 import { Box, Button } from "@mui/material";
 import { getCookies } from "../../utils";
+
 interface UpdateConnectedUsersData {
   connectedUserIds: number[];
   connectedUserIdsPong: number[];
@@ -50,6 +51,7 @@ export function FriendsAndUsers({ socket }: someProp) {
       }
     };
   }, [invitationModalIsOpen]);
+
   
   // ----------------------------- DEBUT DU useEffect -----------------------------
   useEffect(() => {
@@ -65,16 +67,16 @@ export function FriendsAndUsers({ socket }: someProp) {
       setConnectedToPong(connectedUserIdsPong);
     });
 
-    socket.on("invitation", (payload: any) => {
-      setGameId(payload.roomId);
-      setChallengerUsername(payload.challengerUsername);
-      setChallengerId(payload.challengerId);
-      setInvitationModalIsOpen(true);
+    // socket.on("invitation", (payload: any) => {
+    //   setGameId(payload.roomId);
+    //   setChallengerUsername(payload.challengerUsername);
+    //   setChallengerId(payload.challengerId);
+    //   setInvitationModalIsOpen(true);
 
-      setTimeout(() => {
-        setInvitationModalIsOpen(false);
-      }, 10000);
-    });
+    //   setTimeout(() => {
+    //     setInvitationModalIsOpen(false);
+    //   }, 10000);
+    // });
 
     // Je crois que c'est ici que ca ce passe pour les appel d'API en boucle
     async function fetchInitialData() {
@@ -91,10 +93,28 @@ export function FriendsAndUsers({ socket }: someProp) {
 
     return () => {
       socket.off("updateConnectedUsers");
+      // socket.off("invitation");
+    };
+  }, []) // retrait de [connectedUsers]
+  // ----------------------------- FIN DU useEffect -----------------------------
+
+  // -------------------------Decouplage--------------------------
+  useEffect(() => {
+    socket.on("invitation", (payload: any) => {
+      setGameId(payload.roomId);
+      setChallengerUsername(payload.challengerUsername);
+      setChallengerId(payload.challengerId);
+      setInvitationModalIsOpen(true);
+
+      setTimeout(() => {
+        setInvitationModalIsOpen(false);
+      }, 10000);
+    });
+
+    return () => {
       socket.off("invitation");
     };
-  }, [connectedUsers]);
-  // ----------------------------- FIN DU useEffect -----------------------------
+  })
 
   function acceptGame() {
     if (gameId) {
