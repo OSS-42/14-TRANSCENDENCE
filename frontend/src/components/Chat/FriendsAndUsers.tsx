@@ -65,17 +65,6 @@ export function FriendsAndUsers({ socket }: someProp) {
       setConnectedToPong(connectedUserIdsPong);
     });
 
-    socket.on("invitation", (payload: any) => {
-      setGameId(payload.roomId);
-      setChallengerUsername(payload.challengerUsername);
-      setChallengerId(payload.challengerId);
-      setInvitationModalIsOpen(true);
-
-      setTimeout(() => {
-        setInvitationModalIsOpen(false);
-      }, 10000);
-    });
-
     // Je crois que c'est ici que ca ce passe pour les appel d'API en boucle
     async function fetchInitialData() {
       try {
@@ -91,9 +80,30 @@ export function FriendsAndUsers({ socket }: someProp) {
 
     return () => {
       socket.off("updateConnectedUsers");
-      socket.off("invitation");
+      // socket.off("invitation");
     };
   }, [connectedUsers]);
+
+  // -------------------------- Decouplagge Invitation --------------------------
+
+useEffect(() => {
+  socket.on("invitation", (payload: any) => {
+    setGameId(payload.roomId);
+    setChallengerUsername(payload.challengerUsername);
+    setChallengerId(payload.challengerId);
+    setInvitationModalIsOpen(true);
+
+    setTimeout(() => {
+      setInvitationModalIsOpen(false);
+    }, 10000);
+  });
+
+  return () => {
+    socket.off("invitation");
+  };
+
+}, [connectedUsers]);
+
   // ----------------------------- FIN DU useEffect -----------------------------
 
   function acceptGame() {
