@@ -5,6 +5,7 @@ import { verify } from 'jsonwebtoken';
 import { ConfigService } from '@nestjs/config';
 import { ConnectedUsersService } from '../connectedUsers/connectedUsers.service';
 import { empty } from '@prisma/client/runtime/library';
+import { OnModuleInit} from '@nestjs/common';
 
 // admin, ban, inviteRoom, kickUser, mute
 interface ChatPayload {
@@ -40,19 +41,22 @@ interface PrivmsgPayload {
   param : string
 }
 
-
-
 @WebSocketGateway({ cors: true,  namespace: 'chat' })
-export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
+export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, OnModuleInit {
   // Map pour stocker les ID d'utilisateur associés aux IDs de socket
   // AVec cette map, on peut identifier le client.id à partir d'un Utilisateur ID.
   //private connectedUsers: Map<number, string> = new Map(); 
 
   constructor(private chatService: ChatService, private config: ConfigService, private readonly connectedUsersService: ConnectedUsersService) {
-    setInterval(() => this.emitUpdateConnectedUsers(), 1500);
+    // setInterval(() => this.emitUpdateConnectedUsers(), 1500);
   }
   @WebSocketServer()
   server: Server
+
+  // UPDATE : onmoduleinit pour s'assurer que le websocket est fini d'etre mis en place et ensuite de faire le premier emit.
+  onModuleInit() {
+    this.emitUpdateConnectedUsers();
+  }
  
   //Fonction qui gère les nouvelles connexion au socket
   //dès qu'il y a un nouveau client, cette fonction est appelée
@@ -79,7 +83,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
    }
    // renvoie au client la liste des users connectés
  
-    
   //Fonction qui gère les déconnexions au socket
   //dès qu'un client se déconnecte du socket, cette fonction est appelée
   handleDisconnect(client: Socket): void {
@@ -90,8 +93,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         this.connectedUsersService.delete(userId);
         break;
       }
-      this.emitUpdateConnectedUsers()
     }
+    this.emitUpdateConnectedUsers()
     // const connectedUserIds = Array.from(this.connectedUsers.keys());
     // this.server.emit("updateConnectedUsers", connectedUserIds)
   }
