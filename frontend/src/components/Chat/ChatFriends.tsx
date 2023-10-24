@@ -8,7 +8,8 @@ import SportsCricketSharpIcon from '@mui/icons-material/SportsCricketSharp'
 type ChatFriendsProps = {
   socket: Socket
   connectedUsers: number[]
-  connectedToPong: number[]
+  // connectedToPong: number[]
+  userAvailability: boolean
   friendsList: User[]
   setFriendsList: React.Dispatch<React.SetStateAction<User[]>>
   handleUserClick: (user: User) => void
@@ -21,7 +22,8 @@ const ChatFriends = ({
   connectedUsers,
   handleUserClick,
   friendsList,
-  connectedToPong,
+  userAvailability,
+  // connectedToPong,
 }: ChatFriendsProps) => {
   async function removeFriend(id: number) {
     await destroyFriend(id)
@@ -57,24 +59,22 @@ const ChatFriends = ({
                 style={{ borderRadius: '50%' }}
                 onClick={() => handleUserClick(user)}
               />
-
+              {/* ---------------- UPDATE ----------------- */}
               <div>
                 <p> {user.username}</p>
                 {connectedUsers?.includes(user.id) && (
                   <span style={{ color: '#65bf76' }}>online</span>
                 )}
-                {connectedToPong?.includes(user.id) && (
-                  //    <span style={{ color: "#65bf76", textAlign: "center", width: "100%", marginLeft: "1rem"}}>
-                  //       in game {/* Icône ou texte d'indication */}
-                  //  </span>
-                  <Box
-                    component="div"
-                    sx={{ color: 'secondary', fontSize: 'small' }}
-                  >
-                    <SportsCricketSharpIcon />
-                  </Box>
-                )}
+                <Box
+                  component="div"
+                  sx={{ fontSize: 'small' }}
+                >
+                  <SportsCricketSharpIcon
+                    style={{ color: userAvailability?.[user.id] ? 'green' : 'red' }}
+                  />
+                </Box>
               </div>
+              {/* ----------------------------------------- */}
               {/* <div
                 style={{
                   display: "flex",

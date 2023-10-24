@@ -73,18 +73,17 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
           console.log("voici lidentite du socket")
           console.log(decoded)
           this.connectedUsersService.set( Number(decoded.sub), client.id);
-
-          //--------------------- UPDATE ----------------------
-          client.emit('updateConnectedUsers', {
-            connectedUserIds: Array.from(this.connectedUsersService.connectedUsers.keys()),
-            connectedUserIdsPong: Array.from(this.connectedUsersService.connectedtoPonng.keys())
-          });
-          //----------------------------------------------------
-
+          
           //FONCTION QUI VERIFIE LES CHANNELS DONT LUTILASATEUR EST MEMBRE ET LES JOIN TOUS
           this.joinRoomsAtConnection(Number(decoded.sub), client)
           this.server.emit("updateUserList")
           this.emitUpdateConnectedUsers()
+          
+          //--------------------- UPDATE ----------------------
+          this.connectedUsersService.userAvailability.set(Number(decoded.sub), false);
+          const userAvailableObject = Object.fromEntries(this.connectedUsersService.userAvailability);
+          this.server.emit('updateUserAvailability', { isAvailable: userAvailableObject });
+          //----------------------------------------------------
         } catch (error) {
           client.disconnect();
         }
@@ -97,6 +96,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   //Fonction qui gère les déconnexions au socket
   //dès qu'un client se déconnecte du socket, cette fonction est appelée
   handleDisconnect(client: Socket): void {
+    const token = client.handshake.query.token as string; // UPDATE
+    const decoded = verify(token, this.config.get("JWT_SECRET")); // UPDATE
     console.log(`🔥: ${client.id} user disconnected`); 
     //supprime le le client.id de la map de connectedUser lorsque ce dernier ce déconnecte!
     for (const [userId, socketId] of this.connectedUsersService.connectedUsers.entries()) {
@@ -106,6 +107,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
       }
     }
     this.emitUpdateConnectedUsers()
+    //--------------------- UPDATE ----------------------
+    this.connectedUsersService.userAvailability.set(Number(decoded.sub), false);
+    const userAvailableObject = Object.fromEntries(this.connectedUsersService.userAvailability);
+    this.server.emit('updateUserAvailability', { isAvailable: userAvailableObject });
+    //----------------------------------------------------
     // const connectedUserIds = Array.from(this.connectedUsers.keys());
     // this.server.emit("updateConnectedUsers", connectedUserIds)
   }
@@ -119,13 +125,28 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     });
   }
 
-  @SubscribeMessage("onChatTab")
-  private emitUpdateConnectedUsers(): void {
+  @SubscribeMessage("onChatTab") // UPDATE
+  private emitUpdateConnectedUsers(client?: Socket): void {
+    // New logic to update user availability
+    if (client) {
+      const token = client.handshake.query.token as string;
+      if (token) {
+        try {
+          const decoded = verify(token, this.config.get("JWT_SECRET"));
+          const userId = Number(decoded.sub);
+          this.connectedUsersService.userAvailability.set(userId, true);
+          const userAvailableObject = Object.fromEntries(this.connectedUsersService.userAvailability.entries());
+          this.server.emit('updateUserAvailability', { isAvailable: userAvailableObject });
+        } catch (error) {
+          console.log("error: ", error);
+        }
+      }
+    }
+    
+    // Existing logic to emit 'updateConnectedUsers'
     const connectedUserIds = Array.from(this.connectedUsersService.connectedUsers.keys());
     const connectedUserIdsPong = Array.from(this.connectedUsersService.connectedtoPonng.keys());
-    console.log("Co User : ", connectedUserIds);
-    console.log("Po User : ", connectedUserIdsPong);
-    this.server.emit('updateConnectedUsers', { connectedUserIds :connectedUserIds, connectedUserIdsPong:connectedUserIdsPong });
+    this.server.emit('updateConnectedUsers', { connectedUserIds, connectedUserIdsPong });
   }
 
   @SubscribeMessage('invitation')

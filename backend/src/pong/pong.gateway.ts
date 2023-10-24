@@ -62,8 +62,15 @@ export class PongGateway {
 
           //Array of Users connected to Pong
           this.connectedUsersService.setPong(Number(decoded.sub), client.id)
+          
           const isConnected = { isConnected: true };
           client.emit("connected", isConnected);
+          
+          // --------------------------- UPDATE --------------------------------
+          this.connectedUsersService.userAvailability.set(Number(decoded.sub), false);
+          const userAvailableObject = Object.fromEntries(this.connectedUsersService.userAvailability);
+          this.server.emit('updateUserAvailability', { isAvailable: userAvailableObject });
+          // -------------------------------------------------------------------
 
         } catch (error) {
           console.log("🏓   Error:", error.message);
@@ -75,12 +82,15 @@ export class PongGateway {
   }
 
   handleDisconnect(client: Socket) {
+    const token = client.handshake.query.token as string; // UPDATE
+    const decoded = verify(token, this.config.get("JWT_SECRET")); // UPDATE
     let gameIdToTerminate: string;
     let clientsMapToTerminate: Map<string, Socket>;
 
     //update connectedToPong
 
     this.connectedUsersService.deleteBySocketIdPonng(client.id);
+
     // Identify the game ID to terminate when disconnect or end of game.
 
     for (const [clientsMap, gameId] of this.gameIds.entries()) {
@@ -110,6 +120,12 @@ export class PongGateway {
 
     const isConnected = false;
     client.emit('connected', isConnected );
+
+    // ------------------------------ UPDATE -----------------------------------
+    this.connectedUsersService.userAvailability.set(Number(decoded.sub), true);
+    const userAvailableObject = Object.fromEntries(this.connectedUsersService.userAvailability);
+    this.server.emit('updateUserAvailability', { isAvailable: userAvailableObject });
+    // -------------------------------------------------------------------------
 
   }
 

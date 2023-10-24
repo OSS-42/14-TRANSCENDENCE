@@ -21,13 +21,13 @@ type ChatProps = {
 };
 
 export function Chat({ socket }: ChatProps) {
+
   //--------------- UPDATE -----------------
   useEffect(() => {
+    console.log("Chat component mounted");
     // Emit an event to update the list of connected users
-    console.log("hello");
-    socket.emit("onChatTab");
-
-  }, []); 
+    socket?.emit("onChatTab");
+  }, []);
 //----------------------------------------
 
   //la valeur de base de setMessage est prise dans le localStorage
