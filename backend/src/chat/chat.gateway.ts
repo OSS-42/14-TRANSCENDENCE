@@ -55,7 +55,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
   // UPDATE : onmoduleinit pour s'assurer que le websocket est fini d'etre mis en place et ensuite de faire le premier emit.
   onModuleInit() {
-    this.emitUpdateConnectedUsers();
+    // this.emitUpdateConnectedUsers();
+    this.server.emit('updateConnectedUsers', {
+      connectedUserIds: Array.from(this.connectedUsersService.connectedUsers.keys()),
+      connectedUserIdsPong: Array.from(this.connectedUsersService.connectedtoPonng.keys())
+    });
   }
  
   //Fonction qui gère les nouvelles connexion au socket
@@ -69,6 +73,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
           console.log("voici lidentite du socket")
           console.log(decoded)
           this.connectedUsersService.set( Number(decoded.sub), client.id);
+
+          //--------------------- UPDATE ----------------------
+          client.emit('updateConnectedUsers', {
+            connectedUserIds: Array.from(this.connectedUsersService.connectedUsers.keys()),
+            connectedUserIdsPong: Array.from(this.connectedUsersService.connectedtoPonng.keys())
+          });
+          //----------------------------------------------------
+
           //FONCTION QUI VERIFIE LES CHANNELS DONT LUTILASATEUR EST MEMBRE ET LES JOIN TOUS
           this.joinRoomsAtConnection(Number(decoded.sub), client)
           this.server.emit("updateUserList")
@@ -79,7 +91,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
       } else {
         client.disconnect();
       }
-     
    }
    // renvoie au client la liste des users connectés
  
@@ -106,12 +117,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     memberOf.forEach((roomName) => {
       client.join(roomName);
     });
-
   }
 
+  @SubscribeMessage("onChatTab")
   private emitUpdateConnectedUsers(): void {
     const connectedUserIds = Array.from(this.connectedUsersService.connectedUsers.keys());
     const connectedUserIdsPong = Array.from(this.connectedUsersService.connectedtoPonng.keys());
+    console.log("Co User : ", connectedUserIds);
+    console.log("Po User : ", connectedUserIdsPong);
     this.server.emit('updateConnectedUsers', { connectedUserIds :connectedUserIds, connectedUserIdsPong:connectedUserIdsPong });
   }
 
@@ -122,23 +135,18 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
       roomId: payload.roomId,
       challengerUsername : payload.challengerUsername,
       challengerId : payload.challengerId
-
     });
   }
   
   @SubscribeMessage('challengeAccepted')
   async challengeAccepted(client: Socket, payload: any){ 
-    
-          
     const socketId = await this.connectedUsersService.getSocketId(payload.challengerId)
     this.server.to(socketId).emit('challengeAccepted', {
       roomId: payload.roomId,
       challengerId : payload.userId
-
     });
   }
   
-
   // //-------------------------------------------------------- COMMANDE DU CHAT --------------------------------------------------------
   
   @SubscribeMessage('message')
@@ -153,8 +161,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
    // Diffuser le message à tous les clients connectés
   }
   
-
-
   // ---------------------------------------------------------- JOIN ----------------------------------------------------------
   // Utilisation :  /JOIN #nomDuchannel 
   // Utilisation :  /JOIN #nomDuchannel motDePasse 

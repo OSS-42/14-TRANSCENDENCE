@@ -21,6 +21,15 @@ type ChatProps = {
 };
 
 export function Chat({ socket }: ChatProps) {
+  //--------------- UPDATE -----------------
+  useEffect(() => {
+    // Emit an event to update the list of connected users
+    console.log("hello");
+    socket.emit("onChatTab");
+
+  }, []); 
+//----------------------------------------
+
   //la valeur de base de setMessage est prise dans le localStorage
   const { logout, tkn } = useAuth();
   const handleMessageResponse = (data: ChatMessage) => {

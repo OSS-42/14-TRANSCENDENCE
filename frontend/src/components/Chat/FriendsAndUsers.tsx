@@ -10,6 +10,7 @@ import { fetchFriendsList, fetchUsersList } from "../../api/requests";
 import { useRoutes } from "../../contexts/RoutesContext";
 import { Box, Button } from "@mui/material";
 import { getCookies } from "../../utils";
+
 interface UpdateConnectedUsersData {
   connectedUserIds: number[];
   connectedUserIdsPong: number[];
@@ -58,10 +59,9 @@ export function FriendsAndUsers({ socket }: someProp) {
       if(tkn !== jwtToken ){
         logout() 
       }
-      
+      console.log("update con User: ", data);
       const { connectedUserIds, connectedUserIdsPong } = data;
       setConnectedUsers(connectedUserIds);
-
       setConnectedToPong(connectedUserIdsPong);
     });
 
@@ -82,7 +82,7 @@ export function FriendsAndUsers({ socket }: someProp) {
       socket.off("updateConnectedUsers");
       // socket.off("invitation");
     };
-  }, [connectedUsers]);
+  }, []);
 
   // -------------------------- Decouplagge Invitation --------------------------
 
