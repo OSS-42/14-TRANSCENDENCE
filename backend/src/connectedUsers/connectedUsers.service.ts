@@ -3,7 +3,7 @@ import {  Injectable } from '@nestjs/common';
 @Injectable()
 export class ConnectedUsersService {
    connectedUsers: Map<number, string> = new Map();
-   connectedtoPonng: Map<number, string> = new Map();
+   connectedtoPong: Map<number, string> = new Map();
    userAvailability: Map<number, boolean> = new Map();
 
   set(userId: number, socketId: string) {
@@ -19,20 +19,21 @@ export class ConnectedUsersService {
   }
 
   setPong(userId: number, socketId: string) {
-    this.connectedtoPonng.set(userId, socketId);
+    this.connectedtoPong.set(userId, socketId);
   }
 
   deletePong(userId: number) {
-    this.connectedtoPonng.delete(userId);
+    this.connectedtoPong.delete(userId);
   }
 
   getSocketIdPong(userId: number): string | undefined {
-    return this.connectedtoPonng.get(userId);
+    return this.connectedtoPong.get(userId);
   }
-  deleteBySocketIdPonng(socketId: string) {
-    for (const [userId, id] of this.connectedtoPonng) {
+  
+  deleteBySocketIdPong(socketId: string) {
+    for (const [userId, id] of this.connectedtoPong) {
       if (id === socketId) {
-        this.connectedtoPonng.delete(userId);
+        this.connectedtoPong.delete(userId);
         break; 
       }
     }

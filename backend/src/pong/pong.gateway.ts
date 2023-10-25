@@ -89,7 +89,7 @@ export class PongGateway {
 
     //update connectedToPong
 
-    this.connectedUsersService.deleteBySocketIdPonng(client.id);
+    this.connectedUsersService.deleteBySocketIdPong(client.id);
 
     // Identify the game ID to terminate when disconnect or end of game.
 

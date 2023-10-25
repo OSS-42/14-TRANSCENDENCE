@@ -41,6 +41,10 @@ interface PrivmsgPayload {
   param : string
 }
 
+type Availability = {
+  isAvailable: boolean;
+}
+
 @WebSocketGateway({ cors: true,  namespace: 'chat' })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, OnModuleInit {
   // Map pour stocker les ID d'utilisateur associés aux IDs de socket
@@ -58,7 +62,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     // this.emitUpdateConnectedUsers();
     this.server.emit('updateConnectedUsers', {
       connectedUserIds: Array.from(this.connectedUsersService.connectedUsers.keys()),
-      connectedUserIdsPong: Array.from(this.connectedUsersService.connectedtoPonng.keys())
+      connectedUserIdsPong: Array.from(this.connectedUsersService.connectedtoPong.keys())
     });
   }
  
@@ -126,15 +130,18 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   }
 
   @SubscribeMessage("onChatTab") // UPDATE
-  private emitUpdateConnectedUsers(client?: Socket): void {
-    // New logic to update user availability
+  private emitUpdateConnectedUsers(client?: Socket, payload?: Availability): void {
     if (client) {
       const token = client.handshake.query.token as string;
       if (token) {
         try {
           const decoded = verify(token, this.config.get("JWT_SECRET"));
           const userId = Number(decoded.sub);
-          this.connectedUsersService.userAvailability.set(userId, true);
+          if (payload && payload.isAvailable) {
+            this.connectedUsersService.userAvailability.set(userId, true);
+          } else {
+            this.connectedUsersService.userAvailability.set(userId, false);
+          }
           const userAvailableObject = Object.fromEntries(this.connectedUsersService.userAvailability.entries());
           this.server.emit('updateUserAvailability', { isAvailable: userAvailableObject });
         } catch (error) {
@@ -145,7 +152,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     
     // Existing logic to emit 'updateConnectedUsers'
     const connectedUserIds = Array.from(this.connectedUsersService.connectedUsers.keys());
-    const connectedUserIdsPong = Array.from(this.connectedUsersService.connectedtoPonng.keys());
+    const connectedUserIdsPong = Array.from(this.connectedUsersService.connectedtoPong.keys());
     this.server.emit('updateConnectedUsers', { connectedUserIds, connectedUserIdsPong });
   }
 

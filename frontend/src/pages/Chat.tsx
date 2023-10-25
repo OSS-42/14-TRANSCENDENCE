@@ -6,6 +6,7 @@ import ChatFooter from "../components/Chat/ChatFooter";
 import { FriendsAndUsers } from "../components/Chat/FriendsAndUsers";
 import { getCookies } from "../utils";
 import { useAuth } from "../contexts/AuthContext";
+import { useLocation } from "react-router-dom"; // UPDATE
 
 type ChatMessage = {
   userId: number;
@@ -16,6 +17,10 @@ type ChatMessage = {
   help: string;
 };
 
+type Availability = {
+  isAvailable: boolean;
+}
+
 type ChatProps = {
   socket?: Socket;
 };
@@ -23,11 +28,27 @@ type ChatProps = {
 export function Chat({ socket }: ChatProps) {
 
   //--------------- UPDATE -----------------
+  const location = useLocation();
+  const isOnChatTab = location.pathname === '/chat';
+
+  // useEffect(() => {
+  //   console.log("Chat component mounted");
+  //   // Emit an event to update the list of connected users
+  //   socket?.emit("onChatTab");
+  // }, []);
+
+  const [isAvailable, setIsAvailable] = useState<Availability>({ isAvailable: false });
+
   useEffect(() => {
-    console.log("Chat component mounted");
-    // Emit an event to update the list of connected users
-    socket?.emit("onChatTab");
-  }, []);
+    console.log("change of tab detected");
+    if (isOnChatTab) {
+      setIsAvailable(true);
+    } else {
+      setIsAvailable(false);
+    }
+    socket?.emit("onChatTab", {isAvailable});
+  }, [isOnChatTab, socket]);
+
 //----------------------------------------
 
   //la valeur de base de setMessage est prise dans le localStorage
