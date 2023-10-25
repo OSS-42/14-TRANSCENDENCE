@@ -61,8 +61,7 @@ export class PongGateway {
           const decoded = verify(token, this.config.get("JWT_SECRET"));
 
           //Array of Users connected to Pong
-          this.connectedUsersService.setPong(Number(decoded.sub), client.id)
-          console.log("connected");
+          this.connectedUsersService.setPong(Number(decoded.sub), client.id);
 
           const isConnected = { isConnected: true };
           client.emit("connected", isConnected);

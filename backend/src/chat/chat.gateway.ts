@@ -41,24 +41,29 @@ interface PrivmsgPayload {
   param : string
 }
 
-type Availability = {
-  isAvailable: boolean;
-}
-
 @WebSocketGateway({ cors: true,  namespace: 'chat' })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, OnModuleInit {
   // Map pour stocker les ID d'utilisateur associés aux IDs de socket
   // AVec cette map, on peut identifier le client.id à partir d'un Utilisateur ID.
   //private connectedUsers: Map<number, string> = new Map(); 
 
-  constructor(private chatService: ChatService, private config: ConfigService, private readonly connectedUsersService: ConnectedUsersService) {
+  constructor(
+    private chatService: ChatService,
+    private config: ConfigService,
+    private readonly connectedUsersService: ConnectedUsersService) {
     // setInterval(() => this.emitUpdateConnectedUsers(), 1500);
   }
   @WebSocketServer()
   server: Server
 
-  // UPDATE : onmoduleinit pour s'assurer que le websocket est fini d'etre mis en place et ensuite de faire le premier emit.
+  // ----------------------- UPDATE ----------------------------
+  // onmoduleinit pour s'assurer que le websocket est fini d'etre mis en place et ensuite de faire le premier emit.
   onModuleInit() {
+
+    this.connectedUsersService.events.on("updateConnectedUsers", () => {
+      this.emitUpdateConnectedUsers();
+    })
+
     // this.emitUpdateConnectedUsers();
     this.server.emit('updateConnectedUsers', {
       connectedUserIds: Array.from(this.connectedUsersService.connectedUsers.keys()),
@@ -120,7 +125,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   }
 
   @SubscribeMessage("onChatTab") // UPDATE
-  private emitUpdateConnectedUsers(client?: Socket, payload?: Availability): void {
+  private emitUpdateConnectedUsers(client?: Socket): void {
     const connectedUserIds = Array.from(this.connectedUsersService.connectedUsers.keys());
     const connectedUserIdsPong = Array.from(this.connectedUsersService.connectedToPong.keys());
     this.server.emit('updateConnectedUsers', { connectedUserIds, connectedUserIdsPong });
