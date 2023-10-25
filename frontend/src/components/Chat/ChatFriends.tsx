@@ -8,8 +8,7 @@ import SportsCricketSharpIcon from '@mui/icons-material/SportsCricketSharp'
 type ChatFriendsProps = {
   socket: Socket
   connectedUsers: number[]
-  // connectedToPong: number[]
-  userAvailability: boolean
+  connectedToPong: number[]
   friendsList: User[]
   setFriendsList: React.Dispatch<React.SetStateAction<User[]>>
   handleUserClick: (user: User) => void
@@ -22,8 +21,7 @@ const ChatFriends = ({
   connectedUsers,
   handleUserClick,
   friendsList,
-  userAvailability,
-  // connectedToPong,
+  connectedToPong,
 }: ChatFriendsProps) => {
   async function removeFriend(id: number) {
     await destroyFriend(id)
@@ -65,23 +63,19 @@ const ChatFriends = ({
                 {connectedUsers?.includes(user.id) && (
                   <span style={{ color: '#65bf76' }}>online</span>
                 )}
-                <Box
+                {connectedToPong?.includes(user.id) && (
+                  <span style={{ color: '#65bf76' }}> and playing</span>
+                )}
+                {/* <Box
                   component="div"
                   sx={{ fontSize: 'small' }}
                 >
                   <SportsCricketSharpIcon
                     style={{ color: userAvailability?.[user.id] ? 'green' : 'red' }}
                   />
-                </Box>
-              </div>
+                </Box> */}
               {/* ----------------------------------------- */}
-              {/* <div
-                style={{
-                  display: "flex",
-                  justifyContent: "flex-end",
-                  flex: "1",
-                }}
-              ></div> */}
+              </div>
               <Button
                 sx={{
                   minWidth: '.1',

@@ -20,10 +20,6 @@ type someProp = {
   socket: Socket;
 };
 
-type Availability = {
-  isAvailable: boolean;
-}
-
 export function FriendsAndUsers({ socket }: someProp) {
   const [usersList, setUsersList] = useState<User[]>([]);
   const [friendsList, setFriendsList] = useState<User[]>([]);
@@ -106,19 +102,7 @@ useEffect(() => {
 
 }, [connectedUsers]);
 
-const [userAvailability, setUserAvailability] = useState<Availability>({ isAvailable: false });
-useEffect(() => {
-  socket.on('updateUserAvailability', (payload: Availability) => {
-    console.log('avail: ', payload.isAvailable);  
-    setUserAvailability(payload.isAvailable);
-  });
-
-  return () => {
-    socket.off("updateUserAvailability");
-  }
-});
-
-// -------------------------------------------------------------------------
+  // -------------------------------------------------------------
 
   function acceptGame() {
     if (gameId) {
@@ -156,8 +140,7 @@ useEffect(() => {
         friendsList={friendsList}
         setFriendsList={setFriendsList}
         connectedUsers={connectedUsers}
-        // connectedToPong={connectedToPong}
-        userAvailability={userAvailability}
+        connectedToPong={connectedToPong}
         handleUserClick={handleUserClick}
       />
       <Box component="div" mb={3} />

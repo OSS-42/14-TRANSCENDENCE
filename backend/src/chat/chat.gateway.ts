@@ -62,7 +62,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     // this.emitUpdateConnectedUsers();
     this.server.emit('updateConnectedUsers', {
       connectedUserIds: Array.from(this.connectedUsersService.connectedUsers.keys()),
-      connectedUserIdsPong: Array.from(this.connectedUsersService.connectedtoPong.keys())
+      connectedUserIdsPong: Array.from(this.connectedUsersService.connectedToPong.keys())
     });
   }
  
@@ -76,18 +76,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
           const decoded = verify(token, this.config.get("JWT_SECRET"));          
           console.log("voici lidentite du socket")
           console.log(decoded)
-          this.connectedUsersService.set( Number(decoded.sub), client.id);
+          this.connectedUsersService.set(Number(decoded.sub), client.id);
           
           //FONCTION QUI VERIFIE LES CHANNELS DONT LUTILASATEUR EST MEMBRE ET LES JOIN TOUS
           this.joinRoomsAtConnection(Number(decoded.sub), client)
           this.server.emit("updateUserList")
           this.emitUpdateConnectedUsers()
-          
-          //--------------------- UPDATE ----------------------
-          this.connectedUsersService.userAvailability.set(Number(decoded.sub), false);
-          const userAvailableObject = Object.fromEntries(this.connectedUsersService.userAvailability);
-          this.server.emit('updateUserAvailability', { isAvailable: userAvailableObject });
-          //----------------------------------------------------
+
         } catch (error) {
           client.disconnect();
         }
@@ -111,11 +106,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
       }
     }
     this.emitUpdateConnectedUsers()
-    //--------------------- UPDATE ----------------------
-    this.connectedUsersService.userAvailability.set(Number(decoded.sub), false);
-    const userAvailableObject = Object.fromEntries(this.connectedUsersService.userAvailability);
-    this.server.emit('updateUserAvailability', { isAvailable: userAvailableObject });
-    //----------------------------------------------------
     // const connectedUserIds = Array.from(this.connectedUsers.keys());
     // this.server.emit("updateConnectedUsers", connectedUserIds)
   }
@@ -131,28 +121,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
   @SubscribeMessage("onChatTab") // UPDATE
   private emitUpdateConnectedUsers(client?: Socket, payload?: Availability): void {
-    if (client) {
-      const token = client.handshake.query.token as string;
-      if (token) {
-        try {
-          const decoded = verify(token, this.config.get("JWT_SECRET"));
-          const userId = Number(decoded.sub);
-          if (payload && payload.isAvailable) {
-            this.connectedUsersService.userAvailability.set(userId, true);
-          } else {
-            this.connectedUsersService.userAvailability.set(userId, false);
-          }
-          const userAvailableObject = Object.fromEntries(this.connectedUsersService.userAvailability.entries());
-          this.server.emit('updateUserAvailability', { isAvailable: userAvailableObject });
-        } catch (error) {
-          console.log("error: ", error);
-        }
-      }
-    }
-    
-    // Existing logic to emit 'updateConnectedUsers'
     const connectedUserIds = Array.from(this.connectedUsersService.connectedUsers.keys());
-    const connectedUserIdsPong = Array.from(this.connectedUsersService.connectedtoPong.keys());
+    const connectedUserIdsPong = Array.from(this.connectedUsersService.connectedToPong.keys());
     this.server.emit('updateConnectedUsers', { connectedUserIds, connectedUserIdsPong });
   }
 

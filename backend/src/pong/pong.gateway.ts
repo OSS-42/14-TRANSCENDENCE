@@ -62,15 +62,10 @@ export class PongGateway {
 
           //Array of Users connected to Pong
           this.connectedUsersService.setPong(Number(decoded.sub), client.id)
-          
+          console.log("connected");
+
           const isConnected = { isConnected: true };
           client.emit("connected", isConnected);
-          
-          // --------------------------- UPDATE --------------------------------
-          this.connectedUsersService.userAvailability.set(Number(decoded.sub), false);
-          const userAvailableObject = Object.fromEntries(this.connectedUsersService.userAvailability);
-          this.server.emit('updateUserAvailability', { isAvailable: userAvailableObject });
-          // -------------------------------------------------------------------
 
         } catch (error) {
           console.log("🏓   Error:", error.message);
@@ -120,12 +115,6 @@ export class PongGateway {
 
     const isConnected = false;
     client.emit('connected', isConnected );
-
-    // ------------------------------ UPDATE -----------------------------------
-    this.connectedUsersService.userAvailability.set(Number(decoded.sub), true);
-    const userAvailableObject = Object.fromEntries(this.connectedUsersService.userAvailability);
-    this.server.emit('updateUserAvailability', { isAvailable: userAvailableObject });
-    // -------------------------------------------------------------------------
 
   }
 

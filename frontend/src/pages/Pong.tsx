@@ -154,6 +154,8 @@ export function Pong() {
       socket.on("connected", (data: Connection) => {
         // console.log("🏓   Connection established ? ", data.isConnected);
         setIsConnected(data.isConnected);
+        
+
         if (user) {
           // console.log("🏓   username is ", user.username);
           setPlayerName(user.username);
