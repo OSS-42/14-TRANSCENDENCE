@@ -3,10 +3,8 @@ import { PrismaService } from "src/prisma/prisma.service";
 import axios from "axios";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
-import { ConnectedUsersService } from 'src/connectedUsers/connectedUsers.service';
-import * as speakeasy from 'speakeasy';
-
-
+import { ConnectedUsersService } from "src/connectedUsers/connectedUsers.service";
+import * as speakeasy from "speakeasy";
 
 @Injectable({})
 export class AuthService {
@@ -17,7 +15,10 @@ export class AuthService {
     private readonly connectedUsersService: ConnectedUsersService
   ) {}
 
-  async signToken(userId: number, email: string): Promise<{ access_token: string }> {
+  async signToken(
+    userId: number,
+    email: string
+  ): Promise<{ access_token: string }> {
     const payload = {
       sub: userId,
       email,
@@ -33,21 +34,20 @@ export class AuthService {
     };
   }
 
-
-
-
   //Fonction qui contacte l'api-42 afin de récuperer l'acces token, elle cree  un nouvelle utilisateur egalement
   async getCode42(code: string) {
     let token: string;
-    let UserToken: Promise<{ access_token: string }> = Promise.resolve({ access_token: '' })
+    let UserToken: Promise<{ access_token: string }> = Promise.resolve({
+      access_token: "",
+    });
     const clientID = this.config.get("CLIENT_ID");
     const clientSecret = this.config.get("CLIENT_SECRET");
     const host = this.config.get("HOST");
 
-    try{
+    try {
       const response = await axios.post(
-      `https://api.intra.42.fr/oauth/token`,
-      `client_id=${clientID}&client_secret=${clientSecret}&code=${code}&redirect_uri=${host}/api/auth&grant_type=authorization_code`,
+        `https://api.intra.42.fr/oauth/token`,
+        `client_id=${clientID}&client_secret=${clientSecret}&code=${code}&redirect_uri=${host}/api/auth&grant_type=authorization_code`,
         {
           headers: {
             Accept: "application/json",
@@ -55,11 +55,10 @@ export class AuthService {
         }
       );
       token = response.data.access_token;
-    }
-    catch (error) {
+    } catch (error) {
       console.error("Erreur POST:", error);
     }
-    try{
+    try {
       const response = await fetch("https://api.intra.42.fr/v2/me", {
         headers: {
           Authorization: "Bearer " + token,
@@ -70,8 +69,8 @@ export class AuthService {
 
         //Extraction des donnees vers la base de donnees--> login  Si l'utilisateur n'existe pas.  On va utiliser le email a place
         const username: string = data.login;
-        const email :string= data.email;
-        const avatar :string = data.image.versions.small;
+        const email: string = data.email;
+        const avatar: string = data.image.versions.small;
 
         let user = await this.prisma.utilisateur.findUnique({
           where: { email },
@@ -79,44 +78,37 @@ export class AuthService {
 
         const isUsernameTaken = await this.isUsernameTaken(username);
         if (!user) {
-
-          const { v4: uuidv4 } = require('uuid');
-          const customPrefix = 'poulet';
-          const uniqueId = customPrefix + '-' + uuidv4();
+          const { v4: uuidv4 } = require("uuid");
+          const customPrefix = "poulet";
+          const uniqueId = customPrefix + "-" + uuidv4();
           user = await this.prisma.utilisateur.create({
             data: {
               username: username,
               email: email,
               avatar: avatar,
-              secretId: uniqueId
+              secretId: uniqueId,
             },
           });
           if (isUsernameTaken) {
-            const { v4: uuidv4 } = require('uuid');
+            const { v4: uuidv4 } = require("uuid");
             const customPrefix = user.username;
-            const uniqueId = customPrefix + '-' + uuidv4().substring(0, 8);
+            const uniqueId = customPrefix + "-" + uuidv4().substring(0, 8);
             await this.prisma.utilisateur.update({
               where: { email },
               data: {
-                username: uniqueId
-                ,
+                username: uniqueId,
               },
             });
-  
-          } 
-        } 
+          }
+        }
         if (this.connectedUsersService.connectedUsers.has(user.id)) {
-          (await UserToken).access_token = "poulet"
-          return (UserToken)
+          (await UserToken).access_token = "poulet";
+          return UserToken;
         }
 
-
-
         UserToken = this.signToken(user.id, user.email);
-        this.createRefreshToken(user.id, user.secretId)
-    
-      }
-      else {
+        this.createRefreshToken(user.id, user.secretId);
+      } else {
         console.error(
           "Erreur lors de la requête:",
           response.status,
@@ -130,23 +122,23 @@ export class AuthService {
     return UserToken;
   }
 
+  //---services pour le 2FA----//
 
-//---services pour le 2FA----//
-
-// Faire une validation quand la premiere fois qu'il ya une connexion
-  async enable2FA(userId: number): Promise<{ otpauthUrl: string, secret: string }> {
+  // Faire une validation quand la premiere fois qu'il ya une connexion
+  async enable2FA(
+    userId: number
+  ): Promise<{ otpauthUrl: string; secret: string }> {
     const secret = speakeasy.generateSecret({ length: 20 });
 
     await this.prisma.utilisateur.update({
       where: { id: userId },
-      data: { twoFactorSecret: secret.base32,
-        is2FA: true },
+      data: { twoFactorSecret: secret.base32, is2FA: true },
     });
 
     const otpauthUrl = speakeasy.otpauthURL({
       secret: secret.ascii,
-      label: 'Balls of Fury',
-      issuer: 'Angry chicken',
+      label: "Balls of Fury",
+      issuer: "Angry chicken",
     });
     return { otpauthUrl, secret: secret.base32 };
   }
@@ -160,24 +152,24 @@ export class AuthService {
 
     const verified = speakeasy.totp.verify({
       secret: user.twoFactorSecret,
-      encoding: 'base32',
+      encoding: "base32",
       token: token,
+    });
+    await this.prisma.utilisateur.update({
+      where: { id: userId },
+      data: { is2FAValidated: true },
     });
     return verified;
   }
 
-
   async disable2FA(userId: number): Promise<void> {
     await this.prisma.utilisateur.update({
       where: { id: userId },
-      data: { twoFactorSecret: null,
-      is2FA: false },
+      data: { twoFactorSecret: null, is2FA: false },
     });
-    }
+  }
 
-
-
-  async createRefreshToken(userId: number, secretId:string){
+  async createRefreshToken(userId: number, secretId: string) {
     const payload = {
       secretId,
     };
@@ -188,31 +180,29 @@ export class AuthService {
       secret: secret,
     });
 
-
     await this.prisma.utilisateur.update({
-    where: { id: userId },
-    data: {
-      refreshToken: token,
-    },
+      where: { id: userId },
+      data: {
+        refreshToken: token,
+      },
     });
-
   }
 
-
-  async generateToken(secretId : string){
-    try{
+  async generateToken(secretId: string) {
+    try {
       const user = await this.prisma.utilisateur.findFirst({
-        where :{secretId},
-      })
-      const decoded = this.jwt.verify(user.refreshToken, this.config.get("JWT_SECRET")); 
+        where: { secretId },
+      });
+      const decoded = this.jwt.verify(
+        user.refreshToken,
+        this.config.get("JWT_SECRET")
+      );
       console.log(decoded);
-      return this.signToken(user.id, user.email)
+      return this.signToken(user.id, user.email);
+    } catch (err) {
+      console.error("JWT validation error:", err.message);
+      return null;
     }
-    catch (err) {
-      console.error('JWT validation error:', err.message);
-      return null
-    }
-
   }
 
   async isUsernameTaken(username: string): Promise<boolean> {
@@ -221,5 +211,4 @@ export class AuthService {
     });
     return !!user; // Si l'utilisateur existe, retourne true, sinon retourne false.
   }
-
 }

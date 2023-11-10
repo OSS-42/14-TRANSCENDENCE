@@ -8,4 +8,7 @@
 	[] Use this variable for condition 
 
 
+
+[] TwoFactorPage: Removed the is2FAValidated post request that actually changes the value of is2FAValidated variable
+				  to true to mention that a number is written down. 
 	

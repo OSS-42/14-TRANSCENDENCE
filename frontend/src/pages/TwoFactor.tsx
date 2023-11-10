@@ -34,7 +34,7 @@ export function TwoFactor() {
         }
       );
       if (response.data.message === "2FA code is valid.") {
-        handleTwo();
+        // handleTwo();
         navigateTo("/");
       } else if (response.data.message === "Invalid 2FA code.") {
         alert("Invalid input, please enter a valid input.");

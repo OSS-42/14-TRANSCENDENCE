@@ -34,15 +34,15 @@ export class UserController {
   //retourne le data de l'utilisateur
   @Get("me") // @ represents the controller that is /api/users/ 
   getMe(@GetUser() user: Utilisateur) {
-    const { id, username, avatar, is2FA} = user;
-    return { id, username, avatar, is2FA};
+    const { id, username, avatar} = user;
+    return { id, username, avatar};
   }
 
-  @Get("2FAtest")
-  get2FAtest(@GetUser() user: Utilisateur) {
-	if (user.is2FA == true)
-    	return (affiche la page 2FA)
-  }
+//   @Get("2FAtest")
+//   get2FAtest(@GetUser() user: Utilisateur) {
+// 	if (user.is2FA == true)
+//     	return ("affiche la page 2FA")
+//   }
 
   //retourne un array d'objets utilisateurs
   @Get("allUsers")
