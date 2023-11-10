@@ -34,8 +34,8 @@ export class UserController {
   //retourne le data de l'utilisateur
   @Get("me")
   getMe(@GetUser() user: Utilisateur) {
-    const { id, username, avatar, is2FA,  is2FAValidated } = user;
-    return { id, username, avatar, is2FA, is2FAValidated };
+    const { id, username, avatar} = user;
+    return { id, username, avatar};
   }
 
   //retourne un array d'objets utilisateurs
