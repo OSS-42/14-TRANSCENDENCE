@@ -46,9 +46,7 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
     console.log("Logging in. Hello!");
 
     try {
-		await fetch2FA();
       await fetchUserData();
-
 
       redirectToHome();
     } catch (error) {
@@ -95,23 +93,6 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
     }
     setLoading(false);
   };
-
-  const fetch2FA = async () => {
-    const jwtToken = getCookies("jwt_token");
-
-    try {
-        const response = await axios.get("/api/users/2FAtest", {
-          headers: {
-            Authorization: bearerAuthorization(jwtToken),
-          },
-        });
-		console.log(response);
-		// if (response.data == "2FA required")
-		// 	navigateTo("TwoFactor");
-      } catch (error) {
-        console.error("Error fetching 2FA info :", error);
-      }
-    };
 
   const redirectToHome = () => {
     navigateTo("/");

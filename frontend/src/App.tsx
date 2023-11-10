@@ -14,7 +14,9 @@ import {
 } from "./pages";
 import { useEffect, useState } from "react";
 import { TwoFactor } from "./pages/TwoFactor";
-
+import { getCookies, bearerAuthorization} from "./utils";
+import axios from "axios";
+import { useRoutes } from "./contexts/RoutesContext";
 
 // App component that is use in main.tsx
 //
@@ -54,6 +56,27 @@ function App() {
     console.log("Loading...");
     return <></>;
   }
+
+  // 2FA UPDATE: got a specific error message 
+  const fetch2FA = async () => {
+    const jwtToken = getCookies("jwt_token");
+	const { navigateTo } = useRoutes();
+    try {
+        const response = await axios.get("/api/users/2FAtest", {
+          headers: {
+            Authorization: bearerAuthorization(jwtToken),
+          },
+        });
+		console.log(response.data);
+		if (response.data == "2FA required")
+			navigateTo("TwoFactor");
+      } catch (error) {
+        console.error("Error fetching 2FA info :", error);
+      }
+    };
+
+	fetch2FA();
+ // ------------------------------------------------------------------
 
   return (
     <>

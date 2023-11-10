@@ -11,4 +11,8 @@
 
 [] TwoFactorPage: Removed the is2FAValidated post request that actually changes the value of is2FAValidated variable
 				  to true to mention that a number is written down. 
-	
+[] TwoFactorValidationStatus that is used on TwoFactor page and in AuthContext in the logout section. TwoFactor
+	Validation status was calling the  is2FAValidated endpoitn that was changing the value of boolean in database from
+	true to false or the opposite.
+
+[] Calling the fetch2FA function inside App causes problem as if it supposed to be on  AuthContext. 

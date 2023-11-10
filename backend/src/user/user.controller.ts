@@ -35,12 +35,15 @@ export class UserController {
     return { id, username, avatar };
   }
 
+
+	// 2FA 
   @Get("2FAtest")
   get2FAtest(@GetUser() user: Utilisateur) {
     if (user.is2FA == true && user.is2FAValidated == false)
       return { message: "2FA required" };
     else return { message: "2FA NOT required" };
   }
+// -------------------------------------------
 
   //retourne un array d'objets utilisateurs
   @Get("allUsers")
