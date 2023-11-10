@@ -180,20 +180,20 @@ export async function updateUserName(editedName: string): Promise<void> {
   }
 }
 
-export async function twoFactorValidationStatus(bool: boolean) {
-  try {
-    const response = await axios.post(
-      `${BASE_URL}/users/is2FAValidated`,
-      { value: bool },
-      {
-        headers: {
-          Authorization: `Bearer ${jwt_token}`,
-        },
-      }
-    );
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching user 2FA", error);
-    throw error;
-  }
-}
+// export async function twoFactorValidationStatus(bool: boolean) {
+//   try {
+//     const response = await axios.post(
+//       `${BASE_URL}/users/is2FAValidated`,
+//       { value: bool },
+//       {
+//         headers: {
+//           Authorization: `Bearer ${jwt_token}`,
+//         },
+//       }
+//     );
+//     return response.data;
+//   } catch (error) {
+//     console.error("Error fetching user 2FA", error);
+//     throw error;
+//   }
+// }

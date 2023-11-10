@@ -29,7 +29,6 @@ function App() {
     };
   }, []);
   const { user, loading, isLogged } = useAuth();
-  const [is2FATest, setIs2FATest] = useState(false);
   const [chatSocket, setChatSocket] = useState<Socket | null>(null);
   const [chatSocketInitialized, setChatSocketInitialized] = useState(false);
   useEffect(() => {
@@ -59,7 +58,7 @@ function App() {
   return (
     <>
       <>
-        {(user && user.is2FAValidated) || (user && !user.is2FA) ? (
+        {(user) ? (
           <Header />
         ) : null}
         <Routes>

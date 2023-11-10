@@ -1,0 +1,11 @@
+[X] Remove the is2FA and is 2FAValidated from the "me" endpoint
+	[] Do not forget that this impact the status of the button "Activate2FA" as it was based on the user.is2FA info"
+[] Create a new endpoint that returns the is2FA and is2FAValidated
+	[] test endpoint with console console log;
+	[] test with swagger with typing localhost:8080/api
+[] Call the endpoint before the return value  in App component 
+	[] Store endpoint response in a variable 
+	[] Use this variable for condition 
+
+
+	

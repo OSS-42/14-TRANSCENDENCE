@@ -12,10 +12,10 @@ export function TwoFactor() {
   const { navigateTo } = useRoutes();
   const { setUser } = useAuth();
 
-  async function handleTwo() {
-    const newUser = await twoFactorValidationStatus(true);
-    setUser(newUser);
-  }
+//   async function handleTwo() {
+//     const newUser = await twoFactorValidationStatus(true);
+//     setUser(newUser);
+//   }
 
   function handleChange(event: any) {
     const value = event.target.value;

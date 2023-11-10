@@ -32,10 +32,16 @@ export class UserController {
   constructor(private userService: UserService) {}
 
   //retourne le data de l'utilisateur
-  @Get("me")
+  @Get("me") // @ represents the controller that is /api/users/ 
   getMe(@GetUser() user: Utilisateur) {
-    const { id, username, avatar} = user;
-    return { id, username, avatar};
+    const { id, username, avatar, is2FA} = user;
+    return { id, username, avatar, is2FA};
+  }
+
+  @Get("2FAtest")
+  get2FAtest(@GetUser() user: Utilisateur) {
+	if (user.is2FA == true)
+    	return (affiche la page 2FA)
   }
 
   //retourne un array d'objets utilisateurs
