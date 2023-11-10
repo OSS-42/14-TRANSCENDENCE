@@ -1,5 +1,3 @@
-
-
 import {
   Body,
   Controller,
@@ -12,16 +10,15 @@ import {
   UseInterceptors,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
-import {
-  ApiBearerAuth,
-  ApiParam,
-  ApiTags,
-} from "@nestjs/swagger";
+import { ApiBearerAuth, ApiParam, ApiTags } from "@nestjs/swagger";
 import { Utilisateur } from "@prisma/client";
 import { GetUser } from "src/auth/decorator";
 import { JwtGuard } from "src/auth/guard";
 import { UserService } from "./user.service";
-import { NotFoundException, InternalServerErrorException } from '@nestjs/common';
+import {
+  NotFoundException,
+  InternalServerErrorException,
+} from "@nestjs/common";
 import * as fs from "fs";
 
 @Controller("api/users")
@@ -32,17 +29,18 @@ export class UserController {
   constructor(private userService: UserService) {}
 
   //retourne le data de l'utilisateur
-  @Get("me") // @ represents the controller that is /api/users/ 
+  @Get("me") // @ represents the controller that is /api/users/
   getMe(@GetUser() user: Utilisateur) {
-    const { id, username, avatar} = user;
-    return { id, username, avatar};
+    const { id, username, avatar } = user;
+    return { id, username, avatar };
   }
 
-//   @Get("2FAtest")
-//   get2FAtest(@GetUser() user: Utilisateur) {
-// 	if (user.is2FA == true)
-//     	return ("affiche la page 2FA")
-//   }
+  @Get("2FAtest")
+  get2FAtest(@GetUser() user: Utilisateur) {
+    if (user.is2FA == true && user.is2FAValidated == false)
+      return { message: "2FA required" };
+    else return { message: "2FA NOT required" };
+  }
 
   //retourne un array d'objets utilisateurs
   @Get("allUsers")
@@ -56,19 +54,18 @@ export class UserController {
 
   //retourne le data d'un utilisateur particulier
   @ApiParam({ name: "username", type: String })
-  @Get(':username')
-  async getUserInfo(@Param('username') username: string) {
+  @Get(":username")
+  async getUserInfo(@Param("username") username: string) {
     try {
       const user = await this.userService.getUserInfo(username);
       return user;
     } catch (error) {
       if (error instanceof NotFoundException) {
-        throw error; 
+        throw error;
       }
-      throw new InternalServerErrorException('Internal Server Error');
+      throw new InternalServerErrorException("Internal Server Error");
     }
   }
-
 
   @ApiParam({ name: "id", type: Number })
   @Get("plus/:id")
@@ -107,7 +104,6 @@ export class UserController {
     return this.userService.blockedUserIds(id);
   }
 
-  
   @ApiParam({ name: "friendId", type: Number })
   @Get("removeFriend/:friendId")
   revomeFriend(
@@ -117,13 +113,11 @@ export class UserController {
     return this.userService.destroyFriend(user.id, friendId);
   }
 
-
   @ApiParam({ name: "username", type: String })
   @Get("userExist/:username")
   checkIfUserExist(@Param("username") username: string) {
     return this.userService.checkIfUserExist(username);
   }
-
 
   @Post("updateUsername")
   updateUsername(

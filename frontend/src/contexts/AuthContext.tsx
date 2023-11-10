@@ -11,7 +11,7 @@ import Cookies from "js-cookie";
 import { getCookies, bearerAuthorization } from "../utils";
 import { User } from "../models/User";
 import { useRoutes } from "./RoutesContext";
-import { twoFactorValidationStatus } from "../api/requests";
+// import { twoFactorValidationStatus } from "../api/requests";
 
 // Define constants
 const JWT_TOKEN_COOKIE = "jwt_token";
@@ -46,7 +46,9 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
     console.log("Logging in. Hello!");
 
     try {
+		await fetch2FA();
       await fetchUserData();
+
 
       redirectToHome();
     } catch (error) {
@@ -62,7 +64,7 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
     setIsLogged(false);
     setLoading(false);
     redirectToWelcome();
-    twoFactorValidationStatus(false);
+    // twoFactorValidationStatus(false);
   };
 
   const fetchUserData = async () => {
@@ -77,12 +79,12 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
         });
 
         setUser({ ...response.data, jwtToken: jwtToken });
-      setTkn(jwtToken);
+      	setTkn(jwtToken);
 
-        if (response.data.is2FA && response.data.is2FAValidated === false) {
-          setIs2FA(true);
-          navigateTo("TwoFactor");
-        }
+        // if (response.data.is2FA && response.data.is2FAValidated === false) {
+        //   setIs2FA(true);
+        //   navigateTo("TwoFactor");
+        // }
         
         setIsLogged(true);
       } catch (error) {
@@ -93,6 +95,23 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
     }
     setLoading(false);
   };
+
+  const fetch2FA = async () => {
+    const jwtToken = getCookies("jwt_token");
+
+    try {
+        const response = await axios.get("/api/users/2FAtest", {
+          headers: {
+            Authorization: bearerAuthorization(jwtToken),
+          },
+        });
+		console.log(response);
+		// if (response.data == "2FA required")
+		// 	navigateTo("TwoFactor");
+      } catch (error) {
+        console.error("Error fetching 2FA info :", error);
+      }
+    };
 
   const redirectToHome = () => {
     navigateTo("/");
