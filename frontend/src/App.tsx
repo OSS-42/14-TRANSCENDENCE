@@ -15,6 +15,9 @@ import {
 import { useEffect, useState } from "react";
 import { TwoFactor } from "./pages/TwoFactor";
 
+
+// App component that is use in main.tsx
+//
 function App() {
   const clearLocalStorageOnTabClose = () => {
     localStorage.clear();
@@ -26,6 +29,7 @@ function App() {
     };
   }, []);
   const { user, loading, isLogged } = useAuth();
+  const [is2FATest, setIs2FATest] = useState(false);
   const [chatSocket, setChatSocket] = useState<Socket | null>(null);
   const [chatSocketInitialized, setChatSocketInitialized] = useState(false);
   useEffect(() => {
