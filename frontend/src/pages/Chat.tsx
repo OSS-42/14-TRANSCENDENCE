@@ -42,9 +42,9 @@ export function Chat({ socket }: ChatProps) {
   useEffect(() => {
     console.log("change of tab detected");
     if (isOnChatTab) {
-      setIsAvailable(true);
+      setIsAvailable({ isAvailable: true});
     } else {
-      setIsAvailable(false);
+      setIsAvailable({ isAvailable: false });
     }
     socket?.emit("onChatTab", {isAvailable});
   }, [isOnChatTab, socket]);
