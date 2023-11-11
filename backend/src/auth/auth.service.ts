@@ -5,8 +5,7 @@ import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import { ConnectedUsersService } from 'src/connectedUsers/connectedUsers.service';
 import * as speakeasy from 'speakeasy';
-
-
+import { ChatGateway } from '../chat/chat.gateway';
 
 @Injectable({})
 export class AuthService {
@@ -14,7 +13,8 @@ export class AuthService {
     private prisma: PrismaService,
     private jwt: JwtService,
     private config: ConfigService,
-    private readonly connectedUsersService: ConnectedUsersService
+    private readonly connectedUsersService: ConnectedUsersService,
+    private chatGateway: ChatGateway
   ) {}
 
   async signToken(userId: number, email: string): Promise<{ access_token: string }> {
@@ -102,8 +102,9 @@ export class AuthService {
                 ,
               },
             });
-  
-          } 
+          }
+          //Ici eric
+          this.chatGateway.server.emit('newUser', user);
         } 
         if (this.connectedUsersService.connectedUsers.has(user.id)) {
           (await UserToken).access_token = "poulet"
