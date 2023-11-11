@@ -87,6 +87,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
           this.joinRoomsAtConnection(Number(decoded.sub), client)
           this.server.emit("updateUserList")
           this.emitUpdateConnectedUsers()
+          this.server.emit('newUser'); // ici morgam
 
         } catch (error) {
           client.disconnect();

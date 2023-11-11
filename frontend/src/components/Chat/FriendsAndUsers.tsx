@@ -102,7 +102,24 @@ useEffect(() => {
 
 }, [connectedUsers]);
 
-  // -------------------------------------------------------------
+// --------------------------- UPDATE #2 --------------------------
+
+useEffect(() => {
+  socket.on("newUser", (payload: any) => {
+    async function fetchInitialData() {
+      try {
+        console.log("hello");
+        const newUsersList = await fetchUsersList();
+        setUsersList(newUsersList);
+      } catch (error) {
+        console.error("Erreur lors de la récupération des données :", error);
+      }
+    }
+    fetchInitialData();
+  })
+}, []);
+
+// ----------------------------------------------------------------
 
   function acceptGame() {
     if (gameId) {
