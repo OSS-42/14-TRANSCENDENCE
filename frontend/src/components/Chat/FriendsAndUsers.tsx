@@ -103,7 +103,7 @@ useEffect(() => {
 }, [connectedUsers]);
 
 // --------------------------- UPDATE #2 --------------------------
-
+// ici morgan
 useEffect(() => {
   socket.on("newUser", (payload: any) => {
     async function fetchInitialData() {
