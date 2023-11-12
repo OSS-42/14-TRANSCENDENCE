@@ -31,12 +31,6 @@ export function Chat({ socket }: ChatProps) {
   const location = useLocation();
   const isOnChatTab = location.pathname === '/chat';
 
-  // useEffect(() => {
-  //   console.log("Chat component mounted");
-  //   // Emit an event to update the list of connected users
-  //   socket?.emit("onChatTab");
-  // }, []);
-
   const [isAvailable, setIsAvailable] = useState<Availability>({ isAvailable: false });
 
   useEffect(() => {

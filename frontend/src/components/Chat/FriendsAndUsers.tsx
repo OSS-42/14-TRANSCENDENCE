@@ -58,7 +58,7 @@ useEffect(() => {
       if(tkn !== jwtToken ){
         logout() 
       }
-      console.log("update con User: ", data);
+      console.log("users are there: ", data);
       const { connectedUserIds, connectedUserIdsPong } = data;
       setConnectedUsers(connectedUserIds);
       setConnectedToPong(connectedUserIdsPong);

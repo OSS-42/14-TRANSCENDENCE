@@ -3,7 +3,7 @@ import { Box, Button } from '@mui/material'
 import { User } from '../../models/User'
 import { destroyFriend, fetchFriendsList } from '../../api/requests'
 import PersonRemoveIcon from '@mui/icons-material/PersonRemove'
-import SportsCricketSharpIcon from '@mui/icons-material/SportsCricketSharp'
+// import SportsCricketSharpIcon from '@mui/icons-material/SportsCricketSharp' //UPDATE
 
 type ChatFriendsProps = {
   socket: Socket
