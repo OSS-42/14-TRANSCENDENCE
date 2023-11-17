@@ -82,6 +82,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
           console.log("voici lidentite du socket")
           console.log(decoded)
           this.connectedUsersService.set(Number(decoded.sub), client.id);
+          this.connectedUsersService.set(Number(decoded.sub), client.id);
+          this.connectedUsersService.setSocketChat(Number(decoded.sub), client);
           
           //FONCTION QUI VERIFIE LES CHANNELS DONT LUTILASATEUR EST MEMBRE ET LES JOIN TOUS
           this.joinRoomsAtConnection(Number(decoded.sub), client)
@@ -595,6 +597,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     // ------------------------ Le channel n'existe pas ------------------------
     else{
       const targetId = await this.chatService.getUserIdFromUsername(payload.target)
+      const targetSocket = await this.connectedUsersService.getSocketChat(targetId);
       targetSocketId = await this.connectedUsersService.getSocketId(targetId)
       const roomObject = await this.chatService.isRoomExist(payload.channelName[0])
       if (roomObject === null)
@@ -622,6 +625,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
         targetNotice = `You are kick of the channel ${payload.channelName}`
         userNotice = `/KICK: The user ${payload.target} is now kicked of the room ${payload.channelName[0]}`
         await this.chatService.removeMember(roomObject.id, targetId)
+        targetSocket.leave(payload.channelName[0]);
       }
     } 
     if (targetSocketId !== null &&  targetNotice !== null)
@@ -653,6 +657,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     userNotice = `/BAN : bad format`
     else {      
       const targetId = await this.chatService.getUserIdFromUsername(payload.target)
+      const targetSocket = await this.connectedUsersService.getSocketChat(targetId);
       targetSocketId = await this.connectedUsersService.getSocketId(targetId)
       const roomObject = await this.chatService.isRoomExist(payload.channelName[0])
       if (roomObject === null)
@@ -679,6 +684,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
       else {
         targetNotice = `You are ban of the channel ${payload.channelName}`
         userNotice = `/BAN: The user ${payload.target} is now ban of the room ${payload.channelName[0]}`
+        targetSocket.leave(payload.channelName[0]);
         await this.chatService.banUserFromRoom(targetId, roomObject.id)
       }
     }
