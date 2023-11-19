@@ -91,39 +91,6 @@ export function TwoFactorAuthentication({ TwoFactorStatus}: TwoFactorAuthenticat
     }
   }
 
-  const handleCloseModal = () => {
-    // No need to make an additional verification request here
-    if (verificationCode.length === 6) {
-      submitVerificationCode(); // Handle verification logic in submitVerificationCode
-    }
-  };
-
-
-  // const handleCloseModal = async () => {
-  //   if (verificationCode.length === 6) {
-  //     try {
-  //       const response = await axios.post(
-  //         `${BASE_URL}/auth/verify2FA`,
-  //         { verificationCode },
-  //         {
-  //           headers: {
-  //             Authorization: `Bearer ${jwt_token}`,
-  //           },
-  //         }
-  //       );
-  //       alert(response.data.message);
-  //       setVerificationCode(""); // Clear the verification code if needed
-  //       // Close the modal only if the code is valid
-  //       if (response.data.isValid) {
-  //         setQRCodeVisible(false);
-  //       }
-  //     } catch (error) {
-  //       console.error("Error verifying 2FA code", error);
-  //       // Handle error (display an error message, etc.)
-  //     }
-  //   }
-  // };
-
   return (
     <Box
       component="div"
@@ -147,7 +114,7 @@ export function TwoFactorAuthentication({ TwoFactorStatus}: TwoFactorAuthenticat
         >
           {isActivated ? "Deactivate 2FA" : "Activate 2FA"}
         </Button>
-        <Modal open={isQRCodeVisible} onClose={handleCloseModal}>
+        <Modal open={isQRCodeVisible}>
           <Box
             component="div"
             sx={{
@@ -173,6 +140,8 @@ export function TwoFactorAuthentication({ TwoFactorStatus}: TwoFactorAuthenticat
             <input
               type="text"
               placeholder="Enter 6-digit code"
+              minLength={6}
+              maxLength={6}
               value={verificationCode}
               onChange={(e) => setVerificationCode(e.target.value)}
               style={{ margin: "10px" }}
