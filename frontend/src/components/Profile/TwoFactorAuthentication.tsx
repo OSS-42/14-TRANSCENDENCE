@@ -69,15 +69,14 @@ export function TwoFactorAuthentication({ TwoFactorStatus}: TwoFactorAuthenticat
         }
       );
       if (response.data.message == "2FA code is valid."){
-        alert(response.data.message);
+        alert("2FA is correctly set up");
         setQRCodeVisible(false);
         setVerificationCode("");
       }else{
-        alert(response.data.message);
+        alert("2FA code is invalid. Please re-enter code");
       }
     } catch (error) {
       console.error("Error verifying 2FA code", error);
-      // Handle error (display an error message, etc.)
     }
   }
 
@@ -135,7 +134,8 @@ export function TwoFactorAuthentication({ TwoFactorStatus}: TwoFactorAuthenticat
             <br />
             <QRCode value={otpURL} size={256} />
             <Typography>
-              <br /> Scan the QR code with your authenticator app.
+              <br /> Scan the QR code with your authenticator app and enter the 6-digits 
+              <br /> number of your app below to make sure 2FA is set up correctly!
             </Typography>
             <input
               type="text"
