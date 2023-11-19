@@ -10,13 +10,13 @@ interface TwoFactorAuthenticationProps {
 
 const BASE_URL = "/api";
 
-export function TwoFactorAuthentication({
-  TwoFactorStatus,
-}: TwoFactorAuthenticationProps) {
+export function TwoFactorAuthentication({ TwoFactorStatus}: TwoFactorAuthenticationProps) {
   const [otpURL, setOtpURL] = useState("");
   const [isQRCodeVisible, setQRCodeVisible] = useState(false);
   const [isActivated, setIsActivated] = useState(TwoFactorStatus);
+  const [verificationCode, setVerificationCode] = useState("");
   const jwt_token = Cookies.get("jwt_token");
+
   async function activate2FA() {
     try {
       const response = await axios.post(
@@ -56,6 +56,31 @@ export function TwoFactorAuthentication({
     }
   }
 
+  // function that submits the verification code 
+  async function submitVerificationCode() {
+    try {
+      const response = await axios.post(
+        `${BASE_URL}/auth/verify2FA`,
+        { token: verificationCode },
+        {
+          headers: {
+            Authorization: `Bearer ${jwt_token}`,
+          },
+        }
+      );
+      if (response.data.message == "2FA code is valid."){
+        alert(response.data.message);
+        setQRCodeVisible(false);
+        setVerificationCode("");
+      }else{
+        alert(response.data.message);
+      }
+    } catch (error) {
+      console.error("Error verifying 2FA code", error);
+      // Handle error (display an error message, etc.)
+    }
+  }
+
   function handle2FA() {
     if (isActivated) {
       setIsActivated(false);
@@ -65,6 +90,31 @@ export function TwoFactorAuthentication({
       setIsActivated(true);
     }
   }
+
+  const handleCloseModal = async () => {
+    if (verificationCode.length === 6) {
+      try {
+        const response = await axios.post(
+          `${BASE_URL}/auth/verify2FA`,
+          { verificationCode },
+          {
+            headers: {
+              Authorization: `Bearer ${jwt_token}`,
+            },
+          }
+        );
+        alert(response.data.message);
+        setVerificationCode(""); // Clear the verification code if needed
+        // Close the modal only if the code is valid
+        if (response.data.isValid) {
+          setQRCodeVisible(false);
+        }
+      } catch (error) {
+        console.error("Error verifying 2FA code", error);
+        // Handle error (display an error message, etc.)
+      }
+    }
+  };
 
   return (
     <Box
@@ -89,7 +139,7 @@ export function TwoFactorAuthentication({
         >
           {isActivated ? "Deactivate 2FA" : "Activate 2FA"}
         </Button>
-        <Modal open={isQRCodeVisible} onClose={() => setQRCodeVisible(false)}>
+        <Modal open={isQRCodeVisible} onClose={handleCloseModal}>
           <Box
             component="div"
             sx={{
@@ -112,6 +162,21 @@ export function TwoFactorAuthentication({
             <Typography>
               <br /> Scan the QR code with your authenticator app.
             </Typography>
+            <input
+              type="text"
+              placeholder="Enter 6-digit code"
+              value={verificationCode}
+              onChange={(e) => setVerificationCode(e.target.value)}
+              style={{ margin: "10px" }}
+            />
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={submitVerificationCode}
+              disabled={verificationCode.length !== 6}
+            >
+              Submit Code
+            </Button>
           </Box>
         </Modal>
       </label>
