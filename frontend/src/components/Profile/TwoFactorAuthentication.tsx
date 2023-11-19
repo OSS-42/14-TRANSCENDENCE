@@ -91,30 +91,38 @@ export function TwoFactorAuthentication({ TwoFactorStatus}: TwoFactorAuthenticat
     }
   }
 
-  const handleCloseModal = async () => {
+  const handleCloseModal = () => {
+    // No need to make an additional verification request here
     if (verificationCode.length === 6) {
-      try {
-        const response = await axios.post(
-          `${BASE_URL}/auth/verify2FA`,
-          { verificationCode },
-          {
-            headers: {
-              Authorization: `Bearer ${jwt_token}`,
-            },
-          }
-        );
-        alert(response.data.message);
-        setVerificationCode(""); // Clear the verification code if needed
-        // Close the modal only if the code is valid
-        if (response.data.isValid) {
-          setQRCodeVisible(false);
-        }
-      } catch (error) {
-        console.error("Error verifying 2FA code", error);
-        // Handle error (display an error message, etc.)
-      }
+      submitVerificationCode(); // Handle verification logic in submitVerificationCode
     }
   };
+
+
+  // const handleCloseModal = async () => {
+  //   if (verificationCode.length === 6) {
+  //     try {
+  //       const response = await axios.post(
+  //         `${BASE_URL}/auth/verify2FA`,
+  //         { verificationCode },
+  //         {
+  //           headers: {
+  //             Authorization: `Bearer ${jwt_token}`,
+  //           },
+  //         }
+  //       );
+  //       alert(response.data.message);
+  //       setVerificationCode(""); // Clear the verification code if needed
+  //       // Close the modal only if the code is valid
+  //       if (response.data.isValid) {
+  //         setQRCodeVisible(false);
+  //       }
+  //     } catch (error) {
+  //       console.error("Error verifying 2FA code", error);
+  //       // Handle error (display an error message, etc.)
+  //     }
+  //   }
+  // };
 
   return (
     <Box
