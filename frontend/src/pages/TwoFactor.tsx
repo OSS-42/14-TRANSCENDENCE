@@ -25,7 +25,7 @@ export function TwoFactor() {
   async function handle2FAClick() {
     try {
       const response = await axios.post(
-        `api/auth/verify2FA`,
+        `api/auth/verify2FAlogin`,
         { token: inputValue },
         {
           headers: {

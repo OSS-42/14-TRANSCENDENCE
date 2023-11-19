@@ -72,6 +72,7 @@ export function TwoFactorAuthentication({ TwoFactorStatus}: TwoFactorAuthenticat
         alert("2FA is correctly set up");
         setQRCodeVisible(false);
         setVerificationCode("");
+        setIsActivated(true); 
       }else{
         alert("2FA code is invalid. Please re-enter code");
       }
@@ -86,7 +87,7 @@ export function TwoFactorAuthentication({ TwoFactorStatus}: TwoFactorAuthenticat
       deactivate2FA();
     } else {
       activate2FA();
-      setIsActivated(true);
+      // setIsActivated(true);
     }
   }
 

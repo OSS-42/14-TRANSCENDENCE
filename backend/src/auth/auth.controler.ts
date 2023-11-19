@@ -86,4 +86,18 @@ export class AuthControler {
       return { message: "Invalid 2FA code." };
     }
   }
+
+  @UseGuards(JwtGuard)
+  @Post("verify2FAlogin")
+  async verify2FAlogin(@Req() req, @Body() body: { token: string }) {
+    const userId = req.user.id;
+    const verified = await this.authService.verify2FAlogin(userId, body.token);
+
+    if (verified) {
+      return { message: "2FA code is valid." };
+    } else {
+      return { message: "Invalid 2FA code." };
+    }
+  }
+
 }

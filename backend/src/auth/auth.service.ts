@@ -141,8 +141,7 @@ export class AuthService {
 
     await this.prisma.utilisateur.update({
       where: { id: userId },
-      data: { twoFactorSecret: secret.base32,
-        is2FA: true },
+      data: { twoFactorSecret: secret.base32 }
     });
 
     const otpauthUrl = speakeasy.otpauthURL({
@@ -156,8 +155,9 @@ export class AuthService {
   // Méthode pour vérifier le code 2FA
 
   async verify2FA(userId: number, token: string): Promise<boolean> {
-    const user = await this.prisma.utilisateur.findUnique({
+    const user = await this.prisma.utilisateur.update({
       where: { id: userId },
+      data: { is2FA: true }
     });
 
     const verified = speakeasy.totp.verify({
@@ -168,6 +168,18 @@ export class AuthService {
     return verified;
   }
 
+  async verify2FAlogin(userId: number, token: string): Promise<boolean> {
+    const user = await this.prisma.utilisateur.findUnique({
+      where: { id: userId }
+    });
+
+    const verified = speakeasy.totp.verify({
+      secret: user.twoFactorSecret,
+      encoding: 'base32',
+      token: token,
+    });
+    return verified;
+  }
 
   async disable2FA(userId: number): Promise<void> {
     await this.prisma.utilisateur.update({
