@@ -58,18 +58,18 @@ export class AuthControler {
   //---routes pour le 2FA----//
 
   @UseGuards(JwtGuard)
-  @Post("enable2FA")
-  async enable2FA(@Req() req) {
+  @Post("activate2FA")
+  async activate2FA(@Req() req) {
     const userId = req.user.id;
-    const { otpauthUrl } = await this.authService.enable2FA(userId);
+    const { otpauthUrl } = await this.authService.activate2FA(userId);
     return { otpauthUrl };
   }
 
   @UseGuards(JwtGuard)
-  @Post("disable2FA")
-  async disable2FA(@Req() req) {
+  @Post("deactivate2FA")
+  async deactivate2FA(@Req() req) {
     const userId = req.user.id;
-    await this.authService.disable2FA(userId);
+    await this.authService.deactivate2FA(userId);
 
     return { message: "2FA has been disabled." };
   }
@@ -88,10 +88,10 @@ export class AuthControler {
   }
 
   @UseGuards(JwtGuard)
-  @Post("verify2FAlogin")
-  async verify2FAlogin(@Req() req, @Body() body: { token: string }) {
+  @Post("verifyLogin2FA")
+  async verifyLogin2FA(@Req() req, @Body() body: { token: string }) {
     const userId = req.user.id;
-    const verified = await this.authService.verify2FAlogin(userId, body.token);
+    const verified = await this.authService.verifyLogin2FA(userId, body.token);
 
     if (verified) {
       return { message: "2FA code is valid." };
@@ -99,5 +99,4 @@ export class AuthControler {
       return { message: "Invalid 2FA code." };
     }
   }
-
 }

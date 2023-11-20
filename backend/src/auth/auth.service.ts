@@ -136,7 +136,7 @@ export class AuthService {
 //---services pour le 2FA----//
 
 // Faire une validation quand la premiere fois qu'il ya une connexion
-  async enable2FA(userId: number): Promise<{ otpauthUrl: string, secret: string }> {
+  async activate2FA(userId: number): Promise<{ otpauthUrl: string, secret: string }> {
     const secret = speakeasy.generateSecret({ length: 20 });
 
     await this.prisma.utilisateur.update({
@@ -152,8 +152,17 @@ export class AuthService {
     return { otpauthUrl, secret: secret.base32 };
   }
 
-  // Méthode pour vérifier le code 2FA
+  async deactivate2FA(userId: number): Promise<void> {
+    await this.prisma.utilisateur.update({
+      where: { id: userId },
+      data: { twoFactorSecret: null,
+      is2FA: false },
+    });
+    }
 
+  // This endpoint is to verify2FA right after clicking on activate2FA.
+  // To avoid that user forget to scan its QrCode, we force him to scan code and enter it
+  // Once done, variable is2FA is set to true. 
   async verify2FA(userId: number, token: string): Promise<boolean> {
     const user = await this.prisma.utilisateur.update({
       where: { id: userId },
@@ -168,9 +177,11 @@ export class AuthService {
     return verified;
   }
 
-  async verify2FAlogin(userId: number, token: string): Promise<boolean> {
+  // Pretty similar to verify2FA endpoint, except that we do not update 
+  // the variable is2FA as it is already updated, we simply validate code. 
+  async verifyLogin2FA(userId: number, token: string): Promise<boolean> {
     const user = await this.prisma.utilisateur.findUnique({
-      where: { id: userId }
+      where: { id: userId },
     });
 
     const verified = speakeasy.totp.verify({
@@ -180,16 +191,6 @@ export class AuthService {
     });
     return verified;
   }
-
-  async disable2FA(userId: number): Promise<void> {
-    await this.prisma.utilisateur.update({
-      where: { id: userId },
-      data: { twoFactorSecret: null,
-      is2FA: false },
-    });
-    }
-
-
 
   async createRefreshToken(userId: number, secretId:string){
     const payload = {
