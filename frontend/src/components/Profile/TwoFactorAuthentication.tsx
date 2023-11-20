@@ -10,7 +10,9 @@ interface TwoFactorAuthenticationProps {
 
 const BASE_URL = "/api";
 
-export function TwoFactorAuthentication({ TwoFactorStatus}: TwoFactorAuthenticationProps) {
+export function TwoFactorAuthentication({
+  TwoFactorStatus,
+}: TwoFactorAuthenticationProps) {
   const [otpURL, setOtpURL] = useState("");
   const [isQRCodeVisible, setQRCodeVisible] = useState(false);
   const [isActivated, setIsActivated] = useState(TwoFactorStatus);
@@ -20,7 +22,7 @@ export function TwoFactorAuthentication({ TwoFactorStatus}: TwoFactorAuthenticat
   async function activate2FA() {
     try {
       const response = await axios.post(
-        `${BASE_URL}/auth/enable2FA`,
+        `${BASE_URL}/auth/activate2FA`,
         {},
         {
           headers: {
@@ -39,7 +41,7 @@ export function TwoFactorAuthentication({ TwoFactorStatus}: TwoFactorAuthenticat
   async function deactivate2FA() {
     try {
       const response = await axios.post(
-        `${BASE_URL}/auth/disable2FA`,
+        `${BASE_URL}/auth/deactivate2FA`,
         {},
         {
           headers: {
@@ -56,7 +58,7 @@ export function TwoFactorAuthentication({ TwoFactorStatus}: TwoFactorAuthenticat
     }
   }
 
-  // function that submits the verification code 
+  // function that submits the verification code
   async function submitVerificationCode() {
     try {
       const response = await axios.post(
@@ -68,13 +70,14 @@ export function TwoFactorAuthentication({ TwoFactorStatus}: TwoFactorAuthenticat
           },
         }
       );
-      if (response.data.message == "2FA code is valid."){
-        alert("2FA is correctly set up");
+      if (response.data.message == "2FA code is valid.") {
+        alert("2FA code is valid. 2FA is now activated");
         setQRCodeVisible(false);
         setVerificationCode("");
-        setIsActivated(true); 
-      }else{
+        setIsActivated(true);
+      } else {
         alert("2FA code is invalid. Please re-enter code");
+        setVerificationCode("");
       }
     } catch (error) {
       console.error("Error verifying 2FA code", error);
@@ -87,7 +90,6 @@ export function TwoFactorAuthentication({ TwoFactorStatus}: TwoFactorAuthenticat
       deactivate2FA();
     } else {
       activate2FA();
-      // setIsActivated(true);
     }
   }
 
@@ -99,8 +101,8 @@ export function TwoFactorAuthentication({ TwoFactorStatus}: TwoFactorAuthenticat
         margin: "0 0 2rem 0",
         width: "100%",
         display: "flex",
-        justifyContent: "center", // Center horizontally
-        alignItems: "center", // Center vertically
+        justifyContent: "center",
+        alignItems: "center",
       }}
     >
       <label>
@@ -129,14 +131,13 @@ export function TwoFactorAuthentication({ TwoFactorStatus}: TwoFactorAuthenticat
               p: 2,
             }}
           >
-            <Typography variant="h5">Set up 2FA</Typography>
-            <br />
-            <Typography>Follow the instructions below:</Typography>
+            <Typography variant="h5">Activate 2FA</Typography>
             <br />
             <QRCode value={otpURL} size={256} />
-            <Typography>
-              <br /> Scan the QR code with your authenticator app and enter the 6-digits 
-              <br /> number of your app below to make sure 2FA is set up correctly!
+            <Typography variant="h6">
+              <br /> Scan the QR code with your authenticator app and enter the
+              6-digits number of your app below to make sure 2FA is set up
+              correctly!
             </Typography>
             <input
               type="text"
