@@ -39,6 +39,10 @@ interface WeHaveAWinner {
   clientName: string;
 };
 
+interface NewRound {
+  gameId: string;
+}
+
 type GameState = HostGameParameters | ClientGameParameters | WeHaveAWinner;
 
 @WebSocketGateway({ cors: true,  namespace: 'pong' })
@@ -219,6 +223,15 @@ export class PongGateway {
     this.gameStates.set(gameId, payload);
 
     this.server.to(gameId).volatile.emit('clientMovesUpdate', payload);
+  }
+
+  @SubscribeMessage('newRound')
+  launchNewRound(client: Socket, payload: NewRound) {
+
+    const gameId = payload.gameId;
+    // console.log('server starting new round for :', gameId);
+
+    this.server.to(gameId).volatile.emit('startNewRound', payload);
   }
 
   @SubscribeMessage('weHaveAWinner')
