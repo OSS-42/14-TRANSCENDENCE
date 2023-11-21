@@ -21,8 +21,8 @@ const privmsgCommand = ({data, socket, user}: PrivmsgCommandProps) => {
     if (command === "/PRIVMSG") {
       socket.emit("privmsg", {
         username: user?.username,
-        target: target,
-        message: message,
+        channelName: target,
+        param: message,
       });
     }
 }

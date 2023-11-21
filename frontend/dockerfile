@@ -1,7 +1,14 @@
 FROM node:18-alpine3.17
 
-WORKDIR /app/frontend
+WORKDIR /app/frontend/
+
 COPY . /app/frontend/
+
 RUN npm install
 
-CMD ["npm", "run",  "dev"]
+COPY wait-for-it.sh /usr/local/bin/wait-for-it.sh
+RUN chmod +x /usr/local/bin/wait-for-it.sh
+COPY startup.sh /usr/local/bin/startup.sh
+RUN chmod +x /usr/local/bin/startup.sh
+
+CMD ["/bin/sh","startup.sh"]

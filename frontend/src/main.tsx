@@ -30,7 +30,6 @@ api.interceptors.response.use(
 );
 
 root.render(
-  //<React.StrictMode>
   <Router>
     <ThemeProvider theme={theme}>
       <RoutesProvider>
@@ -40,5 +39,4 @@ root.render(
       </RoutesProvider>
     </ThemeProvider>
   </Router>
-  //</React.StrictMode>
 );

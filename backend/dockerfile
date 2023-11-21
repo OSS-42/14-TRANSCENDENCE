@@ -3,10 +3,11 @@ FROM node:18-alpine3.17
 WORKDIR /app/backend/
 COPY . /app/backend/
 
+COPY wait-for-it.sh /usr/local/bin/wait-for-it.sh
+RUN chmod +x /usr/local/bin/wait-for-it.sh
+
 RUN npm install
 
-RUN rm -rf backend/prisma/migrations 
-
-CMD ["npm", "run", "start:dev"]
-
-# ENTRYPOINT ["npx", "prisma", "migrate", "dev"]
+RUN rm -rf ./prisma/migrations
+ 
+CMD ["/bin/sh", "-c", "wait-for-it.sh db:5432 -- npm run start:migrate:dev"]

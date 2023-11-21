@@ -5,19 +5,71 @@ import { verify } from 'jsonwebtoken';
 import { ConfigService } from '@nestjs/config';
 import { ConnectedUsersService } from '../connectedUsers/connectedUsers.service';
 import { empty } from '@prisma/client/runtime/library';
+import { OnModuleInit} from '@nestjs/common';
 
+// admin, ban, inviteRoom, kickUser, mute
+interface ChatPayload {
+  username: string,
+  channelName: string[],
+  target: string
+}
+
+// block,unblock
+interface BlockPayload {
+  username: string,
+  socketID: string,
+  target: string[]
+}
+
+// default(message), help, list
+interface GeneralMessagePayload {
+  message: string[],
+  name: string
+}
+
+//joinRoom, modeRoom, 
+interface ChannelPayload {
+  username: string,
+  channelName: string,
+  param : string[]
+}
+
+// privmsg
+interface PrivmsgPayload {
+  username: string,
+  channelName: string,
+  param : string
+}
 
 @WebSocketGateway({ cors: true,  namespace: 'chat' })
-export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
+export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, OnModuleInit {
   // Map pour stocker les ID d'utilisateur associés aux IDs de socket
   // AVec cette map, on peut identifier le client.id à partir d'un Utilisateur ID.
   //private connectedUsers: Map<number, string> = new Map(); 
 
-  constructor(private chatService: ChatService, private config: ConfigService, private readonly connectedUsersService: ConnectedUsersService) {
-    setInterval(() => this.emitUpdateConnectedUsers(), 1500);
+  constructor(
+    private chatService: ChatService,
+    private config: ConfigService,
+    private readonly connectedUsersService: ConnectedUsersService) {
+    // setInterval(() => this.emitUpdateConnectedUsers(), 1500);
   }
   @WebSocketServer()
   server: Server
+
+  // ----------------------- UPDATE ----------------------------
+  // onmoduleinit pour s'assurer que le websocket est fini d'etre mis en place et ensuite de faire le premier emit.
+  onModuleInit() {
+
+    this.connectedUsersService.events.on("updateConnectedUsers", () => {
+      this.emitUpdateConnectedUsers();
+    })
+
+    // this.emitUpdateConnectedUsers();
+    this.server.emit('updateConnectedUsers', {
+      connectedUserIds: Array.from(this.connectedUsersService.connectedUsers.keys()),
+      connectedUserIdsPong: Array.from(this.connectedUsersService.connectedToPong.keys())
+    });
+  }
  
   //Fonction qui gère les nouvelles connexion au socket
   //dès qu'il y a un nouveau client, cette fonction est appelée
@@ -29,25 +81,30 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
           const decoded = verify(token, this.config.get("JWT_SECRET"));          
           console.log("voici lidentite du socket")
           console.log(decoded)
-          this.connectedUsersService.set( Number(decoded.sub), client.id);
+          this.connectedUsersService.set(Number(decoded.sub), client.id);
+          this.connectedUsersService.set(Number(decoded.sub), client.id);
+          this.connectedUsersService.setSocketChat(Number(decoded.sub), client);
+          
           //FONCTION QUI VERIFIE LES CHANNELS DONT LUTILASATEUR EST MEMBRE ET LES JOIN TOUS
           this.joinRoomsAtConnection(Number(decoded.sub), client)
           this.server.emit("updateUserList")
           this.emitUpdateConnectedUsers()
+          this.server.emit('newUser'); // ici morgan
+
         } catch (error) {
           client.disconnect();
         }
       } else {
         client.disconnect();
       }
-     
    }
    // renvoie au client la liste des users connectés
  
-    
   //Fonction qui gère les déconnexions au socket
   //dès qu'un client se déconnecte du socket, cette fonction est appelée
   handleDisconnect(client: Socket): void {
+    const token = client.handshake.query.token as string; // UPDATE
+    const decoded = verify(token, this.config.get("JWT_SECRET")); // UPDATE
     console.log(`🔥: ${client.id} user disconnected`); 
     //supprime le le client.id de la map de connectedUser lorsque ce dernier ce déconnecte!
     for (const [userId, socketId] of this.connectedUsersService.connectedUsers.entries()) {
@@ -55,29 +112,26 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         this.connectedUsersService.delete(userId);
         break;
       }
-      this.emitUpdateConnectedUsers()
     }
+    this.emitUpdateConnectedUsers()
     // const connectedUserIds = Array.from(this.connectedUsers.keys());
     // this.server.emit("updateConnectedUsers", connectedUserIds)
   }
 
 //Retourne le clientId du socket, si lutilisateur n<est pas connect/ la fonciton retourne undefined.
-  // connectedUsersService.getSocketId(id: number): string | undefined {
-  //   return this.connectedUsers.get(id);
-  // }
   //join chaque channel dont le user est membre
   private  async joinRoomsAtConnection(userId:number, client:Socket){
     const memberOf = await this.chatService.getRoomNamesUserIsMemberOf(userId)
     memberOf.forEach((roomName) => {
       client.join(roomName);
     });
-
   }
 
-  private emitUpdateConnectedUsers(): void {
+  @SubscribeMessage("onChatTab") // UPDATE
+  private emitUpdateConnectedUsers(client?: Socket): void {
     const connectedUserIds = Array.from(this.connectedUsersService.connectedUsers.keys());
-    const connectedUserIdsPong = Array.from(this.connectedUsersService.connectedtoPonng.keys());
-    this.server.emit('updateConnectedUsers', { connectedUserIds :connectedUserIds, connectedUserIdsPong:connectedUserIdsPong });
+    const connectedUserIdsPong = Array.from(this.connectedUsersService.connectedToPong.keys());
+    this.server.emit('updateConnectedUsers', { connectedUserIds, connectedUserIdsPong });
   }
 
   @SubscribeMessage('invitation')
@@ -87,27 +141,22 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       roomId: payload.roomId,
       challengerUsername : payload.challengerUsername,
       challengerId : payload.challengerId
-
     });
   }
   
   @SubscribeMessage('challengeAccepted')
   async challengeAccepted(client: Socket, payload: any){ 
-    
-          
     const socketId = await this.connectedUsersService.getSocketId(payload.challengerId)
     this.server.to(socketId).emit('challengeAccepted', {
       roomId: payload.roomId,
       challengerId : payload.userId
-
     });
   }
   
-
   // //-------------------------------------------------------- COMMANDE DU CHAT --------------------------------------------------------
   
   @SubscribeMessage('message')
-  async handleMessage(client: Socket, payload: any){ //voir pour changer any
+  async handleMessage(client: Socket, payload: GeneralMessagePayload){
     const userId = await this.chatService.getUserIdFromUsername(payload.name)
     this.server.emit('messageResponse', {
       userId: userId,
@@ -118,14 +167,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
    // Diffuser le message à tous les clients connectés
   }
   
-
-
   // ---------------------------------------------------------- JOIN ----------------------------------------------------------
   // Utilisation :  /JOIN #nomDuchannel 
   // Utilisation :  /JOIN #nomDuchannel motDePasse 
   // Utilisation :  /JOIN #nomDuchannel +i (channel sur invitation seulement) 
   @SubscribeMessage('joinRoom')
-  async joinRoom(client: Socket, payload: any) {
+  async joinRoom(client: Socket, payload: ChannelPayload) {
     const userId = await this.chatService.getUserIdFromUsername(payload.username)
     let notice : string = null
     // ------------------------ Mauvais parametre ------------------------
@@ -143,7 +190,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         let invite : boolean = false;
         if (payload.param[0] === '+i')
         invite = true;
-        await this.chatService.createRoom(payload.channelName, userId, payload.param, invite)// voir avec sam pour le param invit
+        await this.chatService.createRoom(payload.channelName, userId, payload.param[0], invite)// voir avec sam pour le param invit
         client.join(payload.channelName);
         if (payload.param[0] !== undefined && payload.param[0] !== '+i' && payload.param[0] !== "")//Channel avec mdp
         await this.chatService.createPassword(payload.param[0], payload.channelName)
@@ -182,7 +229,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   // ---------------------------------------------------------- BLOCK ----------------------------------------------------------
   // Utilisation :  /BLOCK nomCible 
   @SubscribeMessage('blockUser')
-  async blockUser(client: Socket, payload: any) {
+  async blockUser(client: Socket, payload: BlockPayload) {
     const userId = await this.chatService.getUserIdFromUsername(payload.username)
     const blockedUserIds = await this.chatService.getBlockedUserIds(userId)
     let notice : string = null
@@ -195,6 +242,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         notice = `/BLOCK: The user ${payload.target} doesn't exist`
       else if (blockedUserIds.find((id) => id === targetId)  !== undefined)
         notice = `/BLOCK: The user ${payload.target} is already block`
+      else if (userId === targetId)
+        notice = `/BLOCK: You can't block yourself`
       else {
         notice = `/BLOCK : You block ${payload.target}`
         this.chatService.blockUser(targetId, userId)
@@ -202,7 +251,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
     client.emit('notice', {
     name: payload.username,
-    channel: payload.channelName,
+    channel: undefined,
     text: undefined,
     notice : notice
     })
@@ -211,7 +260,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   // ---------------------------------------------------------- UNBLOCK ----------------------------------------------------------
   // Utilisation :  /UNBLOCK nomCible 
   @SubscribeMessage('unblockUser')
-  async unblockUser(client: Socket, payload: any) {
+  async unblockUser(client: Socket, payload: BlockPayload) {
     const userId = await this.chatService.getUserIdFromUsername(payload.username)
     const blockedUserIds = await this.chatService.getBlockedUserIds(userId)
     let notice : string = null
@@ -231,7 +280,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
     client.emit('notice', {
     name: payload.username,
-    channel: payload.channelName,
+    channel: undefined,
     text: undefined,
     notice : notice
     })
@@ -240,12 +289,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   // ---------------------------------------------------------- HELP ----------------------------------------------------------
   // Utilisation :  /HELP 
   @SubscribeMessage('help')
-  async help(client: Socket, payload: any) {
-    const userId = await this.chatService.getUserIdFromUsername(payload.username)
+  async help(client: Socket, payload: GeneralMessagePayload) {
+    const userId = await this.chatService.getUserIdFromUsername(payload.name)
     let notice : string = undefined
     let help : string = undefined
     // ------------------------ Trop de parametre ------------------------
-    if (payload.param[0] !== undefined)
+    if (payload.message[0] !== undefined)
       notice = '/HELP: Too many argument'
     else {
     help = `
@@ -283,8 +332,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     }      
     client.emit('notice', {
-    name: payload.username,
-    channel: payload.channelName,
+    name: payload.name,
+    channel: undefined,
     text: undefined,
     notice : notice,
     help : help
@@ -294,13 +343,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   // ---------------------------------------------------------- LIST ----------------------------------------------------------
   // Utilisation :  /LIST 
   @SubscribeMessage('list')
-  async listChannel(client: Socket, payload: any) {
-    const userId = await this.chatService.getUserIdFromUsername(payload.username)
+  async listChannel(client: Socket, payload: GeneralMessagePayload) {
+    const userId = await this.chatService.getUserIdFromUsername(payload.name)
     const channelList = await this.chatService.getRoomNamesUserIsMemberOf(userId)
     let notice : string = undefined
     let help : string = null
     // ------------------------ Trop de parametre ------------------------
-    if (payload.param[0] !== undefined && payload.param[0] !== "")
+    if (payload.message[0] !== undefined && payload.message[0] !== "")
       notice = '/LIST: Too many argument'
     else if (channelList.length === 0)
       notice = '/LIST: You are not inside any channel'
@@ -309,8 +358,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       help = `<br>Here is the list of channels you are part of :<br>${formattedList}<br>`;
     }
     client.emit('notice', {
-    name: payload.username,
-    channel: payload.channelName,
+    name: payload.name,
+    channel: undefined,
     text: undefined,
     notice: notice,
     help : help,
@@ -326,45 +375,45 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   // Utilisation :  /PRIVMSG NomUtilisateur message ...                    
   @SubscribeMessage('privmsg')
 
-  async privateMessage(client: Socket, payload: any) {
+  async privateMessage(client: Socket, payload: PrivmsgPayload) {
     const userId = await this.chatService.getUserIdFromUsername(payload.username)
     let notice : string = null
     let event : string = "notice"
     
     // --------------------------------------------- LE MESSAGE S'ADRESSE A UN CHANNEL ---------------------------------------------
-    if (payload.target === undefined || payload.message === null)
+    if (payload.channelName === undefined || payload.param === null)
     {
       notice = "/PRIVMSG: bad format"
       client.emit(event, {
         userId: userId,
         name: payload.username,
-        channel: payload.target,
-        text: payload.message,
+        channel: payload.channelName,
+        text: payload.param,
         notice : notice
       })
     }
     else {
-      const roomObject = await this.chatService.isRoomExist(payload.target)
-      if (payload.target.startsWith("#")) {
+      const roomObject = await this.chatService.isRoomExist(payload.channelName)
+      if (payload.channelName.startsWith("#")) {
         // ---------------------- LE  CHANNEL N'EXISTE PAS ----------------------
         if (roomObject === null)
-          notice = `/PRIVMSG: The channel or user ${payload.target} doesn't exist`
+          notice = `/PRIVMSG: The channel or user ${payload.channelName} doesn't exist`
         // ---------------------- L'UTILISATEUR N'EST PAS MEMBRE DU CHANNEL ----------------------
         else if (await this.chatService.isUserMemberOfRoom(userId, roomObject.id) === false) //l'utilisateur ne fait pas partie du channel
-          notice = `/PRIVMSG: You are not a member of the channel ${payload.target}`
+          notice = `/PRIVMSG: You are not a member of the channel ${payload.channelName}`
         // ---------------------- L'UTILISATEUR EST MUTE DANS LE CHANNEL ----------------------
         else if (await this.chatService.isUserMutedInRoom(userId, roomObject.id) === true)
-          notice = `/PRIVMSG: You are muted in the room ${payload.target}`
+          notice = `/PRIVMSG: You are muted in the room ${payload.channelName}`
         // ---------------------- ON ENVOI LE MESSAGE AU CHANNEL  ----------------------
         else
           event = "messageResponse"
         // ---------------------- J'ENVOIS LE MESSAGE AU CHANNEL ----------------------
         if (event === "messageResponse")
-          this.server.to(payload.target).emit(event, {
+          this.server.to(payload.channelName).emit(event, {
             userId: userId,
             name: payload.username,
-            channel: payload.target,
-            text: payload.message,
+            channel: payload.channelName,
+            text: payload.param,
             notice : notice
           })
         // ---------------------- J'ENVOIS UNE NOTICE A L'UTILSATEUR DE LA COMMANDE (ERREUR)  ----------------------
@@ -372,19 +421,19 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
           client.emit(event, {
             userId: userId,
             name: payload.username,
-            channel: payload.target,
-            text: payload.message,
+            channel: payload.channelName,
+            text: payload.param,
             notice : notice
           })
       } 
       
       // ------------------------------------------ LE MESSAGE S'ADRESSE A UN UTILISATEUR ------------------------------------------
       else { //le message s'adresse a un utilistateur 
-        const userId = await this.chatService.getUserIdFromUsername(payload.target);
+        const userId = await this.chatService.getUserIdFromUsername(payload.channelName);
         const socketId = await this.connectedUsersService.getSocketId(userId)
         // ---------------------- L'UTILISATEUR N'EXISTE PAS ----------------------
         if (userId === null)
-          notice = `/PRIVMSG: The user ${payload.target} doesn't exist`
+          notice = `/PRIVMSG: The user ${payload.channelName} doesn't exist`
         // il faut verifier si l'utilisateur n'est pas bloqué. Mais c'est plus frontend je penses
         // ---------------------- SINON ON ENVOI LE MESSAGE A L'UTILISATEUR  ----------------------
         else
@@ -395,7 +444,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
             userId: userId,
             name: payload.username,
             channel: undefined,
-            text: payload.message,
+            text: payload.param,
             notice : notice
           })
           else
@@ -404,7 +453,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
           userId: userId,
           name: payload.username,
           channel: undefined,
-          text: payload.message,
+          text: payload.param,
           notice : notice
           })
       }
@@ -417,7 +466,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   // ---------------------------------------------------------- INVITE ----------------------------------------------------------
   // Utilisation :  /INVITE nomCible nomDuChannel   
   @SubscribeMessage('inviteRoom')
-  async inviteRoom(client: Socket, payload: any) {
+  async inviteRoom(client: Socket, payload: ChatPayload) {
     const userId = await this.chatService.getUserIdFromUsername(payload.username)
     const userSocketId = await this.connectedUsersService.getSocketId(userId)
     const targetId = await this.chatService.getUserIdFromUsername(payload.target)
@@ -474,7 +523,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   // ---------------------------------------------------------- MUTE ----------------------------------------------------------
   // Utilisation :  /MUTE nomCible nomDuChannel   
   @SubscribeMessage('mute')
-  async muteUser(client: Socket, payload: any) {
+  async muteUser(client: Socket, payload: ChatPayload) {
     const userId = await this.chatService.getUserIdFromUsername(payload.username)
     const userSocketId = await this.connectedUsersService.getSocketId(userId)
     let targetSocketId = null;
@@ -508,6 +557,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       // ------------------------ L'utilisateur est deja mute ------------------------
       else if (await this.chatService.isUserMutedInRoom(targetId, roomObject.id) === true)
         userNotice = `/MUTE: The target is already mute in the room ${payload.channelName}`
+      else if (userId === targetId)
+        userNotice = `/MUTE: You can't mute yourself`
       // ------------------------ Sinon on mute la cible ------------------------
       else {
         targetNotice = `You are muted for 30s in the channel ${payload.channelName}`
@@ -534,7 +585,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   // ---------------------------------------------------------- KICK ----------------------------------------------------------
   // Utilisation :  /KICK nomCible nomDuChannel   
   @SubscribeMessage('kickUser')
-  async kickUser(client: Socket, payload: any) {
+  async kickUser(client: Socket, payload: ChatPayload) {
     const userId = await this.chatService.getUserIdFromUsername(payload.username)
     const userSocketId = await this.connectedUsersService.getSocketId(userId)
     let targetSocketId = null;
@@ -546,6 +597,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     // ------------------------ Le channel n'existe pas ------------------------
     else{
       const targetId = await this.chatService.getUserIdFromUsername(payload.target)
+      const targetSocket = await this.connectedUsersService.getSocketChat(targetId);
       targetSocketId = await this.connectedUsersService.getSocketId(targetId)
       const roomObject = await this.chatService.isRoomExist(payload.channelName[0])
       if (roomObject === null)
@@ -566,11 +618,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       // ------------------------ La cible est owner du chat ------------------------
       else if (await this.chatService.isUserOwnerOfChatRoom(targetId, roomObject.id) === true)
         userNotice = `/KICK: Error: the target is the owner of the room ${payload.channelName}`
+      else if (userId === targetId)
+        userNotice = `/KICK: You can't kick yourself`
       // ------------------------ Sinon on mute la cible ------------------------
       else {
         targetNotice = `You are kick of the channel ${payload.channelName}`
         userNotice = `/KICK: The user ${payload.target} is now kicked of the room ${payload.channelName[0]}`
         await this.chatService.removeMember(roomObject.id, targetId)
+        targetSocket.leave(payload.channelName[0]);
       }
     } 
     if (targetSocketId !== null &&  targetNotice !== null)
@@ -591,7 +646,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   // ---------------------------------------------------------- BAN ----------------------------------------------------------
   // Utilisation :  /BAN nomCible nomDuChannel   
   @SubscribeMessage('banUser')
-  async banUser(client: Socket, payload: any) {
+  async banUser(client: Socket, payload: ChatPayload) {
     const userId = await this.chatService.getUserIdFromUsername(payload.username)
     const userSocketId = await this.connectedUsersService.getSocketId(userId)
     let targetSocketId = null
@@ -602,6 +657,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     userNotice = `/BAN : bad format`
     else {      
       const targetId = await this.chatService.getUserIdFromUsername(payload.target)
+      const targetSocket = await this.connectedUsersService.getSocketChat(targetId);
       targetSocketId = await this.connectedUsersService.getSocketId(targetId)
       const roomObject = await this.chatService.isRoomExist(payload.channelName[0])
       if (roomObject === null)
@@ -622,14 +678,69 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       // ------------------------ La cible est owner du chat ------------------------
       else if (await this.chatService.isUserOwnerOfChatRoom(targetId, roomObject.id) === true)
         userNotice = `/BAN: The target is the owner of the room ${payload.channelName}`
-      // ------------------------ Sinon on mute la cible ------------------------
+      else if (userId === targetId)
+        userNotice = `/BAN: You can't BAN yourself`
+      // ------------------------ Sinon on ban la cible ------------------------
       else {
         targetNotice = `You are ban of the channel ${payload.channelName}`
         userNotice = `/BAN: The user ${payload.target} is now ban of the room ${payload.channelName[0]}`
+        targetSocket.leave(payload.channelName[0]);
         await this.chatService.banUserFromRoom(targetId, roomObject.id)
       }
     }
-    // ------------------------ Le channel n'existe pas ------------------------
+    if (targetSocketId !== null && targetNotice !== null)
+      this.server.to(targetSocketId).emit('notice', {
+        name: payload.username,
+        channel: undefined,
+        text: null,
+        notice: targetNotice
+      })
+    this.server.to(userSocketId).emit('notice', {
+      name: payload.username,
+      channel: undefined,
+      text: null,
+      notice: userNotice
+    })
+  }
+  
+  // ---------------------------------------------------------- UNBAN ----------------------------------------------------------
+  // Utilisation :  /UNBAN nomCible nomDuChannel   
+  @SubscribeMessage('unbanUser')
+  async unbanUser(client: Socket, payload: ChatPayload) {
+    const userId = await this.chatService.getUserIdFromUsername(payload.username)
+    const userSocketId = await this.connectedUsersService.getSocketId(userId)
+    let targetSocketId = null
+    let userNotice : string = null
+    let targetNotice : string = null
+    // ------------------------ Trop de parametre ------------------------
+    if (payload.target === undefined || payload.channelName[0] === undefined ||  payload.channelName[1] !== undefined)
+    userNotice = `/UNBAN : bad format`
+    else {      
+      const targetId = await this.chatService.getUserIdFromUsername(payload.target)
+      targetSocketId = await this.connectedUsersService.getSocketId(targetId)
+      const roomObject = await this.chatService.isRoomExist(payload.channelName[0])
+      if (roomObject === null)
+        userNotice = `/UNBAN: The room ${payload.channelName[0]} don't exist`
+      // ------------------------ L'utilisateur n'est pas membre de la room ------------------------
+      else if (await this.chatService.isUserMemberOfRoom(userId, roomObject.id) === false)
+        userNotice = `/UNBAN: You need to be a member of the room ${payload.channelName[0]} to unban the user ${payload.target}`
+      // ------------------------ La cible n'existe pas ------------------------
+      else if (targetId === null)
+        userNotice = `/UNBAN: The user ${payload.target} doesn't exist`
+      // ------------------------ La cible n'est pas membre de la room ------------------------
+      else if (await this.chatService.isUserMemberOfRoom(targetId, roomObject.id) === false)
+        userNotice = `/UNBAN: The user ${payload.target} is not a member of the room ${payload.channelName[0]}`
+      // ------------------------ L'utilisateur n'a pas les autorisations (n'est pas owner ou admin du channel) ------------------------
+      else if (await this.chatService.isUserOwnerOfChatRoom(userId, roomObject.id) === false 
+      && await this.chatService.isUserModeratorOfChatRoom(userId, roomObject.id) === false)
+        userNotice = `/UNBAN: You don't have the right to unban a user of the room ${payload.channelName}`
+      // ------------------------ Sinon on unban la cible ------------------------
+      else {
+        targetNotice = `You are unban of the channel ${payload.channelName}`
+        userNotice = `/UNBAN: The user ${payload.target} is now unban of the room ${payload.channelName[0]}`
+        await this.chatService.removeBan(roomObject.id, targetId)
+      }
+    }
     if (targetSocketId !== null && targetNotice !== null)
       this.server.to(targetSocketId).emit('notice', {
         name: payload.username,
@@ -649,7 +760,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   // ---------------------------------------------------------- ADMIN ----------------------------------------------------------
   // Utilisation :  /ADMIN nomCible nomDuChannel   
   @SubscribeMessage('admin')
-  async adminUser(client: Socket, payload: any) {
+  async adminUser(client: Socket, payload: ChatPayload) {
     const userId = await this.chatService.getUserIdFromUsername(payload.username)
     const userSocketId = await this.connectedUsersService.getSocketId(userId)
     let targetSocketId = null;
@@ -712,7 +823,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   // Passer le channel en public : /MODE nomDuChannel public 
   // Passer le channel en mode protection : /MODE nomDuChannel protected motDePasse
   @SubscribeMessage('modeRoom')
-  async modeRoom(client: Socket, payload: any) {
+  async modeRoom(client: Socket, payload: ChannelPayload) {
     const userId = await this.chatService.getUserIdFromUsername(payload.username)
     const userSocketId = await this.connectedUsersService.getSocketId(userId)
     let userNotice : string = null
@@ -773,13 +884,3 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     })
   }  
 }
-
-
-   //cette ligne permet de diffuser a tout le monde, sauf celui qui emet
-   //client.broadcast.emit('test', {'payload':'test'});
-
-  //exemple pour envoyer un message a une room.
-   //this.server.to('room-name').emit('message', 'Hello from the room!');
-
-
-

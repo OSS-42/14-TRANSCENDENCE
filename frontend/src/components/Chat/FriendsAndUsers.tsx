@@ -10,6 +10,7 @@ import { fetchFriendsList, fetchUsersList } from "../../api/requests";
 import { useRoutes } from "../../contexts/RoutesContext";
 import { Box, Button } from "@mui/material";
 import { getCookies } from "../../utils";
+
 interface UpdateConnectedUsersData {
   connectedUserIds: number[];
   connectedUserIdsPong: number[];
@@ -50,31 +51,20 @@ export function FriendsAndUsers({ socket }: someProp) {
       }
     };
   }, [invitationModalIsOpen]);
-
-  useEffect(() => {
+  
+useEffect(() => {
     socket.on("updateConnectedUsers", (data: UpdateConnectedUsersData) => {
       const jwtToken:string  =  getCookies("jwt_token");
-    if(tkn !== jwtToken ){
-      logout() 
-    }
-      
+      if(tkn !== jwtToken ){
+        logout() 
+      }
+      console.log("users are there: ", data);
       const { connectedUserIds, connectedUserIdsPong } = data;
       setConnectedUsers(connectedUserIds);
-
       setConnectedToPong(connectedUserIdsPong);
     });
 
-    socket.on("invitation", (payload: any) => {
-      setGameId(payload.roomId);
-      setChallengerUsername(payload.challengerUsername);
-      setChallengerId(payload.challengerId);
-      setInvitationModalIsOpen(true);
-
-      setTimeout(() => {
-        setInvitationModalIsOpen(false);
-      }, 10000);
-    });
-
+    // Je crois que c'est ici que ca ce passe pour les appel d'API en boucle
     async function fetchInitialData() {
       try {
         const newFriendsList = await fetchFriendsList();
@@ -89,9 +79,47 @@ export function FriendsAndUsers({ socket }: someProp) {
 
     return () => {
       socket.off("updateConnectedUsers");
-      socket.off("invitation");
     };
-  }, [connectedUsers]);
+  }, []);
+
+  // -------------------------- UPDATE --------------------------
+
+useEffect(() => {
+  socket.on("invitation", (payload: any) => {
+    setGameId(payload.roomId);
+    setChallengerUsername(payload.challengerUsername);
+    setChallengerId(payload.challengerId);
+    setInvitationModalIsOpen(true);
+
+    setTimeout(() => {
+      setInvitationModalIsOpen(false);
+    }, 10000);
+  });
+
+  return () => {
+    socket.off("invitation");
+  };
+
+}, [connectedUsers]);
+
+// --------------------------- UPDATE #2 --------------------------
+// ici morgan
+useEffect(() => {
+  socket.on("newUser", (payload: any) => {
+    async function fetchInitialData() {
+      try {
+        console.log("hello");
+        const newUsersList = await fetchUsersList();
+        setUsersList(newUsersList);
+      } catch (error) {
+        console.error("Erreur lors de la récupération des données :", error);
+      }
+    }
+    fetchInitialData();
+  })
+}, []);
+
+// ----------------------------------------------------------------
 
   function acceptGame() {
     if (gameId) {

@@ -28,7 +28,6 @@ export class ChatService {
         });
         return user?.id || null; 
       }
-    
 
         //PERMET DE RECUPERER LE ID de la room : room.id
     async isRoomExist(roomName:string): Promise <ChatRoom | null>{
@@ -39,7 +38,6 @@ export class ChatService {
           //si room nameName est diffrent de null, on renvoie true. Si roomName n<est pas different de null, on renvoie false.
           return room || null;
     }
-
 
     async isUserMemberOfRoom(userId: number, roomId: number): Promise<boolean> { // C'est quoi la differnece avec isAlreadyMember ?
         const room = await this.prisma.chatRoom.findFirst({
@@ -55,7 +53,6 @@ export class ChatService {
       
         return !!room; // Syntaxe mysterieuse : double negation, si room existe = true, si room n<existe pas= false
     }
-    
 
     //CETTE FONCTION CREE UN CHANNEL DANS LA BASE DE DONNEE. 
     //PREMIER ARGUMENT :  le nom du channel
@@ -73,9 +70,7 @@ export class ChatService {
           });
           
          return room 
-    } 
-
-
+    }
 
      //CETTE FONCTION AJOUTE UN UTILISATEUR DANS UN CHANNEL  (BASE DE DONNEE)
     //PREMIER ARGUMENT :  le ID du channnel *** CE denier peut être recpurer par la fonciton isRoomExist : cette fonction retourne un obet chatRoom
@@ -99,7 +94,6 @@ export class ChatService {
       }
       await this.prisma.chatRoom.delete({ where: { name: roomName } });
     }
-
 
     //CETTE FONCTION BAN UN UTILISATEUR D'UN CHANNEL  (BASE DE DONNEE)
     //PREMIER ARGUMENT :  le ID du channnel *** CE denier peut être recpurer par la fonciton isRoomExist : cette fonction retourne un obet chatRoom
@@ -210,7 +204,6 @@ export class ChatService {
       });
      return !!room && !!room.hash; 
     }
-
 
     async validatePassword(password:string, roomName:string) {
       const room = await this.prisma.chatRoom.findFirst({
@@ -352,9 +345,6 @@ export class ChatService {
       return userWithBlockedUsers.blockedUsers.map(blockedUser => blockedUser.blockedUserId);
     }
 
-  
-      
- 
   async changeInvite(roomId:number, invite : boolean){
     const room = await this.prisma.chatRoom.update({
       where: {id : roomId},
@@ -411,10 +401,4 @@ export class ChatService {
       mutedUsersMap.delete(mutedUserId);
     }
   }
-     
-       
-
-  }
-  
-
- 
+}
