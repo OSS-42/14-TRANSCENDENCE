@@ -229,7 +229,7 @@ export class PongGateway {
   launchNewRound(client: Socket, payload: NewRound) {
 
     const gameId = payload.gameId;
-    console.log('server starting new round for :', gameId);
+    // console.log('server starting new round for :', gameId);
 
     this.server.to(gameId).volatile.emit('startNewRound', payload);
   }

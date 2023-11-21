@@ -547,7 +547,7 @@ export function Pong() {
   useEffect (() => {
     if (socket) {
       socket.on('startNewRound', (payload: any) => {
-        console.log("start new round");
+        // console.log("start new round");
         if (payload.gameId) {
           handleCountdown();
         }
@@ -705,10 +705,10 @@ export function Pong() {
         }
 
         if (newX - ballRadius <= -WORLD_WIDTH / 2) {
-          console.log("but gauche");
+          // console.log("but gauche");
           goalScored(rightScore, 'right');
         } else if (newX + ballRadius >= WORLD_WIDTH / 2) {
-          console.log("but droite");
+          // console.log("but droite");
           goalScored(leftScore, 'left');
         }
 
