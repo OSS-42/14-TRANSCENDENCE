@@ -117,6 +117,7 @@ export function Pong() {
   const netWidth: number = 0.5;
   const netDepth: number = 8;
   const INITIAL_BALL_SPEED: number = 0.3;
+  const paddleMove: number = 2;
 
   const [leftPaddlePositionZ, setLeftPaddlePositionZ] = React.useState(0);
   const [rightPaddlePositionZ, setRightPaddlePositionZ] = React.useState(0);
@@ -390,6 +391,37 @@ export function Pong() {
         soundsON.current = false;
       }
     }
+    if (cameraMode === 'orthographic') {
+      // Top-down view controls
+      if (event.key === "ArrowUp") {
+        if (hostStatus) {
+          setLeftPaddlePositionZ(prev => Math.max(prev - paddleMove, -WORLD_HEIGHT / 2 + paddleDepth / 2));
+        } else {
+          setRightPaddlePositionZ(prev => Math.max(prev - paddleMove, -WORLD_HEIGHT / 2 + paddleDepth / 2));
+        }
+      } else if (event.key === "ArrowDown") {
+        if (hostStatus) {
+          setLeftPaddlePositionZ(prev => Math.min(prev + paddleMove, WORLD_HEIGHT / 2 - paddleDepth / 2));
+        } else {
+          setRightPaddlePositionZ(prev => Math.min(prev + paddleMove, WORLD_HEIGHT / 2 - paddleDepth / 2));
+        }
+      }
+    } else {
+      // Perspective view controls
+      if (event.key === "ArrowLeft") {
+        if (hostStatus) {
+          setLeftPaddlePositionZ(prev => Math.max(prev - paddleMove, -WORLD_WIDTH / 2 + paddleDepth / 2));
+        } else {
+          setRightPaddlePositionZ(prev => Math.max(prev + paddleMove, -WORLD_WIDTH / 2 + paddleDepth / 2));
+        }
+      } else if (event.key === "ArrowRight") {
+        if (hostStatus) {
+          setLeftPaddlePositionZ(prev => Math.min(prev + paddleMove, WORLD_WIDTH / 2 - paddleDepth / 2));
+        } else {
+          setRightPaddlePositionZ(prev => Math.min(prev - paddleMove, WORLD_WIDTH / 2 - paddleDepth / 2));
+        }
+      }
+    }
   };
 
   React.useEffect(() => {
@@ -399,7 +431,7 @@ export function Pong() {
     return () => {
       window.removeEventListener("keydown", handleKeyPress);
     };
-  }, [gameMode]);
+  }, [gameMode, cameraMode, hostStatus]);
 
   // Scoreboard
   // en cas de victoire, reinitialisation du jeu, identification du gagnant et perdant pour envoi a la DB et retour a la page de selection des modes
@@ -780,40 +812,41 @@ export function Pong() {
     leftPaddlePositionZ,
     setLeftPaddlePositionZ,
   }) => {
-    const { mouse } = useThree()
-    let lastEventTime = 0;
-    const throttleTime = 100;
+    // const { mouse } = useThree()
+    // let lastEventTime = 0;
+    // const throttleTime = 100;
 
-    useFrame(() => {
-      const currentTime = Date.now();
+    // useFrame(() => {
+    //   const currentTime = Date.now();
 
-       if (currentTime - lastEventTime > throttleTime) {
-        lastEventTime = currentTime;
-        let newPosition
-        if (hostStatus) {
-          if (cameraMode === 'perspective') {
-            newPosition = mouse.x * (WORLD_WIDTH / 2)
-          } else {
-            newPosition = -mouse.y * (WORLD_HEIGHT / 2)
-          }
-        } else {
-          newPosition = leftPaddlePositionZ
-        }
+    //    if (currentTime - lastEventTime > throttleTime) {
+    //     lastEventTime = currentTime;
+        // let newPosition = leftPaddlePositionZ;
 
-        newPosition = lerp(leftPaddlePositionZ, newPosition, lerpFactor)
+        // if (hostStatus) {
+        //   if (cameraMode === 'perspective') {
+        //     newPosition = mouse.x * (WORLD_WIDTH / 2)
+        //   } else {
+        //     newPosition = -mouse.y * (WORLD_HEIGHT / 2)
+        //   }
+        // } else {
+        //   newPosition = leftPaddlePositionZ
+        // }
 
-        const paddleTopEdge = newPosition + paddleDepth / 2
-        const paddleBottomEdge = newPosition - paddleDepth / 2
+        // newPosition = lerp(leftPaddlePositionZ, newPosition, lerpFactor)
 
-        if (paddleTopEdge > WORLD_HEIGHT / 2) {
-          newPosition = WORLD_HEIGHT / 2 - paddleDepth / 2
-        } else if (paddleBottomEdge < -WORLD_HEIGHT / 2) {
-          newPosition = -WORLD_HEIGHT / 2 + paddleDepth / 2
-        }
+        // const paddleTopEdge = newPosition + paddleDepth / 2
+        // const paddleBottomEdge = newPosition - paddleDepth / 2
 
-        setLeftPaddlePositionZ(newPosition)
-      }
-    })
+        // if (paddleTopEdge > WORLD_HEIGHT / 2) {
+        //   newPosition = WORLD_HEIGHT / 2 - paddleDepth / 2
+        // } else if (paddleBottomEdge < -WORLD_HEIGHT / 2) {
+        //   newPosition = -WORLD_HEIGHT / 2 + paddleDepth / 2
+        // }
+
+        // setLeftPaddlePositionZ(newPosition)
+    //   }
+    // })
 
     return (
       <Box
@@ -839,40 +872,40 @@ export function Pong() {
     setRightPaddlePositionZ,
   }) => {
     // mouvement du right (user2) paddle a la souris.
-    const { mouse } = useThree()
-    let lastEventTime = 0;
-    const throttleTime = 100;
+    // const { mouse } = useThree()
+    // let lastEventTime = 0;
+    // const throttleTime = 100;
 
-    useFrame(() => {
-      const currentTime = Date.now();
+    // useFrame(() => {
+    //   const currentTime = Date.now();
 
-      if (currentTime - lastEventTime > throttleTime) {
-        lastEventTime = currentTime;
-        let newPosition
-        if (!hostStatus) {
-          if (cameraMode === 'perspective') {
-            newPosition = -mouse.x * (WORLD_WIDTH / 2)
-          } else {
-            newPosition = -mouse.y * (WORLD_HEIGHT / 2)
-          }
-        } else {
-          newPosition = rightPaddlePositionZ
-        }
+    //   if (currentTime - lastEventTime > throttleTime) {
+    //     lastEventTime = currentTime;
+    //     let newPosition
+    //     if (!hostStatus) {
+    //       if (cameraMode === 'perspective') {
+    //         newPosition = -mouse.x * (WORLD_WIDTH / 2)
+    //       } else {
+    //         newPosition = -mouse.y * (WORLD_HEIGHT / 2)
+    //       }
+    //     } else {
+    //       newPosition = rightPaddlePositionZ
+    //     }
 
-        newPosition = lerp(rightPaddlePositionZ, newPosition, lerpFactor)
+    //     newPosition = lerp(rightPaddlePositionZ, newPosition, lerpFactor)
 
-        const paddleTopEdge = newPosition + paddleDepth / 2
-        const paddleBottomEdge = newPosition - paddleDepth / 2
+    //     const paddleTopEdge = newPosition + paddleDepth / 2
+    //     const paddleBottomEdge = newPosition - paddleDepth / 2
 
-        if (paddleTopEdge > WORLD_HEIGHT / 2) {
-          newPosition = WORLD_HEIGHT / 2 - paddleDepth / 2
-        } else if (paddleBottomEdge < -WORLD_HEIGHT / 2) {
-          newPosition = -WORLD_HEIGHT / 2 + paddleDepth / 2
-        }
+    //     if (paddleTopEdge > WORLD_HEIGHT / 2) {
+    //       newPosition = WORLD_HEIGHT / 2 - paddleDepth / 2
+    //     } else if (paddleBottomEdge < -WORLD_HEIGHT / 2) {
+    //       newPosition = -WORLD_HEIGHT / 2 + paddleDepth / 2
+    //     }
 
-        setRightPaddlePositionZ(newPosition)
-      }
-    })
+    //     setRightPaddlePositionZ(newPosition)
+    //   }
+    // })
 
     return (
       <Box

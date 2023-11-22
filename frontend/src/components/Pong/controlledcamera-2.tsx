@@ -314,7 +314,7 @@ export const ControlledCameras = forwardRef<
 
           // Restore the zoom for the ortho camera
           controls.zoomTo(mode === "perspective" ? 1 : orthoZoom!, false);
-          controls.enabled = true;
+          controls.enabled = false;
 
           // Invalidate to cause re-render
           invalidate();
@@ -331,7 +331,7 @@ export const ControlledCameras = forwardRef<
 
         // TODO: if not changing the camera it could take quite a while to reach here - is there a way to
         // re-enable faster without waiting for "rest"?
-        controls.enabled = true;
+        controls.enabled = false;
       })();
     }, [invalidate, mode, controls, orthoCam, persCam, set]);
 
