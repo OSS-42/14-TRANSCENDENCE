@@ -16,7 +16,6 @@ RM_IMAGES = docker image rm $(IMAGES)
 RM_CONT = docker rm -f $(CONTAINERS)
 RM_VOL = docker volume rm -f $(VOLUMES)
 RM_NET = docker network rm $(NETWORK)
-MIGRATIONS = backend/prisma/migrations
 
 #------------------------------------------------------------------------------#
 #									 NEEDED									   #
@@ -55,8 +54,6 @@ fclean:	clean
 	@echo "$(LGREEN)Docker Containers and Network Removed.$(NC)"
 	@if [ -n "$(IMAGES)" ]; then $(RM_IMAGES); echo "$(LGREEN)Docker Images Removed.$(NC)"; fi
 	@if [ -n "$(VOLUMES)" ]; then $(RM_VOL); echo "$(LGREEN)Docker Volumes Removed.$(NC)"; fi
-	@$(RM) $(MIGRATIONS)
-	@echo "$(LGREEN)Directory MIGRATIONS removed$(NC)"
 	@$(RM) *.log
 	@echo "$(LGREEN)Logs files removed.$(NC)"
 
