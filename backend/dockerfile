@@ -7,7 +7,5 @@ COPY wait-for-it.sh /usr/local/bin/wait-for-it.sh
 RUN chmod +x /usr/local/bin/wait-for-it.sh
 
 RUN npm install
-
-RUN rm -rf ./prisma/migrations
  
-CMD ["/bin/sh", "-c", "wait-for-it.sh db:5432 -- npm run start:migrate:dev"]
+CMD ["/bin/sh", "-c", "wait-for-it.sh db:5432 -- npm run start:deploy:dev"]
