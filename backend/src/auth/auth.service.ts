@@ -166,7 +166,8 @@ export class AuthService {
   async verify2FA(userId: number, token: string): Promise<boolean> {
     const user = await this.prisma.utilisateur.update({
       where: { id: userId },
-      data: { is2FA: true }
+      data: { is2FA: true,
+      is2FAValidated: true },
     });
 
     const verified = speakeasy.totp.verify({
