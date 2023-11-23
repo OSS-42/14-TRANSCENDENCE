@@ -48,7 +48,7 @@ interface BallPosition {
   gameId: string;
 }
 
-type GameState = HostGameParameters | ClientGameParameters | WeHaveAWinner | NewRound | ballPosition;
+type GameState = HostGameParameters | ClientGameParameters | WeHaveAWinner | NewRound | BallPosition;
 
 @WebSocketGateway({ cors: true,  namespace: 'pong' })
 export class PongGateway {
@@ -254,10 +254,11 @@ export class PongGateway {
   handleWinner(client: Socket, payload: WeHaveAWinner) {
     const gameId = payload.gameId; // Make sure to send gameId from client
 
-    // this.server.to(gameId).emit('weHaveAWinner', payload);
-
+    console.log('weHaveAWinner', gameId);
     this.gameStates.set(gameId, payload);
-    this.server.to(gameId).volatile.emit('weHaveAWinner', payload);
+
+    // this.server.to(gameId).volatile.emit('endGame', payload);
+    this.server.to(gameId).emit('endGame', payload);
 
     if(!payload.theHostIsWinner){
       this.pongService.updateHistory(payload.clientName, payload.hostname);

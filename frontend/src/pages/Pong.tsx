@@ -30,8 +30,6 @@ type Connection = {
 
 type HostGameParameters = {
   gameId: string;
-  // ballPosition: { x: number; y: number; z: number };
-  // ballVelocity: { x: number, z: number };
   leftPaddlePositionZ: number;
   leftScore: number;
   rightScore: number;
@@ -116,8 +114,8 @@ export function Pong() {
   const ballRadius: number = 0.5;
   const netWidth: number = 0.5;
   const netDepth: number = 8;
-  const INITIAL_BALL_SPEED: number = 0.3;
-  const paddleMove: number = 2;
+  const INITIAL_BALL_SPEED: number = 0.25;
+  const paddleMove: number = 1.5;
 
   const [leftPaddlePositionZ, setLeftPaddlePositionZ] = React.useState(0);
   const [rightPaddlePositionZ, setRightPaddlePositionZ] = React.useState(0);
@@ -205,8 +203,6 @@ export function Pong() {
       if (hostStatus) {
         socket.volatile.emit("hostGameParameters", {
           gameId,
-          // ballPosition,
-          // ballVelocity,
           leftPaddlePositionZ,
           leftScore,
           rightScore,
@@ -221,8 +217,6 @@ export function Pong() {
       if (!hostStatus) {
         socket.on('hostMovesUpdate', (data: HostGameParameters) => {
           if (data.gameId === gameId) {
-            // setBallPosition(data.ballPosition)
-            // setBallVelocity(data.ballVelocity)
             setLeftPaddlePositionZ(data.leftPaddlePositionZ)
             setRightScore(data.rightScore)
             setLeftScore(data.leftScore)
@@ -275,10 +269,10 @@ export function Pong() {
 
   useEffect (() => {
     if (socket && gameId) {
-      socket.on("weHaveAWinner", (data: WeHaveAWinner) => {
+      socket.on("endGame", (data: WeHaveAWinner) => {
         if (data.gameId === gameId) {
           setTimeout(() => {
-            // console.log('THERE IS A WINNER ', gameId);
+            console.log('THERE IS A WINNER ', gameId);
             isHostWinner.current = data.theHostIsWinner;
             isGameOver.current = true;
             setGameLaunched(false);
@@ -294,7 +288,7 @@ export function Pong() {
     };
     return () => {
       if (socket) {
-        socket.off("weHaveAWinner");
+        socket.off("endGame");
       }
     };
   });
@@ -581,7 +575,8 @@ export function Pong() {
     }
 
     setBallPosition({ x: 0, y: 0, z: 0 });
-    setBallVelocity({ x: INITIAL_BALL_SPEED, z: INITIAL_BALL_SPEED });
+    // setBallVelocity({ x: INITIAL_BALL_SPEED, z: INITIAL_BALL_SPEED });
+    setBallVelocity(getRandomVelocity());
     setCameraMode("orthographic");
     setIsPaused(true);
 
@@ -596,6 +591,7 @@ export function Pong() {
       socket.on('startNewRound', (payload: any) => {
         // console.log("start new round");
         if (payload.gameId) {
+          setCameraMode("orthographic");
           handleCountdown();
         }
       })
@@ -610,6 +606,9 @@ export function Pong() {
 
   const sentWinnerMessage = (winnerText: string) => {
     setWinner(winnerText);
+    if (cameraMode  === "perspective") {
+      setCameraMode("orthographic");
+    }
 
     // console.log("🏓   ", winnerText);
     // console.log("🏓   ", gameId);
@@ -647,12 +646,22 @@ export function Pong() {
         
         sentWinnerMessage(winnerText);
       }
-      // } else if (hostStatus) {
-      //   console.log('envoi du nouveau score : ', leftScore, " - ", rightScore);
-      // };
   }, [leftScore, rightScore])
 
   //============== GAME BALL LOGIC ==============
+  // Randomizing start of the ball
+  const getRandomVelocity = () => {
+    // Randomize the direction (positive or negative)
+    const xDirection = Math.random() < 0.5 ? -1 : 1;
+    const zDirection = Math.random() < 0.5 ? -1 : 1;
+  
+    // Apply the direction to the initial speed
+    return {
+      x: INITIAL_BALL_SPEED * xDirection,
+      z: INITIAL_BALL_SPEED * zDirection
+    };
+  };
+
   // Ball mechanics
   
   interface BallProps {
