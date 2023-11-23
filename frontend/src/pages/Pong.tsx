@@ -419,15 +419,19 @@ export function Pong() {
       // Perspective view controls
       if (event.key === "ArrowLeft") {
         if (hostStatus) {
-          setLeftPaddlePositionZ(prev => Math.max(prev - paddleMove, -WORLD_WIDTH / 2 + paddleDepth / 2));
+          setLeftPaddlePositionZ(prev => Math.max(prev - paddleMove, -WORLD_HEIGHT / 2 + paddleDepth / 2));
+          console.log("paddle left:", leftPaddlePositionZ, "world width: ", WORLD_HEIGHT);
         } else {
-          setRightPaddlePositionZ(prev => Math.max(prev + paddleMove, -WORLD_WIDTH / 2 + paddleDepth / 2));
+          setRightPaddlePositionZ(prev => Math.max(prev + paddleMove, -WORLD_HEIGHT / 2 + paddleDepth / 2));
+          console.log("paddle right:", rightPaddlePositionZ, "world width: ", WORLD_HEIGHT);
         }
       } else if (event.key === "ArrowRight") {
         if (hostStatus) {
-          setLeftPaddlePositionZ(prev => Math.min(prev + paddleMove, WORLD_WIDTH / 2 - paddleDepth / 2));
+          setLeftPaddlePositionZ(prev => Math.min(prev + paddleMove, WORLD_HEIGHT / 2 - paddleDepth / 2));
+          console.log("paddle left:", leftPaddlePositionZ, "world width: ", WORLD_HEIGHT);
         } else {
-          setRightPaddlePositionZ(prev => Math.min(prev - paddleMove, WORLD_WIDTH / 2 - paddleDepth / 2));
+          setRightPaddlePositionZ(prev => Math.min(prev - paddleMove, WORLD_HEIGHT / 2 - paddleDepth / 2));
+          console.log("paddle right:", rightPaddlePositionZ, "world width: ", WORLD_HEIGHT);
         }
       }
     }
@@ -577,7 +581,7 @@ export function Pong() {
     setBallPosition({ x: 0, y: 0, z: 0 });
     // setBallVelocity({ x: INITIAL_BALL_SPEED, z: INITIAL_BALL_SPEED });
     setBallVelocity(getRandomVelocity());
-    setCameraMode("orthographic");
+    // setCameraMode("orthographic");
     setIsPaused(true);
 
     if (hostStatus && (newScore > 0)) {
@@ -591,7 +595,7 @@ export function Pong() {
       socket.on('startNewRound', (payload: any) => {
         // console.log("start new round");
         if (payload.gameId) {
-          setCameraMode("orthographic");
+          // setCameraMode("orthographic");
           handleCountdown();
         }
       })
@@ -825,18 +829,18 @@ export function Pong() {
   const leftPaddleXPosition: number = -distanceFromCenter;
 
   // The lerp function helps you find a point that is a certain percentage t along the way from a to b.
-  const lerp = (a: number, b: number, t: number): number => a + t * (b - a);
-  let lerpFactor = 0.5;
+  // const lerp = (a: number, b: number, t: number): number => a + t * (b - a);
+  // let lerpFactor = 0.5;
 
   // mouvement du left (user1) paddle a la souris.
   interface LeftPaddleProps {
     leftPaddlePositionZ: number;
-    setLeftPaddlePositionZ: React.Dispatch<React.SetStateAction<number>>;
+    // setLeftPaddlePositionZ: React.Dispatch<React.SetStateAction<number>>;
   }
 
   const LeftPaddle: React.FC<LeftPaddleProps> = ({
     leftPaddlePositionZ,
-    setLeftPaddlePositionZ,
+    // setLeftPaddlePositionZ,
   }) => {
     // const { mouse } = useThree()
     // let lastEventTime = 0;
@@ -890,12 +894,12 @@ export function Pong() {
 
   interface RightPaddleProps {
     rightPaddlePositionZ: number;
-    setRightPaddlePositionZ: React.Dispatch<React.SetStateAction<number>>;
+    // setRightPaddlePositionZ: React.Dispatch<React.SetStateAction<number>>;
   }
 
   const RightPaddle: React.FC<RightPaddleProps> = ({
     rightPaddlePositionZ,
-    setRightPaddlePositionZ,
+    // setRightPaddlePositionZ,
   }) => {
     // mouvement du right (user2) paddle a la souris.
     // const { mouse } = useThree()
