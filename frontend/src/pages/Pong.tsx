@@ -30,8 +30,8 @@ type Connection = {
 
 type HostGameParameters = {
   gameId: string;
-  ballPosition: { x: number; y: number; z: number };
-  ballVelocity: { x: number, z: number };
+  // ballPosition: { x: number; y: number; z: number };
+  // ballVelocity: { x: number, z: number };
   leftPaddlePositionZ: number;
   leftScore: number;
   rightScore: number;
@@ -205,8 +205,8 @@ export function Pong() {
       if (hostStatus) {
         socket.volatile.emit("hostGameParameters", {
           gameId,
-          ballPosition,
-          ballVelocity,
+          // ballPosition,
+          // ballVelocity,
           leftPaddlePositionZ,
           leftScore,
           rightScore,
@@ -221,8 +221,8 @@ export function Pong() {
       if (!hostStatus) {
         socket.on('hostMovesUpdate', (data: HostGameParameters) => {
           if (data.gameId === gameId) {
-            setBallPosition(data.ballPosition)
-            setBallVelocity(data.ballVelocity)
+            // setBallPosition(data.ballPosition)
+            // setBallVelocity(data.ballVelocity)
             setLeftPaddlePositionZ(data.leftPaddlePositionZ)
             setRightScore(data.rightScore)
             setLeftScore(data.leftScore)
@@ -257,6 +257,21 @@ export function Pong() {
     leftPaddlePositionZ,
     rightPaddlePositionZ,
   ]);
+
+  useEffect(() => {
+    if (socket && !hostStatus) {
+      socket.on('newBallPosition', (data: any) => {
+        setBallPosition({ x: data.newX, y: data.newY, z: data.newZ });
+      });
+      
+      return () => {
+        socket.off('newBallPosition');
+      };
+    } else {
+      return () => {};
+    }
+  }, [socket, hostStatus]);
+  
 
   useEffect (() => {
     if (socket && gameId) {
@@ -571,7 +586,7 @@ export function Pong() {
     setIsPaused(true);
 
     if (hostStatus && (newScore > 0)) {
-      console.log("sending new round", gameId);
+      // console.log("sending new round", gameId);
       socket.emit('newRound', { gameId });
     }
   }
@@ -657,10 +672,11 @@ export function Pong() {
     useFrame(() => {
       if (isPaused || gameStart || winner) return;
       
-      let newX: number = ballPosition.x + ballVelocity.x;
-      let newZ: number = ballPosition.z + ballVelocity.z;
-
+      
       if (hostStatus) {
+        let newX: number = ballPosition.x + ballVelocity.x;
+        let newZ: number = ballPosition.z + ballVelocity.z;
+
         const directionZ = Math.sign(ballVelocity.z);
       
         //----------- VALIDATION HIT AVEC WALL ----------
@@ -710,48 +726,49 @@ export function Pong() {
           ballVelocity.x = -ballVelocity.x;
 
           const relativeCollisionPoint = (newZ - hitPaddlePosition.z) / (paddleDepth / 2);
-        const newZVelocity = ballVelocity.z + relativeCollisionPoint * INITIAL_BALL_SPEED;
+          const newZVelocity = ballVelocity.z + relativeCollisionPoint * INITIAL_BALL_SPEED;
 
-        // Normalize the velocity to maintain the initial speed
-        const magnitude = Math.sqrt(ballVelocity.x ** 2 + newZVelocity ** 2);
-        ballVelocity.x = (ballVelocity.x / magnitude) * INITIAL_BALL_SPEED;
-        ballVelocity.z = (newZVelocity / magnitude) * INITIAL_BALL_SPEED;
+          // Normalize the velocity to maintain the initial speed
+          const magnitude = Math.sqrt(ballVelocity.x ** 2 + newZVelocity ** 2);
+          ballVelocity.x = (ballVelocity.x / magnitude) * INITIAL_BALL_SPEED;
+          ballVelocity.z = (newZVelocity / magnitude) * INITIAL_BALL_SPEED;
   
           newX =
             hitPaddlePosition.x +
             Math.sign(ballVelocity.x) * (paddleWidth / 2 + ballRadius);
         }
-      }
-
-      //----------- IN CASE OF GOAL ----------
-      if (
-        newX - ballRadius <= -WORLD_WIDTH / 2 ||
-        newX + ballRadius >= WORLD_WIDTH / 2
-      ) {
-        if (!goalUpdate.current) {
-          goalUpdate.current = true;
-        }
-
-        if (soundsON.current) {
-          playGoalSound();
-        }
-
-        if (newX - ballRadius <= -WORLD_WIDTH / 2) {
-          // console.log("but gauche");
-          goalScored(rightScore, 'right');
-        } else if (newX + ballRadius >= WORLD_WIDTH / 2) {
-          // console.log("but droite");
-          goalScored(leftScore, 'left');
-        }
-
-      } else {
-        goalUpdate.current = false;
-
-        setBallPosition({
-          x: newX,
-          y: 0,
-          z: newZ,
-        } as BallPosition);
+        
+        //----------- IN CASE OF GOAL ----------
+        if (
+          newX - ballRadius <= -WORLD_WIDTH / 2 ||
+          newX + ballRadius >= WORLD_WIDTH / 2
+          ) {
+            if (!goalUpdate.current) {
+              goalUpdate.current = true;
+            }
+            
+            if (soundsON.current) {
+              playGoalSound();
+            }
+            
+            if (newX - ballRadius <= -WORLD_WIDTH / 2) {
+              // console.log("but gauche");
+              goalScored(rightScore, 'right');
+            } else if (newX + ballRadius >= WORLD_WIDTH / 2) {
+              // console.log("but droite");
+              goalScored(leftScore, 'left');
+            }
+            
+          } else {
+            goalUpdate.current = false;
+            
+            setBallPosition({
+              x: newX,
+              y: 0,
+              z: newZ,
+            } as BallPosition);
+          }
+          socket.emit("ballPositionUpdate", { newX, newY: 0, newZ, gameId });
       }
     });
 
@@ -934,7 +951,9 @@ export function Pong() {
       <div className="instructions">
         To change Camera POV during game : press C.
         <br />
-        In case of disconnections of any party or at the end of game, wait 2 seconds for a page refresh.
+        If your opponent disconnects, wait 2 seconds for an automatic page refresh.
+        <br />
+        At the end of the game, refresh the page to start a new game, or navigate elsewhere on the website. 
       </div>
       <div
         className="pong-container"
