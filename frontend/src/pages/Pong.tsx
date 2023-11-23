@@ -422,7 +422,7 @@ export function Pong() {
           setLeftPaddlePositionZ(prev => Math.max(prev - paddleMove, -WORLD_HEIGHT / 2 + paddleDepth / 2));
           console.log("paddle left:", leftPaddlePositionZ, "world width: ", WORLD_HEIGHT);
         } else {
-          setRightPaddlePositionZ(prev => Math.max(prev + paddleMove, -WORLD_HEIGHT / 2 + paddleDepth / 2));
+          setRightPaddlePositionZ(prev => Math.min(prev + paddleMove, WORLD_HEIGHT / 2 - paddleDepth / 2));
           console.log("paddle right:", rightPaddlePositionZ, "world width: ", WORLD_HEIGHT);
         }
       } else if (event.key === "ArrowRight") {
@@ -430,7 +430,7 @@ export function Pong() {
           setLeftPaddlePositionZ(prev => Math.min(prev + paddleMove, WORLD_HEIGHT / 2 - paddleDepth / 2));
           console.log("paddle left:", leftPaddlePositionZ, "world width: ", WORLD_HEIGHT);
         } else {
-          setRightPaddlePositionZ(prev => Math.min(prev - paddleMove, WORLD_HEIGHT / 2 - paddleDepth / 2));
+          setRightPaddlePositionZ(prev => Math.max(prev - paddleMove, -WORLD_HEIGHT / 2 + paddleDepth / 2));
           console.log("paddle right:", rightPaddlePositionZ, "world width: ", WORLD_HEIGHT);
         }
       }
@@ -966,7 +966,7 @@ export function Pong() {
         <br />
         If your opponent disconnects, wait 2 seconds for an automatic page refresh.
         <br />
-        At the end of the game, refresh the page to start a new game, or navigate elsewhere on the website. 
+        At the end of the game, wait 2 seconds for an automatic page refresh, or navigate elsewhere on the website. 
       </div>
       <div
         className="pong-container"
