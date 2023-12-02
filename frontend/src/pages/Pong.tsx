@@ -30,8 +30,6 @@ type Connection = {
 
 type HostGameParameters = {
   gameId: string;
-  ballPosition: { x: number; y: number; z: number };
-  ballVelocity: { x: number, z: number };
   leftPaddlePositionZ: number;
   leftScore: number;
   rightScore: number;
@@ -116,7 +114,8 @@ export function Pong() {
   const ballRadius: number = 0.5;
   const netWidth: number = 0.5;
   const netDepth: number = 8;
-  const INITIAL_BALL_SPEED: number = 0.3;
+  const INITIAL_BALL_SPEED: number = 0.25;
+  const paddleMove: number = 1.5;
 
   const [leftPaddlePositionZ, setLeftPaddlePositionZ] = React.useState(0);
   const [rightPaddlePositionZ, setRightPaddlePositionZ] = React.useState(0);
@@ -204,8 +203,6 @@ export function Pong() {
       if (hostStatus) {
         socket.volatile.emit("hostGameParameters", {
           gameId,
-          ballPosition,
-          ballVelocity,
           leftPaddlePositionZ,
           leftScore,
           rightScore,
@@ -220,8 +217,6 @@ export function Pong() {
       if (!hostStatus) {
         socket.on('hostMovesUpdate', (data: HostGameParameters) => {
           if (data.gameId === gameId) {
-            setBallPosition(data.ballPosition)
-            setBallVelocity(data.ballVelocity)
             setLeftPaddlePositionZ(data.leftPaddlePositionZ)
             setRightScore(data.rightScore)
             setLeftScore(data.leftScore)
@@ -257,12 +252,28 @@ export function Pong() {
     rightPaddlePositionZ,
   ]);
 
+  useEffect(() => {
+    if (socket && !hostStatus) {
+      socket.on('newBallPosition', (data: any) => {
+        setBallPosition({ x: data.newX, y: data.newY, z: data.newZ });
+      });
+      
+      return () => {
+        socket.off('newBallPosition');
+      };
+    } else {
+      return () => {};
+    }
+  }, [socket, hostStatus]);
+  
+
   useEffect (() => {
     if (socket && gameId) {
-      socket.on("weHaveAWinner", (data: WeHaveAWinner) => {
+      socket.on("endGame", (data: WeHaveAWinner) => {
         if (data.gameId === gameId) {
           setTimeout(() => {
-            // console.log('THERE IS A WINNER ', gameId);
+            console.log('THERE IS A WINNER ', gameId);
+
             isHostWinner.current = data.theHostIsWinner;
             isGameOver.current = true;
             setGameLaunched(false);
@@ -278,7 +289,7 @@ export function Pong() {
     };
     return () => {
       if (socket) {
-        socket.off("weHaveAWinner");
+        socket.off("endGame");
       }
     };
   });
@@ -390,6 +401,41 @@ export function Pong() {
         soundsON.current = false;
       }
     }
+    if (cameraMode === 'orthographic') {
+      // Top-down view controls
+      if (event.key === "ArrowUp") {
+        if (hostStatus) {
+          setLeftPaddlePositionZ(prev => Math.max(prev - paddleMove, -WORLD_HEIGHT / 2 + paddleDepth / 2));
+        } else {
+          setRightPaddlePositionZ(prev => Math.max(prev - paddleMove, -WORLD_HEIGHT / 2 + paddleDepth / 2));
+        }
+      } else if (event.key === "ArrowDown") {
+        if (hostStatus) {
+          setLeftPaddlePositionZ(prev => Math.min(prev + paddleMove, WORLD_HEIGHT / 2 - paddleDepth / 2));
+        } else {
+          setRightPaddlePositionZ(prev => Math.min(prev + paddleMove, WORLD_HEIGHT / 2 - paddleDepth / 2));
+        }
+      }
+    } else {
+      // Perspective view controls
+      if (event.key === "ArrowLeft") {
+        if (hostStatus) {
+          setLeftPaddlePositionZ(prev => Math.max(prev - paddleMove, -WORLD_HEIGHT / 2 + paddleDepth / 2));
+          console.log("paddle left:", leftPaddlePositionZ, "world width: ", WORLD_HEIGHT);
+        } else {
+          setRightPaddlePositionZ(prev => Math.min(prev + paddleMove, WORLD_HEIGHT / 2 - paddleDepth / 2));
+          console.log("paddle right:", rightPaddlePositionZ, "world width: ", WORLD_HEIGHT);
+        }
+      } else if (event.key === "ArrowRight") {
+        if (hostStatus) {
+          setLeftPaddlePositionZ(prev => Math.min(prev + paddleMove, WORLD_HEIGHT / 2 - paddleDepth / 2));
+          console.log("paddle left:", leftPaddlePositionZ, "world width: ", WORLD_HEIGHT);
+        } else {
+          setRightPaddlePositionZ(prev => Math.max(prev - paddleMove, -WORLD_HEIGHT / 2 + paddleDepth / 2));
+          console.log("paddle right:", rightPaddlePositionZ, "world width: ", WORLD_HEIGHT);
+        }
+      }
+    }
   };
 
   React.useEffect(() => {
@@ -399,7 +445,7 @@ export function Pong() {
     return () => {
       window.removeEventListener("keydown", handleKeyPress);
     };
-  }, [gameMode]);
+  }, [gameMode, cameraMode, hostStatus]);
 
   // Scoreboard
   // en cas de victoire, reinitialisation du jeu, identification du gagnant et perdant pour envoi a la DB et retour a la page de selection des modes
@@ -534,12 +580,14 @@ export function Pong() {
     }
 
     setBallPosition({ x: 0, y: 0, z: 0 });
-    setBallVelocity({ x: INITIAL_BALL_SPEED, z: INITIAL_BALL_SPEED });
-    setCameraMode("orthographic");
+    // setBallVelocity({ x: INITIAL_BALL_SPEED, z: INITIAL_BALL_SPEED });
+    setBallVelocity(getRandomVelocity());
+    // setCameraMode("orthographic");
     setIsPaused(true);
 
     if (hostStatus && (newScore > 0)) {
-      console.log("sending new round", gameId);
+      // console.log("sending new round", gameId);
+
       socket.emit('newRound', { gameId });
     }
   }
@@ -549,6 +597,8 @@ export function Pong() {
       socket.on('startNewRound', (payload: any) => {
         // console.log("start new round");
         if (payload.gameId) {
+          // setCameraMode("orthographic");
+
           handleCountdown();
         }
       })
@@ -563,6 +613,9 @@ export function Pong() {
 
   const sentWinnerMessage = (winnerText: string) => {
     setWinner(winnerText);
+    if (cameraMode  === "perspective") {
+      setCameraMode("orthographic");
+    }
 
     // console.log("🏓   ", winnerText);
     // console.log("🏓   ", gameId);
@@ -600,12 +653,22 @@ export function Pong() {
         
         sentWinnerMessage(winnerText);
       }
-      // } else if (hostStatus) {
-      //   console.log('envoi du nouveau score : ', leftScore, " - ", rightScore);
-      // };
   }, [leftScore, rightScore])
 
   //============== GAME BALL LOGIC ==============
+  // Randomizing start of the ball
+  const getRandomVelocity = () => {
+    // Randomize the direction (positive or negative)
+    const xDirection = Math.random() < 0.5 ? -1 : 1;
+    const zDirection = Math.random() < 0.5 ? -1 : 1;
+  
+    // Apply the direction to the initial speed
+    return {
+      x: INITIAL_BALL_SPEED * xDirection,
+      z: INITIAL_BALL_SPEED * zDirection
+    };
+  };
+
   // Ball mechanics
   
   interface BallProps {
@@ -625,10 +688,11 @@ export function Pong() {
     useFrame(() => {
       if (isPaused || gameStart || winner) return;
       
-      let newX: number = ballPosition.x + ballVelocity.x;
-      let newZ: number = ballPosition.z + ballVelocity.z;
-
+      
       if (hostStatus) {
+        let newX: number = ballPosition.x + ballVelocity.x;
+        let newZ: number = ballPosition.z + ballVelocity.z;
+
         const directionZ = Math.sign(ballVelocity.z);
       
         //----------- VALIDATION HIT AVEC WALL ----------
@@ -678,48 +742,49 @@ export function Pong() {
           ballVelocity.x = -ballVelocity.x;
 
           const relativeCollisionPoint = (newZ - hitPaddlePosition.z) / (paddleDepth / 2);
-        const newZVelocity = ballVelocity.z + relativeCollisionPoint * INITIAL_BALL_SPEED;
+          const newZVelocity = ballVelocity.z + relativeCollisionPoint * INITIAL_BALL_SPEED;
 
-        // Normalize the velocity to maintain the initial speed
-        const magnitude = Math.sqrt(ballVelocity.x ** 2 + newZVelocity ** 2);
-        ballVelocity.x = (ballVelocity.x / magnitude) * INITIAL_BALL_SPEED;
-        ballVelocity.z = (newZVelocity / magnitude) * INITIAL_BALL_SPEED;
+          // Normalize the velocity to maintain the initial speed
+          const magnitude = Math.sqrt(ballVelocity.x ** 2 + newZVelocity ** 2);
+          ballVelocity.x = (ballVelocity.x / magnitude) * INITIAL_BALL_SPEED;
+          ballVelocity.z = (newZVelocity / magnitude) * INITIAL_BALL_SPEED;
   
           newX =
             hitPaddlePosition.x +
             Math.sign(ballVelocity.x) * (paddleWidth / 2 + ballRadius);
         }
-      }
-
-      //----------- IN CASE OF GOAL ----------
-      if (
-        newX - ballRadius <= -WORLD_WIDTH / 2 ||
-        newX + ballRadius >= WORLD_WIDTH / 2
-      ) {
-        if (!goalUpdate.current) {
-          goalUpdate.current = true;
-        }
-
-        if (soundsON.current) {
-          playGoalSound();
-        }
-
-        if (newX - ballRadius <= -WORLD_WIDTH / 2) {
-          // console.log("but gauche");
-          goalScored(rightScore, 'right');
-        } else if (newX + ballRadius >= WORLD_WIDTH / 2) {
-          // console.log("but droite");
-          goalScored(leftScore, 'left');
-        }
-
-      } else {
-        goalUpdate.current = false;
-
-        setBallPosition({
-          x: newX,
-          y: 0,
-          z: newZ,
-        } as BallPosition);
+        
+        //----------- IN CASE OF GOAL ----------
+        if (
+          newX - ballRadius <= -WORLD_WIDTH / 2 ||
+          newX + ballRadius >= WORLD_WIDTH / 2
+          ) {
+            if (!goalUpdate.current) {
+              goalUpdate.current = true;
+            }
+            
+            if (soundsON.current) {
+              playGoalSound();
+            }
+            
+            if (newX - ballRadius <= -WORLD_WIDTH / 2) {
+              // console.log("but gauche");
+              goalScored(rightScore, 'right');
+            } else if (newX + ballRadius >= WORLD_WIDTH / 2) {
+              // console.log("but droite");
+              goalScored(leftScore, 'left');
+            }
+            
+          } else {
+            goalUpdate.current = false;
+            
+            setBallPosition({
+              x: newX,
+              y: 0,
+              z: newZ,
+            } as BallPosition);
+          }
+          socket.emit("ballPositionUpdate", { newX, newY: 0, newZ, gameId });
       }
     });
 
@@ -767,53 +832,54 @@ export function Pong() {
   const leftPaddleXPosition: number = -distanceFromCenter;
 
   // The lerp function helps you find a point that is a certain percentage t along the way from a to b.
-  const lerp = (a: number, b: number, t: number): number => a + t * (b - a);
-  let lerpFactor = 0.5;
+  // const lerp = (a: number, b: number, t: number): number => a + t * (b - a);
+  // let lerpFactor = 0.5;
 
   // mouvement du left (user1) paddle a la souris.
   interface LeftPaddleProps {
     leftPaddlePositionZ: number;
-    setLeftPaddlePositionZ: React.Dispatch<React.SetStateAction<number>>;
+    // setLeftPaddlePositionZ: React.Dispatch<React.SetStateAction<number>>;
   }
 
   const LeftPaddle: React.FC<LeftPaddleProps> = ({
     leftPaddlePositionZ,
-    setLeftPaddlePositionZ,
+    // setLeftPaddlePositionZ,
   }) => {
-    const { mouse } = useThree()
-    let lastEventTime = 0;
-    const throttleTime = 100;
+    // const { mouse } = useThree()
+    // let lastEventTime = 0;
+    // const throttleTime = 100;
 
-    useFrame(() => {
-      const currentTime = Date.now();
+    // useFrame(() => {
+    //   const currentTime = Date.now();
 
-       if (currentTime - lastEventTime > throttleTime) {
-        lastEventTime = currentTime;
-        let newPosition
-        if (hostStatus) {
-          if (cameraMode === 'perspective') {
-            newPosition = mouse.x * (WORLD_WIDTH / 2)
-          } else {
-            newPosition = -mouse.y * (WORLD_HEIGHT / 2)
-          }
-        } else {
-          newPosition = leftPaddlePositionZ
-        }
+    //    if (currentTime - lastEventTime > throttleTime) {
+    //     lastEventTime = currentTime;
+        // let newPosition = leftPaddlePositionZ;
 
-        newPosition = lerp(leftPaddlePositionZ, newPosition, lerpFactor)
+        // if (hostStatus) {
+        //   if (cameraMode === 'perspective') {
+        //     newPosition = mouse.x * (WORLD_WIDTH / 2)
+        //   } else {
+        //     newPosition = -mouse.y * (WORLD_HEIGHT / 2)
+        //   }
+        // } else {
+        //   newPosition = leftPaddlePositionZ
+        // }
 
-        const paddleTopEdge = newPosition + paddleDepth / 2
-        const paddleBottomEdge = newPosition - paddleDepth / 2
+        // newPosition = lerp(leftPaddlePositionZ, newPosition, lerpFactor)
 
-        if (paddleTopEdge > WORLD_HEIGHT / 2) {
-          newPosition = WORLD_HEIGHT / 2 - paddleDepth / 2
-        } else if (paddleBottomEdge < -WORLD_HEIGHT / 2) {
-          newPosition = -WORLD_HEIGHT / 2 + paddleDepth / 2
-        }
+        // const paddleTopEdge = newPosition + paddleDepth / 2
+        // const paddleBottomEdge = newPosition - paddleDepth / 2
 
-        setLeftPaddlePositionZ(newPosition)
-      }
-    })
+        // if (paddleTopEdge > WORLD_HEIGHT / 2) {
+        //   newPosition = WORLD_HEIGHT / 2 - paddleDepth / 2
+        // } else if (paddleBottomEdge < -WORLD_HEIGHT / 2) {
+        //   newPosition = -WORLD_HEIGHT / 2 + paddleDepth / 2
+        // }
+
+        // setLeftPaddlePositionZ(newPosition)
+    //   }
+    // })
 
     return (
       <Box
@@ -831,48 +897,48 @@ export function Pong() {
 
   interface RightPaddleProps {
     rightPaddlePositionZ: number;
-    setRightPaddlePositionZ: React.Dispatch<React.SetStateAction<number>>;
+    // setRightPaddlePositionZ: React.Dispatch<React.SetStateAction<number>>;
   }
 
   const RightPaddle: React.FC<RightPaddleProps> = ({
     rightPaddlePositionZ,
-    setRightPaddlePositionZ,
+    // setRightPaddlePositionZ,
   }) => {
     // mouvement du right (user2) paddle a la souris.
-    const { mouse } = useThree()
-    let lastEventTime = 0;
-    const throttleTime = 100;
+    // const { mouse } = useThree()
+    // let lastEventTime = 0;
+    // const throttleTime = 100;
 
-    useFrame(() => {
-      const currentTime = Date.now();
+    // useFrame(() => {
+    //   const currentTime = Date.now();
 
-      if (currentTime - lastEventTime > throttleTime) {
-        lastEventTime = currentTime;
-        let newPosition
-        if (!hostStatus) {
-          if (cameraMode === 'perspective') {
-            newPosition = -mouse.x * (WORLD_WIDTH / 2)
-          } else {
-            newPosition = -mouse.y * (WORLD_HEIGHT / 2)
-          }
-        } else {
-          newPosition = rightPaddlePositionZ
-        }
+    //   if (currentTime - lastEventTime > throttleTime) {
+    //     lastEventTime = currentTime;
+    //     let newPosition
+    //     if (!hostStatus) {
+    //       if (cameraMode === 'perspective') {
+    //         newPosition = -mouse.x * (WORLD_WIDTH / 2)
+    //       } else {
+    //         newPosition = -mouse.y * (WORLD_HEIGHT / 2)
+    //       }
+    //     } else {
+    //       newPosition = rightPaddlePositionZ
+    //     }
 
-        newPosition = lerp(rightPaddlePositionZ, newPosition, lerpFactor)
+    //     newPosition = lerp(rightPaddlePositionZ, newPosition, lerpFactor)
 
-        const paddleTopEdge = newPosition + paddleDepth / 2
-        const paddleBottomEdge = newPosition - paddleDepth / 2
+    //     const paddleTopEdge = newPosition + paddleDepth / 2
+    //     const paddleBottomEdge = newPosition - paddleDepth / 2
 
-        if (paddleTopEdge > WORLD_HEIGHT / 2) {
-          newPosition = WORLD_HEIGHT / 2 - paddleDepth / 2
-        } else if (paddleBottomEdge < -WORLD_HEIGHT / 2) {
-          newPosition = -WORLD_HEIGHT / 2 + paddleDepth / 2
-        }
+    //     if (paddleTopEdge > WORLD_HEIGHT / 2) {
+    //       newPosition = WORLD_HEIGHT / 2 - paddleDepth / 2
+    //     } else if (paddleBottomEdge < -WORLD_HEIGHT / 2) {
+    //       newPosition = -WORLD_HEIGHT / 2 + paddleDepth / 2
+    //     }
 
-        setRightPaddlePositionZ(newPosition)
-      }
-    })
+    //     setRightPaddlePositionZ(newPosition)
+    //   }
+    // })
 
     return (
       <Box
@@ -901,7 +967,9 @@ export function Pong() {
       <div className="instructions">
         To change Camera POV during game : press C.
         <br />
-        In case of disconnections of any party or at the end of game, wait 2 seconds for a page refresh.
+        If your opponent disconnects, wait 2 seconds for an automatic page refresh.
+        <br />
+        At the end of the game, wait 2 seconds for an automatic page refresh, or navigate elsewhere on the website. 
       </div>
       <div
         className="pong-container"

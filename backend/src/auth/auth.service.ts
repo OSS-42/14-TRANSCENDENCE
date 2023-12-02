@@ -152,6 +152,7 @@ export class AuthService {
     return { otpauthUrl, secret: secret.base32 };
   }
 
+
   async deactivate2FA(userId: number): Promise<void> {
     await this.prisma.utilisateur.update({
       where: { id: userId },

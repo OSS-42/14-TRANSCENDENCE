@@ -7,5 +7,5 @@ COPY wait-for-it.sh /usr/local/bin/wait-for-it.sh
 RUN chmod +x /usr/local/bin/wait-for-it.sh
 
 RUN npm install
- 
+
 CMD ["/bin/sh", "-c", "wait-for-it.sh db:5432 -- npm run start:deploy:dev"]
