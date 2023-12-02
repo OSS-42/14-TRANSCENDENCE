@@ -24,6 +24,7 @@ interface ClientGameParameters {
 
 interface HostGameParameters {
   gameId: string;
+
   // ballPosition: { x: number; y: number; z: number };
   // ballVelocity: { x: number, z: number };
   leftPaddlePositionZ: number;
@@ -254,11 +255,13 @@ export class PongGateway {
   handleWinner(client: Socket, payload: WeHaveAWinner) {
     const gameId = payload.gameId; // Make sure to send gameId from client
 
+
     console.log('weHaveAWinner', gameId);
     this.gameStates.set(gameId, payload);
 
     // this.server.to(gameId).volatile.emit('endGame', payload);
     this.server.to(gameId).emit('endGame', payload);
+
 
     if(!payload.theHostIsWinner){
       this.pongService.updateHistory(payload.clientName, payload.hostname);

@@ -316,6 +316,7 @@ export const ControlledCameras = forwardRef<
           controls.zoomTo(mode === "perspective" ? 1 : orthoZoom!, false);
           controls.enabled = false;
 
+
           // Invalidate to cause re-render
           invalidate();
         }

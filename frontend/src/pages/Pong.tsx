@@ -273,6 +273,7 @@ export function Pong() {
         if (data.gameId === gameId) {
           setTimeout(() => {
             console.log('THERE IS A WINNER ', gameId);
+
             isHostWinner.current = data.theHostIsWinner;
             isGameOver.current = true;
             setGameLaunched(false);
@@ -586,6 +587,7 @@ export function Pong() {
 
     if (hostStatus && (newScore > 0)) {
       // console.log("sending new round", gameId);
+
       socket.emit('newRound', { gameId });
     }
   }
@@ -596,6 +598,7 @@ export function Pong() {
         // console.log("start new round");
         if (payload.gameId) {
           // setCameraMode("orthographic");
+
           handleCountdown();
         }
       })

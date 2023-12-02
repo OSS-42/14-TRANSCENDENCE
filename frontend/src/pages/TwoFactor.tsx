@@ -25,7 +25,7 @@ export function TwoFactor() {
   async function handle2FAClick() {
     try {
       const response = await axios.post(
-        `api/auth/verify2FA`,
+        `api/auth/verifyLogin2FA`,
         { token: inputValue },
         {
           headers: {
@@ -37,7 +37,7 @@ export function TwoFactor() {
         handleTwo();
         navigateTo("/");
       } else if (response.data.message === "Invalid 2FA code.") {
-        alert("Invalid input, please enter a valid input.");
+        alert("Invalid 2FA code, please re-enter code");
         setInputValue("");
       }
     } catch (error) {
