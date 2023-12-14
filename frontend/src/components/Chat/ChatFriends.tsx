@@ -64,7 +64,7 @@ const ChatFriends = ({
                   <span style={{ color: '#65bf76' }}>online</span>
                 )}
                 {connectedToPong?.includes(user.id) && (
-                  <span style={{ color: '#65bf76' }}> and not ready to play</span>
+                  <span style={{ color: 'grey' }}> (not ready to play)</span>
                 )}
                 {/* <Box
                   component="div"
